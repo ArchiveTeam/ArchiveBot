@@ -10,11 +10,20 @@ module JobTracking
     uuid.to_i.to_s(36)
   end
 
-  def has_job?(ident, redis)
-    redis.sismember('jobs', ident)
+  def has_job?(ident)
+    redis { |r| r.sismember('jobs', ident) }
   end
 
-  def add_job(ident, redis)
-    redis.sadd('jobs', ident)
+  def add_job(ident)
+    redis { |r| r.sadd('jobs', ident) }
+  end
+
+  def fail_job(ident, why)
+    redis do |r|
+      r.multi do
+        r.hmset(ident, 'status', 'failed', 'reason', why)
+        r.srem('jobs', ident)
+      end
+    end
   end
 end

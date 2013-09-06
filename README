@@ -18,11 +18,8 @@
 
 2. Running it
 
-ArchiveBot uses a Redis server for keeping around job state.  Archive jobs are
-run by Sidekiq, which also needs a Redis server.  (They may be the same
-server.)
-
-To run, you will need a Ruby 1.9+ environment and Bundler.
+To run, you will need a Redis server, a Ruby 1.9+ environment, and
+Bundler.
 
    bundle install
    ruby bot.rb --help

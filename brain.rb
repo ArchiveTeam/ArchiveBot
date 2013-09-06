@@ -1,3 +1,4 @@
+require 'sidekiq'
 require 'uri'
 
 require File.expand_path('../archive', __FILE__)
@@ -6,12 +7,14 @@ require File.expand_path('../job_tracking', __FILE__)
 class Brain
   include JobTracking
 
-  attr_reader :redis
   attr_reader :schemes
 
-  def initialize(redis, schemes)
-    @redis = redis
+  def initialize(schemes)
     @schemes = schemes
+  end
+
+  def redis(&block)
+    Sidekiq.redis(&block)
   end
 
   def request_archive(m, param)
@@ -31,13 +34,13 @@ class Brain
 
     # Is the job already known?
     ident = job_ident(uri)
-    if has_job?(ident, redis)
+    if has_job?(ident)
       reply m, "That URL is already being processed.  Use !status #{ident} for updates."
       return
     end
 
     # OK, add the job and queue it up.
-    add_job(ident, redis)
+    add_job(ident)
     Archive.perform_async(uri, ident)
     reply m, "Archiving #{uri.to_s}; use !status #{ident} for updates."
   end
