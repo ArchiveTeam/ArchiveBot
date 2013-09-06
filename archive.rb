@@ -13,13 +13,15 @@ class Archive
   end
 
   def perform(uri, ident, strategy = :wget)
-    strat = Strategies.get(strategy)
+    start_job(ident, uri)
+
+    strat = Strategies.get(strategy, ident, uri)
 
     if !strat
       fail_job(ident, "Unknown strategy #{strategy}")
       return
     end
 
-    strat.run(uri, ident)
+    strat.run
   end
 end

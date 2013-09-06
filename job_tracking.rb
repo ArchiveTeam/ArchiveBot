@@ -18,10 +18,16 @@ module JobTracking
     redis { |r| r.sadd('jobs', ident) }
   end
 
-  def fail_job(ident, why)
+  def start_job(ident, uri, at = Time.now)
+    redis do |r|
+      r.hmset(ident, 'status', 'started', 'uri', uri, 'updated_at', at)
+    end
+  end
+
+  def fail_job(ident, why, at = Time.now)
     redis do |r|
       r.multi do
-        r.hmset(ident, 'status', 'failed', 'reason', why)
+        r.hmset(ident, 'status', 'failed', 'reason', why, 'updated_at', at)
         r.srem('jobs', ident)
       end
     end
