@@ -1,0 +1,39 @@
+1. ArchiveBot
+
+    <SketchCow> Coders, I have a question.
+    <SketchCow> Or, a request, etc.
+    <SketchCow> I spent some time with xmc discussing something we could
+                do to make things easier around here.
+    <SketchCow> What we came up with is a trigger for a bot, which can
+                be triggered by people with ops.
+    <SketchCow> You tell it a website. It crawls it. WARC. Uploads it to
+                archive.org. Boom.
+    <SketchCow> I can supply machine as needed.
+    <SketchCow> Obviously there's some sanitation issues, and it is root
+                all the way down or nothing.
+    <SketchCow> I think that would help a lot for smaller sites
+    <SketchCow> Sites where it's 100 pages or 1000 pages even, pretty
+                simple.
+    <SketchCow> And just being able to go "bot, get a sanity dump"
+
+2. Running it
+
+ArchiveBot uses a Redis server for keeping around job state.  Archive jobs are
+run by Sidekiq, which also needs a Redis server.  (They may be the same
+server.)
+
+To run, you will need a Ruby 1.9+ environment and Bundler.
+
+   bundle install
+   ruby bot.rb --help
+
+To start processing jobs, you'll also need to start Sidekiq:
+
+   sidekiq
+
+3. License
+
+Dedicated to the public domain.  See LICENSE if you really need more
+than that.
+
+ vim:ts=2:sw=2:tw=72:et
