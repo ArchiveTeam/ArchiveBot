@@ -32,10 +32,17 @@ class Brain
       return
     end
 
-    # Is the job already known?
     ident = job_ident(uri)
+
+    # Is the job already known?
     if has_job?(ident)
-      reply m, "That URL is already being processed.  Use !status #{ident} for updates."
+      # OK, was it completed?
+      if job_completed?(ident)
+        reply m, "That URL was previously archived.  Re-archiving is not yet supported."
+      else
+        reply m, "That URL is already being processed.  Use !status #{ident} for updates."
+      end
+
       return
     end
 

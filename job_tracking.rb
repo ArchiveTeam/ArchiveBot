@@ -14,6 +14,10 @@ module JobTracking
     redis { |r| r.sismember('jobs', ident) }
   end
 
+  def job_completed?(ident)
+    redis { |r| r.hget(ident, 'status') == 'done' }
+  end
+
   def add_job(ident)
     redis { |r| r.sadd('jobs', ident) }
   end
