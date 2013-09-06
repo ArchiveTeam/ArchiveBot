@@ -1,26 +1,19 @@
 require 'sidekiq'
 require 'uri'
 
-require File.expand_path('../archive', __FILE__)
-require File.expand_path('../job_tracking', __FILE__)
+require File.expand_path('../job', __FILE__)
 
 class Brain
-  include JobTracking
-
   attr_reader :schemes
 
   def initialize(schemes)
     @schemes = schemes
   end
 
-  def redis(&block)
-    Sidekiq.redis(&block)
-  end
-
   def request_archive(m, param)
     # Do we have a valid URI?
     begin
-      uri = URI.parse(param).normalize
+      uri = URI.parse(param)
     rescue URI::InvalidURIError => e
       reply m, "Sorry, that doesn't look like a URL to me."
       return
@@ -32,24 +25,24 @@ class Brain
       return
     end
 
-    ident = job_ident(uri)
+    job = Job.new(uri)
 
     # Is the job already known?
-    if has_job?(ident)
-      # OK, was it completed?
-      if job_completed?(ident)
-        reply m, "That URL was previously archived.  Re-archiving is not yet supported."
+    if job.exists?
+      # Does its archive have a URL?
+      if (archive_url = job.archive_url)
+        reply m, "That URL was previously archived to #{archive_url}.  Re-archiving is not yet supported."
       else
-        reply m, "That URL is already being processed.  Use !status #{ident} for updates."
+        reply m, "That URL is already being processed.  Use !status #{job.ident} for updates."
       end
 
       return
     end
 
     # OK, add the job and queue it up.
-    add_job(ident)
-    Archive.perform_async(uri, ident)
-    reply m, "Archiving #{uri.to_s}; use !status #{ident} for updates."
+    job.register
+
+    reply m, "Archiving #{uri.to_s}; use !status #{job.ident} for updates."
   end
 
   private
