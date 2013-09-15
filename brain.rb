@@ -1,13 +1,15 @@
-require 'sidekiq'
 require 'uri'
 
 require File.expand_path('../job', __FILE__)
+require File.expand_path('../summary', __FILE__)
 
 class Brain
   attr_reader :schemes
+  attr_reader :redis
 
-  def initialize(schemes)
+  def initialize(schemes, redis)
     @schemes = schemes
+    @redis = redis
   end
 
   def request_archive(m, param)
@@ -25,7 +27,7 @@ class Brain
       return
     end
 
-    job = Job.new(uri)
+    job = Job.new(uri, redis)
 
     # Is the job already known?
     if job.exists?
@@ -41,8 +43,28 @@ class Brain
 
     # OK, add the job and queue it up.
     job.register
-
+    job.queue
     reply m, "Archiving #{uri.to_s}; use !status #{job.ident} for updates."
+  end
+
+  def request_status(m, ident)
+    job = Job.from_ident(ident, redis)
+
+    if !job
+      reply m, "Sorry, I don't know anything about job #{ident}."
+      return
+    end
+
+    reply m, "Job update for #{job.uri}"
+    reply m, job.to_reply
+    return
+  end
+
+  def request_summary(m)
+    s = Summary.new(redis)
+    s.run
+
+    reply m, s
   end
 
   private
