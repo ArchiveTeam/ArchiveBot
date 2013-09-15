@@ -1,8 +1,6 @@
 import datetime
 import os
 import shutil
-import json
-import argparse
 import redis
 
 from os import environ as env
@@ -12,7 +10,20 @@ from seesaw.task import *
 from seesaw.pipeline import *
 from seesaw.externalprocess import *
 
-r = redis.StrictRedis(host='localhost', port=6379, db=0)
+from seesaw.util import find_executable
+
+VERSION = "20130915.01"
+USER_AGENT = "ArchiveTeam ArchiveBot/%s" % VERSION
+WGET_LUA = find_executable('Wget+Lua', "GNU Wget 1.14.lua.20130523-9a5c",
+    [ './wget-lua' ])
+
+RSYNC_HOST = ''
+RSYNC_MODULE = ''
+
+if not WGET_LUA:
+  raise Exception("No usable Wget+Lua found.")
+
+# ------------------------------------------------------------------------------
 
 class GetItemFromQueue(Task):
   def __init__(self, redis, retry_delay=30):
@@ -33,8 +44,9 @@ class GetItemFromQueue(Task):
       item.log_output('No item received.')
       self.schedule_retry(item)
     else:
-      item.log_output('Received item %s.' % ident)
       item['ident'] = ident
+      item['url'] = self.redis.hget(ident, 'url')
+      item.log_output('Received item %s.' % ident)
       self.complete_item(item)
 
   def schedule_retry(self, item):
@@ -42,6 +54,31 @@ class GetItemFromQueue(Task):
 
     IOLoop.instance().add_timeout(datetime.timedelta(seconds=self.retry_delay),
       functools.partial(self.send_request, item))
+
+class PreparePaths(SimpleTask):
+  def __init__(self):
+    SimpleTask.__init__(self, 'PreparePaths')
+
+  def process(self, item):
+    item_dir = '%s/%s' % (item['data_dir'], item['ident'])
+
+    if os.path.isdir(item_dir):
+      shutil.rmtree(item_dir)
+    os.makedirs(item_dir)
+
+    item['item_dir'] = item_dir
+    item['warc_file_base'] = '%s-%s' % (item['ident'], time.strftime("%Y%m%d-%H%M%S"))
+    item['cookie_jar'] = '%(item_dir)s/cookies.txt' % item
+
+class MoveFiles(SimpleTask):
+  def __init__(self):
+    SimpleTask.__init__(self, "MoveFiles")
+
+  def process(self, item):
+    os.rename("%(item_dir)s/%(warc_file_base)s.warc.gz" % item,
+              "%(data_dir)s/%(warc_file_base)s.warc.gz" % item)
+
+    shutil.rmtree("%(item_dir)s" % item)
 
 class MarkItemAsDone(SimpleTask):
   def __init__(self, redis):
@@ -58,13 +95,48 @@ class MarkItemAsDone(SimpleTask):
 
 # ------------------------------------------------------------------------------
 
+r = redis.StrictRedis(host='localhost', port=6379, db=0)
+
 project = Project(
     title = "ArchiveBot request handler"
 )
 
 pipeline = Pipeline(
   GetItemFromQueue(r),
-  MarkItemAsDone()
+  PreparePaths(),
+  WgetDownload([WGET_LUA,
+    '-U', USER_AGENT,
+    '-nv',
+    '-o', ItemInterpolation('%(item_dir)s/wget.log'),
+    '--save-cookies', ItemInterpolation('%(cookie_jar)s'),
+    '--no-check-certificate',
+    '--output-document', ItemInterpolation('%(item_dir)s/wget.tmp'),
+    '--truncate-output',
+    '-e', 'robots=off',
+    '--recursive', '--level=inf',
+    '--page-requisites',
+    '--no-parent',
+    '--timeout', '60',
+    '--tries', '20',
+    '--waitretry', '10',
+    '--warc-file', ItemInterpolation('%(item_dir)s/%(warc_file_base)s'),
+    '--warc-header', 'operator: Archive Team',
+    '--warc-header', 'downloaded-by: ArchiveBot',
+    '--warc-header', ItemInterpolation('archivebot-job-ident: %(ident)s'),
+    ItemInterpolation('%(url)s')
+  ],
+  accept_on_exit_code=[ 0, 4, 6, 8 ]),
+  MoveFiles(),
+  LimitConcurrent(2,
+    RsyncUpload(
+      target='%s::%s/' % (RSYNC_HOST, RSYNC_MODULE),
+      target_source_path = ItemInterpolation("%(data_dir)s"),
+      files = [
+        ItemInterpolation('%(data_dir)s/%(warc_file_base)s.warc.gz')
+      ]
+    )
+  ),
+  MarkItemAsDone(r)
 )
 
 # vim:ts=2:sw=2:et:tw=78
