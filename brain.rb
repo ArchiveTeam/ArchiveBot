@@ -14,8 +14,8 @@ class Brain
 
   def request_archive(m, param)
     # Is the user an op?
-    if !m.user.oper?
-      reply m, "Sorry, only operators may start archive jobs."
+    if m.channel.opped?(m.user)
+      reply m, "Sorry, only channel operators may start archive jobs."
       return
     end
 
