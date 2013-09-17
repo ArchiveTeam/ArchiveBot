@@ -23,14 +23,10 @@ WGET_LUA = find_executable('Wget+Lua', "GNU Wget 1.14.lua.20130523-9a5c",
 if not WGET_LUA:
   raise Exception("No usable Wget+Lua found.")
 
-if 'RSYNC_HOST' not in env:
-  raise Exception("RSYNC_HOST not set.")
+if 'RSYNC_URL' not in env:
+  raise Exception('RSYNC_URL not set.')
 
-if 'RSYNC_MODULE' not in env:
-  raise Exception("RSYNC_MODULE not set.")
-
-RSYNC_HOST = env['RSYNC_HOST']
-RSYNC_MODULE = env['RSYNC_MODULE']
+RSYNC_URL = env['RSYNC_URL']
 
 # ------------------------------------------------------------------------------
 
@@ -180,7 +176,7 @@ pipeline = Pipeline(
   MoveFiles(),
   LimitConcurrent(2,
     RsyncUpload(
-      target='%s::%s/' % (RSYNC_HOST, RSYNC_MODULE),
+      target = RSYNC_URL,
       target_source_path = ItemInterpolation("%(data_dir)s"),
       files = [
         ItemInterpolation('%(data_dir)s/%(warc_file_base)s.warc.gz')
