@@ -13,6 +13,12 @@ class Brain
   end
 
   def request_archive(m, param)
+    # Is the user an op?
+    if !m.user.oper?
+      reply m, "Sorry, only operators may start archive jobs."
+      return
+    end
+
     # Do we have a valid URI?
     begin
       uri = URI.parse(param)
