@@ -132,7 +132,7 @@ class MarkItemAsDone(SimpleTask):
   def process(self, item):
     pipe = self.redis.pipeline()
 
-    pipe.hset(item['ident'], 'archive_url', 'foobar')
+    pipe.hset(item['ident'], 'archive_url', 'http://dumpground.archivingyoursh.it/%s.warc.gz' % item['warc_file_base'])
     pipe.lrem('working', 1, item['ident'])
     pipe.incr('jobs_completed')
     pipe.execute()
