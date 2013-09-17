@@ -20,11 +20,17 @@ USER_AGENT = "ArchiveTeam ArchiveBot/%s" % VERSION
 WGET_LUA = find_executable('Wget+Lua', "GNU Wget 1.14.lua.20130523-9a5c",
     [ './wget-lua' ])
 
-RSYNC_HOST = ''
-RSYNC_MODULE = ''
-
 if not WGET_LUA:
   raise Exception("No usable Wget+Lua found.")
+
+if 'RSYNC_HOST' not in env:
+  raise Exception("RSYNC_HOST not set.")
+
+if 'RSYNC_MODULE' not in env:
+  raise Exception("RSYNC_MODULE not set.")
+
+RSYNC_HOST = env['RSYNC_HOST']
+RSYNC_MODULE = env['RSYNC_MODULE']
 
 # ------------------------------------------------------------------------------
 
