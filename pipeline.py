@@ -15,7 +15,7 @@ from seesaw.externalprocess import *
 
 from seesaw.util import find_executable
 
-VERSION = "20130915.01"
+VERSION = "20130917.01"
 USER_AGENT = "ArchiveTeam ArchiveBot/%s" % VERSION
 WGET_LUA = find_executable('Wget+Lua', "GNU Wget 1.14.lua.20130523-9a5c",
     [ './wget-lua' ])
