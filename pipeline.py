@@ -170,6 +170,7 @@ pipeline = Pipeline(
     '--warc-header', 'operator: Archive Team',
     '--warc-header', 'downloaded-by: ArchiveBot',
     '--warc-header', ItemInterpolation('archivebot-job-ident: %(ident)s'),
+    '--lua-script', 'archivebot.lua',
     ItemInterpolation('%(url)s')
   ],
   accept_on_exit_code=[ 0, 4, 6, 8 ]),
