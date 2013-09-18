@@ -61,6 +61,8 @@ class Brain
       return
     end
 
+    job.update_warc_size
+
     reply m, "Job update for #{job.uri}"
     reply m, job.to_reply
     return

@@ -73,14 +73,23 @@ class PreparePaths(SimpleTask):
 
     item['item_dir'] = item_dir
     item['warc_file_base'] = '%s-%s' % (item['ident'], time.strftime("%Y%m%d-%H%M%S"))
+    item['source_warc_file'] = '%(item_dir)s/%(warc_file_base)s.warc.gz' % item
     item['cookie_jar'] = '%(item_dir)s/cookies.txt' % item
+
+class SetWarcTargetInRedis(SimpleTask):
+  def __init__(self, redis):
+    SimpleTask.__init__(self, 'PreparePaths')
+    self.redis = redis
+
+  def process(self, item):
+    self.redis.hset(item['ident'], 'source_warc_file', item['source_warc_file'])
 
 class MoveFiles(SimpleTask):
   def __init__(self):
     SimpleTask.__init__(self, "MoveFiles")
 
   def process(self, item):
-    os.rename("%(item_dir)s/%(warc_file_base)s.warc.gz" % item,
+    os.rename("%s" % item['source_warc_file'],
               "%(data_dir)s/%(warc_file_base)s.warc.gz" % item)
 
     shutil.rmtree("%(item_dir)s" % item)
@@ -102,6 +111,18 @@ class MarkItemAsDone(SimpleTask):
 
 r = redis.StrictRedis(host='localhost', port=6379, db=0)
 
+# logging hackery
+old_logger = Item.log_output
+
+def tee_to_redis(self, data, full_line=True):
+  old_logger(self, data, full_line)
+
+  if 'ident' in self:
+    ident = self['ident']
+    r.rpush('%s_log' % ident, data)
+
+Item.log_output = tee_to_redis
+
 project = Project(
     title = "ArchiveBot request handler"
 )
@@ -109,6 +130,7 @@ project = Project(
 pipeline = Pipeline(
   GetItemFromQueue(r),
   PreparePaths(),
+  SetWarcTargetInRedis(r),
   WgetDownload([WGET_LUA,
     '-U', USER_AGENT,
     '-nv',

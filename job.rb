@@ -35,7 +35,33 @@ class Job < Struct.new(:uri, :redis)
     redis.hget(ident, 'archive_url')
   end
 
+  def update_warc_size
+    warc_path = redis.hget(ident, 'source_warc_file')
+
+    if warc_path
+      begin
+        redis.hset(ident, 'last_warc_size', File.stat(warc_path).size)
+      rescue
+        # ignore it
+      end
+    end
+  end
+
+  def last_warc_size
+    redis.hget(ident, 'last_warc_size').to_f / (1024 * 1024)
+  end
+
+  def last_log_entry
+    redis.lindex("#{ident}_log", -1) || '(none)'
+  end
+
   def to_reply
-    'Nothing here yet'
+    %Q{
+Last log entry: #{last_log_entry.strip}; last WARC size: #{last_warc_size.round(2)} MiB
+    }.strip.tap do |rep|
+      if (u = archive_url)
+        rep << "; archived at #{u}"
+      end
+    end
   end
 end
