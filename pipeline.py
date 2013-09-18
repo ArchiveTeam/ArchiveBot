@@ -74,6 +74,7 @@ class PreparePaths(SimpleTask):
     item['item_dir'] = item_dir
     item['warc_file_base'] = '%s-%s' % (item['ident'], time.strftime("%Y%m%d-%H%M%S"))
     item['source_warc_file'] = '%(item_dir)s/%(warc_file_base)s.warc.gz' % item
+    item['target_warc_file'] = '%(data_dir)s/%(warc_file_base)s.warc.gz' % item
     item['cookie_jar'] = '%(item_dir)s/cookies.txt' % item
 
 class SetWarcTargetInRedis(SimpleTask):
@@ -89,10 +90,17 @@ class MoveFiles(SimpleTask):
     SimpleTask.__init__(self, "MoveFiles")
 
   def process(self, item):
-    os.rename("%s" % item['source_warc_file'],
-              "%(data_dir)s/%(warc_file_base)s.warc.gz" % item)
-
+    os.rename(item['source_warc_file'], item['target_warc_file'])
     shutil.rmtree("%(item_dir)s" % item)
+
+class SetWarcFileSizeInRedis(SimpleTask):
+  def __init__(self, redis):
+    SimpleTask.__init__(self, 'SetWarcFileSizeInRedis')
+    self.redis = redis
+
+  def process(self, item):
+    sz = os.stat(item['target_warc_file']).st_size
+    self.redis.hset(item['ident'], 'warc_file_size', sz)
 
 class MarkItemAsDone(SimpleTask):
   def __init__(self, redis):
@@ -155,12 +163,13 @@ pipeline = Pipeline(
   ],
   accept_on_exit_code=[ 0, 4, 6, 8 ]),
   MoveFiles(),
+  SetWarcFileSizeInRedis(r),
   LimitConcurrent(2,
     RsyncUpload(
       target = RSYNC_URL,
       target_source_path = ItemInterpolation("%(data_dir)s"),
       files = [
-        ItemInterpolation('%(data_dir)s/%(warc_file_base)s.warc.gz')
+        ItemInterpolation('%(target_warc_file)s')
       ]
     )
   ),
