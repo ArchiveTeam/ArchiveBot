@@ -17,6 +17,7 @@ from seesaw.util import find_executable
 
 VERSION = "20130917.01"
 USER_AGENT = "ArchiveTeam ArchiveBot/%s" % VERSION
+EXPIRE_TIME = 60 * 60 * 48    # 48 hours between archive requests
 WGET_LUA = find_executable('Wget+Lua', "GNU Wget 1.14.lua.20130523-9a5c",
     [ './wget-lua' ])
 
@@ -113,6 +114,8 @@ class MarkItemAsDone(SimpleTask):
     pipe.hset(item['ident'], 'archive_url', 'http://dumpground.archivingyoursh.it/%s.warc.gz' % item['warc_file_base'])
     pipe.lrem('working', 1, item['ident'])
     pipe.incr('jobs_completed')
+    pipe.expire(item['ident'], EXPIRE_TIME)
+    pipe.expire('%s_log' % item['ident'], EXPIRE_TIME)
     pipe.execute()
 
 # ------------------------------------------------------------------------------

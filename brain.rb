@@ -39,7 +39,15 @@ class Brain
     if job.exists?
       # Does its archive have a URL?
       if (archive_url = job.archive_url)
-        reply m, "That URL was previously archived to #{archive_url}.  Re-archiving is not yet supported."
+        rep = "That URL was previously archived to #{archive_url}."
+
+        # Is the archive record expiring?  If so, tell the requestor when they
+        # may resubmit the archive request.
+        if job.expiring?
+          rep << "  You may resubmit it in #{job.formatted_ttl}."
+        end
+
+        reply m, rep
       else
         reply m, "That URL is already being processed.  Use !status #{job.ident} for updates."
       end

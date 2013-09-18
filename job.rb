@@ -55,6 +55,20 @@ class Job < Struct.new(:uri, :redis)
     redis.lindex("#{ident}_log", -1) || '(none)'
   end
 
+  def expiring?
+    redis.ttl(ident) != -1
+  end
+
+  def formatted_ttl
+    t = redis.ttl(ident)
+
+    hr = t / 3600
+    min = (t % 3600) / 60
+    sec = (t % 3600) % 60
+
+    "#{hr}h #{min}m #{sec}s"
+  end
+
   def to_reply
     u = archive_url
     warc_size = (last_warc_size.to_f / (1024 * 1024)).round(2)
@@ -64,7 +78,11 @@ class Job < Struct.new(:uri, :redis)
        "WARC size: #{warc_size} MiB"
       ]
     else
-      [ "Archived at #{u}, #{warc_size} MiB" ]
+      [ "Archived at #{u}, #{warc_size} MiB" ].tap do |x|
+        if expiring?
+          x << "Eligible for rearchival in #{formatted_ttl}"
+        end
+      end
     end
   end
 end
