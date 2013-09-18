@@ -48,7 +48,7 @@ class Job < Struct.new(:uri, :redis)
   end
 
   def last_warc_size
-    redis.hget(ident, 'last_warc_size').to_f / (1024 * 1024)
+    redis.hget(ident, 'last_warc_size')
   end
 
   def last_log_entry
@@ -56,12 +56,15 @@ class Job < Struct.new(:uri, :redis)
   end
 
   def to_reply
-    %Q{
-Last log entry: #{last_log_entry.strip}; last WARC size: #{last_warc_size.round(2)} MiB
-    }.strip.tap do |rep|
-      if (u = archive_url)
-        rep << "; archived at #{u}"
-      end
+    u = archive_url
+    warc_size = (last_warc_size.to_f / (1024 * 1024)).round(2)
+
+    if !u
+      ["Last log entry: #{last_log_entry}",
+       "WARC size: #{warc_size} MiB"
+      ]
+    else
+      [ "Archived at #{u}, #{warc_size} MiB" ]
     end
   end
 end

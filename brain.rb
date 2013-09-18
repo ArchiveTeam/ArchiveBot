@@ -62,9 +62,9 @@ class Brain
     end
 
     job.update_warc_size
-
     reply m, "Job update for #{job.uri}"
-    reply m, job.to_reply
+
+    job.to_reply.each { |r| reply m, r }
     return
   end
 
