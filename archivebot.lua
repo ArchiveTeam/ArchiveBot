@@ -38,4 +38,64 @@ wget.callbacks.download_child_p = function(urlpos, parent, depth, start_url_pars
   return verdict
 end
 
+local stats = {}
+local count = 0
+
+local categorize_statcode = function(code)
+  if not stats[code] then
+    stats[code] = 0
+  end
+
+  count = count + 1
+  stats[code] = stats[code] + 1
+end
+
+local summarize_statcodes = function()
+  local ss = function(min, max)
+    local sum = 0
+
+    for code = min, max, 1 do
+      local c = stats[code] or 0
+      sum = sum + c
+    end
+
+    return sum
+  end
+
+  str = "1xx: "..ss(100, 199)
+  str = str..", 2xx: "..ss(200, 299)
+  str = str..", 3xx: "..ss(300, 399)
+  str = str..", 4xx: "..ss(400, 499)
+  str = str..", 5xx: "..ss(500, 599)
+  str = str..", other: "..ss(600, 999)
+  str = str.."."
+
+  return str
+end
+
+local print_summary = function()
+  io.stdout:write("Downloaded "..count.." URLs; ")
+  io.stdout:write(summarize_statcodes())
+end
+
+wget.callbacks.httploop_result = function(url, err, http_stat)
+  categorize_statcode(http_stat.statcode)
+
+  if count % 50 == 0 then
+    print_summary()
+    io.stdout:write("\n")
+    io.stdout:flush()
+  end
+
+  return wget.actions.NOTHING
+end
+
+wget.callbacks.finish = function(start_time, end_time, wall_time, numurls, total_downloaded_bytes, total_download_time)
+  print_summary()
+  io.stdout:write("  ")
+  io.stdout:write(total_downloaded_bytes.." bytes.")
+  io.stdout:write("\n")
+  io.stdout:flush()
+end
+
 -- vim:ts=2:sw=2:et:tw=78
