@@ -75,45 +75,6 @@ class PreparePaths(SimpleTask):
     item['warc_file_base'] = '%s-%s' % (item['ident'], time.strftime("%Y%m%d-%H%M%S"))
     item['cookie_jar'] = '%(item_dir)s/cookies.txt' % item
 
-
-class PrepareDomains(SimpleTask):
-  '''
-  Many websites accept (and provide) links at both https?://www.example.com
-  and https?://example.com.  We should follow both if both are provided and if
-  they go to the same location.
-
-  Unfortunately, it's really, really hard to determine whether or not
-  example.com will put you at the same place as www.example.com.  You can't
-  look at IPs and you can't use CNAMEs.
-
-  The easiest way to do this is heuristically:
-
-  if given www.example.com
-      add example.com to follow list
-  if given example.com
-      add www.example.com to follow list
-  else
-      keep follow list as is
-  '''
-  def __init__(self):
-    SimpleTask.__init__(self, 'PrepareDomains')
-
-    self.dub_regex = re.compile('^www\.*')
-    self.bare_regex = re.compile('^[^.]+\.[^.]+$')
-
-  def process(self, item):
-    res = urlparse(item['url'])
-    domains = []
-
-    domains.append(res.hostname)
-
-    if self.dub_regex.match(res.hostname):
-      domains.append(string.replace(res.hostname, 'www.', ''))
-    elif self.bare_regex.match(res.hostname):
-      domains.append('www.%s' % res.hostname)
-
-    item['domains'] = ','.join(domains)
-
 class MoveFiles(SimpleTask):
   def __init__(self):
     SimpleTask.__init__(self, "MoveFiles")
@@ -148,7 +109,6 @@ project = Project(
 pipeline = Pipeline(
   GetItemFromQueue(r),
   PreparePaths(),
-  PrepareDomains(),
   WgetDownload([WGET_LUA,
     '-U', USER_AGENT,
     '-nv',
@@ -164,8 +124,6 @@ pipeline = Pipeline(
     '--timeout', '60',
     '--tries', '20',
     '--waitretry', '10',
-    '--domains', ItemInterpolation('%(domains)s'),
-    '--span-hosts',
     '--warc-file', ItemInterpolation('%(item_dir)s/%(warc_file_base)s'),
     '--warc-header', 'operator: Archive Team',
     '--warc-header', 'downloaded-by: ArchiveBot',
