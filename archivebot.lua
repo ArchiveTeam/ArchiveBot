@@ -5,20 +5,21 @@ local www_to_bare_p = function(url_a, url_b)
 end
 
 wget.callbacks.download_child_p = function(urlpos, parent, depth, start_url_parsed, iri, verdict, reason)
-  -- Is the parent a www.example.com and the child an example.com?
+  -- Is the parent a www.example.com and the child an example.com, or vice
+  -- versa?
   local p_to_bare = www_to_bare_p(parent, urlpos.url)
-
-  -- Is the parent an example.com and the child a www.example.com?
   local bare_to_p = www_to_bare_p(urlpos.url, parent)
 
-  -- If either are true and the target won't be downloaded because of
-  -- span-hosts rules, override the verdict.
-  --
+  -- Is the parent's path a subpath of the child's path?
+  local start = string.find(urlpos.url.path, parent.path, 1, true)
+  local is_subpath = (start == 1)
+
+  -- OK, override the verdict.
   -- Bare domains aren't supposed to resolve to anything, but these days they
   -- are very commonly an alias for www (actually, these days, you could look
   -- at it the other way around), and we assume that any site that pulls that
   -- shit is doing the bare domain thing.
-  if (p_to_bare or bare_to_p) and reason == 'DIFFERENT_HOST' then
+  if (p_to_bare or bare_to_p) and is_subpath and reason == 'DIFFERENT_HOST' then
     return true
   end
 
