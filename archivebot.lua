@@ -27,8 +27,8 @@ wget.callbacks.download_child_p = function(urlpos, parent, depth, start_url_pars
   local is_requisite = urlpos['link_inline_p']
 
   if is_html_link ~= 1 and is_requisite == 1 then
-    -- Did wget decide to not download it due to domain restrictions?
-    if verdict == false and reason == 'DOMAIN_NOT_ACCEPTED' then
+    -- Did wget decide to not download it due to span-hosts restrictions?
+    if verdict == false and reason == 'DIFFERENT_HOST' then
       -- Nope, you're downloading it after all.
       return true
     end
