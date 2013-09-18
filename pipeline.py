@@ -100,7 +100,7 @@ class SetWarcFileSizeInRedis(SimpleTask):
 
   def process(self, item):
     sz = os.stat(item['target_warc_file']).st_size
-    self.redis.hset(item['ident'], 'warc_file_size', sz)
+    self.redis.hset(item['ident'], 'last_warc_size', sz)
 
 class MarkItemAsDone(SimpleTask):
   def __init__(self, redis):
