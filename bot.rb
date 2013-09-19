@@ -43,6 +43,10 @@ bot = Cinch::Bot.new do
   on :message, /\A!status ([0-9a-z]+)\Z/ do |m, ident|
     brain.request_status(m, ident)
   end
+
+  on :message, /\A!abort ([0-9a-z]+)\Z/ do |m, ident|
+    brain.initiate_abort(m, ident)
+  end
 end
 
 bot.start

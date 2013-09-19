@@ -1,6 +1,12 @@
 dofile("wget_behaviors/acceptance_heuristics.lua")
 dofile("wget_behaviors/url_counting.lua")
 
+require('socket')
+
+local redis = require('vendor/redis-lua/src/redis')
+local ident = os.getenv('ITEM_IDENT')
+local rconn = redis.connect(os.getenv('REDIS_HOST'), os.getenv('REDIS_PORT'))
+
 wget.callbacks.download_child_p = function(urlpos, parent, depth, start_url_parsed, iri, verdict, reason)
   -- Second-guess wget's host-spanning restrictions.
   if not verdict and reason == 'DIFFERENT_HOST' then
@@ -22,8 +28,22 @@ wget.callbacks.download_child_p = function(urlpos, parent, depth, start_url_pars
   return verdict
 end
 
+local aborted = function()
+  return rconn:hget(ident, 'aborted')
+end
+
 wget.callbacks.httploop_result = function(url, err, http_stat)
   categorize_statcode(http_stat.statcode)
+
+  if aborted() then
+    io.stdout:write("Wget terminating on bot command")
+    rconn:incr('jobs_aborted')
+    rconn:lrem('working', 1, ident)
+    rconn:expire(ident, 60)
+    rconn:expire(ident..'_log', 60)
+
+    return wget.actions.ABORT
+  end
 
   if count % 50 == 0 then
     print_summary()

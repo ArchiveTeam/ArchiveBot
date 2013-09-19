@@ -27,7 +27,11 @@ if not WGET_LUA:
 if 'RSYNC_URL' not in env:
   raise Exception('RSYNC_URL not set.')
 
+if 'REDIS_URL' not in env:
+  raise Exception('REDIS_URL not set.')
+
 RSYNC_URL = env['RSYNC_URL']
+REDIS_URL = env['REDIS_URL']
 
 # ------------------------------------------------------------------------------
 
@@ -120,7 +124,9 @@ class MarkItemAsDone(SimpleTask):
 
 # ------------------------------------------------------------------------------
 
-r = redis.StrictRedis(host='localhost', port=6379, db=0)
+redis_url = urlparse(REDIS_URL)
+redis_db = int(redis_url.path[1:])
+r = redis.StrictRedis(host=redis_url.hostname, port=redis_url.port, db=redis_db)
 
 # logging hackery
 old_logger = Item.log_output
@@ -164,7 +170,13 @@ pipeline = Pipeline(
     '--lua-script', 'archivebot.lua',
     ItemInterpolation('%(url)s')
   ],
-  accept_on_exit_code=[ 0, 4, 6, 8 ]),
+  accept_on_exit_code=[ 0, 4, 6, 8 ],
+  env={
+    'ITEM_IDENT': ItemInterpolation('%(ident)s'),
+    'REDIS_HOST': redis_url.hostname,
+    'REDIS_PORT': str(redis_url.port),
+    'REDIS_DB': str(redis_db)
+  }),
   MoveFiles(),
   SetWarcFileSizeInRedis(r),
   LimitConcurrent(2,

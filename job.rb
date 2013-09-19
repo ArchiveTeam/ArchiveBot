@@ -19,6 +19,10 @@ class Job < Struct.new(:uri, :redis)
     uri.normalize.to_s
   end
 
+  def abort
+    redis.hset(ident, 'aborted', true)
+  end
+
   def queue
     redis.lpush('pending', ident)
   end
@@ -55,6 +59,10 @@ class Job < Struct.new(:uri, :redis)
     redis.lindex("#{ident}_log", -1) || '(none)'
   end
 
+  def aborted?
+    redis.hget(ident, 'aborted')
+  end
+
   def expiring?
     redis.ttl(ident) != -1
   end
@@ -73,14 +81,22 @@ class Job < Struct.new(:uri, :redis)
     u = archive_url
     warc_size = (last_warc_size.to_f / (1024 * 1024)).round(2)
 
-    if !u
-      ["Last log entry: #{last_log_entry}",
-       "WARC size: #{warc_size} MiB"
-      ]
-    else
-      [ "Archived at #{u}, #{warc_size} MiB" ].tap do |x|
+    if aborted?
+      ["Job aborted"].tap do |x|
         if expiring?
           x << "Eligible for rearchival in #{formatted_ttl}"
+        end
+      end
+    else
+      if !u
+        ["Last log entry: #{last_log_entry}",
+         "WARC size: #{warc_size} MiB"
+        ]
+      else
+        [ "Archived at #{u}, #{warc_size} MiB" ].tap do |x|
+          if expiring?
+            x << "Eligible for rearchival in #{formatted_ttl}"
+          end
         end
       end
     end

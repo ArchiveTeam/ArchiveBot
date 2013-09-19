@@ -13,11 +13,8 @@ class Brain
   end
 
   def request_archive(m, param)
-    # Is the user an op?
-    if !m.channel.opped?(m.user)
-      reply m, "Sorry, only channel operators may start archive jobs."
-      return
-    end
+    # Is the user authorized?
+    return unless authorized?(m)
 
     # Do we have a valid URI?
     begin
@@ -58,7 +55,8 @@ class Brain
     # OK, add the job and queue it up.
     job.register
     job.queue
-    reply m, "Archiving #{uri.to_s}; use !status #{job.ident} for updates."
+    reply m, "Archiving #{uri.to_s}."
+    reply m, "Use !status #{job.ident} for updates, !abort #{job.ident} to abort."
   end
 
   def request_status(m, ident)
@@ -76,6 +74,21 @@ class Brain
     return
   end
 
+  def initiate_abort(m, ident)
+    # Is the user authorized?
+    return unless authorized?(m)
+
+    job = Job.from_ident(ident, redis)
+
+    if !job
+      reply m, "Sorry, I don't know anything about job #{ident}."
+      return
+    end
+
+    job.abort
+    reply m, "Initiated abort for #{job.url}."
+  end
+
   def request_summary(m)
     s = Summary.new(redis)
     s.run
@@ -84,6 +97,15 @@ class Brain
   end
 
   private
+
+  def authorized?(m)
+    if !m.channel.opped?(m.user)
+      reply m, "Sorry, only channel operators may start archive jobs."
+      return false
+    end
+
+    return true
+  end
 
   def reply(m, *args)
     m.reply "#{m.user.nick}: #{args.join(' ')}"
