@@ -30,7 +30,7 @@ To start processing jobs, you'll also need to start Sidekiq:
 
 3. License
 
-Dedicated to the public domain.  See LICENSE if you really need more
-than that.
+Copyright 2013 David Yip; made avaiable under the MIT license.  See
+LICENSE for details.
 
  vim:ts=2:sw=2:tw=72:et
