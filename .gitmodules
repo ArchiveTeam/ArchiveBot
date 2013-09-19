@@ -1,0 +1,3 @@
+[submodule "vendor/redis-lua"]
+	path = vendor/redis-lua
+	url = https://github.com/nrk/redis-lua.git
