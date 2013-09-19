@@ -6,6 +6,7 @@ require('socket')
 local redis = require('vendor/redis-lua/src/redis')
 local ident = os.getenv('ITEM_IDENT')
 local rconn = redis.connect(os.getenv('REDIS_HOST'), os.getenv('REDIS_PORT'))
+local aborter = os.getenv('ABORT_SCRIPT')
 
 wget.callbacks.download_child_p = function(urlpos, parent, depth, start_url_parsed, iri, verdict, reason)
   -- Second-guess wget's host-spanning restrictions.
@@ -37,10 +38,7 @@ wget.callbacks.httploop_result = function(url, err, http_stat)
 
   if aborted() then
     io.stdout:write("Wget terminating on bot command")
-    rconn:incr('jobs_aborted')
-    rconn:lrem('working', 1, ident)
-    rconn:expire(ident, 60)
-    rconn:expire(ident..'_log', 60)
+    rconn:eval(aborter, 1, ident, 60)
 
     return wget.actions.ABORT
   end

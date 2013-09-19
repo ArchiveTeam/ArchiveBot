@@ -108,25 +108,46 @@ class SetWarcFileSizeInRedis(SimpleTask):
     self.redis.hset(item['ident'], 'last_warc_size', sz)
 
 class MarkItemAsDone(SimpleTask):
-  def __init__(self, redis):
+  def __init__(self, redis, mark_done_script):
     SimpleTask.__init__(self, 'MarkItemAsDone')
     self.redis = redis
+    self.mark_done = self.redis.register_script(mark_done_script)
 
   def process(self, item):
-    pipe = self.redis.pipeline()
-
-    pipe.hset(item['ident'], 'archive_url', 'http://dumpground.archivingyoursh.it/%s.warc.gz' % item['warc_file_base'])
-    pipe.lrem('working', 1, item['ident'])
-    pipe.incr('jobs_completed')
-    pipe.expire(item['ident'], EXPIRE_TIME)
-    pipe.expire('%s_log' % item['ident'], EXPIRE_TIME)
-    pipe.execute()
+    archive_url = 'http://dumpground.archivingyoursh.it/%s.warc.gz' % item['warc_file_base']
+    self.mark_done(keys=[item['ident']], args=[archive_url, EXPIRE_TIME])
 
 # ------------------------------------------------------------------------------
 
 redis_url = urlparse(REDIS_URL)
 redis_db = int(redis_url.path[1:])
 r = redis.StrictRedis(host=redis_url.hostname, port=redis_url.port, db=redis_db)
+
+# ------------------------------------------------------------------------------
+
+MARK_DONE = '''
+local ident = KEYS[1]
+local archive_url = ARGV[1]
+local expire_time = ARGV[2]
+
+redis.call('hset', ident, 'archive_url', archive_url)
+redis.call('lrem', 'working', 1, ident)
+redis.call('incr', 'jobs_completed')
+redis.call('expire', ident, expire_time)
+redis.call('expire', ident..'_log', expire_time)
+'''
+
+MARK_ABORTED = '''
+local ident = KEYS[1]
+local expire_time = ARGV[1]
+
+redis.call('incr', 'jobs_aborted')
+redis.call('lrem', 'working', 1, ident)
+redis.call('expire', ident, expire_time)
+redis.call('expire', ident..'_log', expire_time)
+'''
+
+# ------------------------------------------------------------------------------
 
 # logging hackery
 old_logger = Item.log_output
@@ -173,6 +194,7 @@ pipeline = Pipeline(
   accept_on_exit_code=[ 0, 4, 6, 8 ],
   env={
     'ITEM_IDENT': ItemInterpolation('%(ident)s'),
+    'ABORT_SCRIPT': MARK_ABORTED,
     'REDIS_HOST': redis_url.hostname,
     'REDIS_PORT': str(redis_url.port),
     'REDIS_DB': str(redis_db)
@@ -188,7 +210,7 @@ pipeline = Pipeline(
       ]
     )
   ),
-  MarkItemAsDone(r)
+  MarkItemAsDone(r, MARK_DONE)
 )
 
 # vim:ts=2:sw=2:et:tw=78
