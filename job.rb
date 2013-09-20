@@ -55,16 +55,14 @@ class Job < Struct.new(:uri, :redis)
     redis.hget(ident, 'aborted')
   end
 
-  def expiring?
-    redis.ttl(ident) != -1
+  def ttl
+    redis.ttl(ident)
   end
 
-  def formatted_ttl
-    t = redis.ttl(ident)
-
-    hr = t / 3600
-    min = (t % 3600) / 60
-    sec = (t % 3600) % 60
+  def formatted_ttl(ttl)
+    hr = ttl / 3600
+    min = (ttl % 3600) / 60
+    sec = (ttl % 3600) % 60
 
     "#{hr}h #{min}m #{sec}s"
   end
@@ -74,8 +72,8 @@ class Job < Struct.new(:uri, :redis)
 
     if !u && aborted?
       ["Job aborted"].tap do |x|
-        if expiring?
-          x << "Eligible for rearchival in #{formatted_ttl}"
+        if (t = ttl)
+          x << "Eligible for rearchival in #{formatted_ttl(t)}"
         end
       end
     else
@@ -89,8 +87,8 @@ class Job < Struct.new(:uri, :redis)
         warc_size_mib = (warc_size.to_f / (1024 * 1024)).round(2)
 
         [ "Archived at #{u}, WARC size: #{warc_size_mib} MiB" ].tap do |x|
-          if expiring?
-            x << "Eligible for rearchival in #{formatted_ttl}"
+          if (t = ttl)
+            x << "Eligible for rearchival in #{formatted_ttl(t)}"
           end
         end
       end
