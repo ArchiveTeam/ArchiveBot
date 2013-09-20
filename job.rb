@@ -72,7 +72,7 @@ class Job < Struct.new(:uri, :redis)
   def to_reply
     u = archive_url
 
-    if aborted?
+    if !u && aborted?
       ["Job aborted"].tap do |x|
         if expiring?
           x << "Eligible for rearchival in #{formatted_ttl}"
