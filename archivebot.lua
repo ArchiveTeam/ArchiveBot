@@ -34,8 +34,11 @@ local aborted = function()
 end
 
 wget.callbacks.httploop_result = function(url, err, http_stat)
+  -- Categorize what we just downloaded and update the traffic counters.
   categorize_statcode(http_stat.statcode)
+  rconn:hincrby(ident, 'bytes_downloaded', http_stat.rd_size)
 
+  -- Should we abort?
   if aborted() then
     io.stdout:write("Wget terminating on bot command")
     rconn:eval(aborter, 1, ident, 60)
@@ -43,6 +46,7 @@ wget.callbacks.httploop_result = function(url, err, http_stat)
     return wget.actions.ABORT
   end
 
+  -- Should we print a summary line?
   if count % 50 == 0 then
     print_summary()
     io.stdout:write("\n")

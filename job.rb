@@ -39,20 +39,12 @@ class Job < Struct.new(:uri, :redis)
     redis.hget(ident, 'archive_url')
   end
 
-  def update_warc_size
-    warc_path = redis.hget(ident, 'source_warc_file')
-
-    if warc_path
-      begin
-        redis.hset(ident, 'last_warc_size', File.stat(warc_path).size)
-      rescue
-        # ignore it
-      end
-    end
+  def bytes_downloaded
+    redis.hget(ident, 'bytes_downloaded')
   end
 
-  def last_warc_size
-    redis.hget(ident, 'last_warc_size')
+  def warc_size
+    redis.hget(ident, 'warc_size')
   end
 
   def last_log_entry
@@ -79,7 +71,6 @@ class Job < Struct.new(:uri, :redis)
 
   def to_reply
     u = archive_url
-    warc_size = (last_warc_size.to_f / (1024 * 1024)).round(2)
 
     if aborted?
       ["Job aborted"].tap do |x|
@@ -89,11 +80,15 @@ class Job < Struct.new(:uri, :redis)
       end
     else
       if !u
+        downloaded = (bytes_downloaded.to_f / (1024 * 1024)).round(2)
+
         ["Last log entry: #{last_log_entry}",
-         "WARC size: #{warc_size} MiB"
+         "Downloaded #{downloaded} MiB"
         ]
       else
-        [ "Archived at #{u}, #{warc_size} MiB" ].tap do |x|
+        warc_size_mib = (warc_size.to_f / (1024 * 1024)).round(2)
+
+        [ "Archived at #{u}, WARC size: #{warc_size_mib} MiB" ].tap do |x|
           if expiring?
             x << "Eligible for rearchival in #{formatted_ttl}"
           end

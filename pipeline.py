@@ -82,14 +82,6 @@ class PreparePaths(SimpleTask):
     item['target_warc_file'] = '%(data_dir)s/%(warc_file_base)s.warc.gz' % item
     item['cookie_jar'] = '%(item_dir)s/cookies.txt' % item
 
-class SetWarcTargetInRedis(SimpleTask):
-  def __init__(self, redis):
-    SimpleTask.__init__(self, 'PreparePaths')
-    self.redis = redis
-
-  def process(self, item):
-    self.redis.hset(item['ident'], 'source_warc_file', item['source_warc_file'])
-
 class MoveFiles(SimpleTask):
   def __init__(self):
     SimpleTask.__init__(self, "MoveFiles")
@@ -105,7 +97,7 @@ class SetWarcFileSizeInRedis(SimpleTask):
 
   def process(self, item):
     sz = os.stat(item['target_warc_file']).st_size
-    self.redis.hset(item['ident'], 'last_warc_size', sz)
+    self.redis.hset(item['ident'], 'warc_size', sz)
 
 class MarkItemAsDone(SimpleTask):
   def __init__(self, redis, mark_done_script):
@@ -168,7 +160,6 @@ project = Project(
 pipeline = Pipeline(
   GetItemFromQueue(r),
   PreparePaths(),
-  SetWarcTargetInRedis(r),
   WgetDownload([WGET_LUA,
     '-U', USER_AGENT,
     '-nv',
