@@ -149,7 +149,10 @@ def tee_to_redis(self, data, full_line=True):
 
   if 'ident' in self:
     ident = self['ident']
-    r.rpush('%s_log' % ident, string.strip(data))
+    entry = string.strip(data)
+
+    if len(entry) > 0:
+      r.rpush('%s_log' % ident, entry)
 
 Item.log_output = tee_to_redis
 
