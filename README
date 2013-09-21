@@ -16,44 +16,11 @@
                 simple.
     <SketchCow> And just being able to go "bot, get a sanity dump"
 
-2. Running it
+2. More info
 
-To run, you will need:
-
-- a Redis server
-- a Python 2.7 installation
-- a Ruby 1.9 installation
-- Bundler
-- the Lua socket library
-- redis-py
-- wget+lua
-
-(Little known fact: ArchiveBot is made to be as hard as possible to set
-up.)
-
-Quick install, for Debian and Debian-esque systems:
-
-    sudo apt-get update
-    sudo apt-get install liblua5.1-dev lua-socket bundler python-pip \
-      python2.7-dev gnutls-dev git tmux
-    pip install --user seesaw redis
-    git clone https://github.com/ArchiveTeam/ArchiveBot.git
-    cd ArchiveBot
-    ./get-wget-lua.sh
-    bundle install
-
-It is recommended that you build Redis from source (from
-http://redis.io); the latest Debian package (as of September 2013) is
-2.4.14.  That might work, but 2.6.16 is recommended.
-
-Once that's all in place, run the following:
-
-    redis-server   # ensure it has no password
-    export REDIS_URL='redis://localhost:6379/0' # or whatever you need
-    export RSYNC_URL='rsync://yourupload.example.com/some-module/'
-    ruby bot.rb -s 'irc://server.example.org:6667' -c '#archivebot'
-    ~/.local/bin/run-pipeline --disable-web-server --concurrent 3 \
-      pipeline.py ArchiveBot
+For the user's guide, read the COMMANDS file.
+For a half-assed installation and operation guide, read INSTALL.
+For a polished installation guide, submit a pull request.
 
 3. License
 

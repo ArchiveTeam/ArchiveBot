@@ -1,0 +1,48 @@
+- !status: print job summary
+
+    [23:10:55] <me> !status
+    [23:10:55] <ArchiveBot> me: Job status: 0 completed, 0 aborted,
+                            0 in progress, 0 pending
+
+- !archive URL: begin recursive retrieval from a URL
+
+    [23:19:12] <me> !archive http://artscene.textfiles.com/litpacks/
+    [23:19:12] <ArchiveBot> me: Archiving
+                            http://artscene.textfiles.com/litpacks/.
+    [23:19:13] <ArchiveBot> me: Use !status 43z7a11vo6of3a7i173441dtc
+                            for updates,
+                            !abort 43z7a11vo6of3a7i173441dtc to abort.
+
+  ArchiveBot does not ascend to parent links.
+
+- !status IDENT: print information about a job
+
+    [23:21:02] <me> !status 43z7a11vo6of3a7i173441dtc
+    [23:21:02] <ArchiveBot> me: Job update for
+                            http://artscene.textfiles.com/litpacks/
+    [23:21:02] <ArchiveBot> me: Last log entry: Starting WgetDownload
+                            for Item
+    [23:21:02] <ArchiveBot> me: Downloaded 0.01 MiB
+
+  For jobs where a WARC was generated and uploaded, you'll get a URL to the WARC:
+
+    [23:25:04] <me> !status 43z7a11vo6of3a7i173441dtc
+    [23:25:05] <ArchiveBot> me: Job update for
+                            http://artscene.textfiles.com/litpacks/
+    [23:25:05] <ArchiveBot> me: Archived at
+                            http://example.com/thewarc.warc.gz,
+                            WARC size: 11.82 MiB
+    [23:25:05] <ArchiveBot> me: Eligible for rearchival in 47h 59m 29s
+
+- !abort IDENT: abort a job
+
+    [23:21:34] <me> !abort 43z7a11vo6of3a7i173441dtc
+    [23:21:34] <ArchiveBot> me: Initiated abort for
+                            http://artscene.textfiles.com/litpacks/.
+    [23:21:48] <me> !status 43z7a11vo6of3a7i173441dtc
+    [23:21:49] <ArchiveBot> me: Job update for
+                            http://artscene.textfiles.com/litpacks/
+    [23:21:49] <ArchiveBot> me: Job aborted
+    [23:21:49] <ArchiveBot> me: Eligible for rearchival in 0h 0m 45s
+
+ vim:ts=2:sw=2:tw=72:et
