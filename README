@@ -34,7 +34,8 @@ up.)
 Quick install, for Debian and Debian-esque systems:
 
     sudo apt-get update
-    sudo apt-get install liblua5.1-dev lua-socket bundler python-pip python2.7-dev gnutls-dev git tmux
+    sudo apt-get install liblua5.1-dev lua-socket bundler python-pip \
+      python2.7-dev gnutls-dev git tmux
     pip install --user seesaw redis
     git clone https://github.com/ArchiveTeam/ArchiveBot.git
     cd ArchiveBot
@@ -52,7 +53,8 @@ Once that's all in place, run the following:
     export REDIS_URL='redis://localhost:6379/0' # or whatever you need
     export RSYNC_URL='rsync://yourupload.example.com/some-module/'
     ruby bot.rb -s 'irc://server.example.org:6667' -c '#archivebot'
-    ~/.local/bin/run-pipeline --disable-web-server --concurrent 3 pipeline.py ArchiveBot
+    ~/.local/bin/run-pipeline --disable-web-server --concurrent 3 \
+      pipeline.py ArchiveBot
 
 3. License
 
