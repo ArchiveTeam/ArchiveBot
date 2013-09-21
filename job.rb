@@ -27,6 +27,14 @@ class Job < Struct.new(:uri, :redis)
     redis.lpush('pending', ident)
   end
 
+  def set_depth(depth)
+    redis.hset(ident, 'fetch_depth', depth)
+  end
+
+  def depth
+    redis.hget(ident, 'fetch_depth')
+  end
+
   def exists?
     !redis.keys(ident).empty?
   end
@@ -81,6 +89,7 @@ class Job < Struct.new(:uri, :redis)
         downloaded = (bytes_downloaded.to_f / (1024 * 1024)).round(2)
 
         ["Last log entry: #{last_log_entry}",
+         "Fetch depth: #{depth}",
          "Downloaded #{downloaded} MiB"
         ]
       else

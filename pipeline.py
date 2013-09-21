@@ -65,6 +65,25 @@ class GetItemFromQueue(Task):
     IOLoop.instance().add_timeout(datetime.timedelta(seconds=self.retry_delay),
       functools.partial(self.send_request, item))
 
+class SetFetchDepth(SimpleTask):
+  def __init__(self, redis):
+    SimpleTask.__init__(self, 'SetFetchDepth')
+    self.redis = redis
+
+  def process(self, item):
+    depth = self.redis.hget(item['ident'], 'fetch_depth')
+
+    # Unfortunately, depth zero means the same thing as infinite depth to
+    # wget, so we need to special-case it
+    if depth == 'shallow':
+      item['recursive'] = ''
+      item['level'] = ''
+      item['depth'] = ''
+    else:
+      item['recursive'] = '--recursive'
+      item['level'] = '--level'
+      item['depth'] = depth
+
 class PreparePaths(SimpleTask):
   def __init__(self):
     SimpleTask.__init__(self, 'PreparePaths')
@@ -162,6 +181,7 @@ project = Project(
 
 pipeline = Pipeline(
   GetItemFromQueue(r),
+  SetFetchDepth(r),
   PreparePaths(),
   WgetDownload([WGET_LUA,
     '-U', USER_AGENT,
@@ -172,7 +192,9 @@ pipeline = Pipeline(
     '--output-document', ItemInterpolation('%(item_dir)s/wget.tmp'),
     '--truncate-output',
     '-e', 'robots=off',
-    '--recursive', '--level=inf',
+    ItemInterpolation('%(recursive)s'),
+    ItemInterpolation('%(level)s'),
+    ItemInterpolation('%(depth)s'),
     '--page-requisites',
     '--no-parent',
     '--timeout', '60',

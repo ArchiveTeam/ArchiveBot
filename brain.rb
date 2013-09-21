@@ -12,7 +12,7 @@ class Brain
     @redis = redis
   end
 
-  def request_archive(m, param)
+  def request_archive(m, param, depth='inf')
     # Is the user authorized?
     return unless authorized?(m)
 
@@ -54,8 +54,15 @@ class Brain
 
     # OK, add the job and queue it up.
     job.register
+    job.set_depth(depth)
     job.queue
-    reply m, "Archiving #{uri.to_s}."
+
+    if depth == :shallow
+      reply m, "Archiving #{uri.to_s} without recursion."
+    else
+      reply m, "Archiving #{uri.to_s}."
+    end
+
     reply m, "Use !status #{job.ident} for updates, !abort #{job.ident} to abort."
   end
 
