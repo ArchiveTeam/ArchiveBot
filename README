@@ -48,7 +48,6 @@ http://redis.io); the latest Debian package (as of September 2013) is
 
 Once that's all in place, run the following:
 
-
     redis-server   # ensure it has no password
     export REDIS_URL='redis://localhost:6379/0' # or whatever you need
     export RSYNC_URL='rsync://yourupload.example.com/some-module/'
