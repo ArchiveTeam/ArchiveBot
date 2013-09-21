@@ -19,6 +19,7 @@ Quick install, for Debian and Debian-esque systems:
     pip install --user seesaw redis
     git clone https://github.com/ArchiveTeam/ArchiveBot.git
     cd ArchiveBot
+    git submodule update --init
     ./get-wget-lua.sh
     bundle install
 
