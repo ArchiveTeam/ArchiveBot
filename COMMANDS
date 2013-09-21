@@ -15,6 +15,16 @@
 
   ArchiveBot does not ascend to parent links.
 
+- !archiveonly URL: non-recursive retrieval of the given URL
+
+    [10:51:13] <me> !archiveonly http://store.steampowered.com/livingroom
+    [10:51:16] <ArchiveBot> me: Archiving
+                            http://store.steampowered.com/livingroom
+                            without recursion.
+    [10:51:17] <ArchiveBot> me: Use !status 1q2qydhkeh3gfnrcxuf6py70b
+                            for updates,
+                            !abort 1q2qydhkeh3gfnrcxuf6py70b to abort.
+
 - !status IDENT: print information about a job
 
     [23:21:02] <me> !status 43z7a11vo6of3a7i173441dtc
