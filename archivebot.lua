@@ -9,6 +9,8 @@ local rconn = redis.connect(os.getenv('REDIS_HOST'), os.getenv('REDIS_PORT'))
 local aborter = os.getenv('ABORT_SCRIPT')
 local error_list = os.getenv('ERROR_LIST')
 
+rconn:select(os.getenv('REDIS_DB'))
+
 wget.callbacks.download_child_p = function(urlpos, parent, depth, start_url_parsed, iri, verdict, reason)
   -- Second-guess wget's host-spanning restrictions.
   if not verdict and reason == 'DIFFERENT_HOST' then
