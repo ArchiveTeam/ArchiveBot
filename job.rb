@@ -63,7 +63,7 @@ class Job < Struct.new(:uri, :redis)
   end
 
   def error_count
-    redis.hget(ident, 'error_count')
+    redis.hget(ident, 'error_count').to_i
   end
 
   def incr_error_count(by = 1)
