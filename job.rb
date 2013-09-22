@@ -101,7 +101,7 @@ class Job < Struct.new(:uri, :redis)
       else
         warc_size_mib = (warc_size.to_f / (1024 * 1024)).round(2)
 
-        [ "Archived at #{u}, WARC size: #{warc_size_mib} MiB" ].tap do |x|
+        [ "Archived at #{u}, fetch depth: #{depth}, WARC size: #{warc_size_mib} MiB" ].tap do |x|
           x << "#{errs} errors encountered"
 
           if (t = ttl)
