@@ -4,6 +4,7 @@ require 'trollop'
 require 'uri'
 
 require File.expand_path('../brain', __FILE__)
+require File.expand_path('../log_analyzer', __FILE__)
 
 opts = Trollop.options do
   opt :server, 'IRC server, expressed as a URI (irc://SERVER:PORT or //SERVER:PORT)', :type => String
@@ -53,6 +54,12 @@ bot = Cinch::Bot.new do
   on :message, /\A!abort ([0-9a-z]+)\Z/ do |m, ident|
     brain.initiate_abort(m, ident)
   end
+end
+
+LogAnalyzer.supervise_as :log_analyzer, opts[:redis], opts[:log_update_channel]
+
+at_exit do
+  Celluloid::Actor[:log_analyzer].stop
 end
 
 bot.start

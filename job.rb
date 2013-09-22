@@ -1,7 +1,12 @@
 require 'uri'
 require 'uuidtools'
+require 'json'
+
+require File.expand_path('../job_analysis', __FILE__)
 
 class Job < Struct.new(:uri, :redis)
+  include JobAnalysis
+
   ARCHIVEBOT_V0_NAMESPACE = UUIDTools::UUID.parse('82244de1-c354-4c89-bf2b-f153ce23af43')
 
   def self.from_ident(ident, redis)
@@ -46,6 +51,8 @@ class Job < Struct.new(:uri, :redis)
   def archive_url
     redis.hget(ident, 'archive_url')
   end
+
+  alias_method :completed?, :archive_url
 
   def bytes_downloaded
     redis.hget(ident, 'bytes_downloaded')

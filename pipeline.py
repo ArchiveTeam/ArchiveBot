@@ -130,7 +130,8 @@ class MarkItemAsDone(SimpleTask):
 
   def process(self, item):
     archive_url = 'http://dumpground.archivingyoursh.it/%s.warc.gz' % item['warc_file_base']
-    self.mark_done(keys=[item['ident']], args=[archive_url, EXPIRE_TIME])
+    self.mark_done(keys=[item['ident']], args=[archive_url, EXPIRE_TIME,
+      LOG_CHANNEL])
 
 # ------------------------------------------------------------------------------
 
@@ -144,12 +145,14 @@ MARK_DONE = '''
 local ident = KEYS[1]
 local archive_url = ARGV[1]
 local expire_time = ARGV[2]
+local log_channel = ARGV[3]
 
 redis.call('hset', ident, 'archive_url', archive_url)
 redis.call('lrem', 'working', 1, ident)
 redis.call('incr', 'jobs_completed')
 redis.call('expire', ident, expire_time)
 redis.call('expire', ident..'_log', expire_time)
+redis.call('publish', log_channel, ident)
 '''
 
 MARK_ABORTED = '''
