@@ -146,6 +146,7 @@ redis.call('lrem', 'working', 1, ident)
 redis.call('incr', 'jobs_completed')
 redis.call('expire', ident, expire_time)
 redis.call('expire', ident..'_log', expire_time)
+redis.call('expire', ident..'_errors', expire_time)
 '''
 
 MARK_ABORTED = '''
@@ -156,6 +157,7 @@ redis.call('incr', 'jobs_aborted')
 redis.call('lrem', 'working', 1, ident)
 redis.call('expire', ident, expire_time)
 redis.call('expire', ident..'_log', expire_time)
+redis.call('expire', ident..'_errors', expire_time)
 '''
 
 # ------------------------------------------------------------------------------
@@ -209,10 +211,11 @@ pipeline = Pipeline(
     '--lua-script', 'archivebot.lua',
     ItemInterpolation('%(url)s')
   ],
-  accept_on_exit_code=[ 0, 4, 6, 8 ],
+  accept_on_exit_code=[ 0, 1, 2, 3, 4, 5, 6, 7, 8 ],
   env={
     'ITEM_IDENT': ItemInterpolation('%(ident)s'),
     'ABORT_SCRIPT': MARK_ABORTED,
+    'ERROR_LIST': ItemInterpolation('%(ident)s_errors'),
     'REDIS_HOST': redis_url.hostname,
     'REDIS_PORT': str(redis_url.port),
     'REDIS_DB': str(redis_db)

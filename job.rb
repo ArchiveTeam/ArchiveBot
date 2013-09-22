@@ -59,6 +59,10 @@ class Job < Struct.new(:uri, :redis)
     redis.lindex("#{ident}_log", -1) || '(none)'
   end
 
+  def error_count
+    redis.llen("#{ident}_errors")
+  end
+
   def aborted?
     redis.hget(ident, 'aborted')
   end
@@ -85,17 +89,21 @@ class Job < Struct.new(:uri, :redis)
         end
       end
     else
+      errs = error_count
+
       if !u
         downloaded = (bytes_downloaded.to_f / (1024 * 1024)).round(2)
 
         ["Last log entry: #{last_log_entry}",
          "Fetch depth: #{depth}",
-         "Downloaded #{downloaded} MiB"
+         "Downloaded #{downloaded} MiB, #{errs} errors encountered"
         ]
       else
         warc_size_mib = (warc_size.to_f / (1024 * 1024)).round(2)
 
         [ "Archived at #{u}, WARC size: #{warc_size_mib} MiB" ].tap do |x|
+          x << "#{errs} errors encountered"
+
           if (t = ttl)
             x << "Eligible for rearchival in #{formatted_ttl(t)}"
           end
