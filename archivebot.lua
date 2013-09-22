@@ -3,11 +3,13 @@ dofile("wget_behaviors/url_counting.lua")
 
 require('socket')
 
+local json = require('json')
 local redis = require('vendor/redis-lua/src/redis')
 local ident = os.getenv('ITEM_IDENT')
 local rconn = redis.connect(os.getenv('REDIS_HOST'), os.getenv('REDIS_PORT'))
 local aborter = os.getenv('ABORT_SCRIPT')
-local error_list = os.getenv('ERROR_LIST')
+local log_list = os.getenv('LOG_LIST')
+local log_channel = os.getenv('LOG_CHANNEL')
 
 rconn:select(os.getenv('REDIS_DB'))
 
@@ -41,10 +43,15 @@ wget.callbacks.httploop_result = function(url, err, http_stat)
   categorize_statcode(http_stat.statcode)
   rconn:hincrby(ident, 'bytes_downloaded', http_stat.rd_size)
 
-  -- If there was an error, record the URL and the error code.
-  if err ~= "RETRFINISHED" then
-    rconn:lpush(error_list, '{"url":"'..url['url']..'","code":"'..err..'"}')
-  end
+  -- Record the URL, the response code, and wget's error code.
+  local result = {
+    url = url['url'],
+    response_code = http_stat['statcode'],
+    wget_code = err
+  }
+
+  rconn:rpush(log_list, json.encode(result))
+  rconn:publish(log_channel, ident)
 
   -- Should we abort?
   if aborted() then

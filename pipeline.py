@@ -30,8 +30,12 @@ if 'RSYNC_URL' not in env:
 if 'REDIS_URL' not in env:
   raise Exception('REDIS_URL not set.')
 
+if 'LOG_CHANNEL' not in env:
+  raise Exception('LOG_CHANNEL not set.')
+
 RSYNC_URL = env['RSYNC_URL']
 REDIS_URL = env['REDIS_URL']
+LOG_CHANNEL = env['LOG_CHANNEL']
 
 # ------------------------------------------------------------------------------
 
@@ -146,7 +150,6 @@ redis.call('lrem', 'working', 1, ident)
 redis.call('incr', 'jobs_completed')
 redis.call('expire', ident, expire_time)
 redis.call('expire', ident..'_log', expire_time)
-redis.call('expire', ident..'_errors', expire_time)
 '''
 
 MARK_ABORTED = '''
@@ -157,25 +160,9 @@ redis.call('incr', 'jobs_aborted')
 redis.call('lrem', 'working', 1, ident)
 redis.call('expire', ident, expire_time)
 redis.call('expire', ident..'_log', expire_time)
-redis.call('expire', ident..'_errors', expire_time)
 '''
 
 # ------------------------------------------------------------------------------
-
-# logging hackery
-old_logger = Item.log_output
-
-def tee_to_redis(self, data, full_line=True):
-  old_logger(self, data, full_line)
-
-  if 'ident' in self:
-    ident = self['ident']
-    entry = string.strip(data)
-
-    if len(entry) > 0:
-      r.rpush('%s_log' % ident, entry)
-
-Item.log_output = tee_to_redis
 
 project = Project(
     title = "ArchiveBot request handler"
@@ -215,7 +202,8 @@ pipeline = Pipeline(
   env={
     'ITEM_IDENT': ItemInterpolation('%(ident)s'),
     'ABORT_SCRIPT': MARK_ABORTED,
-    'ERROR_LIST': ItemInterpolation('%(ident)s_errors'),
+    'LOG_LIST': ItemInterpolation('%(ident)s_log'),
+    'LOG_CHANNEL': LOG_CHANNEL,
     'REDIS_HOST': redis_url.hostname,
     'REDIS_PORT': str(redis_url.port),
     'REDIS_DB': str(redis_db)

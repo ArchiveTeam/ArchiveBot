@@ -11,6 +11,7 @@ opts = Trollop.options do
   opt :channels, 'Comma-separated list of channels', :type => String
   opt :schemes, 'Comma-separated list of acceptable URI schemes', :default => 'http,https'
   opt :redis, 'URL of Redis server', :default => ENV['REDIS_URL'] || 'redis://localhost:6379/0'
+  opt :log_update_channel, 'Redis pubsub channel for log updates', :default => ENV['LOG_CHANNEL'] || 'updates'
 end
 
 redis = Redis.new(:url => opts[:redis])

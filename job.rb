@@ -55,12 +55,12 @@ class Job < Struct.new(:uri, :redis)
     redis.hget(ident, 'warc_size')
   end
 
-  def last_log_entry
-    redis.lindex("#{ident}_log", -1) || '(none)'
+  def error_count
+    redis.hget(ident, 'error_count')
   end
 
-  def error_count
-    redis.llen("#{ident}_errors")
+  def incr_error_count(by = 1)
+    redis.hincrby(ident, 'error_count', by)
   end
 
   def aborted?
@@ -94,8 +94,7 @@ class Job < Struct.new(:uri, :redis)
       if !u
         downloaded = (bytes_downloaded.to_f / (1024 * 1024)).round(2)
 
-        ["Last log entry: #{last_log_entry}",
-         "Fetch depth: #{depth}",
+        ["Fetch depth: #{depth}",
          "Downloaded #{downloaded} MiB, #{errs} errors encountered"
         ]
       else
