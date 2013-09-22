@@ -40,8 +40,8 @@ class Brain
 
         # Is the archive record expiring?  If so, tell the requestor when they
         # may resubmit the archive request.
-        if job.expiring?
-          rep << "  You may resubmit it in #{job.formatted_ttl}."
+        if (t = job.ttl)
+          rep << "  You may resubmit it in #{job.formatted_ttl(t)}."
         end
 
         reply m, rep
