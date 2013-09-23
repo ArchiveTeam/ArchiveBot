@@ -1,2 +1,5 @@
 *.sw?
 *.rdb
+
+data
+wget-lua
