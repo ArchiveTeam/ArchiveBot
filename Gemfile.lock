@@ -15,6 +15,7 @@ GEM
     celluloid-redis (0.0.2)
       celluloid-io (>= 0.13.0.pre)
       redis
+    json (1.8.0)
     nio4r (0.5.0)
     redis (3.0.4)
     timers (1.1.0)
@@ -28,6 +29,7 @@ DEPENDENCIES
   celluloid
   celluloid-redis
   cinch!
+  json
   redis
   trollop
   uuidtools
