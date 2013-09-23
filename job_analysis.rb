@@ -4,26 +4,25 @@ module JobAnalysis
     "#{ident}_log"
   end
 
+  def checkpoint_key
+    'last_analyzed_log_entry'
+  end
+
   def reset_analysis
     redis.multi do
-      redis.hdel(ident, 'last_seen_log_index')
+      redis.hdel(ident, checkpoint_key)
       response_buckets.each { |_, bucket, _| redis.hdel(ident, bucket) }
     end
   end
 
   def analyze
-    start = last_seen_log_index
+    start = redis.hget(ident, checkpoint_key).to_f
+    resps = redis.zrangebyscore(log_key, "(#{start}", '+inf', :with_scores => true)
 
-    resps = redis.multi do
-      redis.lrange(log_key, start, -1)
-      redis.llen(log_key)
-    end
-
-    pending = resps[0]
-    last = resps[1]
+    last = resps.last.last
 
     redis.pipelined do
-      pending.each do |p|
+      resps.each do |p, _|
         entry = JSON.parse(p)
         wget_code = entry['wget_code']
         response_code = entry['response_code'].to_i
@@ -42,7 +41,7 @@ module JobAnalysis
         end
       end
 
-      redis.hset(ident, 'last_seen_log_index', last)
+      redis.hset(ident, checkpoint_key, last)
     end
 
     # suppress redis.pipelined return value; we don't care about it

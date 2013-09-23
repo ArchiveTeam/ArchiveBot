@@ -67,11 +67,6 @@ class Job < Struct.new(:uri, :redis)
   # Returns an integer.
   attr_reader :error_count
 
-  # The last log index examined by an analysis process.
-  #
-  # For internal use.
-  attr_reader :last_seen_log_index
-
   # A bucket for HTTP responses that aren't in the (100..599) range.
   class UnknownResponseCode
     def include?(resp_code)
@@ -122,7 +117,6 @@ class Job < Struct.new(:uri, :redis)
       @bytes_downloaded = h['bytes_downloaded'].to_i
       @warc_size = h['warc_size'].to_i
       @error_count = h['error_count'].to_i
-      @last_seen_log_index = h['last_seen_log_index'].to_i
 
       response_buckets.each do |_, bucket, attr|
         instance_variable_set("@#{attr}", h[bucket.to_s].to_i)

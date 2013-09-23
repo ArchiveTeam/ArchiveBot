@@ -1,5 +1,4 @@
 dofile("wget_behaviors/acceptance_heuristics.lua")
-dofile("wget_behaviors/url_counting.lua")
 
 require('socket')
 
@@ -8,7 +7,7 @@ local redis = require('vendor/redis-lua/src/redis')
 local ident = os.getenv('ITEM_IDENT')
 local rconn = redis.connect(os.getenv('REDIS_HOST'), os.getenv('REDIS_PORT'))
 local aborter = os.getenv('ABORT_SCRIPT')
-local log_list = os.getenv('LOG_LIST')
+local log_key = os.getenv('LOG_KEY')
 local log_channel = os.getenv('LOG_CHANNEL')
 
 rconn:select(os.getenv('REDIS_DB'))
@@ -39,18 +38,20 @@ local aborted = function()
 end
 
 wget.callbacks.httploop_result = function(url, err, http_stat)
-  -- Categorize what we just downloaded and update the traffic counters.
-  categorize_statcode(http_stat.statcode)
+  -- Update the traffic counters.
   rconn:hincrby(ident, 'bytes_downloaded', http_stat.rd_size)
 
-  -- Record the URL, the response code, and wget's error code.
+  local at = os.clock()
+
+  -- Record the current time, URL, response code, and wget's error code.
   local result = {
+    ts = os.date('%c'),
     url = url['url'],
     response_code = http_stat['statcode'],
     wget_code = err
   }
 
-  rconn:rpush(log_list, json.encode(result))
+  rconn:zadd(log_key, at, json.encode(result))
   rconn:publish(log_channel, ident)
 
   -- Should we abort?
@@ -61,18 +62,10 @@ wget.callbacks.httploop_result = function(url, err, http_stat)
     return wget.actions.ABORT
   end
 
-  -- Should we print a summary line?
-  if count % 50 == 0 then
-    print_summary()
-    io.stdout:write("\n")
-    io.stdout:flush()
-  end
-
   return wget.actions.NOTHING
 end
 
 wget.callbacks.finish = function(start_time, end_time, wall_time, numurls, total_downloaded_bytes, total_download_time)
-  print_summary()
   io.stdout:write("  ")
   io.stdout:write(total_downloaded_bytes.." bytes.")
   io.stdout:write("\n")

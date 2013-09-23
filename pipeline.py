@@ -205,7 +205,7 @@ pipeline = Pipeline(
   env={
     'ITEM_IDENT': ItemInterpolation('%(ident)s'),
     'ABORT_SCRIPT': MARK_ABORTED,
-    'LOG_LIST': ItemInterpolation('%(ident)s_log'),
+    'LOG_KEY': ItemInterpolation('%(ident)s_log'),
     'LOG_CHANNEL': LOG_CHANNEL,
     'REDIS_HOST': redis_url.hostname,
     'REDIS_PORT': str(redis_url.port),
