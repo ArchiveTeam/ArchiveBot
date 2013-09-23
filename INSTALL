@@ -36,4 +36,12 @@ Once that's all in place, run the following:
     ~/.local/bin/run-pipeline --disable-web-server --concurrent 3 \
       pipeline.py ArchiveBot
 
+You can run the dashboard webapp on the same machine, or a different
+machine:
+
+    ruby dashboard/app.rb --redis 'redis://10.0.0.1:6379/0'
+
+Both bot.rb and dashboard/app.rb accept a --help option.  Run them with
+--help to see accepted options.
+
  vim:ts=2:sw=2:tw=72:et
