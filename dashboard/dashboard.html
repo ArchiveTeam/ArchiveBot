@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>ArchiveBot dashboard</title>
+  </head>
+
+  <script type="text/javascript">
+    var Socket = "MozWebSocket" in window ? MozWebSocket : WebSocket;
+    var ws = new Socket('ws://' + window.location.host + '/stream');
+
+    ws.onmessage = function(msg) {
+      console.log(msg.data);
+    }
+  </script>
+
+  <body>
+  </body>
+</html>
+
+<!-- vim: set ts=2 sw=2 et tw=78: -->
