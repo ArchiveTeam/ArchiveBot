@@ -8,18 +8,40 @@ module JobAnalysis
     'last_analyzed_log_entry'
   end
 
+  def broadcast_checkpoint_key
+    'last_broadcasted_log_entry'
+  end
+
   def reset_analysis
     redis.multi do
       redis.hdel(ident, checkpoint_key)
+      redis.hdel(ident, broadcast_checkpoint_key)
       response_buckets.each { |_, bucket, _| redis.hdel(ident, bucket) }
     end
   end
 
+  def new_entries(start)
+    redis.zrangebyscore(log_key, "(#{start}", '+inf', :with_scores => true)
+  end
+
+  def read_new_entries
+    start = redis.hget(ident, broadcast_checkpoint_key).to_f
+    entries = new_entries(start)
+
+    if !entries.empty?
+      redis.hset(ident, broadcast_checkpoint_key, entries.last.last)
+    end
+
+    entries.map { |entry, _| JSON.parse(entry) }
+  end
+
   def analyze
     start = redis.hget(ident, checkpoint_key).to_f
-    resps = redis.zrangebyscore(log_key, "(#{start}", '+inf', :with_scores => true)
+    resps = new_entries(start)
 
-    last = resps.last.last
+    if !resps.empty?
+      last = resps.last.last
+    end
 
     redis.pipelined do
       resps.each do |p, _|

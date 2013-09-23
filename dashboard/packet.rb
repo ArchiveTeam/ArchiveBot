@@ -22,24 +22,21 @@ class Packet
   # Response code counts.
   json_attr :r1xx, :r2xx, :r3xx, :r4xx, :r5xx, :runk
 
-  # The latest URL fetched from the work item, its HTTP response code, and
-  # wget's interpretation of the result.
-  json_attr :last_fetched_url, :last_fetched_response_code,
-    :last_fetched_wget_code
+  # Associated log entries for this update.
+  json_attr :entries
 
-  def self.from_job(job)
-    new.tap do |p|
-      p.ident = job.ident
-      p.url = job.url
+  def initialize(job, entries)
+    self.ident = job.ident
+    self.url = job.url
 
-      counts = job.response_counts
-      p.r1xx = counts['1xx']
-      p.r2xx = counts['2xx']
-      p.r3xx = counts['3xx']
-      p.r4xx = counts['4xx']
-      p.r5xx = counts['5xx']
-      p.runk = counts['unknown']
-    end
+    counts = job.response_counts
+    self.r1xx = counts['1xx']
+    self.r2xx = counts['2xx']
+    self.r3xx = counts['3xx']
+    self.r4xx = counts['4xx']
+    self.r5xx = counts['5xx']
+    self.runk = counts['unknown']
+    self.entries = entries
   end
 
   def to_json(options = nil)

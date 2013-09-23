@@ -15,9 +15,12 @@ class LogReceiver < LogUpdateListener
 
   def on_receive(ident)
     j = ::Job.from_ident(ident, uredis)
-    packet = Packet.from_job(j)
 
-    publish(UPDATE_TOPIC, packet)
+    if j
+      entries = j.read_new_entries
+      packet = Packet.new(j, entries)
+      publish(UPDATE_TOPIC, packet)
+    end
   end
 end
 
