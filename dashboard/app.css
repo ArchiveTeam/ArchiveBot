@@ -30,11 +30,11 @@ h1 {
 
 /* CSS3, or "Fuck You, Everyone Uses CSS Preprocessors Anyway" */
 .job.finished {
-  transition:All 0.5s linear;
-  -webkit-transition:All 0.5s linear;
-  -moz-transition:All 0.5s linear;
-  -o-transition:All 0.5s linear;
-  transform: scale(0.1, 1);
+  transition:All 0.25s linear;
+  -webkit-transition:All 0.25s linear;
+  -moz-transition:All 0.25s linear;
+  -o-transition:All 0.25s linear;
+  transform: scale(1, 0);
   -webkit-transform: scale(1, 0);
   -moz-transform: scale(1, 0);
   -o-transform: scale(1, 0);
