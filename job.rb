@@ -30,8 +30,6 @@ class Job < Struct.new(:uri, :redis)
   # Returns a boolean.
   attr_reader :aborted
 
-  alias_method :aborted?, :aborted
-
   # Whether an abort was requested.
   #
   # Returns a boolean.
@@ -47,8 +45,6 @@ class Job < Struct.new(:uri, :redis)
   #
   # Returns a URL as a string or nil.
   attr_reader :archive_url
-
-  alias_method :completed?, :archive_url
 
   # How many bytes have been downloaded from the target.
   #
@@ -103,6 +99,14 @@ class Job < Struct.new(:uri, :redis)
     return unless url
 
     new(URI.parse(url), redis).tap(&:amplify)
+  end
+
+  def aborted?
+    !!aborted
+  end
+
+  def completed?
+    !!archive_url
   end
 
   def ident

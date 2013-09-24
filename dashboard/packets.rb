@@ -90,7 +90,7 @@ class JobStatusChange
   def initialize(job)
     self.type = 'status_change'
     self.ident = job.ident
-    self.aborted = !!job.aborted?
-    self.completed = !!job.completed?
+    self.aborted = job.aborted?
+    self.completed = job.completed?
   end
 end
