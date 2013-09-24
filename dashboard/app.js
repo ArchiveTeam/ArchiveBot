@@ -106,8 +106,6 @@
       }
 
       delete this.jobIndex[ident];
-
-      console.log(this.jobs, this.jobIndex);
     },
 
     process: function(data) {
@@ -158,8 +156,6 @@
 
     processStatusChange: function(json, job) {
       var ident = json['ident'];
-
-      console.log('processing status change');
 
       job.setProperties({
         aborted: json['aborted'],
