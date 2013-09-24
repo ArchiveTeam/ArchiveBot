@@ -73,6 +73,22 @@
   });
 
   Dashboard.DownloadUpdateEntry = Ember.Object.extend({
+    classNames: function () {
+      var warning = this.get('is_warning'),
+          error = this.get('is_error'),
+          classes = [];
+
+      if (warning) {
+        classes.pushObject('warning');
+      }
+
+      if (error) {
+        classes.pushObject('error');
+      }
+
+      return classes;
+    }.property('is_warning', 'is_error'),
+
     text: function () {
       return [
         this.get('response_code'),

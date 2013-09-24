@@ -100,6 +100,11 @@ h1 {
   float: right;
 }
 
+.log-view .warning {
+  background-color: hsl(60, 100%, 15%);
+  color: hsl(60, 100%, 50%);
+}
+
 .log-view .aborted {
   background-color: hsl(0, 100%, 25%);
   color: hsl(0, 100%, 75%);
