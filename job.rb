@@ -25,12 +25,17 @@ class Job < Struct.new(:uri, :redis)
 
   ARCHIVEBOT_V0_NAMESPACE = UUIDTools::UUID.parse('82244de1-c354-4c89-bf2b-f153ce23af43')
 
-  # This job's "aborted" flag.
+  # Whether this job was aborted.
   #
   # Returns a boolean.
   attr_reader :aborted
 
   alias_method :aborted?, :aborted
+
+  # Whether an abort was requested.
+  #
+  # Returns a boolean.
+  attr_reader :abort_requested
 
   # The fetch depth for this job.
   #
@@ -112,6 +117,7 @@ class Job < Struct.new(:uri, :redis)
   def amplify
     redis.hgetall(ident).tap do |h|
       @aborted = h['aborted']
+      @abort_requested = h['abort_requested']
       @depth = h['fetch_depth']
       @archive_url = h['archive_url']
       @bytes_downloaded = h['bytes_downloaded'].to_i
@@ -131,7 +137,7 @@ class Job < Struct.new(:uri, :redis)
   end
 
   def abort
-    redis.hset(ident, 'aborted', true)
+    redis.hset(ident, 'abort_requested', true)
   end
 
   def queue

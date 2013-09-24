@@ -33,8 +33,8 @@ wget.callbacks.download_child_p = function(urlpos, parent, depth, start_url_pars
   return verdict
 end
 
-local aborted = function()
-  return rconn:hget(ident, 'aborted')
+local abort_requested = function()
+  return rconn:hget(ident, 'abort_requested')
 end
 
 wget.callbacks.httploop_result = function(url, err, http_stat)
@@ -55,7 +55,7 @@ wget.callbacks.httploop_result = function(url, err, http_stat)
   rconn:publish(log_channel, ident)
 
   -- Should we abort?
-  if aborted() then
+  if abort_requested() then
     io.stdout:write("Wget terminating on bot command")
     rconn:eval(aborter, 1, ident, 60, log_channel)
 
