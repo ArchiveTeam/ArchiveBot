@@ -246,14 +246,10 @@
     hideWhenFinished: function () {
       var that = this;
 
-      // You should make sure that this timeout is at least as long as the sum
-      // of the above CSS animation's duration and delay, which currently is
-      // 10000ms + 500ms = 10500ms.  A bit of slop is also useful, because
-      // browser timeouts are not precise.
-      setTimeout(function () {
+      this.$().on('transitionend webkitTransitionEnd oTransitionEnd otransitionend', function () {
         that.remove();
         that.get('jobList').unregisterJob(that.get('ident'));
-      }, 11000);
+      });
     }.observes('finished')
   });
 
