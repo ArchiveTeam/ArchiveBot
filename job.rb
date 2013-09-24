@@ -25,6 +25,11 @@ class Job < Struct.new(:uri, :redis)
 
   ARCHIVEBOT_V0_NAMESPACE = UUIDTools::UUID.parse('82244de1-c354-4c89-bf2b-f153ce23af43')
 
+  # When this job entered the queue.
+  #
+  # Returns a UNIX timestamp as an integer.
+  attr_reader :queued_at
+
   # Whether this job was aborted.
   #
   # Returns a boolean.
@@ -127,6 +132,7 @@ class Job < Struct.new(:uri, :redis)
       @bytes_downloaded = h['bytes_downloaded'].to_i
       @warc_size = h['warc_size'].to_i
       @error_count = h['error_count'].to_i
+      @queued_at = h['queued_at'].to_i
 
       response_buckets.each do |_, bucket, attr|
         instance_variable_set("@#{attr}", h[bucket.to_s].to_i)
@@ -145,11 +151,12 @@ class Job < Struct.new(:uri, :redis)
   end
 
   def queue
+    redis.hset(ident, 'queued_at', Time.now.to_i)
     redis.lpush('pending', ident)
   end
 
   def register
-    redis.hmset(ident, 'url', url)
+    redis.hset(ident, 'url', url)
   end
 
   def exists?
