@@ -158,11 +158,13 @@ redis.call('publish', log_channel, ident)
 MARK_ABORTED = '''
 local ident = KEYS[1]
 local expire_time = ARGV[1]
+local log_channel = ARGV[2]
 
 redis.call('incr', 'jobs_aborted')
 redis.call('lrem', 'working', 1, ident)
 redis.call('expire', ident, expire_time)
 redis.call('expire', ident..'_log', expire_time)
+redis.call('publish', log_channel, ident)
 '''
 
 # ------------------------------------------------------------------------------

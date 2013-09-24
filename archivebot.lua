@@ -57,7 +57,7 @@ wget.callbacks.httploop_result = function(url, err, http_stat)
   -- Should we abort?
   if aborted() then
     io.stdout:write("Wget terminating on bot command")
-    rconn:eval(aborter, 1, ident, 60)
+    rconn:eval(aborter, 1, ident, 60, log_channel)
 
     return wget.actions.ABORT
   end

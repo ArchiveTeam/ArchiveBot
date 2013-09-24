@@ -53,16 +53,8 @@
     <script type="text/x-handlebars" data-template-name="log-view">
       <ol>
         {{#each view.eventBuffer}}
-          <li>
-            <span class="response-code">
-              {{response_code}}
-            </span>
-            <span class="wget-code">
-              {{wget_code}}
-            </span>
-            <span class="url">
-              {{url}}
-            </span>
+          <li {{bind-attr class=classNames}}>
+            {{text}}
           </li>
         {{else}}
           <li>No events</li>
@@ -71,7 +63,8 @@
     </script>
 
     <script type="text/x-handlebars" data-template-name="_job">
-      <article class="job">
+      {{#view Dashboard.JobView finishedBinding=job.finished
+          identBinding=job.ident jobListBinding=Dashboard.messageProcessor}}
         <header>
           <h1 class="url">{{job.urlForDisplay}}</h1>
           <h1 class="ident terminal">{{job.ident}}</h1>
@@ -95,7 +88,7 @@
             </label>
           </div>
         </section>
-      </article>
+      {{/view}}
     </script>
   </body>
 </html>

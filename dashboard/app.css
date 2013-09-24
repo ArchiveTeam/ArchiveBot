@@ -28,6 +28,25 @@ h1 {
   border-bottom: 1px solid #222;
 }
 
+/* CSS3, or "Fuck You, Everyone Uses CSS Preprocessors Anyway" */
+.job.finished {
+  transition:All 0.5s linear;
+  -webkit-transition:All 0.5s linear;
+  -moz-transition:All 0.5s linear;
+  -o-transition:All 0.5s linear;
+  transform: scale(0.1, 1);
+  -webkit-transform: scale(1, 0);
+  -moz-transform: scale(1, 0);
+  -o-transform: scale(1, 0);
+  -ms-transform: scale(1, 0);
+  transition-delay: 10s;
+  -webkit-transition-delay: 10s;
+  -moz-transition-delay: 10s;
+  -o-transition-delay: 10s;
+  -ms-transition-delay: 10s;
+  opacity: 0;
+}
+
 .job h1 {
   margin-bottom: 0.25em;
 }
@@ -79,6 +98,18 @@ h1 {
 
 .job .auto-scroll {
   float: right;
+}
+
+.log-view .aborted {
+  background-color: hsl(0, 100%, 25%);
+  color: hsl(0, 100%, 75%);
+  text-transform: uppercase;
+}
+
+.log-view .completed {
+  background-color: hsl(120, 100%, 25%);
+  color: hsl(120, 100%, 75%);
+  text-transform: uppercase;
 }
 
 /* vim: set ts=2 sw=2 et tw=78: */

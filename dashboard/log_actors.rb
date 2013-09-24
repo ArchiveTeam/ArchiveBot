@@ -4,7 +4,7 @@ require 'reel'
 
 require File.expand_path('../../job', __FILE__)
 require File.expand_path('../../log_update_listener', __FILE__)
-require File.expand_path('../packet', __FILE__)
+require File.expand_path('../packets', __FILE__)
 
 UPDATE_TOPIC = 'updates'.freeze
 
@@ -16,11 +16,14 @@ class LogReceiver < LogUpdateListener
   def on_receive(ident)
     j = ::Job.from_ident(ident, uredis)
 
-    if j
-      entries = j.read_new_entries
-      packet = Packet.new(j, entries)
-      publish(UPDATE_TOPIC, packet)
+    return unless j
+
+    if j.aborted? || j.completed?
+      publish(UPDATE_TOPIC, JobStatusChange.new(j))
     end
+
+    entries = j.read_new_entries
+    publish(UPDATE_TOPIC, DownloadUpdate.new(j, entries))
   end
 end
 
