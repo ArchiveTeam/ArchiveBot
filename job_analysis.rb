@@ -28,10 +28,9 @@ module JobAnalysis
     start = redis.hget(ident, broadcast_checkpoint_key).to_f
     entries = new_entries(start)
 
-    if !entries.empty?
-      redis.hset(ident, broadcast_checkpoint_key, entries.last.last)
-    end
+    return [] if entries.empty?
 
+    redis.hset(ident, broadcast_checkpoint_key, entries.last.last)
     entries.map { |entry, _| JSON.parse(entry) }
   end
 
@@ -39,9 +38,9 @@ module JobAnalysis
     start = redis.hget(ident, checkpoint_key).to_f
     resps = new_entries(start)
 
-    if !resps.empty?
-      last = resps.last.last
-    end
+    return if resps.empty?
+
+    last = resps.last.last
 
     redis.pipelined do
       resps.each do |p, _|
