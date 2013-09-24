@@ -6,7 +6,7 @@ GIT
 
 GIT
   remote: https://github.com/yipdw/analysand.git
-  revision: 81ac790e992c41edaa504da1eb516437269f9747
+  revision: 4db86d95b7ea2ad0996d942800b19fb9740dcb96
   specs:
     analysand (3.0.0)
       celluloid (~> 0.15.0)
