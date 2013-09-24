@@ -46,6 +46,7 @@
 
       job.setProperties({
         url: json['url'],
+        ident: json['ident'],
         r1xx: json['r1xx'],
         r2xx: json['r2xx'],
         r3xx: json['r3xx'],

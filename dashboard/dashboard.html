@@ -68,7 +68,8 @@
   <script type="text/x-handlebars" data-template-name="_job">
     <article class="job">
       <header>
-        <h1>{{job.url}}</h1>
+        <h1 class="url">{{job.url}}</h1>
+        <h1 class="ident terminal">{{job.ident}}</h1>
         {{view Dashboard.ProportionView okPercentageBinding=job.okPercentage
             errorPercentageBinding=job.errorPercentage}}
       </header>
