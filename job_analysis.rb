@@ -48,10 +48,8 @@ module JobAnalysis
         wget_code = entry['wget_code']
         response_code = entry['response_code'].to_i
 
-        if wget_code != 'RETRFINISHED'
-          if response_code == 0 || response_code >= 500
-            incr_error_count
-          end
+        if entry['is_error']
+          incr_error_count
         end
 
         response_buckets.each do |range, bucket, _|

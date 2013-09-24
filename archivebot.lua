@@ -37,18 +37,37 @@ local abort_requested = function()
   return rconn:hget(ident, 'abort_requested')
 end
 
+-- Should this result be flagged as an error?
+local is_error = function(statcode, err)
+  if err ~= 'RETRFINISHED' then
+    if statcode == 0 or statcode >= 500 then
+      return true
+    end
+  end
+
+  return false
+end
+
+-- Should this result be flagged as a warning?
+local is_warning = function(statcode, err)
+  return statcode >= 400 and statcode < 500
+end
+
 wget.callbacks.httploop_result = function(url, err, http_stat)
   -- Update the traffic counters.
   rconn:hincrby(ident, 'bytes_downloaded', http_stat.rd_size)
 
   local at = os.clock()
+  local statcode = http_stat['statcode']
 
   -- Record the current time, URL, response code, and wget's error code.
   local result = {
     ts = os.date('%c'),
     url = url['url'],
-    response_code = http_stat['statcode'],
-    wget_code = err
+    response_code = statcode,
+    wget_code = err,
+    is_error = is_error(statcode, err),
+    is_warning = is_warning(statcode, err)
   }
 
   rconn:zadd(log_key, at, json.encode(result))
