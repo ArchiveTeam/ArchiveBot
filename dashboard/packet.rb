@@ -22,12 +22,24 @@ class Packet
   # Response code counts.
   json_attr :r1xx, :r2xx, :r3xx, :r4xx, :r5xx, :runk
 
+  # Total number of HTTP responses.
+  json_attr :total
+
+  # Bytes downloaded.
+  json_attr :bytes_downloaded
+
+  # Error count.
+  json_attr :error_count
+
   # Associated log entries for this update.
   json_attr :entries
 
   def initialize(job, entries)
     self.ident = job.ident
     self.url = job.url
+    self.error_count = job.error_count
+    self.bytes_downloaded = job.bytes_downloaded
+    self.total = job.total_responses
 
     counts = job.response_counts
     self.r1xx = counts['1xx']

@@ -203,4 +203,8 @@ class Job < Struct.new(:uri, :redis)
       h[bucket] = send(attr)
     end
   end
+
+  def total_responses
+    response_counts.values.inject(0) { |c, a| c + a }
+  end
 end
