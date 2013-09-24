@@ -2,19 +2,100 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="/reset.css" />
+    <link rel="stylesheet" type="text/css" href="/app.css" />
     <title>ArchiveBot dashboard</title>
   </head>
 
-  <script type="text/javascript">
-    var Socket = "MozWebSocket" in window ? MozWebSocket : WebSocket;
-    var ws = new Socket('ws://' + window.location.host + '/stream');
+  <script type="text/javascript" src="/jquery.js"></script>
+  <script type="text/javascript" src="/handlebars.js"></script>
+  <script type="text/javascript" src="/ember.js"></script>
+  <script type="text/javascript" src="/app.js"></script>
 
-    ws.onmessage = function(msg) {
-      console.log(msg.data);
-    }
+  <script type="text/javascript">
+    (function () {
+      "use strict";
+
+      var Socket = "MozWebSocket" in window ? MozWebSocket : WebSocket;
+      var ws = new Socket('ws://' + window.location.host + '/stream');
+      var processor = window.Dashboard.messageProcessor;
+
+      ws.onmessage = function(msg) {
+        processor.process(msg.data);
+      }
+    })();
+  </script>
+
+  <script type="text/x-handlebars">
+    <h1>#archivebot @ irc.efnet.net</h1>
+
+    {{outlet}}
+  </script>
+
+  <script type="text/x-handlebars" data-template-name="index">
+    {{#each job in jobs}}
+      {{partial "job"}}
+    {{else}}
+      No jobs
+    {{/each}}
+  </script>
+
+  <script type="text/x-handlebars" data-template-name="proportion-view">
+    <div class="ok proportion"></div>
+    <div class="error proportion"></div>
+  </script>
+
+  <script type="text/x-handlebars" data-template-name="log-view">
+    <ol>
+      {{#each view.eventBuffer}}
+        <li>
+          <span class="response-code">
+            {{response_code}}
+          </span>
+          <span class="wget-code">
+            {{wget_code}}
+          </span>
+          <span class="url">
+            {{url}}
+          </span>
+        </li>
+      {{else}}
+        <li>No events</li>
+      {{/each}}
+    </ol>
+  </script>
+
+  <script type="text/x-handlebars" data-template-name="_job">
+    <article class="job">
+      <header>
+        <h1>{{job.url}}</h1>
+        {{view Dashboard.ProportionView okPercentageBinding=job.okPercentage
+            errorPercentageBinding=job.errorPercentage}}
+      </header>
+      {{view Dashboard.LogView incomingBinding=job.latestEntries
+          autoScrollBinding=job.autoScroll}}
+      <section>
+        <span class="downloaded">{{job.mibDownloaded}} MiB downloaded</span>
+        <span>1xx: {{job.r1xx}}</span>
+        <span>2xx: {{job.r2xx}}</span>
+        <span>3xx: {{job.r3xx}}</span>
+        <span>4xx: {{job.r4xx}}</span>
+        <span>5xx: {{job.r5xx}}</span>
+        <span>Unknown: {{job.runk}}</span>
+        <div class="auto-scroll">
+          <label>
+            {{input type=checkbox checked=job.autoScroll}}
+            Auto-scroll
+          </label>
+        </div>
+      </section>
+    </article>
   </script>
 
   <body>
+    <noscript>
+      This dashboard is a Javascript monstrosity, yo.
+    </noscript>
   </body>
 </html>
 
