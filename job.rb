@@ -183,6 +183,20 @@ class Job < Struct.new(:uri, :redis)
     redis.hincrby(ident, 'error_count', by)
   end
 
+  def to_json
+    { 'aborted' => aborted?,
+      'archive_url' => archive_url,
+      'bytes_downloaded' => bytes_downloaded,
+      'completed' => completed?,
+      'depth' => depth,
+      'error_count' => error_count,
+      'ident' => ident,
+      'queued_at' => queued_at,
+      'url' => url,
+      'warc_size' => warc_size
+    }.to_json
+  end
+
   def to_reply
     u = archive_url
 

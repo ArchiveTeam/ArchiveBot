@@ -5,6 +5,7 @@ require 'uri'
 
 require File.expand_path('../brain', __FILE__)
 require File.expand_path('../log_analyzer', __FILE__)
+require File.expand_path('../job_recorder', __FILE__)
 
 opts = Trollop.options do
   opt :server, 'IRC server, expressed as a URI (irc://SERVER:PORT or //SERVER:PORT)', :type => String
@@ -12,6 +13,8 @@ opts = Trollop.options do
   opt :channels, 'Comma-separated list of channels', :type => String
   opt :schemes, 'Comma-separated list of acceptable URI schemes', :default => 'http,https'
   opt :redis, 'URL of Redis server', :default => ENV['REDIS_URL'] || 'redis://localhost:6379/0'
+  opt :db, 'URL of CouchDB history database', :default => ENV['COUCHDB_URL'] || 'http://localhost:5984/archivebot_history'
+  opt :db_credentials, 'Credentials for history database (USERNAME:PASSWORD)', :type => String, :default => nil
   opt :log_update_channel, 'Redis pubsub channel for log updates', :default => ENV['LOG_CHANNEL'] || 'updates'
 end
 
@@ -56,10 +59,19 @@ bot = Cinch::Bot.new do
   end
 end
 
+credentials = if (c = opts[:db_credentials])
+                u, p = c.split(':', 2)
+
+                { :username => u, :password => p }
+              end
+
 LogAnalyzer.supervise_as :log_analyzer, opts[:redis], opts[:log_update_channel]
+JobRecorder.supervise_as :job_recorder, opts[:redis],
+  opts[:log_update_channel], opts[:db], credentials
 
 at_exit do
   Celluloid::Actor[:log_analyzer].stop
+  Celluloid::Actor[:job_recorder].stop
 end
 
 bot.start

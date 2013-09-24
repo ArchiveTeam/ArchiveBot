@@ -19,7 +19,7 @@ class LogUpdateListener
   # The shutdown sentinel.  Set at initialization.
   attr_reader :shutdown_message
 
-  def initialize(redis_url, update_channel)
+  def initialize(redis_url, update_channel, *)
     @lredis = ::Redis.new(:url => redis_url, :driver => :celluloid)
     @uredis = ::Redis.new(:url => redis_url, :driver => :celluloid)
     @channel = update_channel
