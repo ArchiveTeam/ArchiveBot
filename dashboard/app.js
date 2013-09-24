@@ -25,7 +25,17 @@
 
     mibDownloaded: function () {
       return (this.get('bytes_downloaded') / (1024 * 1024)).toFixed(2);
-    }.property('bytes_downloaded')
+    }.property('bytes_downloaded'),
+
+    urlForDisplay: function () {
+      var url = this.get('url');
+
+      if (url.length > 63) {
+        return url.slice(0, 61) + '...';
+      } else {
+        return url;
+      }
+    }.property('url')
   });
 
   Dashboard.LogEntry = Ember.Object.extend({
