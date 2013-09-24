@@ -14,11 +14,7 @@ bind_uri = URI.parse(opts[:url])
 
 # The webapp.
 class Webapp < Reel::Server
-  attr_reader :dashboard_html
-
   def initialize(uri)
-    @dashboard_html = File.read(File.expand_path('../dashboard.html', __FILE__)).freeze
-
     super uri.host, uri.port, &method(:on_connection)
   end
 
@@ -30,8 +26,11 @@ class Webapp < Reel::Server
         route_websocket(req.websocket)
         return
       else
-        if req.url == '/'
+        case req.url
+        when %r{\A/\Z}
           return show_dashboard(conn)
+        when %r{\A/([^.]+)\.(js|css)\Z}
+          return read_asset_file($1, $2, conn)
         else
           conn.respond :not_found, 'Not found'
         end
@@ -49,7 +48,11 @@ class Webapp < Reel::Server
   end
 
   def show_dashboard(conn)
-    conn.respond :ok, dashboard_html
+    conn.respond :ok, File.read(File.expand_path('../dashboard.html', __FILE__))
+  end
+
+  def read_asset_file(base, ext, conn)
+    conn.respond :ok, File.read(File.expand_path("../#{base}.#{ext}", __FILE__))
   end
 end
 
