@@ -52,7 +52,14 @@ class Webapp < Reel::Server
   end
 
   def read_asset_file(base, ext, conn)
-    conn.respond :ok, File.read(File.expand_path("../#{base}.#{ext}", __FILE__))
+    mimetype = case ext
+               when 'js'; 'text/javascript; charset=utf-8'
+               when 'css'; 'text/css; charset=utf-8'
+               end
+
+    conn.respond(:ok, {
+      'Content-Type' => mimetype
+    }, File.read(File.expand_path("../#{base}.#{ext}", __FILE__)))
   end
 end
 
