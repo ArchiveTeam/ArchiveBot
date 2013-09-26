@@ -59,15 +59,9 @@ bot = Cinch::Bot.new do
   end
 end
 
-credentials = if (c = opts[:db_credentials])
-                u, p = c.split(':', 2)
-
-                { :username => u, :password => p }
-              end
-
 LogAnalyzer.supervise_as :log_analyzer, opts[:redis], opts[:log_update_channel]
 JobRecorder.supervise_as :job_recorder, opts[:redis],
-  opts[:log_update_channel], opts[:db], credentials
+  opts[:log_update_channel], opts[:db], opts[:db_credentials]
 
 at_exit do
   Celluloid::Actor[:log_analyzer].stop

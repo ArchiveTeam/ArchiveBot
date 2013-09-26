@@ -1,12 +1,13 @@
 require 'analysand'
+require 'uri'
 
-require File.expand_path('../log_update_listener', __FILE__)
+require File.expand_path('../history_db', __FILE__)
 require File.expand_path('../job', __FILE__)
+require File.expand_path('../log_update_listener', __FILE__)
 
 class JobRecorder < LogUpdateListener
   def initialize(redis_url, update_channel, db_url, db_credentials)
-    @db = Analysand::Database.new(URI(db_url))
-    @credentials = db_credentials
+    @db = HistoryDb.new(URI(db_url), db_credentials)
 
     super
   end
@@ -20,10 +21,10 @@ class JobRecorder < LogUpdateListener
       doc_id = "#{job.ident}:#{job.queued_at.to_i}"
 
       begin
-        @db.put!(doc_id, job, @credentials)
+        @db.put!(doc_id, job)
       rescue Analysand::DocumentNotSaved => e
         if e.response.conflict?
-          error "Conflict occurred on document #{doc_id}"
+          warn "Document #{doc_id} already exists"
         else
           throw e
         end
