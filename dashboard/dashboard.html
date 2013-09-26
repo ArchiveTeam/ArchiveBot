@@ -2,8 +2,8 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <link rel="stylesheet" type="text/css" href="/reset.css" />
-    <link rel="stylesheet" type="text/css" href="/app.css" />
+    <link rel="stylesheet" type="text/css" href="/assets/reset.css" />
+    <link rel="stylesheet" type="text/css" href="/assets/app.css" />
     <title>ArchiveBot dashboard</title>
   </head>
 
@@ -12,42 +12,105 @@
       This dashboard is a Javascript monstrosity, yo.
     </noscript>
 
-    <script type="text/javascript" src="/jquery.js"></script>
-    <script type="text/javascript" src="/handlebars.js"></script>
-    <script type="text/javascript" src="/ember.js"></script>
-    <script type="text/javascript" src="/app.js"></script>
-
-    <script type="text/javascript">
-      (function () {
-        "use strict";
-
-        var Socket = "MozWebSocket" in window ? MozWebSocket : WebSocket;
-        var ws = new Socket('ws://' + window.location.host + '/stream');
-        var processor = window.Dashboard.messageProcessor;
-
-        ws.onmessage = function(msg) {
-          processor.process(msg.data);
-        }
-      })();
-    </script>
+    <script type="text/javascript" src="/assets/jquery.js"></script>
+    <script type="text/javascript" src="/assets/handlebars.js"></script>
+    <script type="text/javascript" src="/assets/ember.js"></script>
+    <script type="text/javascript" src="/assets/app.js"></script>
+    <script type="text/javascript" src="/assets/models.js"></script>
+    <script type="text/javascript" src="/assets/routes.js"></script>
+    <script type="text/javascript" src="/assets/controllers.js"></script>
+    <script type="text/javascript" src="/assets/views.js"></script>
+    <script type="text/javascript" src="/assets/boot.js"></script>
 
     <script type="text/x-handlebars">
       <h1>#archivebot @ irc.efnet.net</h1>
-
       {{outlet}}
     </script>
 
     <script type="text/x-handlebars" data-template-name="index">
-      {{#each job in jobs}}
-        {{partial "job"}}
-      {{else}}
-        No running jobs
-      {{/each}}
+      <ul class="dashboard-job-list">
+        {{#each job in jobs}}
+          <li>{{partial "job"}}</li>
+        {{else}}
+          No running jobs
+        {{/each}}
+      </ul>
+    </script>
+
+    <script type="text/x-handlebars" data-template-name="job-layout">
+      <header>
+        <h1 class="url">
+          <a {{bindAttr href=url}}>{{urlForDisplay}}</a>
+          {{#unless hideHistoryLink}}
+            <a {{bindAttr href=historyRoute}} class="history">History</a>
+          {{/unless}}
+        </h1>
+        <h1 class="ident terminal">{{ident}}</h1>
+      </header>
+      {{yield}}
+    </script>
+
+    <script type="text/x-handlebars" data-template-name="job">
+      {{outlet}}
+    </script>
+
+    <script type="text/x-handlebars" data-template-name="history">
+      {{#view Dashboard.JobView}}
+        <section class="history">
+          <table>
+            <thead>
+              <tr>
+                <th>Started (your time zone)</th>
+                <th>Fetch depth</th>
+                <th>Downloaded</th>
+                <th>Response distribution</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each r in records}}
+                <tr {{bind-attr class=r.classNames}}>
+                  <td>{{r.queuedAtDate}}</td>
+                  <td>{{r.depth}}</td>
+                  <td>{{r.mbDownloaded}} MB</td>
+                  <td>{{view Dashboard.ResponseDistributionView itemBinding=r}}</td>
+                  <td>
+                    {{#if r.completed}}
+                      <a {{bind-attr href=r.archive_url}}>WARC</a>
+                      ({{r.warcSizeMb}} MB)
+                    {{/if}}
+                    {{#if r.aborted}}
+                      Aborted
+                    {{/if}}
+                  </td>
+                </tr>
+              {{else}}
+                <tr>
+                  <td colspan=4>
+                    No recorded history
+                  </td>
+                </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+      {{/view}}
     </script>
 
     <script type="text/x-handlebars" data-template-name="proportion-view">
       <div class="ok proportion"></div>
       <div class="error proportion"></div>
+    </script>
+
+    <script type="text/x-handlebars" data-template-name="distribution-view">
+      <div class="proportion-view">
+        <div class="r1xx warning proportion"></div>
+        <div class="r2xx ok proportion"></div>
+        <div class="r3xx ok proportion"></div>
+        <div class="r4xx warning proportion"></div>
+        <div class="r5xx error proportion"></div>
+        <div class="runk error proportion"></div>
+      </div>
     </script>
 
     <script type="text/x-handlebars" data-template-name="log-view">
@@ -63,18 +126,15 @@
     </script>
 
     <script type="text/x-handlebars" data-template-name="_job">
-      {{#view Dashboard.JobView finishedBinding=job.finished
-          identBinding=job.ident jobListBinding=Dashboard.messageProcessor}}
+      {{#view Dashboard.JobView}}
         <header>
-          <h1 class="url">{{job.urlForDisplay}}</h1>
-          <h1 class="ident terminal">{{job.ident}}</h1>
-          {{view Dashboard.ProportionView okPercentageBinding=job.okPercentage
-              errorPercentageBinding=job.errorPercentage}}
+          {{view Dashboard.ProportionView okPercentageBinding=okPercentage
+            errorPercentageBinding=errorPercentage}}
         </header>
         {{view Dashboard.LogView incomingBinding=job.latestEntries
             autoScrollBinding=job.autoScroll}}
         <section>
-          <span class="downloaded">{{job.mibDownloaded}} MiB downloaded</span>
+          <span class="downloaded">{{job.mbDownloaded}} MB downloaded</span>
           <span>1xx: {{job.r1xx}}</span>
           <span>2xx: {{job.r2xx}}</span>
           <span>3xx: {{job.r3xx}}</span>

@@ -1,12 +1,12 @@
 html {
-  font-family: 'FreeSans', 'Helvetica Neue', 'Arial', sans-serif;
-  font-size: 16px;
+  font-family: 'Source Sans Pro', 'Helvetica Neue', 'Arial', sans-serif;
+  font-size: 18px;
   background-color: #333;
   color: #ccc;
 }
 
 .terminal {
-  font-family: 'Inconsolata', 'Consolas', 'Monaco', monospace;
+  font-family: 'Source Code Pro', 'Inconsolata', 'Consolas', 'Monaco', monospace;
 }
 
 body {
@@ -23,6 +23,9 @@ h1 {
 
 .job {
   width: 100%;
+}
+
+.dashboard-job-list .job {
   padding-bottom: 1em;
   margin-bottom: 1em;
   border-bottom: 1px solid #222;
@@ -51,31 +54,54 @@ h1 {
   margin-bottom: 0.25em;
 }
 
+.job header {
+  clear: both;
+}
+
 .job h1.url {
   float: left;
 }
 
-.job h1.ident {
+.job h1.url a {
+  color: hsl(240, 100%, 75%);
+}
+
+.job h1.url a.history {
+  text-transform: lowercase;
+}
+
+.job h1.url a.history:before {
+  content: '[';
+}
+
+.job h1.url a.history:after {
+  content: ']';
+}
+
+.job h1.ident, .job h1.count {
   float: right;
 }
 
-.job .success-bar {
+.job .proportion-view {
   width: 100%;
   height: 1em;
   overflow: hidden;
-  clear: both;
 }
 
-.success-bar .proportion {
+.proportion-view .proportion {
   height: 100%;
   float: left;
 }
 
-.success-bar .ok {
+.proportion-view .ok {
   background-color: hsl(120, 100%, 25%);
 }
 
-.success-bar .error {
+.proportion-view .warning {
+  background-color: hsl(60, 100%, 25%);
+}
+
+.proportion-view .error {
   background-color: hsl(0, 100%, 25%);
 }
 
@@ -105,11 +131,6 @@ h1 {
   color: hsl(60, 100%, 50%);
 }
 
-.log-view .error {
-  background-color: hsl(0, 100%, 15%);
-  color: hsl(0, 100%, 50%);
-}
-
 .log-view .aborted {
   background-color: hsl(0, 100%, 25%);
   color: hsl(0, 100%, 75%);
@@ -120,6 +141,40 @@ h1 {
   background-color: hsl(120, 100%, 25%);
   color: hsl(120, 100%, 75%);
   text-transform: uppercase;
+}
+
+section.history {
+  clear: both;
+  padding-top: 1em;
+}
+
+section.history table {
+  width: 100%;
+}
+
+section.history th {
+  text-align: left;
+  font-variant: small-caps;
+}
+
+section.history th, section.history td {
+  padding-top: 0.25em;
+  padding-bottom: 0.25em;
+  padding-right: 1em;
+}
+
+section.history tr.completed {
+  background-color: hsl(120, 100%, 10%);
+  border-bottom: 1px solid hsl(120, 100%, 15%);
+}
+
+section.history tr.completed a {
+  color: hsl(120, 100%, 35%);
+}
+
+section.history tr.aborted {
+  background-color: hsl(0, 100%, 10%);
+  border-bottom: 1px solid hsl(0, 100%, 15%);
 }
 
 /* vim: set ts=2 sw=2 et tw=78: */

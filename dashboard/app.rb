@@ -1,73 +1,95 @@
-require 'reel'
+require 'coffee-script'
+require 'json'
 require 'trollop'
 require 'uri'
+require 'webmachine'
+require 'webmachine/sprockets'
 
+require File.expand_path('../../history_db', __FILE__)
 require File.expand_path('../log_actors', __FILE__)
 
 opts = Trollop.options do
   opt :url, 'URL to bind to', :default => 'http://localhost:4567'
   opt :redis, 'URL of Redis server', :default => ENV['REDIS_URL'] || 'redis://localhost:6379/0'
   opt :log_update_channel, 'Redis pubsub channel for log updates', :default => ENV['LOG_CHANNEL'] || 'updates'
+  opt :db, 'URL of CouchDB history database', :default => ENV['COUCHDB_URL'] || 'http://localhost:5984/archivebot_history'
+  opt :db_credentials, 'Credentials for history database (USERNAME:PASSWORD)', :type => String, :default => nil
 end
 
 bind_uri = URI.parse(opts[:url])
 
-# The webapp.
-class Webapp < Reel::Server
-  def initialize(uri)
-    super uri.host, uri.port, &method(:on_connection)
+DB = HistoryDb.new(URI(opts[:db]), opts[:db_credentials])
+
+class History < Webmachine::Resource
+  def run_query
+    @query ||= DB.history(requested_url, limit, start_at)
   end
 
-  def on_connection(conn)
-    while req = conn.request
-      if req.websocket?
-        conn.detach
+  def limit
+    100
+  end
 
-        route_websocket(req.websocket)
-        return
+  def start_at
+    request.query['start_at']
+  end
+
+  def requested_url
+    URI.decode(request.path_tokens.join('/'))
+  end
+
+  def resource_exists?
+    run_query
+
+    @query.success?
+  end
+
+  def content_types_provided
+    [['application/json', :to_json]]
+  end
+
+  def to_json
+    run_query
+
+    @query.body.to_json
+  end
+end
+
+class Dashboard < Webmachine::Resource
+  def to_html
+    File.read(File.expand_path('../dashboard.html', __FILE__))
+  end
+end
+
+App = Webmachine::Application.new do |app|
+  sprockets = Sprockets::Environment.new
+  sprockets.append_path(File.expand_path('../assets/stylesheets', __FILE__))
+  sprockets.append_path(File.expand_path('../assets/javascripts', __FILE__))
+  resource = Webmachine::Sprockets.resource_for(sprockets)
+
+  app.configure do |config|
+    config.ip = bind_uri.host
+    config.port = bind_uri.port
+    config.adapter = :Reel
+    config.adapter_options[:websocket_handler] = proc do |ws|
+      if ws.url == '/stream'
+        LogClient.new(ws)
       else
-        case req.url
-        when %r{\A/\Z}
-          return show_dashboard(conn)
-        when %r{\A/([^.]+)\.(js|css)\Z}
-          return read_asset_file($1, $2, conn)
-        else
-          conn.respond :not_found, 'Not found'
-        end
+        ws.close
       end
     end
   end
 
-  def route_websocket(socket)
-    if socket.url == '/stream'
-      LogClient.new(socket)
-    else
-      info "Invalid WebSocket request: #{socket.url}"
-      socket.close
-    end
-  end
-
-  def show_dashboard(conn)
-    conn.respond :ok, File.read(File.expand_path('../dashboard.html', __FILE__))
-  end
-
-  def read_asset_file(base, ext, conn)
-    mimetype = case ext
-               when 'js'; 'text/javascript; charset=utf-8'
-               when 'css'; 'text/css; charset=utf-8'
-               end
-
-    conn.respond(:ok, {
-      'Content-Type' => mimetype
-    }, File.read(File.expand_path("../#{base}.#{ext}", __FILE__)))
+  app.routes do
+    add [], Dashboard
+    add ['histories', '*'], History
+    add ['assets', '*'], resource
   end
 end
 
 LogReceiver.supervise_as :log_receiver, opts[:redis], opts[:log_update_channel]
-Webapp.supervise_as :webapp, bind_uri
 
 at_exit do
   Celluloid::Actor[:log_receiver].stop
 end
 
-sleep
+App.run

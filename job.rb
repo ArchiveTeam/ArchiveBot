@@ -89,12 +89,12 @@ class Job < Struct.new(:uri, :redis)
   # hash keys as strings, and throwing #to_s everywhere is totally not
   # necessary.
   RESPONSE_BUCKETS = [
-    [(100...200).freeze, '1xx'.freeze, %s(responses_1xx)],
-    [(200...300).freeze, '2xx'.freeze, %s(responses_2xx)],
-    [(300...400).freeze, '3xx'.freeze, %s(responses_3xx)],
-    [(400...500).freeze, '4xx'.freeze, %s(responses_4xx)],
-    [(500...600).freeze, '5xx'.freeze, %s(responses_5xx)],
-    [UnknownResponseCode.new.freeze, 'unknown'.freeze, :responses_unknown]
+    [(100...200).freeze, 'r1xx'.freeze, %s(responses_1xx)],
+    [(200...300).freeze, 'r2xx'.freeze, %s(responses_2xx)],
+    [(300...400).freeze, 'r3xx'.freeze, %s(responses_3xx)],
+    [(400...500).freeze, 'r4xx'.freeze, %s(responses_4xx)],
+    [(500...600).freeze, 'r5xx'.freeze, %s(responses_5xx)],
+    [UnknownResponseCode.new.freeze, 'runk'.freeze, :responses_unknown]
   ].freeze.each do |_, _, attr_name|
     attr_reader attr_name
   end
@@ -196,7 +196,11 @@ class Job < Struct.new(:uri, :redis)
       'queued_at' => queued_at,
       'url' => url,
       'warc_size' => warc_size
-    }.to_json
+    }.tap do |h|
+      response_buckets.each do |_, bucket, attr|
+        h[bucket.to_s] = send(attr)
+      end
+    end.to_json
   end
 
   def to_reply

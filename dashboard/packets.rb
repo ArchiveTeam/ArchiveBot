@@ -61,12 +61,12 @@ class DownloadUpdate
     self.total = job.total_responses
 
     counts = job.response_counts
-    self.r1xx = counts['1xx']
-    self.r2xx = counts['2xx']
-    self.r3xx = counts['3xx']
-    self.r4xx = counts['4xx']
-    self.r5xx = counts['5xx']
-    self.runk = counts['unknown']
+    self.r1xx = counts['r1xx']
+    self.r2xx = counts['r2xx']
+    self.r3xx = counts['r3xx']
+    self.r4xx = counts['r4xx']
+    self.r5xx = counts['r5xx']
+    self.runk = counts['runk']
     self.entries = entries
   end
 end
