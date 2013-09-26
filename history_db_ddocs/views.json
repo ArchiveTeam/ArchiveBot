@@ -1,0 +1,14 @@
+{
+   "_id": "_design/jobs",
+   "_rev": "2-19a34229fedba13026303c3dbf0682a0",
+   "language": "javascript",
+   "views": {
+       "by_url_and_queue_time": {
+           "map": "function(doc) {\n  var status = {\n    aborted: doc['aborted'],\n    completed: doc['completed'],\n    depth: doc['depth']\n  };\n\n  emit([doc['url'], doc['queued_at']], [1, doc['queued_at'], status]);\n}",
+           "reduce": "function (keys, values, rereduce) {\n  var i, status, maxtime = 0;\n \n  for(i = 0; i < values.length; ++i) {\n    if (maxtime <= values[i][1]) {\n      maxtime = values[i][1];\n      status = values[i][2];\n    }\n  }\n\n  return [values.length, maxtime, status];\n}"
+       },
+       "by_ident": {
+           "map": "function(doc) {\n  emit(doc['ident'], true);\n}"
+       }
+   }
+}
