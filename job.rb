@@ -25,7 +25,7 @@ class Job < Struct.new(:uri, :redis)
 
   ARCHIVEBOT_V0_NAMESPACE = UUIDTools::UUID.parse('82244de1-c354-4c89-bf2b-f153ce23af43')
 
-  # When this job entered the queue.
+  # When this job entered the queue.  Expressed in UTC.
   #
   # Returns a UNIX timestamp as an integer.
   attr_reader :queued_at
@@ -151,7 +151,9 @@ class Job < Struct.new(:uri, :redis)
   end
 
   def queue
-    redis.hset(ident, 'queued_at', Time.now.to_i)
+    t = Time.now
+
+    redis.hset(ident, 'queued_at', t.utc.to_i)
     redis.lpush('pending', ident)
   end
 
