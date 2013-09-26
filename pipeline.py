@@ -40,7 +40,7 @@ LOG_CHANNEL = env['LOG_CHANNEL']
 # ------------------------------------------------------------------------------
 
 class GetItemFromQueue(Task):
-  def __init__(self, redis, retry_delay=30):
+  def __init__(self, redis, retry_delay=5):
     Task.__init__(self, 'GetItemFromQueue')
     self.redis = redis
     self.retry_delay = retry_delay
@@ -55,7 +55,6 @@ class GetItemFromQueue(Task):
     ident = self.redis.execute_command('RPOPLPUSH', 'pending', 'working')
     
     if ident == None:
-      item.log_output('No item received.')
       self.schedule_retry(item)
     else:
       item['ident'] = ident
@@ -64,8 +63,6 @@ class GetItemFromQueue(Task):
       self.complete_item(item)
 
   def schedule_retry(self, item):
-    item.log_output('Retrying in %s seconds.' % self.retry_delay)
-
     IOLoop.instance().add_timeout(datetime.timedelta(seconds=self.retry_delay),
       functools.partial(self.send_request, item))
 
