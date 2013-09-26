@@ -19,32 +19,28 @@ class HistoryDb
   end
 
   def history(url, limit, start_at = nil, prefix = false)
-    normalized = URI(url).normalize.to_s
-
     params = {
       :include_docs => true,
       :limit => limit,
       :reduce => false,
       :descending => true,
       :endkey_docid => start_at,
-      :endkey => [normalized, 0],
-      :startkey => endkey(normalized, prefix)
+      :endkey => [url, 0],
+      :startkey => endkey(url, prefix)
     }.reject! { |_,v| v.nil? }
 
     @db.view('jobs/by_url_and_queue_time', params, @credentials)
   end
 
   def summary(url, limit, start_at = nil, prefix = false)
-    normalized = URI(url).normalize.to_s
-
     params = {
       :limit => limit,
       :group => true,
       :group_level => 1,
       :descending => true,
       :endkey_docid => start_at,
-      :endkey => [normalized, 0],
-      :startkey => endkey(normalized, prefix)
+      :endkey => [url, 0],
+      :startkey => endkey(url, prefix)
     }.reject! { |_,v| v.nil? }
 
     @db.view('jobs/by_url_and_queue_time', params, @credentials)

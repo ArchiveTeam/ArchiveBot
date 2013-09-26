@@ -143,7 +143,7 @@ class Job < Struct.new(:uri, :redis)
   alias_method :reload, :amplify
 
   def url
-    uri.normalize.to_s
+    uri.to_s
   end
 
   def abort
