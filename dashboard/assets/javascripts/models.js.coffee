@@ -83,6 +83,7 @@ Dashboard.MessageProcessor = Ember.Object.extend
     # Sanity-check the message.
     console.log 'Message is malformed (no ident)' unless ident?
     console.log 'Message is malformed (no type identifier)' unless type?
+    return unless ident? && type?
 
     # Do we have a job for the identifier?
     # If we don't, register a job and retry processing when the run loop
