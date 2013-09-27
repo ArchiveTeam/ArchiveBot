@@ -11,8 +11,9 @@ Dashboard.IndexRoute = Ember.Route.extend
 Dashboard.HistoryRoute = Ember.Route.extend
   model: (params) ->
     $.getJSON("/histories/#{params['url']}").then (data) ->
-      data['rows'].map (row) ->
-        Dashboard.JobHistoryEntry.create row['doc']
+      ret = data['rows'].map (row) -> Dashboard.JobHistoryEntry.create row['doc']
+      ret.set 'url', params['url']
+      ret
 
   serialize: (model) ->
     { url: model.get 'url' }

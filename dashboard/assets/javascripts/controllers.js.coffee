@@ -11,6 +11,7 @@ Dashboard.HistoryController = Ember.ArrayController.extend
 
   hideHistoryLink: true
 
+  urlBinding: 'content.url'
   urlForDisplayBinding: 'url'
 
 Dashboard.HistoryRecordController = Ember.ObjectController.extend
