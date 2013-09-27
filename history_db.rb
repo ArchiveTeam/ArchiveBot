@@ -11,13 +11,6 @@ class HistoryDb
     @db.put!(doc_id, job, @credentials)
   end
 
-  def history_by_ident(ident, limit, start_at = nil)
-    resp = @db.view!('jobs/by_ident', :key => ident)
-    url = resp.rows.first['value']
-
-    history(url, limit, start_at)
-  end
-
   def history(url, limit, start_at = nil, prefix = false)
     params = {
       :include_docs => true,
