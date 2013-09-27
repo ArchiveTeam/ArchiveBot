@@ -31,26 +31,6 @@ Dashboard.Job = Ember.Object.extend Calculations,
     @setProperties props
 
 Dashboard.JobHistoryEntry = Ember.Object.extend Calculations,
-  # Returns this job's queuing timestamp in the browser's timezone and locale.
-  queuedAtDate: (->
-    # Convert the stored timestamp (which is in UTC) to miliseconds.
-    stored = (@get('queued_at') || 0) * 1000
-
-    # Get the browser's UTC offset in milliseconds.
-    #
-    # Javascript's Date returns something crazy: it's the number of _minutes_
-    # offset from UTC, with the sign reversed.  Luckily, the sign reversal
-    # works out for us later on, so we leave the sign as is.
-    browserOffset = new Date().getTimezoneOffset() * 60 * 1000
-
-    # Build the date in the browser TZ.
-    new Date(stored + browserOffset).toLocaleString()
-  ).property('queued_at')
-
-  warcSizeMb: (->
-    (@get('warc_size') / (1000 * 1000)).toFixed(2)
-  ).property('warc_size')
-
   totalResponses: (->
     RESPONSE_BUCKETS.reduce(((acc, bucket) =>
       acc + @get(bucket)
@@ -61,28 +41,6 @@ Dashboard.JobHistoryEntry = Ember.Object.extend Calculations,
     RESPONSE_BUCKETS.map (bucket) =>
       [bucket, @get(bucket)]
   ).property(RESPONSE_BUCKETS)
-
-  classNames: (->
-    classes = []
-
-    classes.pushObject('aborted') if @get('aborted')
-    classes.pushObject('completed') if @get('completed')
-
-    classes
-  ).property('aborted', 'completed')
-
-Dashboard.JobHistory = Ember.Object.extend
-  fetch: ->
-    $.getJSON(@get 'path').then (data) =>
-      @set 'total', data['rows'].length
-      @set 'records', data['rows'].map (row) ->
-        Dashboard.JobHistoryEntry.create row['doc']
-
-      this
-
-  path: (->
-    "/histories/#{@get('url')}"
-  ).property('url')
 
 Dashboard.DownloadUpdateEntry = Ember.Object.extend
   classNames: (->

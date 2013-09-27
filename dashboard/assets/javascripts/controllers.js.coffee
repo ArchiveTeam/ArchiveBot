@@ -6,10 +6,41 @@ Dashboard.IndexController = Ember.Controller.extend
 Dashboard.JobsController = Ember.ArrayController.extend
   itemController: 'job'
 
-Dashboard.HistoryController = Ember.ObjectController.extend
+Dashboard.HistoryController = Ember.ArrayController.extend
+  itemController: 'historyRecord'
+
   hideHistoryLink: true
 
   urlForDisplayBinding: 'url'
+
+Dashboard.HistoryRecordController = Ember.ObjectController.extend
+  classNames: (->
+    classes = []
+
+    classes.pushObject('aborted') if @get('aborted')
+    classes.pushObject('completed') if @get('completed')
+
+    classes
+  ).property('aborted', 'completed')
+
+  queuedAtForDisplay: (->
+    # Convert the stored timestamp (which is in UTC) to miliseconds.
+    stored = (@get('queued_at') || 0) * 1000
+
+    # Get the browser's UTC offset in milliseconds.
+    #
+    # Javascript's Date returns something crazy: it's the number of _minutes_
+    # offset from UTC, with the sign reversed.
+    browserOffset = new Date().getTimezoneOffset() * 60 * 1000
+
+    # Build the date in the browser TZ.  The sign oddness above means that we
+    # subtract.
+    new Date(stored - browserOffset).toLocaleString()
+  ).property('queued_at')
+
+  warcSizeMb: (->
+    (@get('warc_size') / (1000 * 1000)).toFixed(2)
+  ).property('warc_size')
 
 Dashboard.JobController = Ember.ObjectController.extend
   unregister: ->
