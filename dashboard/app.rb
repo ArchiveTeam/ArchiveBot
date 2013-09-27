@@ -34,7 +34,7 @@ class History < Webmachine::Resource
   end
 
   def requested_url
-    URI.decode(request.path_tokens.join('/'))
+    request.query['url']
   end
 
   def resource_exists?
@@ -81,7 +81,7 @@ App = Webmachine::Application.new do |app|
 
   app.routes do
     add [], Dashboard
-    add ['histories', '*'], History
+    add ['histories'], History
     add ['assets', '*'], resource
   end
 end
