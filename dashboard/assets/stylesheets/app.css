@@ -1,12 +1,24 @@
+@font-face {
+  font-family: 'Source Sans Pro';
+  src: url('/assets/SourceSansPro-Regular.ttf');
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: 'Inconsolata';
+  src: url('/assets/Inconsolata-Regular.ttf');
+  font-weight: normal;
+}
+
 html {
-  font-family: 'Source Sans Pro', 'Helvetica Neue', 'Arial', sans-serif;
+  font-family: 'Source Sans Pro', sans-serif;
   font-size: 18px;
   background-color: #333;
   color: #ccc;
 }
 
 .terminal {
-  font-family: 'Source Code Pro', 'Inconsolata', 'Consolas', 'Monaco', monospace;
+  font-family: 'Inconsolata', monospace;
 }
 
 body {

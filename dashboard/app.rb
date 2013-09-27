@@ -64,6 +64,7 @@ App = Webmachine::Application.new do |app|
   sprockets = Sprockets::Environment.new
   sprockets.append_path(File.expand_path('../assets/stylesheets', __FILE__))
   sprockets.append_path(File.expand_path('../assets/javascripts', __FILE__))
+  sprockets.append_path(File.expand_path('../assets/fonts', __FILE__))
   resource = Webmachine::Sprockets.resource_for(sprockets)
 
   app.configure do |config|
