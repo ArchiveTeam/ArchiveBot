@@ -23,7 +23,10 @@ Dashboard.HistoryRoute = Ember.Route.extend
   requestedUrl: (params) ->
     locationHref = window.location.href
 
-    if (locationHref.lastIndexOf('/') == locationHref.length - 1) && !(params['url'].endsWith('/'))
+    endsWith = (haystack, needle) ->
+      haystack.lastIndexOf(needle) == haystack.length - needle.length
+
+    if endsWith(locationHref, '/') && !endsWith(params['url'], '/')
       "#{params['url']}/"
     else
       params['url']
