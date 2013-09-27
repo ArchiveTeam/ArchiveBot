@@ -28,15 +28,15 @@ Dashboard.HistoryRecordController = Ember.ObjectController.extend
     # Convert the stored timestamp (which is in UTC) to miliseconds.
     stored = (@get('queued_at') || 0) * 1000
 
-    # Get the browser's UTC offset in milliseconds.
+    # Build the date in the browser TZ and let the browser display it.  The
+    # default behavior of toLocaleString is pretty complex, but it'll give us
+    # year, month, day, hour, minute, and second, which is all we need.  Look
+    # up Date on developer.mozilla.org for all the fun details.
     #
-    # Javascript's Date returns something crazy: it's the number of _minutes_
-    # offset from UTC, with the sign reversed.
-    browserOffset = new Date().getTimezoneOffset() * 60 * 1000
-
-    # Build the date in the browser TZ.  The sign oddness above means that we
-    # subtract.
-    new Date(stored - browserOffset).toLocaleString()
+    # Important note: When given a value, Date's constructor assumes that it's
+    # the number of milliseconds since the start of the UNIX epoch in UTC.  As
+    # such, we do not need to convert to local time.
+    new Date(stored).toLocaleString()
   ).property('queued_at')
 
   warcSizeMb: (->
