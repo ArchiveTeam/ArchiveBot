@@ -43,7 +43,12 @@ class HistoryDb
     }
 
     resp = @db.view!('jobs/by_url_and_queue_time', params, @credentials)
-    resp.rows.first['value'].first
+
+    if resp.rows.length > 0
+      resp.rows.first['value'].first
+    else
+      0
+    end
   end
 
   private
