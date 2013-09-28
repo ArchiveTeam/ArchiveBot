@@ -1,58 +1,61 @@
 - !status: print job summary
 
-    [23:10:55] <me> !status
-    [23:10:55] <ArchiveBot> me: Job status: 0 completed, 0 aborted,
-                            0 in progress, 0 pending
+    > !status
+    < Job status: 0 completed, 0 aborted, 0 in progress, 0 pending
 
 - !archive URL: begin recursive retrieval from a URL
 
-    [23:19:12] <me> !archive http://artscene.textfiles.com/litpacks/
-    [23:19:12] <ArchiveBot> me: Archiving
-                            http://artscene.textfiles.com/litpacks/.
-    [23:19:13] <ArchiveBot> me: Use !status 43z7a11vo6of3a7i173441dtc
-                            for updates,
-                            !abort 43z7a11vo6of3a7i173441dtc to abort.
+    > !archive http://artscene.textfiles.com/litpacks/
+    < Archiving http://artscene.textfiles.com/litpacks/.
+    < Use !status 43z7a11vo6of3a7i173441dtc for updates, !abort
+      43z7a11vo6of3a7i173441dtc to abort.
 
   ArchiveBot does not ascend to parent links.
 
 - !archiveonly URL: non-recursive retrieval of the given URL
 
-    [10:51:13] <me> !archiveonly http://store.steampowered.com/livingroom
-    [10:51:16] <ArchiveBot> me: Archiving
-                            http://store.steampowered.com/livingroom
-                            without recursion.
-    [10:51:17] <ArchiveBot> me: Use !status 1q2qydhkeh3gfnrcxuf6py70b
-                            for updates,
-                            !abort 1q2qydhkeh3gfnrcxuf6py70b to abort.
-
-- !status IDENT: print information about a job
-
-    [23:21:02] <me> !status 43z7a11vo6of3a7i173441dtc
-    [23:21:02] <ArchiveBot> me: Job update for
-                            http://artscene.textfiles.com/litpacks/
-    [23:21:02] <ArchiveBot> me: Last log entry: Starting WgetDownload
-                            for Item
-    [23:21:02] <ArchiveBot> me: Downloaded 0.01 MiB
-
-  For jobs where a WARC was generated and uploaded, you'll get a URL to the WARC:
-
-    [23:25:04] <me> !status 43z7a11vo6of3a7i173441dtc
-    [23:25:05] <ArchiveBot> me: Job update for
-                            http://artscene.textfiles.com/litpacks/
-    [23:25:05] <ArchiveBot> me: Archived at
-                            http://example.com/thewarc.warc.gz,
-                            WARC size: 11.82 MiB
-    [23:25:05] <ArchiveBot> me: Eligible for rearchival in 47h 59m 29s
+    > !archiveonly http://store.steampowered.com/livingroom
+    < Archiving http://store.steampowered.com/livingroom without
+      recursion.
+    > Use !status 1q2qydhkeh3gfnrcxuf6py70b for updates, !abort
+      1q2qydhkeh3gfnrcxuf6py70b to abort.
 
 - !abort IDENT: abort a job
+    > !abort 1q2qydhkeh3gfnrcxuf6py70b
+    < Initiating abort for job 1q2qydhkeh3gfnrcxuf6py70b.
 
-    [23:21:34] <me> !abort 43z7a11vo6of3a7i173441dtc
-    [23:21:34] <ArchiveBot> me: Initiated abort for
-                            http://artscene.textfiles.com/litpacks/.
-    [23:21:48] <me> !status 43z7a11vo6of3a7i173441dtc
-    [23:21:49] <ArchiveBot> me: Job update for
-                            http://artscene.textfiles.com/litpacks/
-    [23:21:49] <ArchiveBot> me: Job aborted
-    [23:21:49] <ArchiveBot> me: Eligible for rearchival in 0h 0m 45s
+- !status IDENT, !status URL: print information about a job or URL
+
+    For an unknown job:
+    > !status 1q2qydhkeh3gfnrcxuf6py70b
+    < Sorry, I don't know anything about job 1q2qydhkeh3gfnrcxuf6py70b.
+
+    For a URL that hasn't been archived:
+    > !status http://artscene.textfiles.com/litpacks/
+    < http://artscene.textfiles.com/litpacks/ has not been archived.
+
+    For a URL that hasn't been archived, but has children that have been
+    processed before (either succesfully or unsuccessfully):
+    > !status http://artscene.textfiles.com/
+    < http://artscene.textfiles.com/ has not been archived.
+    < However, there have been 5 download attempts on child URLs.
+    < More info: http://www.example.com/#/prefixes/http://artscene.textfiles.com/
+
+    For an ident or URL that's in progress:
+    > !status 43z7a11vo6of3a7i173441dtc
+    <
+    < Downloaded 10.01 MB, 2 errors encountered
+    < More info at my dashboard: http://www.example.com
+
+    For an ident or URL that has been successfully archived within the
+    past 48 hours:
+    > !status 43z7a11vo6of3a7i173441dtc
+    < Archived to http://www.example.com/site.warc.gz
+    < Eligible for rearchival in 30h 25m 07s
+
+    For an ident or URL identifying a job that was aborted:
+    > !status 43z7a11vo6of3a7i173441dtc
+    < Job aborted
+    < Eligible for rearchival in 00h 00m 45s
 
  vim:ts=2:sw=2:tw=72:et

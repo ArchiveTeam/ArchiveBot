@@ -4,12 +4,16 @@ require File.expand_path('../job', __FILE__)
 require File.expand_path('../summary', __FILE__)
 
 class Brain
-  attr_reader :schemes
+  attr_reader :history_db
   attr_reader :redis
+  attr_reader :schemes
+  attr_reader :url_pattern
 
-  def initialize(schemes, redis)
-    @schemes = schemes
+  def initialize(schemes, redis, history_db)
+    @history_db = history_db
     @redis = redis
+    @schemes = schemes
+    @url_pattern ||= %r{(?:#{schemes.join('|')})://.+}
   end
 
   def request_archive(m, param, depth='inf')
@@ -34,21 +38,11 @@ class Brain
 
     # Is the job already known?
     if job.exists?
-      # Does its archive have a URL?
-      if (archive_url = job.archive_url)
-        rep = "That URL was previously archived to #{archive_url}."
+      reply m, "Job for #{uri} already exists."
 
-        # Is the archive record expiring?  If so, tell the requestor when they
-        # may resubmit the archive request.
-        if (t = job.ttl)
-          rep << "  You may resubmit it in #{job.formatted_ttl(t)}."
-        end
-
-        reply m, rep
-      else
-        reply m, "That URL is already being processed.  Use !status #{job.ident} for updates."
-      end
-
+      # OK, print out its status.
+      status = job.to_status
+      reply m, *status
       return
     end
 
@@ -66,18 +60,60 @@ class Brain
     reply m, "Use !status #{job.ident} for updates, !abort #{job.ident} to abort."
   end
 
-  def request_status(m, ident)
+  def request_status_by_url(m, url)
+    job = Job.new(URI(url), redis)
+
+    if !job.exists?
+      rep = []
+
+      # Was there a successful attempt in the past?
+      doc = history_db.latest_job_record(url)
+
+      if doc
+        queued_time = Time.at(doc['queued_at']).to_s
+        rep << "#{url}:"
+
+        if doc['completed']
+          rep << "Archived to #{doc['archive_url']}; last ran at #{queued_time}."
+          rep << "Eligible for re-archiving."
+        elsif doc['aborted']
+          rep << "Job aborted; last ran at #{queued_time}."
+          rep << "Eligible for re-archiving."
+        else
+          rep << "Hmm...I've seen #{url} before, but I can't figure out its status :("
+        end
+      else
+        rep << "#{url} has not been archived."
+
+        # Were there any attempts on child URLs?
+        child_attempts = history_db.attempts_on_children(url)
+
+        if child_attempts > 0
+          if child_attempts == 1
+            rep << "However, there has been #{child_attempts} download attempt on child URLs."
+          else
+            rep << "However, there have been #{child_attempts} download attempts on child URLs."
+          end
+
+          rep << "See the ArchiveBot dashboard for more information."
+        end
+      end
+
+      reply m, *rep
+    else
+      job.amplify
+      reply m, *job.to_status
+    end
+  end
+
+  def request_status_by_ident(m, ident)
     job = Job.from_ident(ident, redis)
 
     if !job
       reply m, "Sorry, I don't know anything about job #{ident}."
-      return
+    else
+      reply m, *job.to_status
     end
-
-    reply m, "Job update for #{job.uri}"
-
-    job.to_reply.each { |r| reply m, r }
-    return
   end
 
   def initiate_abort(m, ident)
@@ -114,6 +150,6 @@ class Brain
   end
 
   def reply(m, *args)
-    m.reply "#{m.user.nick}: #{args.join(' ')}"
+    args.each { |msg| m.reply "#{m.user.nick}: #{msg}" }
   end
 end

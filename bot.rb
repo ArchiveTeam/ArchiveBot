@@ -36,7 +36,8 @@ bot = Cinch::Bot.new do
     c.channels = channels
   end
 
-  brain = Brain.new(schemes, redis)
+  history_db = HistoryDb.new(URI(opts[:db]), opts[:db_credentials])
+  brain = Brain.new(schemes, redis, history_db)
 
   on :message, /\A\!archive (.+)\Z/ do |m, param|
     brain.request_archive(m, param)
@@ -51,7 +52,11 @@ bot = Cinch::Bot.new do
   end
 
   on :message, /\A!status ([0-9a-z]+)\Z/ do |m, ident|
-    brain.request_status(m, ident)
+    brain.request_status_by_ident(m, ident)
+  end
+
+  on :message, /\A!status (#{brain.url_pattern})\Z/ do |m, url|
+    brain.request_status_by_url(m, url)
   end
 
   on :message, /\A!abort ([0-9a-z]+)\Z/ do |m, ident|

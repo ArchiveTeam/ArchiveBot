@@ -25,18 +25,25 @@ class HistoryDb
     @db.view('jobs/by_url_and_queue_time', params, @credentials)
   end
 
-  def summary(url, limit, start_at = nil, prefix = false)
-    params = {
-      :limit => limit,
-      :group => true,
-      :group_level => 1,
-      :descending => true,
-      :endkey_docid => start_at,
-      :endkey => [url, 0],
-      :startkey => endkey(url, prefix)
-    }.reject! { |_,v| v.nil? }
+  def latest_job_record(url)
+    resp = history(url, 1)
 
-    @db.view('jobs/by_url_and_queue_time', params, @credentials)
+    if resp.rows.length == 1
+      resp.rows.first['doc']
+    else
+      nil
+    end
+  end
+
+  def attempts_on_children(url)
+    params = {
+      :reduce => true,
+      :startkey => [url, 0],
+      :endkey => endkey(url, true)
+    }
+
+    resp = @db.view!('jobs/by_url_and_queue_time', params, @credentials)
+    resp.rows.first['value'].first
   end
 
   private

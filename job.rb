@@ -3,6 +3,7 @@ require 'uuidtools'
 require 'json'
 
 require File.expand_path('../job_analysis', __FILE__)
+require File.expand_path('../job_status_generation', __FILE__)
 
 # Ruby representation of an archive job.
 #
@@ -22,6 +23,7 @@ require File.expand_path('../job_analysis', __FILE__)
 # second pattern.
 class Job < Struct.new(:uri, :redis)
   include JobAnalysis
+  include JobStatusGeneration
 
   ARCHIVEBOT_V0_NAMESPACE = UUIDTools::UUID.parse('82244de1-c354-4c89-bf2b-f153ce23af43')
 
@@ -114,6 +116,10 @@ class Job < Struct.new(:uri, :redis)
     !!archive_url
   end
 
+  def in_progress?
+    !(aborted? || completed?)
+  end
+
   def ident
     @ident ||= UUIDTools::UUID.sha1_create(ARCHIVEBOT_V0_NAMESPACE, url).to_i.to_s(36)
   end
@@ -169,14 +175,6 @@ class Job < Struct.new(:uri, :redis)
     redis.ttl(ident)
   end
 
-  def formatted_ttl(ttl)
-    hr = ttl / 3600
-    min = (ttl % 3600) / 60
-    sec = (ttl % 3600) % 60
-
-    "#{hr}h #{min}m #{sec}s"
-  end
-
   def set_depth(depth)
     redis.hset(ident, 'fetch_depth', depth)
   end
@@ -201,38 +199,6 @@ class Job < Struct.new(:uri, :redis)
         h[bucket.to_s] = send(attr)
       end
     end.to_json
-  end
-
-  def to_reply
-    u = archive_url
-
-    if !u && aborted?
-      ["Job aborted"].tap do |x|
-        if (t = ttl)
-          x << "Eligible for rearchival in #{formatted_ttl(t)}"
-        end
-      end
-    else
-      errs = error_count
-
-      if !u
-        downloaded = (bytes_downloaded.to_f / (1024 * 1024)).round(2)
-
-        ["Fetch depth: #{depth}",
-         "Downloaded #{downloaded} MiB, #{errs} errors encountered"
-        ]
-      else
-        warc_size_mib = (warc_size.to_f / (1024 * 1024)).round(2)
-
-        [ "Archived at #{u}, fetch depth: #{depth}, WARC size: #{warc_size_mib} MiB" ].tap do |x|
-          x << "#{errs} errors encountered"
-
-          if (t = ttl)
-            x << "Eligible for rearchival in #{formatted_ttl(t)}"
-          end
-        end
-      end
-    end
   end
 
   def response_counts
