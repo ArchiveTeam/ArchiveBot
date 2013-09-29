@@ -41,6 +41,7 @@ class Brain
       reply m, "Job for #{uri} already exists."
 
       # OK, print out its status.
+      job.amplify
       status = job.to_status
       reply m, *status
       return
