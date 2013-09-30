@@ -75,6 +75,20 @@ class Job < Struct.new(:uri, :redis)
   # Returns an integer.
   attr_reader :error_count
 
+  # The nick of the user who initiated the job.
+  #
+  # Returns a string.
+  attr_reader :started_by
+
+  # The channel in which the job was started.
+  #
+  # This is assumed to be constant across the lifespan of a job.  If you move
+  # ArchiveBot across channels (or networks and channels), you won't get
+  # notifications for the jobs that were initiated elsewhere.
+  #
+  # Returns a string.
+  attr_reader :started_in
+
   # A bucket for HTTP responses that aren't in the (100..599) range.
   class UnknownResponseCode
     def include?(resp_code)
@@ -139,6 +153,8 @@ class Job < Struct.new(:uri, :redis)
       @warc_size = h['warc_size'].to_i
       @error_count = h['error_count'].to_i
       @queued_at = h['queued_at'].to_i
+      @started_by = h['started_by']
+      @started_in = h['started_in']
 
       response_buckets.each do |_, bucket, attr|
         instance_variable_set("@#{attr}", h[bucket.to_s].to_i)
@@ -163,8 +179,11 @@ class Job < Struct.new(:uri, :redis)
     redis.lpush('pending', ident)
   end
 
-  def register
-    redis.hset(ident, 'url', url)
+  def register(depth, started_by, started_in)
+    redis.hmset(ident, 'url', url,
+                       'fetch_depth', depth,
+                       'started_by', started_by,
+                       'started_in', started_in)
   end
 
   def exists?
@@ -173,10 +192,6 @@ class Job < Struct.new(:uri, :redis)
 
   def ttl
     redis.ttl(ident)
-  end
-
-  def set_depth(depth)
-    redis.hset(ident, 'fetch_depth', depth)
   end
 
   def incr_error_count(by = 1)
@@ -192,6 +207,8 @@ class Job < Struct.new(:uri, :redis)
       'error_count' => error_count,
       'ident' => ident,
       'queued_at' => queued_at,
+      'started_by' => started_by,
+      'started_in' => started_in,
       'url' => url,
       'warc_size' => warc_size
     }.tap do |h|

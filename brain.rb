@@ -48,8 +48,7 @@ class Brain
     end
 
     # OK, add the job and queue it up.
-    job.register
-    job.set_depth(depth)
+    job.register(depth, m.user.nick, m.channel.name)
     job.queue
 
     if depth == :shallow
