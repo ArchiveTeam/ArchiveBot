@@ -144,7 +144,7 @@ local archive_url = ARGV[1]
 local expire_time = ARGV[2]
 local log_channel = ARGV[3]
 
-redis.call('hset', ident, 'archive_url', archive_url)
+redis.call('hset', ident, 'archive_url', archive_url, 'finished_at', os.time())
 redis.call('lrem', 'working', 1, ident)
 redis.call('incr', 'jobs_completed')
 redis.call('expire', ident, expire_time)
@@ -157,7 +157,7 @@ local ident = KEYS[1]
 local expire_time = ARGV[1]
 local log_channel = ARGV[2]
 
-redis.call('hset', ident, 'aborted', 'true')
+redis.call('hset', ident, 'aborted', 'true', 'finished_at', os.time())
 redis.call('incr', 'jobs_aborted')
 redis.call('lrem', 'working', 1, ident)
 redis.call('expire', ident, expire_time)
