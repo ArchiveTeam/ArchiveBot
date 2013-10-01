@@ -53,11 +53,12 @@ local is_warning = function(statcode, err)
   return statcode >= 400 and statcode < 500
 end
 
+local log_counter = 0
+
 wget.callbacks.httploop_result = function(url, err, http_stat)
   -- Update the traffic counters.
   rconn:hincrby(ident, 'bytes_downloaded', http_stat.rd_size)
 
-  local at = os.clock()
   local statcode = http_stat['statcode']
 
   -- Record the current time, URL, response code, and wget's error code.
@@ -70,8 +71,10 @@ wget.callbacks.httploop_result = function(url, err, http_stat)
     is_warning = is_warning(statcode, err)
   }
 
-  rconn:zadd(log_key, at, json.encode(result))
+  -- Publish the log entry, and bump the log counter.
+  rconn:zadd(log_key, log_counter, json.encode(result))
   rconn:publish(log_channel, ident)
+  log_counter = log_counter + 1
 
   -- Should we abort?
   if abort_requested() then
