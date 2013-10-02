@@ -61,7 +61,7 @@ Dashboard.MessageProcessor = Ember.Object.extend
     job = Dashboard.Job.create autoScroll: true, messageProcessor: this
 
     @get('jobIndex')[ident] = job
-    @get('jobs').pushObject job
+    @get('jobs').unshiftObject job
 
     job
 
