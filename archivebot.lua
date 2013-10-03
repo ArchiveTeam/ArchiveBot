@@ -39,12 +39,17 @@ end
 
 -- Should this result be flagged as an error?
 local is_error = function(statcode, err)
-  if err ~= 'RETRFINISHED' then
-    if statcode == 0 or statcode >= 500 then
-      return true
-    end
+  -- 5xx: yes
+  if statcode >= 500 then
+    return true
   end
 
+  -- Response code zero with non-RETRFINISHED wget code: yes
+  if statcode == 0 and err ~= 'RETRFINISHED' then
+    return true
+  end
+
+  -- Could be an error, but we don't know it as such
   return false
 end
 
