@@ -4,6 +4,7 @@ import re
 import string
 import shutil
 import redis
+import time
 
 from os import environ as env
 from urlparse import urlparse
@@ -128,7 +129,7 @@ class MarkItemAsDone(SimpleTask):
   def process(self, item):
     archive_url = 'http://dumpground.archivingyoursh.it/%s.warc.gz' % item['warc_file_base']
     self.mark_done(keys=[item['ident']], args=[archive_url, EXPIRE_TIME,
-      LOG_CHANNEL])
+      LOG_CHANNEL, time.time()])
 
 # ------------------------------------------------------------------------------
 
@@ -143,8 +144,9 @@ local ident = KEYS[1]
 local archive_url = ARGV[1]
 local expire_time = ARGV[2]
 local log_channel = ARGV[3]
+local finished_at = ARGV[4]
 
-redis.call('hset', ident, 'archive_url', archive_url, 'finished_at', os.time())
+redis.call('hmset', ident, 'archive_url', archive_url, 'finished_at', finished_at)
 redis.call('lrem', 'working', 1, ident)
 redis.call('incr', 'jobs_completed')
 redis.call('expire', ident, expire_time)
@@ -156,8 +158,9 @@ MARK_ABORTED = '''
 local ident = KEYS[1]
 local expire_time = ARGV[1]
 local log_channel = ARGV[2]
+local finished_at = ARGV[3]
 
-redis.call('hset', ident, 'aborted', 'true', 'finished_at', os.time())
+redis.call('hmset', ident, 'aborted', 'true', 'finished_at', finished_at)
 redis.call('incr', 'jobs_aborted')
 redis.call('lrem', 'working', 1, ident)
 redis.call('expire', ident, expire_time)
