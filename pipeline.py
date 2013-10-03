@@ -165,6 +165,17 @@ redis.call('expire', ident..'_log', expire_time)
 redis.call('publish', log_channel, ident)
 '''
 
+LOGGER = '''
+local ident = KEYS[1]
+local message = ARGV[1]
+local log_channel = ARGV[2]
+
+local nextseq = redis.call('hincrby', ident, 'log_score', 1)
+
+redis.call('zadd', ident..'_log', nextseq, message)
+redis.call('publish', log_channel, ident)
+'''
+
 # ------------------------------------------------------------------------------
 
 project = Project(
@@ -205,6 +216,7 @@ pipeline = Pipeline(
   env={
     'ITEM_IDENT': ItemInterpolation('%(ident)s'),
     'ABORT_SCRIPT': MARK_ABORTED,
+    'LOG_SCRIPT': LOGGER,
     'LOG_KEY': ItemInterpolation('%(ident)s_log'),
     'LOG_CHANNEL': LOG_CHANNEL,
     'REDIS_HOST': redis_url.hostname,

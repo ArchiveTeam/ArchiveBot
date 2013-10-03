@@ -1,3 +1,4 @@
+dofile("redis_script_exec.lua")
 dofile("wget_behaviors/acceptance_heuristics.lua")
 
 require('socket')
@@ -9,6 +10,9 @@ local rconn = redis.connect(os.getenv('REDIS_HOST'), os.getenv('REDIS_PORT'))
 local aborter = os.getenv('ABORT_SCRIPT')
 local log_key = os.getenv('LOG_KEY')
 local log_channel = os.getenv('LOG_CHANNEL')
+
+local do_abort = eval_redis(os.getenv('ABORT_SCRIPT'), rconn)
+local do_log = eval_redis(os.getenv('LOG_SCRIPT'), rconn)
 
 rconn:select(os.getenv('REDIS_DB'))
 
@@ -58,8 +62,6 @@ local is_warning = function(statcode, err)
   return statcode >= 400 and statcode < 500
 end
 
-local log_counter = 0
-
 wget.callbacks.httploop_result = function(url, err, http_stat)
   -- Update the traffic counters.
   rconn:hincrby(ident, 'bytes_downloaded', http_stat.rd_size)
@@ -73,18 +75,17 @@ wget.callbacks.httploop_result = function(url, err, http_stat)
     response_code = statcode,
     wget_code = err,
     is_error = is_error(statcode, err),
-    is_warning = is_warning(statcode, err)
+    is_warning = is_warning(statcode, err),
+    msg_type = 'download'
   }
 
   -- Publish the log entry, and bump the log counter.
-  rconn:zadd(log_key, log_counter, json.encode(result))
-  rconn:publish(log_channel, ident)
-  log_counter = log_counter + 1
+  do_log(1, ident, 2, json.encode(result), log_channel)
 
   -- Should we abort?
   if abort_requested() then
     io.stdout:write("Wget terminating on bot command")
-    rconn:eval(aborter, 1, ident, 60, log_channel)
+    do_abort(1, ident, 60, log_channel)
 
     return wget.actions.ABORT
   end
