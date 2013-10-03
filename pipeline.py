@@ -129,7 +129,7 @@ class MarkItemAsDone(SimpleTask):
   def process(self, item):
     archive_url = 'http://dumpground.archivingyoursh.it/%s.warc.gz' % item['warc_file_base']
     self.mark_done(keys=[item['ident']], args=[archive_url, EXPIRE_TIME,
-      LOG_CHANNEL, time.time()])
+      LOG_CHANNEL, int(time.time())])
 
 # ------------------------------------------------------------------------------
 
