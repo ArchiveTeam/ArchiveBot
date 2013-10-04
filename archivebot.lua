@@ -80,7 +80,7 @@ wget.callbacks.httploop_result = function(url, err, http_stat)
   }
 
   -- Publish the log entry, and bump the log counter.
-  do_log(1, ident, 2, json.encode(result), log_channel)
+  do_log(1, ident, json.encode(result), log_channel)
 
   -- Should we abort?
   if abort_requested() then

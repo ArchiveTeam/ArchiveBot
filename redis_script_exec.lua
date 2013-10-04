@@ -1,5 +1,3 @@
-dofile("table_show.lua")
-
 -- Given a Lua script, creates a function for executing the script.
 --
 -- On first invocation, this function executes a SCRIPT LOAD, and stores the
