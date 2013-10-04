@@ -8,7 +8,7 @@ module JobStatusGeneration
       rep << "In progress.  Downloaded #{mb_downloaded.round(2)} MB, #{error_count.to_i} errors encountered."
       rep << "See the ArchiveBot dashboard for more information."
     elsif completed?
-      rep << "Archived to #{archive_url}."
+      rep << "WARC: #{archive_url}"
 
       if (t = ttl)
         rep << "Eligible for rearchival in #{formatted_ttl(t)}."
