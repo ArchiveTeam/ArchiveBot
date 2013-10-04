@@ -16,7 +16,7 @@ from seesaw.externalprocess import *
 
 from seesaw.util import find_executable
 
-VERSION = "20130921.01"
+VERSION = "20131004.01"
 USER_AGENT = "ArchiveTeam ArchiveBot/%s" % VERSION
 EXPIRE_TIME = 60 * 60 * 48    # 48 hours between archive requests
 WGET_LUA = find_executable('Wget+Lua', "GNU Wget 1.14.lua.20130523-9a5c",
@@ -53,8 +53,7 @@ class GetItemFromQueue(Task):
 
   def send_request(self, item):
     # The Python Redis client doesn't understand RPOPLPUSH yet
-    ident = self.redis.execute_command('RPOPLPUSH', 'pending', 'working')
-    
+    ident = self.redis.execute_command('RPOPLPUSH', 'pending', 'working') 
     if ident == None:
       self.schedule_retry(item)
     else:
