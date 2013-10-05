@@ -4,7 +4,7 @@ require 'reel'
 
 require File.expand_path('../../job', __FILE__)
 require File.expand_path('../../log_update_listener', __FILE__)
-require File.expand_path('../packets', __FILE__)
+require File.expand_path('../messages', __FILE__)
 
 UPDATE_TOPIC = 'updates'.freeze
 
@@ -15,15 +15,21 @@ class LogReceiver < LogUpdateListener
 
   def on_receive(ident)
     j = ::Job.from_ident(ident, uredis)
-
     return unless j
 
-    if j.aborted? || j.completed?
-      publish(UPDATE_TOPIC, JobStatusChange.new(j))
+    if j.aborted?
+      publish(UPDATE_TOPIC, AbortMessage.new(j))
+    end
+
+    if j.completed?
+      publish(UPDATE_TOPIC, CompleteMessage.new(j))
     end
 
     entries = j.read_new_entries
-    publish(UPDATE_TOPIC, DownloadUpdate.new(j, entries))
+
+    entries.each do |entry|
+      publish(UPDATE_TOPIC, LogMessage.new(j, entry))
+    end
   end
 end
 
@@ -38,10 +44,10 @@ class LogClient
     subscribe(UPDATE_TOPIC, :relay)
   end
 
-  def relay(pattern, packet)
+  def relay(pattern, message)
     if pattern == UPDATE_TOPIC
       begin
-        @socket << packet.to_json
+        @socket << message.to_json
       rescue Reel::SocketError
         terminate
       end

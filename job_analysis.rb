@@ -45,6 +45,9 @@ module JobAnalysis
     redis.pipelined do
       resps.each do |p, _|
         entry = JSON.parse(p)
+
+        next unless entry['type'] == 'download'
+
         wget_code = entry['wget_code']
         response_code = entry['response_code'].to_i
 

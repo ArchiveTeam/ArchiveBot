@@ -207,7 +207,7 @@ class Job < Struct.new(:uri, :redis)
     redis.hincrby(ident, 'error_count', by)
   end
 
-  def to_json
+  def as_json
     { 'aborted' => aborted?,
       'archive_url' => archive_url,
       'bytes_downloaded' => bytes_downloaded,
@@ -225,7 +225,11 @@ class Job < Struct.new(:uri, :redis)
       response_buckets.each do |_, bucket, attr|
         h[bucket.to_s] = send(attr)
       end
-    end.to_json
+    end
+  end
+
+  def to_json
+    as_json.to_json
   end
 
   def response_counts
