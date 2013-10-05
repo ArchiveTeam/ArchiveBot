@@ -184,6 +184,10 @@ project = Project(
     title = "ArchiveBot request handler"
 )
 
+class AcceptAny:
+  def __contains__(self, item):
+    return True
+
 pipeline = Pipeline(
   GetItemFromQueue(r),
   SetFetchDepth(r),
@@ -214,7 +218,7 @@ pipeline = Pipeline(
     '--lua-script', 'archivebot.lua',
     ItemInterpolation('%(url)s')
   ],
-  accept_on_exit_code=[ 0, 1, 2, 3, 4, 5, 6, 7, 8 ],
+  accept_on_exit_code=AcceptAny(),
   env={
     'ITEM_IDENT': ItemInterpolation('%(ident)s'),
     'ABORT_SCRIPT': MARK_ABORTED,
