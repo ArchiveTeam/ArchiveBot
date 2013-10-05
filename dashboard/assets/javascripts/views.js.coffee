@@ -12,23 +12,6 @@ Dashboard.JobView = Ember.View.extend
         @remove()
         @get('controller').unregister()
 
-Dashboard.ProportionView = Ember.View.extend
-  classNames: ['proportion-view']
-  templateName: 'proportion-view'
-
-  tagName: 'div'
-
-  didInsertElement: ->
-    @sizeBars()
-
-  onProportionChange: (->
-    @sizeBars()
-  ).observes('okPercentage', 'errorPercentage')
-
-  sizeBars: ->
-    @$('.ok').css { width: @get('okPercentage') + '%' }
-    @$('.error').css { width: @get('errorPercentage') + '%' }
-
 Dashboard.ResponseDistributionView = Ember.View.extend
   tagName: 'div'
   templateName: 'distribution-view'

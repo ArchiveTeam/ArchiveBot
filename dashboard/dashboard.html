@@ -128,8 +128,7 @@
     <script type="text/x-handlebars" data-template-name="_job">
       {{#view Dashboard.JobView}}
         <header>
-          {{view Dashboard.ProportionView okPercentageBinding=okPercentage
-            errorPercentageBinding=errorPercentage}}
+          {{view Dashboard.ResponseDistributionView itemBinding=job}}
         </header>
         {{view Dashboard.LogView incomingBinding=job.latestEntries
             autoScrollBinding=job.autoScroll}}
