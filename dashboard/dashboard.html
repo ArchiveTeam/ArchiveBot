@@ -76,12 +76,11 @@
                   <td>{{r.mbDownloaded}} MB</td>
                   <td>{{view Dashboard.ResponseDistributionView itemBinding=r}}</td>
                   <td>
-                    {{#if r.completed}}
+                    {{#if r.archive_url}}
                       <a {{bind-attr href=r.archive_url}}>WARC</a>
                       ({{r.warcSizeMb}} MB)
-                    {{/if}}
-                    {{#if r.aborted}}
-                      Aborted
+                    {{else}}
+                      No archive URL
                     {{/if}}
                   </td>
                 </tr>
