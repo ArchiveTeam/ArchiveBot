@@ -83,6 +83,6 @@ Dashboard.JobController = Ember.ObjectController.extend
     Ember.run.next =>
       entry = Ember.Object.create params
 
-      @get('content').addLogEntries [entry]
+      @get('content').addLogEntry [entry]
 
 # vim:ts=2:sw=2:et:tw=78

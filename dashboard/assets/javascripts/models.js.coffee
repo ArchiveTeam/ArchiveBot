@@ -1,28 +1,41 @@
+# Response code buckets.
+RESPONSE_BUCKETS = ['r1xx', 'r2xx', 'r3xx', 'r4xx', 'r5xx', 'runk']
+
 Calculations = Ember.Mixin.create
   mbDownloaded: (->
     (@get('bytes_downloaded') / (1000 * 1000)).toFixed(2)
   ).property('bytes_downloaded')
 
-# Response code buckets.
-RESPONSE_BUCKETS = ['r1xx', 'r2xx', 'r3xx', 'r4xx', 'r5xx', 'runk']
+  # Sadly, there doesn't seem to be a way to reuse RESPONSE_BUCKETS in the
+  # property path set.
+  responseCountsByBucket: (->
+    RESPONSE_BUCKETS.map (bucket) =>
+      [bucket, @bucketCount(bucket)]
+  ).property('r1xx', 'r2xx', 'r3xx', 'r4xx', 'r5xx', 'runk')
+
+  totalResponses: (->
+    RESPONSE_BUCKETS.reduce(((acc, bucket) =>
+      acc + @bucketCount(bucket)
+    ), 0)
+  ).property('r1xx', 'r2xx', 'r3xx', 'r4xx', 'r5xx', 'runk')
+
+  bucketCount: (bucket) ->
+    @get(bucket) || 0
 
 Dashboard.Job = Ember.Object.extend Calculations,
   idBinding: 'ident'
 
-  addLogEntries: (entries) ->
-    @set 'latestEntries', entries
+  addLogEntry: (entry) ->
+    @set 'latestEntries', [entry]
 
   finished: (->
     @get('aborted') || @get('completed')
   ).property('aborted', 'completed')
 
   # Properties directly copied from a JSON representation of this job.
-  #
-  # See amplify.
   directCopiedProperties: [
-    'url', 'ident',
-    'total', 'error_count',
-    'bytes_downloaded'
+    'url', 'ident', 'aborted', 'completed',
+    'error_count', 'bytes_downloaded'
   ].pushObjects(RESPONSE_BUCKETS)
 
   amplify: (json) ->
@@ -30,17 +43,7 @@ Dashboard.Job = Ember.Object.extend Calculations,
     props[key] = json[key] for key in @directCopiedProperties
     @setProperties props
 
-Dashboard.JobHistoryEntry = Ember.Object.extend Calculations,
-  totalResponses: (->
-    RESPONSE_BUCKETS.reduce(((acc, bucket) =>
-      acc + @get(bucket)
-    ), 0)
-  ).property(RESPONSE_BUCKETS)
-
-  responseCountsByBucket: (->
-    RESPONSE_BUCKETS.map (bucket) =>
-      [bucket, @get(bucket)]
-  ).property(RESPONSE_BUCKETS)
+Dashboard.JobHistoryEntry = Ember.Object.extend Calculations
 
 Dashboard.DownloadUpdateEntry = Ember.Object.extend
   classNames: (->
@@ -55,6 +58,11 @@ Dashboard.DownloadUpdateEntry = Ember.Object.extend
   text: (->
     [@get('response_code'), @get('wget_code'), @get('url')].join(' ')
   ).property('response_code', 'wget_code', 'url')
+
+Dashboard.StdoutUpdateEntry = Ember.Object.extend
+  classNames: []
+
+  textBinding: 'message'
 
 Dashboard.MessageProcessor = Ember.Object.extend
   registerJob: (ident) ->
@@ -77,13 +85,18 @@ Dashboard.MessageProcessor = Ember.Object.extend
 
   process: (data) ->
     json = JSON.parse data
-    ident = json['ident']
-    type = json['type']
 
     # Sanity-check the message.
-    console.log 'Message is malformed (no ident)' unless ident?
+    job_data = json['job_data']
+    type = json['type']
+
+    console.log 'Message is malformed (no job_data key)' unless job_data?
     console.log 'Message is malformed (no type identifier)' unless type?
-    return unless ident? && type?
+
+    ident = job_data['ident']
+    console.log 'Message is malformed (no ident)' unless ident?
+
+    return unless job_data? && ident? && type?
 
     # Do we have a job for the identifier?
     # If we don't, register a job and retry processing when the run loop
@@ -98,23 +111,20 @@ Dashboard.MessageProcessor = Ember.Object.extend
 
       return
 
-    # If we do, process the message.
-    switch json['type']
-      when 'status_change' then @processStatusChange(json, job)
-      when 'download_update' then @processDownloadUpdate(json, job)
-      else console.log "Can't handle message type #{json['type']}"
+    # OK, we have a job.
 
-  processStatusChange: (json, job) ->
-    job.setProperties
-      aborted: json['aborted']
-      completed: json['completed']
+    # Read the updated job data.
+    job.amplify(job_data)
+
+    # Now, update the log buffer.  This part depends on the message type.
+    switch type
+      when 'download' then @processDownloadUpdate(json, job)
+      when 'stdout' then @processStdoutUpdate(json, job)
 
   processDownloadUpdate: (json, job) ->
-    job.amplify(json)
+    job.addLogEntry Dashboard.DownloadUpdateEntry.create(json)
 
-    job.addLogEntries(json['entries'].map (item) ->
-      Dashboard.DownloadUpdateEntry.create(item)
-    )
-
+  processStdoutUpdate: (json, job) ->
+    job.addLogEntry Dashboard.StdoutUpdateEntry.create(json)
 
 # vim:ts=2:sw=2:et:tw=78
