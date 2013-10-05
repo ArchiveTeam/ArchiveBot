@@ -18,8 +18,8 @@ Dashboard.HistoryRecordController = Ember.ObjectController.extend
   classNames: (->
     classes = []
 
-    classes.pushObject('aborted') if @get('aborted')
     classes.pushObject('completed') if @get('completed')
+    classes.pushObject('aborted') if @get('aborted')
 
     classes
   ).property('aborted', 'completed')
