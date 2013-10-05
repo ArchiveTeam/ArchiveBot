@@ -44,6 +44,8 @@ Dashboard.ResponseDistributionView = Ember.View.extend
     total = @get 'item.totalResponses'
     counts = @get 'item.responseCountsByBucket'
 
+    return if total == 0
+
     for pair in counts
       [bucket, count] = pair
       width = (100 * (count / total)) + '%'
