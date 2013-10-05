@@ -5,6 +5,7 @@ import string
 import shutil
 import redis
 import time
+import json
 
 from os import environ as env
 from urlparse import urlparse
@@ -177,6 +178,27 @@ local nextseq = redis.call('hincrby', ident, 'log_score', 1)
 redis.call('zadd', ident..'_log', nextseq, message)
 redis.call('publish', log_channel, ident)
 '''
+
+# ------------------------------------------------------------------------------
+
+# Each item has a log output.  We want to be able to broadcast that in the
+# ArchiveBot Dashboard; therefore, we tee the item log output to Redis.
+old_logger = Item.log_output
+log_script = r.register_script(LOGGER)
+
+def tee_to_redis(self, data, full_line=True):
+  old_logger(self, data, full_line)
+
+  if 'ident' in self:
+    packet = {
+      'type': 'stdout',
+      'ts': int(time.time()),
+      'message': data
+    }
+
+    log_script(keys=[self['ident']], args=[json.dumps(packet), LOG_CHANNEL])
+
+Item.log_output = tee_to_redis
 
 # ------------------------------------------------------------------------------
 
