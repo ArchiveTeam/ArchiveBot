@@ -70,7 +70,7 @@ wget.callbacks.httploop_result = function(url, err, http_stat)
 
   -- Record the current time, URL, response code, and wget's error code.
   local result = {
-    ts = os.date('%c'),
+    ts = os.time(),
     url = url['url'],
     response_code = statcode,
     wget_code = err,
