@@ -148,7 +148,15 @@ local finished_at = ARGV[4]
 
 redis.call('hmset', ident, 'archive_url', archive_url, 'finished_at', finished_at)
 redis.call('lrem', 'working', 1, ident)
-redis.call('incr', 'jobs_completed')
+
+local was_aborted = redis.call('hget', ident, 'aborted')
+
+if was_aborted then
+  redis.call('incr', 'jobs_aborted')
+else
+  redis.call('incr', 'jobs_completed')
+end
+
 redis.call('expire', ident, expire_time)
 redis.call('expire', ident..'_log', expire_time)
 redis.call('publish', log_channel, ident)
@@ -156,15 +164,9 @@ redis.call('publish', log_channel, ident)
 
 MARK_ABORTED = '''
 local ident = KEYS[1]
-local expire_time = ARGV[1]
-local log_channel = ARGV[2]
-local finished_at = ARGV[3]
+local log_channel = ARGV[1]
 
-redis.call('hmset', ident, 'aborted', 'true', 'finished_at', finished_at)
-redis.call('incr', 'jobs_aborted')
-redis.call('lrem', 'working', 1, ident)
-redis.call('expire', ident, expire_time)
-redis.call('expire', ident..'_log', expire_time)
+redis.call('hset', ident, 'aborted', 'true')
 redis.call('publish', log_channel, ident)
 '''
 

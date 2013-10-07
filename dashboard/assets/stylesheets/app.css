@@ -154,7 +154,7 @@ h1 {
   text-transform: uppercase;
 }
 
-.log-view .completed {
+.log-view .finished {
   background-color: hsl(120, 100%, 25%);
   color: hsl(120, 100%, 75%);
   text-transform: uppercase;
@@ -180,18 +180,34 @@ section.history th, section.history td {
   padding-right: 1em;
 }
 
-section.history tr.completed {
+section.history tr.finished {
   background-color: hsl(120, 100%, 10%);
   border-bottom: 1px solid hsl(120, 100%, 15%);
 }
 
-section.history tr.completed a {
+section.history tr.finished a {
   color: hsl(120, 100%, 35%);
 }
 
 section.history tr.aborted {
   background-color: hsl(0, 100%, 10%);
   border-bottom: 1px solid hsl(0, 100%, 15%);
+}
+
+section.history tr.aborted a {
+  color: hsl(0, 100%, 35%);
+}
+
+section.history .aborted-warning {
+  float: right;
+}
+
+section.history tr.finished .aborted-warning {
+  display: none;
+}
+
+section.history tr.aborted .aborted-warning {
+  display: inline;
 }
 
 /* vim: set ts=2 sw=2 et tw=78: */

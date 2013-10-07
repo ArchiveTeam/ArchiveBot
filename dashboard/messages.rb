@@ -12,18 +12,6 @@ module Message
   end
 end
 
-class AbortMessage
-  include Message
-
-  def initialize(job)
-    @job = job
-  end
-
-  def as_json
-    super.merge('type' => 'abort')
-  end
-end
-
 class CompleteMessage
   include Message
 

@@ -17,11 +17,7 @@ class LogReceiver < LogUpdateListener
     j = ::Job.from_ident(ident, uredis)
     return unless j
 
-    if j.aborted?
-      publish(UPDATE_TOPIC, AbortMessage.new(j))
-    end
-
-    if j.completed?
+    if j.finished?
       publish(UPDATE_TOPIC, CompleteMessage.new(j))
     end
 

@@ -70,14 +70,9 @@ Dashboard.JobController = Ember.ObjectController.extend
   ).property('url')
 
   generateCompletionMessage: (->
-    if @get('completed')
-      @queueSpecialMessage text: 'Job completed', classNames: 'completed'
-  ).observes('completed')
-
-  generateAbortMessage: (->
-    if @get('aborted')
-      @queueSpecialMessage text: 'Job aborted', classNames: 'aborted'
-  ).observes('aborted')
+    if @get('finished')
+      @queueSpecialMessage text: 'Job finished', classNames: 'finished'
+  ).observes('finished')
 
   queueSpecialMessage: (params) ->
     Ember.run.next =>

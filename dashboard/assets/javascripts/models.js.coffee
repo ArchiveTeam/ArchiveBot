@@ -28,13 +28,9 @@ Dashboard.Job = Ember.Object.extend Calculations,
   addLogEntry: (entry) ->
     @set 'latestEntries', [entry]
 
-  finished: (->
-    @get('aborted') || @get('completed')
-  ).property('aborted', 'completed')
-
   # Properties directly copied from a JSON representation of this job.
   directCopiedProperties: [
-    'url', 'ident', 'aborted', 'completed',
+    'url', 'ident', 'aborted', 'finished',
     'error_count', 'bytes_downloaded'
   ].pushObjects(RESPONSE_BUCKETS)
 

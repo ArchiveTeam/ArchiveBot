@@ -17,7 +17,7 @@ class JobRecorder < LogUpdateListener
 
     return unless job
 
-    if job.aborted? || job.completed?
+    if job.finished?
       doc_id = "#{job.ident}:#{job.queued_at.to_i}"
 
       begin

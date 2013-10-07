@@ -32,9 +32,7 @@ class Job < Struct.new(:uri, :redis)
   # Returns a UNIX timestamp as an integer.
   attr_reader :queued_at
 
-  # When this job was completed.
-  #
-  # This is set by the Seesaw pipeline on abort or completion.
+  # When this job was completed.  This is set by the Seesaw pipeline.
   #
   # Returns a UNIX timestamp as an integer, or nil if the job has not yet
   # finished, terminated abnormally, etc.
@@ -134,12 +132,12 @@ class Job < Struct.new(:uri, :redis)
     !!aborted
   end
 
-  def completed?
+  def finished?
     !!archive_url
   end
 
   def in_progress?
-    !(aborted? || completed?)
+    !finished?
   end
 
   def ident
@@ -211,9 +209,9 @@ class Job < Struct.new(:uri, :redis)
     { 'aborted' => aborted?,
       'archive_url' => archive_url,
       'bytes_downloaded' => bytes_downloaded,
-      'completed' => completed?,
       'depth' => depth,
       'error_count' => error_count,
+      'finished' => finished?,
       'ident' => ident,
       'queued_at' => queued_at,
       'finished_at' => finished_at,
