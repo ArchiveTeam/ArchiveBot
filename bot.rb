@@ -39,11 +39,11 @@ bot = Cinch::Bot.new do
   history_db = HistoryDb.new(URI(opts[:db]), opts[:db_credentials])
   brain = Brain.new(schemes, redis, history_db)
 
-  on :message, /\A\!archive (.+)\Z/ do |m, param|
+  on :message, /\A(?:\!a|\!archive) (.+)\Z/ do |m, param|
     brain.request_archive(m, param)
   end
 
-  on :message, /\A!archiveonly (.+)\Z/ do |m, param|
+  on :message, /\A(?:\!ao|\!archiveonly) (.+)\Z/ do |m, param|
     brain.request_archive(m, param, :shallow)
   end
 
