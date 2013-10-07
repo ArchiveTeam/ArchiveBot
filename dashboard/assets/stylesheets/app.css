@@ -180,6 +180,10 @@ section.history th, section.history td {
   padding-right: 1em;
 }
 
+section.history td {
+  vertical-align: middle;
+}
+
 section.history tr.finished {
   background-color: hsl(120, 100%, 10%);
   border-bottom: 1px solid hsl(120, 100%, 15%);
