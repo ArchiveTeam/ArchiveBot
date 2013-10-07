@@ -18,11 +18,11 @@ Dashboard.HistoryRecordController = Ember.ObjectController.extend
   classNames: (->
     classes = []
 
-    classes.pushObject('completed') if @get('completed')
+    classes.pushObject('finished') if @get('finished')
     classes.pushObject('aborted') if @get('aborted')
 
-    classes
-  ).property('aborted', 'completed')
+    classes.join(' ')
+  ).property('aborted', 'finished')
 
   queuedAtForDisplay: (->
     stored = (@get('queued_at') || 0) * 1000
