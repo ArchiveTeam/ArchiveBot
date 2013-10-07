@@ -151,14 +151,20 @@ redis.call('lrem', 'working', 1, ident)
 
 local was_aborted = redis.call('hget', ident, 'aborted')
 
+-- If the job was aborted, we ignore the given expire time.  Instead, we set a
+-- much shorter expire time -- one that's long enough for (most) subscribers
+-- to read a message, but short enough to not cause undue suffering in the
+-- case of retrying an aborted job.
 if was_aborted then
   redis.call('incr', 'jobs_aborted')
+  redis.call('expire', ident, 5)
+  redis.call('expire', ident..'_log', 5)
 else
   redis.call('incr', 'jobs_completed')
+  redis.call('expire', ident, expire_time)
+  redis.call('expire', ident..'_log', expire_time)
 end
 
-redis.call('expire', ident, expire_time)
-redis.call('expire', ident..'_log', expire_time)
 redis.call('publish', log_channel, ident)
 '''
 
