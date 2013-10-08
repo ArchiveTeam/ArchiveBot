@@ -18,6 +18,8 @@ module JobStatusGeneration
         rep << "Eligible for rearchival in #{formatted_ttl(t)}."
       end
     end
+
+    rep
   end
 
   private
