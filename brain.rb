@@ -136,6 +136,36 @@ class Brain
     reply m, "Initiated abort for #{job.url}."
   end
 
+  def add_ignore_pattern(m, ident, pattern)
+    # Is the user authorized?
+    return unless authorized?(m)
+
+    job = Job.from_ident(ident, redis)
+
+    if !job
+      reply m, "Sorry, I don't know anything about job #{ident}."
+      return
+    end
+
+    job.add_ignore_pattern(pattern)
+    reply m, "Added ignore pattern #{pattern} to job #{ident}."
+  end
+
+  def remove_ignore_pattern(m, ident, pattern)
+    # Is the user authorized?
+    return unless authorized?(m)
+
+    job = Job.from_ident(ident, redis)
+
+    if !job
+      reply m, "Sorry, I don't know anything about job #{ident}."
+      return
+    end
+
+    job.remove_ignore_pattern(pattern)
+    reply m, "Removed ignore pattern #{pattern} from job #{ident}."
+  end
+
   def request_summary(m)
     s = Summary.new(redis)
     s.run

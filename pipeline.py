@@ -187,10 +187,12 @@ if was_aborted then
   redis.call('incr', 'jobs_aborted')
   redis.call('expire', ident, 5)
   redis.call('expire', ident..'_log', 5)
+  redis.call('expire', ident..'_ignores', 5)
 else
   redis.call('incr', 'jobs_completed')
   redis.call('expire', ident, expire_time)
   redis.call('expire', ident..'_log', expire_time)
+  redis.call('expire', ident..'_ignores', expire_time)
 end
 
 redis.call('publish', log_channel, ident)
@@ -283,6 +285,7 @@ pipeline = Pipeline(
     'ABORT_SCRIPT': MARK_ABORTED,
     'LOG_SCRIPT': LOGGER,
     'LOG_KEY': ItemInterpolation('%(ident)s_log'),
+    'IGNORE_PATTERNS_KEY': ItemInterpolation('%(ident)s_ignores'),
     'LOG_CHANNEL': LOG_CHANNEL,
     'REDIS_HOST': redis_url.hostname,
     'REDIS_PORT': str(redis_url.port),

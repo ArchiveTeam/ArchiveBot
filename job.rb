@@ -151,6 +151,20 @@ class Job < Struct.new(:uri, :redis)
     @ident ||= UUIDTools::UUID.sha1_create(ARCHIVEBOT_V0_NAMESPACE, url).to_i.to_s(36)
   end
 
+  def ignore_patterns_set_key
+    "#{ident}_ignores"
+  end
+
+  def add_ignore_pattern(pattern)
+    redis.sadd(ignore_patterns_set_key, pattern)
+    redis.hincrby(ident, 'ignore_patterns_set_age', 1)
+  end
+
+  def remove_ignore_pattern(pattern)
+    redis.srem(ignore_patterns_set_key, pattern)
+    redis.hincrby(ident, 'ignore_patterns_set_age', 1)
+  end
+
   # More convenient access for modules.
   def response_buckets
     RESPONSE_BUCKETS
