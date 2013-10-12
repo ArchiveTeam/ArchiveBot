@@ -54,7 +54,7 @@ class GetItemFromQueue(Task):
 
   def send_request(self, item):
     # The Python Redis client doesn't understand RPOPLPUSH yet
-    ident = self.redis.execute_command('RPOPLPUSH', 'pending', 'working') 
+    ident = self.redis.execute_command('RPOPLPUSH', 'pending', 'working')
     if ident == None:
       self.schedule_retry(item)
     else:
@@ -101,7 +101,32 @@ class PreparePaths(SimpleTask):
     item['warc_file_base'] = '%s-%s' % (item['ident'], time.strftime("%Y%m%d-%H%M%S"))
     item['source_warc_file'] = '%(item_dir)s/%(warc_file_base)s.warc.gz' % item
     item['target_warc_file'] = '%(data_dir)s/%(warc_file_base)s.warc.gz' % item
+    item['source_info_file'] = '%(item_dir)s/%(warc_file_base)s.json' % item
+    item['target_info_file'] = '%(data_dir)s/%(warc_file_base)s.json' % item
     item['cookie_jar'] = '%(item_dir)s/cookies.txt' % item
+
+class WriteInfo(SimpleTask):
+  def __init__(self, redis):
+    SimpleTask.__init__(self, 'WriteNfo')
+    self.redis = redis
+
+  def process(self, item):
+    job_data = self.redis.hgetall(item['ident'])
+
+    # Yeah, we're just copying keys.  The difference is interface.
+    #
+    # This JSON object's fieldset will remain much more stable than
+    # ArchiveBot's internal structures.
+    info = {
+        'url': job_data['url'],
+        'fetch_depth': job_data['fetch_depth'],
+        'queued_at': job_data['queued_at'],
+        'started_in': job_data['started_in'],
+        'started_by': job_data['started_by']
+    }
+
+    with open(item['source_info_file'], 'w') as f:
+      f.write(json.dumps(info, indent=True))
 
 class MoveFiles(SimpleTask):
   def __init__(self):
@@ -109,6 +134,7 @@ class MoveFiles(SimpleTask):
 
   def process(self, item):
     os.rename(item['source_warc_file'], item['target_warc_file'])
+    os.rename(item['source_info_file'], item['target_info_file'])
     shutil.rmtree("%(item_dir)s" % item)
 
 class SetWarcFileSizeInRedis(SimpleTask):
@@ -220,6 +246,7 @@ pipeline = Pipeline(
   GetItemFromQueue(r),
   SetFetchDepth(r),
   PreparePaths(),
+  WriteInfo(r),
   WgetDownload([WGET_LUA,
     '-U', USER_AGENT,
     '-nv',
@@ -264,7 +291,8 @@ pipeline = Pipeline(
       target = RSYNC_URL,
       target_source_path = ItemInterpolation("%(data_dir)s"),
       files = [
-        ItemInterpolation('%(target_warc_file)s')
+        ItemInterpolation('%(target_warc_file)s'),
+        ItemInterpolation('%(target_info_file)s')
       ]
     )
   ),
