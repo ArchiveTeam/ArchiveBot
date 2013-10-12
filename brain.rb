@@ -73,8 +73,13 @@ class Brain
         queued_time = Time.at(doc['queued_at']).to_s
         rep << "#{url}:"
 
-        if doc['completed']
-          rep << "Archived to #{doc['archive_url']}; last ran at #{queued_time}."
+        if doc['finished']
+          if doc['archive_url']
+            rep << "Archived to #{doc['archive_url']}; last ran at #{queued_time}."
+          else
+            rep << "Job finished; last ran at #{queued_time}."
+          end
+
           rep << "Eligible for re-archiving."
         elsif doc['aborted']
           rep << "Job aborted; last ran at #{queued_time}."

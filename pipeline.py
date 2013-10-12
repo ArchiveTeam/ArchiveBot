@@ -127,9 +127,8 @@ class MarkItemAsDone(SimpleTask):
     self.mark_done = self.redis.register_script(mark_done_script)
 
   def process(self, item):
-    archive_url = 'http://dumpground.archivingyoursh.it/%s.warc.gz' % item['warc_file_base']
-    self.mark_done(keys=[item['ident']], args=[archive_url, EXPIRE_TIME,
-      LOG_CHANNEL, int(time.time())])
+    self.mark_done(keys=[item['ident']], args=[EXPIRE_TIME, LOG_CHANNEL,
+      int(time.time())])
 
 # ------------------------------------------------------------------------------
 
@@ -141,12 +140,11 @@ r = redis.StrictRedis(host=redis_url.hostname, port=redis_url.port, db=redis_db)
 
 MARK_DONE = '''
 local ident = KEYS[1]
-local archive_url = ARGV[1]
-local expire_time = ARGV[2]
-local log_channel = ARGV[3]
-local finished_at = ARGV[4]
+local expire_time = ARGV[1]
+local log_channel = ARGV[2]
+local finished_at = ARGV[3]
 
-redis.call('hmset', ident, 'archive_url', archive_url, 'finished_at', finished_at)
+redis.call('hmset', ident, 'finished_at', finished_at)
 redis.call('lrem', 'working', 1, ident)
 
 local was_aborted = redis.call('hget', ident, 'aborted')

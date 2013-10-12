@@ -6,6 +6,8 @@ module JobStatusGeneration
 
     if aborted?
       rep << "Job aborted."
+    elsif finished?
+      rep << "Job completed."
     elsif in_progress?
       rep << "In progress.  Downloaded #{mb_downloaded.round(2)} MB, #{error_count.to_i} errors encountered."
       rep << "See the ArchiveBot dashboard for more information."
@@ -13,10 +15,12 @@ module JobStatusGeneration
 
     if archive_url
       rep << "WARC: #{archive_url}"
+    else
+      rep << "No archive URL currently available."
+    end
 
-      if (t = ttl)
-        rep << "Eligible for rearchival in #{formatted_ttl(t)}."
-      end
+    if (t = ttl)
+      rep << "Eligible for rearchival in #{formatted_ttl(t)}."
     end
 
     rep

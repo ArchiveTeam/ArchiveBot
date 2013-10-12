@@ -133,7 +133,7 @@ class Job < Struct.new(:uri, :redis)
   end
 
   def finished?
-    !!archive_url
+    !finished_at.nil?
   end
 
   def in_progress?
