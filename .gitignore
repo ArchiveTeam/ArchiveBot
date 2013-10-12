@@ -2,4 +2,4 @@
 *.rdb
 
 data
-wget-lua
+./wget-lua
