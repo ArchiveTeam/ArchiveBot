@@ -98,6 +98,14 @@ local update_ignore_patterns = function()
   end
 end
 
+wget.callbacks.httploop_proceed_p = function(url, http_stat)
+  if matches_ignore_pattern(url.url) then
+    return false
+  end
+
+  return true
+end
+
 wget.callbacks.httploop_result = function(url, err, http_stat)
   -- Update the traffic counters.
   rconn:hincrby(ident, 'bytes_downloaded', http_stat.rd_size)
