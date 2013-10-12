@@ -4,3 +4,6 @@
 [submodule "vendor/ember.js"]
 	path = vendor/ember.js
 	url = https://github.com/emberjs/ember.js.git
+[submodule "vendor/wget-lua"]
+	path = vendor/wget-lua
+	url = https://github.com/ArchiveTeam/wget-lua.git
