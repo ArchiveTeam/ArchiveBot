@@ -189,6 +189,7 @@ class Job < Struct.new(:uri, :redis)
   def register(depth, started_by, started_in)
     redis.hmset(ident, 'url', url,
                        'fetch_depth', depth,
+                       'slug', "#{uri.host}-#{depth}",
                        'started_by', started_by,
                        'started_in', started_in)
   end

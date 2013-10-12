@@ -60,6 +60,7 @@ class GetItemFromQueue(Task):
     else:
       item['ident'] = ident
       item['url'] = self.redis.hget(ident, 'url')
+      item['slug'] = self.redis.hget(ident, 'slug')
       item.log_output('Received item %s.' % ident)
       self.complete_item(item)
 
@@ -98,7 +99,7 @@ class PreparePaths(SimpleTask):
     os.makedirs(item_dir)
 
     item['item_dir'] = item_dir
-    item['warc_file_base'] = '%s-%s' % (item['ident'], time.strftime("%Y%m%d-%H%M%S"))
+    item['warc_file_base'] = '%s-%s' % (item['slug'], time.strftime("%Y%m%d-%H%M%S"))
     item['source_warc_file'] = '%(item_dir)s/%(warc_file_base)s.warc.gz' % item
     item['target_warc_file'] = '%(data_dir)s/%(warc_file_base)s.warc.gz' % item
     item['source_info_file'] = '%(item_dir)s/%(warc_file_base)s.json' % item
