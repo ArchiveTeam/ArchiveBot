@@ -20,7 +20,7 @@ from seesaw.util import find_executable
 VERSION = "20131012.01"
 USER_AGENT = "ArchiveTeam ArchiveBot/%s" % VERSION
 EXPIRE_TIME = 60 * 60 * 48    # 48 hours between archive requests
-WGET_LUA = find_executable('Wget+Lua', "GNU Wget 1.14.lua.20130523-9a5c",
+WGET_LUA = find_executable('Wget+Lua', "GNU Wget UNKNOWN",
     [ './wget-lua' ])
 
 if not WGET_LUA:
