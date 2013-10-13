@@ -165,9 +165,9 @@ class Job < Struct.new(:uri, :redis)
       @bytes_downloaded = h['bytes_downloaded'].to_i
       @warc_size = h['warc_size'].to_i
       @error_count = h['error_count'].to_i
-      @queued_at = h['queued_at'].to_i
+      @queued_at = h['queued_at']
       @finished_at = h['finished_at']
-      @started_at = h['started_at'].to_i
+      @started_at = h['started_at']
       @started_by = h['started_by']
       @started_in = h['started_in']
 
