@@ -55,9 +55,12 @@ class GetItemFromQueue(Task):
   def send_request(self, item):
     # The Python Redis client doesn't understand RPOPLPUSH yet
     ident = self.redis.execute_command('RPOPLPUSH', 'pending', 'working')
+
     if ident == None:
       self.schedule_retry(item)
     else:
+      self.redis.hset(ident, 'started_at', int(time.time()))
+
       item['ident'] = ident
       item['url'] = self.redis.hget(ident, 'url')
       item['slug'] = self.redis.hget(ident, 'slug')

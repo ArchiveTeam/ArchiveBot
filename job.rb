@@ -86,6 +86,9 @@ class Job < Struct.new(:uri, :redis)
   # Returns a string.
   attr_reader :started_by
 
+  # When the job was started.  Set by the seesaw pipeline.
+  attr_reader :started_at
+
   # The channel in which the job was started.
   #
   # This is assumed to be constant across the lifespan of a job.  If you move
@@ -160,6 +163,7 @@ class Job < Struct.new(:uri, :redis)
       @error_count = h['error_count'].to_i
       @queued_at = h['queued_at'].to_i
       @finished_at = h['finished_at']
+      @started_at = h['started_at'].to_i
       @started_by = h['started_by']
       @started_in = h['started_in']
 
@@ -214,8 +218,9 @@ class Job < Struct.new(:uri, :redis)
       'error_count' => error_count,
       'finished' => finished?,
       'ident' => ident,
-      'queued_at' => queued_at,
       'finished_at' => finished_at,
+      'queued_at' => queued_at,
+      'started_at' => started_at,
       'started_by' => started_by,
       'started_in' => started_in,
       'url' => url,
