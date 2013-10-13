@@ -8,6 +8,8 @@ module JobStatusGeneration
       rep << "Job aborted."
     elsif finished?
       rep << "Job completed."
+    elsif pending?
+      rep << "In queue."
     elsif in_progress?
       rep << "In progress.  Downloaded #{mb_downloaded.round(2)} MB, #{error_count.to_i} errors encountered."
       rep << "See the ArchiveBot dashboard for more information."

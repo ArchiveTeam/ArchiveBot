@@ -139,8 +139,12 @@ class Job < Struct.new(:uri, :redis)
     !finished_at.nil?
   end
 
+  def pending?
+    started_at.nil?
+  end
+
   def in_progress?
-    !finished?
+    !finished? && !pending?
   end
 
   def ident
