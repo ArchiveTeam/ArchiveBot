@@ -18,7 +18,7 @@ then
   fi
 fi
 
-WGET_DOWNLOAD_URL="http://warriorhq.archiveteam.org/downloads/wget-lua/wget-1.14.lua.LATEST.tar.bz2"
+WGET_DOWNLOAD_URL="https://github.com/ArchiveTeam/wget-lua/releases/download/v1.14.0-archivebot1/wget-1.14.0-archivebot1.tar.gz"
 
 rm -rf get-wget-lua.tmp/
 mkdir -p get-wget-lua.tmp
@@ -27,10 +27,10 @@ cd get-wget-lua.tmp
 
 if builtin type -p curl &>/dev/null
 then
-  curl -L $WGET_DOWNLOAD_URL | tar -xj --strip-components=1
+  curl -L $WGET_DOWNLOAD_URL | tar -xz --strip-components=1
 elif builtin type -p wget &>/dev/null
 then
-  wget --output-document=- $WGET_DOWNLOAD_URL | tar -xj --strip-components=1
+  wget --output-document=- $WGET_DOWNLOAD_URL | tar -xz --strip-components=1
 else
   echo "You need Curl or Wget to download the source files."
   exit 1
