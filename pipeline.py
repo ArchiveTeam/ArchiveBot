@@ -90,7 +90,12 @@ class SetFetchDepth(SimpleTask):
       item['level'] = '--level'
       item['depth'] = depth
 
-class PreparePaths(SimpleTask):
+class TargetPathMixin(object):
+  def set_target_paths(self, item):
+    item['target_warc_file'] = '%(data_dir)s/%(warc_file_base)s.warc.gz' % item
+    item['target_info_file'] = '%(data_dir)s/%(warc_file_base)s.json' % item
+
+class PreparePaths(SimpleTask, TargetPathMixin):
   def __init__(self):
     SimpleTask.__init__(self, 'PreparePaths')
 
@@ -104,10 +109,10 @@ class PreparePaths(SimpleTask):
     item['item_dir'] = item_dir
     item['warc_file_base'] = '%s-%s' % (item['slug'], time.strftime("%Y%m%d-%H%M%S"))
     item['source_warc_file'] = '%(item_dir)s/%(warc_file_base)s.warc.gz' % item
-    item['target_warc_file'] = '%(data_dir)s/%(warc_file_base)s.warc.gz' % item
     item['source_info_file'] = '%(item_dir)s/%(warc_file_base)s.json' % item
-    item['target_info_file'] = '%(data_dir)s/%(warc_file_base)s.json' % item
     item['cookie_jar'] = '%(item_dir)s/cookies.txt' % item
+
+    self.set_target_paths(item)
 
 class WriteInfo(SimpleTask):
   def __init__(self, redis):
@@ -140,6 +145,20 @@ class MoveFiles(SimpleTask):
     os.rename(item['source_warc_file'], item['target_warc_file'])
     os.rename(item['source_info_file'], item['target_info_file'])
     shutil.rmtree("%(item_dir)s" % item)
+
+class RelabelIfAborted(SimpleTask, TargetPathMixin):
+  def __init__(self, redis):
+    SimpleTask.__init__(self, 'RelabelIfAborted')
+    self.redis = redis
+
+  def process(self, item):
+    if self.redis.hget(ident, 'aborted'):
+      item['warc_file_base'] = '%(warc_file_base)s-aborted' % item
+
+      self.set_target_paths(item)
+
+      item.log_output('Adjusted target WARC path to %w(target_warc_file)s' %
+          item)
 
 class SetWarcFileSizeInRedis(SimpleTask):
   def __init__(self, redis):
@@ -292,6 +311,7 @@ pipeline = Pipeline(
     'REDIS_DB': str(redis_db)
   }),
   MoveFiles(),
+  RelabelIfAborted(r),
   SetWarcFileSizeInRedis(r),
   LimitConcurrent(2,
     RsyncUpload(
