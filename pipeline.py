@@ -310,8 +310,8 @@ pipeline = Pipeline(
     'REDIS_PORT': str(redis_url.port),
     'REDIS_DB': str(redis_db)
   }),
-  MoveFiles(),
   RelabelIfAborted(r),
+  MoveFiles(),
   SetWarcFileSizeInRedis(r),
   LimitConcurrent(2,
     RsyncUpload(
