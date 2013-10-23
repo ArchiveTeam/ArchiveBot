@@ -4,6 +4,7 @@ require 'trollop'
 require 'uri'
 
 require File.expand_path('../brain', __FILE__)
+require File.expand_path('../command_patterns', __FILE__)
 require File.expand_path('../log_analyzer', __FILE__)
 require File.expand_path('../job_recorder', __FILE__)
 
@@ -41,12 +42,12 @@ bot = Cinch::Bot.new do
   history_db = HistoryDb.new(URI(opts[:db]), opts[:db_credentials])
   brain = Brain.new(schemes, redis, history_db)
 
-  on :message, /\A(?:\!a|\!archive) (.+)\Z/ do |m, param|
-    brain.request_archive(m, param)
+  on :message, CommandPatterns::ARCHIVE do |m, url, params|
+    brain.request_archive(m, url)
   end
 
-  on :message, /\A(?:\!ao|\!archiveonly) (.+)\Z/ do |m, param|
-    brain.request_archive(m, param, :shallow)
+  on :message, CommandPatterns::ARCHIVEONLY do |m, url, params|
+    brain.request_archive(m, url, :shallow)
   end
 
   on :message, /\A\!status\Z/ do |m|
