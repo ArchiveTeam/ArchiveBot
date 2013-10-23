@@ -1,7 +1,10 @@
 require 'uri'
 
-require File.expand_path('../job', __FILE__)
+require File.expand_path('../../lib/job', __FILE__)
 require File.expand_path('../summary', __FILE__)
+require File.expand_path('../job_status_generation', __FILE__)
+
+Job.send(:include, JobStatusGeneration)
 
 class Brain
   attr_reader :history_db

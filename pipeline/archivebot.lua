@@ -1,10 +1,10 @@
 dofile("redis_script_exec.lua")
-dofile("wget_behaviors/acceptance_heuristics.lua")
+dofile("acceptance_heuristics.lua")
 
 require('socket')
 
 local json = require('json')
-local redis = require('vendor/redis-lua/src/redis')
+local redis = require('../vendor/redis-lua/src/redis')
 local ident = os.getenv('ITEM_IDENT')
 local rconn = redis.connect(os.getenv('REDIS_HOST'), os.getenv('REDIS_PORT'))
 local aborter = os.getenv('ABORT_SCRIPT')

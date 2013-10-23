@@ -5,7 +5,7 @@ require 'uri'
 require 'webmachine'
 require 'webmachine/sprockets'
 
-require File.expand_path('../../history_db', __FILE__)
+require File.expand_path('../../lib/history_db', __FILE__)
 require File.expand_path('../log_actors', __FILE__)
 
 opts = Trollop.options do

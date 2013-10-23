@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-require 'command_patterns'
+require 'bot/command_patterns'
 
 describe CommandPatterns do
   describe 'Archive command' do

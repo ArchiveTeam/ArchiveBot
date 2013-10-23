@@ -1,9 +1,9 @@
 require 'analysand'
 require 'uri'
 
-require File.expand_path('../history_db', __FILE__)
-require File.expand_path('../job', __FILE__)
-require File.expand_path('../log_update_listener', __FILE__)
+require File.expand_path('../../lib/history_db', __FILE__)
+require File.expand_path('../../lib/job', __FILE__)
+require File.expand_path('../../lib/log_update_listener', __FILE__)
 
 class JobRecorder < LogUpdateListener
   def initialize(redis_url, update_channel, db_url, db_credentials)

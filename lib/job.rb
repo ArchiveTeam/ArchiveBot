@@ -3,7 +3,6 @@ require 'uuidtools'
 require 'json'
 
 require File.expand_path('../job_analysis', __FILE__)
-require File.expand_path('../job_status_generation', __FILE__)
 
 # Ruby representation of an archive job.
 #
@@ -23,7 +22,6 @@ require File.expand_path('../job_status_generation', __FILE__)
 # second pattern.
 class Job < Struct.new(:uri, :redis)
   include JobAnalysis
-  include JobStatusGeneration
 
   ARCHIVEBOT_V0_NAMESPACE = UUIDTools::UUID.parse('82244de1-c354-4c89-bf2b-f153ce23af43')
 

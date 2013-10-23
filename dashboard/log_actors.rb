@@ -2,8 +2,8 @@ require 'celluloid'
 require 'celluloid/autostart'
 require 'reel'
 
-require File.expand_path('../../job', __FILE__)
-require File.expand_path('../../log_update_listener', __FILE__)
+require File.expand_path('../../lib/job', __FILE__)
+require File.expand_path('../../lib/log_update_listener', __FILE__)
 require File.expand_path('../messages', __FILE__)
 
 UPDATE_TOPIC = 'updates'.freeze

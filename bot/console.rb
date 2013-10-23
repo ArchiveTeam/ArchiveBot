@@ -2,7 +2,7 @@ require 'irb'
 require 'redis'
 require 'trollop'
 
-require File.expand_path('../job', __FILE__)
+require File.expand_path('../lib/job', __FILE__)
 
 opts = Trollop.options do
   opt :redis, 'URL of Redis server', :default => ENV['REDIS_URL'] || 'redis://localhost:6379/0'
