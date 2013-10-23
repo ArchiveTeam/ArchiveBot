@@ -9,6 +9,10 @@ gem 'redis'
 gem 'trollop'
 gem 'uuidtools'
 
+group :test do
+  gem 'rspec'
+end
+
 group :dashboard do
   gem 'reel'
   gem 'json'
