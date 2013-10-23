@@ -152,7 +152,7 @@ class RelabelIfAborted(SimpleTask, TargetPathMixin):
     self.redis = redis
 
   def process(self, item):
-    if self.redis.hget(ident, 'aborted'):
+    if self.redis.hget(item['ident'], 'aborted'):
       item['warc_file_base'] = '%(warc_file_base)s-aborted' % item
 
       self.set_target_paths(item)
