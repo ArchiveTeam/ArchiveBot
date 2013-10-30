@@ -23,9 +23,13 @@ class JobRecorder < LogUpdateListener
       begin
         @db.put!(doc_id, job)
       rescue Analysand::DocumentNotSaved => e
-        if e.response.conflict?
-          warn "Document #{doc_id} already exists"
-        else
+        # A conflict indicates that doc_id already exists.  The ident is unique
+        # with high probability, so this situation is a very strong indication
+        # that we just received a duplicate message.  As such, we ignore
+        # conflicts.
+        #
+        # However, other issues are treated as fatal.
+        if !e.response.conflict?
           throw e
         end
       end
