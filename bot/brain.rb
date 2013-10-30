@@ -3,10 +3,13 @@ require 'uri'
 require File.expand_path('../../lib/job', __FILE__)
 require File.expand_path('../summary', __FILE__)
 require File.expand_path('../job_status_generation', __FILE__)
+require File.expand_path('../parameter_parsing', __FILE__)
 
 Job.send(:include, JobStatusGeneration)
 
 class Brain
+  include ParameterParsing
+
   attr_reader :history_db
   attr_reader :redis
   attr_reader :schemes
@@ -19,15 +22,26 @@ class Brain
     @url_pattern ||= %r{(?:#{schemes.join('|')})://.+}
   end
 
-  def request_archive(m, param, depth='inf')
+  def request_archive(m, target, params, depth='inf')
     # Is the user authorized?
     return unless authorized?(m)
 
     # Do we have a valid URI?
     begin
-      uri = URI.parse(param)
+      uri = URI.parse(target)
     rescue URI::InvalidURIError => e
       reply m, "Sorry, that doesn't look like a URL to me."
+      return
+    end
+
+    # Parse parameters.
+    h = parse_params(params)
+
+    # Eliminate unknown parameters.  If we find any such parameters, report
+    # them and don't run the job.
+    unknown = delete_unknown_parameters(params, :archive)
+    if !unknown.empty?
+      reply m, "Sorry, #{unknown.join(', ')} are unrecognized parameters."
       return
     end
 
@@ -177,6 +191,21 @@ class Brain
   end
 
   private
+
+  VALID_PARAMETERS = {
+    :archive => %w(ignore_sets)
+  }
+
+  def delete_unknown_parameters(h, command)
+    [].tap do |a|
+      h.keys.each do |k|
+        if !VALID_PARAMETERS[command].include?(k)
+          h.delete k
+          a << k
+        end
+      end
+    end
+  end
 
   def authorized?(m)
     if !m.channel.opped?(m.user)

@@ -12,6 +12,17 @@
 
   ArchiveBot does not ascend to parent links.
 
+  Accepted parameters:
+
+    * --ignore-sets SET1,...,SETN: specify sets of URL patterns to
+      ignore
+
+      > !archive http://example.blogspot.com/ --ignore-sets=blogspot,google
+      < Archiving http://example.blogspot.com/.
+      < 14 ignore patterns loaded.
+      < Use !status 5sid4pgxkiu6zynhbt3q1gi2s for updates, !abort
+        5sid4pgxkiu6zynhbt3q1gi2s to abort.
+
 - !archiveonly URL: non-recursive retrieval of the given URL
 
     > !archiveonly http://store.steampowered.com/livingroom
@@ -19,6 +30,17 @@
       recursion.
     > Use !status 1q2qydhkeh3gfnrcxuf6py70b for updates, !abort
       1q2qydhkeh3gfnrcxuf6py70b to abort.
+
+    Accepted parameters:
+
+    * --ignore-sets SET1,...,SETN: specify sets of URL patterns to
+      ignore
+
+      > !archiveonly http://example.blogspot.com/ --ignore-sets=blogspot,google
+      < Archiving http://example.blogspot.com/ without recursion.
+      < 14 ignore patterns loaded.
+      < Use !status 5sid4pgxkiu6zynhbt3q1gi2s for updates, !abort
+        5sid4pgxkiu6zynhbt3q1gi2s to abort.
 
 - !abort IDENT: abort a job
     > !abort 1q2qydhkeh3gfnrcxuf6py70b
