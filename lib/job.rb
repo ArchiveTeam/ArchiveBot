@@ -146,7 +146,7 @@ class Job < Struct.new(:uri, :redis)
   end
 
   def ident
-    @ident ||= UUIDTools::UUID.sha1_create(ARCHIVEBOT_V0_NAMESPACE, url).to_i.to_s(36)
+    @ident ||= UUIDTools::UUID.sha1_create(ARCHIVEBOT_V0_NAMESPACE, uri.normalize.to_s).to_i.to_s(36)
   end
 
   def ignore_patterns_set_key
