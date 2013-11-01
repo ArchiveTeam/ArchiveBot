@@ -39,7 +39,7 @@ class Brain
 
     # Eliminate unknown parameters.  If we find any such parameters, report
     # them and don't run the job.
-    unknown = delete_unknown_parameters(params, :archive)
+    unknown = delete_unknown_parameters(h, :archive)
     if !unknown.empty?
       reply m, "Sorry, #{unknown.join(', ')} are unrecognized parameters."
       return
