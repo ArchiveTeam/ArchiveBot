@@ -1,5 +1,7 @@
 module ParameterParsing
   def parse_params(str)
+    return {} if str.nil?
+
     str.split(/\s+/).each_with_object({}) do |p, h|
       k, v = p.split('=')
 

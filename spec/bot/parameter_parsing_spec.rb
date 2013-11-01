@@ -11,6 +11,10 @@ describe ParameterParsing do
     vessel.parse_params('').should == {}
   end
 
+  it 'treats nil as an empty string' do
+    vessel.parse_params(nil).should == {}
+  end
+
   it 'parses foo to {}' do
     vessel.parse_params('foo').should == {}
   end
