@@ -157,7 +157,7 @@ class RelabelIfAborted(SimpleTask, TargetPathMixin):
 
       self.set_target_paths(item)
 
-      item.log_output('Adjusted target WARC path to %w(target_warc_file)s' %
+      item.log_output('Adjusted target WARC path to %(target_warc_file)s' %
           item)
 
 class SetWarcFileSizeInRedis(SimpleTask):
