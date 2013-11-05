@@ -1,7 +1,7 @@
 require 'analysand'
 require 'uri'
 
-class HistoryDb
+class Couchdb
   def initialize(uri, credentials)
     @db = Analysand::Database.new(uri)
     @credentials = parse_credentials(credentials)

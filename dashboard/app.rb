@@ -5,20 +5,20 @@ require 'uri'
 require 'webmachine'
 require 'webmachine/sprockets'
 
-require File.expand_path('../../lib/history_db', __FILE__)
+require File.expand_path('../../lib/couchdb', __FILE__)
 require File.expand_path('../log_actors', __FILE__)
 
 opts = Trollop.options do
   opt :url, 'URL to bind to', :default => 'http://localhost:4567'
   opt :redis, 'URL of Redis server', :default => ENV['REDIS_URL'] || 'redis://localhost:6379/0'
   opt :log_update_channel, 'Redis pubsub channel for log updates', :default => ENV['LOG_CHANNEL'] || 'updates'
-  opt :db, 'URL of CouchDB history database', :default => ENV['COUCHDB_URL'] || 'http://localhost:5984/archivebot_history'
-  opt :db_credentials, 'Credentials for history database (USERNAME:PASSWORD)', :type => String, :default => nil
+  opt :db, 'URL of CouchDB database', :default => ENV['COUCHDB_URL'] || 'http://localhost:5984/archivebot_history'
+  opt :db_credentials, 'Credentials for CouchDB database (USERNAME:PASSWORD)', :type => String, :default => nil
 end
 
 bind_uri = URI.parse(opts[:url])
 
-DB = HistoryDb.new(URI(opts[:db]), opts[:db_credentials])
+DB = Couchdb.new(URI(opts[:db]), opts[:db_credentials])
 
 class History < Webmachine::Resource
   def run_query

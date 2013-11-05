@@ -5,7 +5,7 @@ require 'uri'
 
 require File.expand_path('../brain', __FILE__)
 require File.expand_path('../command_patterns', __FILE__)
-require File.expand_path('../../lib/history_db', __FILE__)
+require File.expand_path('../../lib/couchdb', __FILE__)
 
 opts = Trollop.options do
   opt :server, 'IRC server, expressed as a URI (irc://SERVER:PORT or //SERVER:PORT)', :type => String
@@ -13,8 +13,8 @@ opts = Trollop.options do
   opt :channels, 'Comma-separated list of channels', :type => String
   opt :schemes, 'Comma-separated list of acceptable URI schemes', :default => 'http,https'
   opt :redis, 'URL of Redis server', :default => ENV['REDIS_URL'] || 'redis://localhost:6379/0'
-  opt :db, 'URL of CouchDB history database', :default => ENV['COUCHDB_URL'] || 'http://localhost:5984/archivebot_history'
-  opt :db_credentials, 'Credentials for history database (USERNAME:PASSWORD)', :type => String, :default => nil
+  opt :db, 'URL of CouchDB database', :default => ['COUCHDB_URL'] || 'http://localhost:5984/archivebot'
+  opt :db_credentials, 'Credentials for CouchDB database (USERNAME:PASSWORD)', :type => String, :default => nil
 end
 
 redis = Redis.new(:url => opts[:redis])
@@ -37,8 +37,8 @@ bot = Cinch::Bot.new do
     c.channels = channels
   end
 
-  history_db = HistoryDb.new(URI(opts[:db]), opts[:db_credentials])
-  brain = Brain.new(schemes, redis, history_db)
+  couchdb = Couchdb.new(URI(opts[:db]), opts[:db_credentials])
+  brain = Brain.new(schemes, redis, couchdb)
 
   on :message, CommandPatterns::ARCHIVE do |m, target, params|
     brain.request_archive(m, target, params)

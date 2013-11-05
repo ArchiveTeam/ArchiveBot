@@ -10,13 +10,13 @@ Job.send(:include, JobStatusGeneration)
 class Brain
   include ParameterParsing
 
-  attr_reader :history_db
+  attr_reader :couchdb
   attr_reader :redis
   attr_reader :schemes
   attr_reader :url_pattern
 
-  def initialize(schemes, redis, history_db)
-    @history_db = history_db
+  def initialize(schemes, redis, couchdb)
+    @couchdb = couchdb
     @redis = redis
     @schemes = schemes
     @url_pattern ||= %r{(?:#{schemes.join('|')})://.+}
@@ -84,7 +84,7 @@ class Brain
       rep = []
 
       # Was there a successful attempt in the past?
-      doc = history_db.latest_job_record(url)
+      doc = couchdb.latest_job_record(url)
 
       if doc
         queued_time = Time.at(doc['queued_at']).to_s
@@ -108,7 +108,7 @@ class Brain
         rep << "#{url} has not been archived."
 
         # Were there any attempts on child URLs?
-        child_attempts = history_db.attempts_on_children(url)
+        child_attempts = couchdb.attempts_on_children(url)
 
         if child_attempts > 0
           if child_attempts == 1
