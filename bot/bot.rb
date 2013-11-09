@@ -13,7 +13,7 @@ opts = Trollop.options do
   opt :channels, 'Comma-separated list of channels', :type => String
   opt :schemes, 'Comma-separated list of acceptable URI schemes', :default => 'http,https'
   opt :redis, 'URL of Redis server', :default => ENV['REDIS_URL'] || 'redis://localhost:6379/0'
-  opt :db, 'URL of CouchDB database', :default => ['COUCHDB_URL'] || 'http://localhost:5984/archivebot'
+  opt :db, 'URL of CouchDB database', :default => ENV['COUCHDB_URL'] || 'http://localhost:5984/archivebot'
   opt :db_credentials, 'Credentials for CouchDB database (USERNAME:PASSWORD)', :type => String, :default => nil
 end
 
