@@ -7,7 +7,7 @@ require File.expand_path('../job_recorder', __FILE__)
 opts = Trollop.options do
   opt :redis, 'URL of Redis server', :default => ENV['REDIS_URL'] || 'redis://localhost:6379/0'
   opt :log_update_channel, 'Redis pubsub channel for log updates', :default => ENV['LOG_CHANNEL'] || 'updates'
-  opt :db, 'URL of CouchDB history database', :default => ENV['COUCHDB_URL'] || 'http://localhost:5984/archivebot_history'
+  opt :db, 'URL of CouchDB history database', :default => ENV['COUCHDB_URL'] || 'http://localhost:5984/archivebot'
   opt :db_credentials, 'Credentials for history database (USERNAME:PASSWORD)', :type => String, :default => nil
 end
 
