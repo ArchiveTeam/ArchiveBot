@@ -69,6 +69,8 @@ Dashboard.LogView = Ember.View.extend
     if @get('autoScroll')
       Ember.run.next =>
         container = @$()
+        return unless container
+
         container.scrollTop container.prop('scrollHeight')
 
 # vim:ts=2:sw=2:et:tw=78
