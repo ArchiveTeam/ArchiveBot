@@ -87,7 +87,12 @@ class Brain
       doc = couchdb.latest_job_record(url)
 
       if doc
-        queued_time = Time.at(doc['queued_at']).to_s
+        queued_time = if doc['queued_at']
+                        Time.at(doc['queued_at']).to_s
+                      else
+                        '(unknown)'
+                      end
+
         rep << "#{url}:"
 
         if doc['finished']
