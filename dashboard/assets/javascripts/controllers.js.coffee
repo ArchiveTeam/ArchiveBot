@@ -5,6 +5,7 @@ Dashboard.IndexController = Ember.Controller.extend
 
 Dashboard.JobsController = Ember.ArrayController.extend
   itemController: 'job'
+  sortProperties: ['urlWithoutWww']
 
 Dashboard.HistoryController = Ember.ArrayController.extend
   itemController: 'historyRecord'
