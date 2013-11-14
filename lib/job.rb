@@ -161,7 +161,7 @@ class Job < Struct.new(:uri, :redis)
   def add_ignore_patterns(patterns)
     return if patterns.empty?
 
-    add_ignore_patterns(patterns)
+    add_ignore_pattern(patterns)
   end
 
   def remove_ignore_pattern(pattern)
