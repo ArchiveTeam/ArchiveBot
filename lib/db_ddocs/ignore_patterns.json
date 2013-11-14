@@ -1,0 +1,10 @@
+{
+   "_id": "_design/ignore_patterns",
+   "_rev": "1-99413747d226120bc4ff435aba504001",
+   "language": "javascript",
+   "views": {
+       "by_name": {
+           "map": "function(doc) {\n  var patterns, i;\n\n  if (doc['type'] === 'ignore_patterns') {\n    patterns = doc['patterns'] || [];\n \n    for(i = 0; i < patterns.length; ++i) {\n      emit(doc['name'], patterns[i]);\n    }\n  }\n}"
+       }
+   }
+}
