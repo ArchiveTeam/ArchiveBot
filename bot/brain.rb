@@ -2,6 +2,8 @@ require 'uri'
 
 require File.expand_path('../../lib/job', __FILE__)
 require File.expand_path('../summary', __FILE__)
+require File.expand_path('../post_registration_hook', __FILE__)
+require File.expand_path('../add_ignore_sets', __FILE__)
 require File.expand_path('../job_status_generation', __FILE__)
 require File.expand_path('../parameter_parsing', __FILE__)
 
@@ -9,6 +11,8 @@ Job.send(:include, JobStatusGeneration)
 
 class Brain
   include ParameterParsing
+  include PostRegistrationHook
+  include AddIgnoreSets
 
   attr_reader :couchdb
   attr_reader :redis
@@ -64,17 +68,24 @@ class Brain
       return
     end
 
-    # OK, add the job and queue it up.
+    # OK, add the job.
+    rep = []
     job.register(depth, m.user.nick, m.channel.name)
-    job.queue
 
     if depth == :shallow
-      reply m, "Archiving #{uri.to_s} without recursion."
+      rep << "Archiving #{uri.to_s} without recursion."
     else
-      reply m, "Archiving #{uri.to_s}."
+      rep << "Archiving #{uri.to_s}."
     end
 
-    reply m, "Use !status #{job.ident} for updates, !abort #{job.ident} to abort."
+    rep <<  "Use !status #{job.ident} for updates, !abort #{job.ident} to abort."
+
+    run_post_registration_hooks(job, h, rep)
+
+    # Queue it up.
+    job.queue
+
+    reply m, *rep
   end
 
   def request_status_by_url(m, url)

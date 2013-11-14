@@ -158,6 +158,12 @@ class Job < Struct.new(:uri, :redis)
     redis.hincrby(ident, 'ignore_patterns_set_age', 1)
   end
 
+  def add_ignore_patterns(patterns)
+    return if patterns.empty?
+
+    add_ignore_patterns(patterns)
+  end
+
   def remove_ignore_pattern(pattern)
     redis.srem(ignore_patterns_set_key, pattern)
     redis.hincrby(ident, 'ignore_patterns_set_age', 1)
