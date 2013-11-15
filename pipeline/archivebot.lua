@@ -21,19 +21,36 @@ rconn:select(os.getenv('REDIS_DB'))
 local ignore_patterns = {}
 local ignore_patterns_set_age = nil
 
+-- If a URL matches an ignore pattern, returns the matching pattern.
+-- Otherwise, returns false.
 local matches_ignore_pattern = function(url)
   for i, pattern in ipairs(ignore_patterns) do
    if string.find(url, pattern) then
-     return true
+     return pattern
    end
  end
 
  return false
 end
 
+-- Generates a log entry for ignored URLs.
+local log_ignored_url = function(url, pattern)
+  local entry = {
+    ts = os.time(),
+    url = url,
+    pattern = pattern,
+    type = 'ignore'
+  }
+
+  do_log(1, ident, json.encode(entry), log_channel)
+end
+
 wget.callbacks.download_child_p = function(urlpos, parent, depth, start_url_parsed, iri, verdict, reason)
   -- Does the URL match any of the ignore patterns?
-  if matches_ignore_pattern(urlpos.url.url) then
+  local pattern = matches_ignore_pattern(urlpos.url.url)
+
+  if pattern then
+    log_ignored_url(urlpos.url.url, pattern)
     return false
   end
 
@@ -99,7 +116,10 @@ local update_ignore_patterns = function()
 end
 
 wget.callbacks.httploop_proceed_p = function(url, http_stat)
-  if matches_ignore_pattern(url.url) then
+  local pattern = matches_ignore_pattern(url.url)
+
+  if pattern then
+    log_ignored_url(url.url, pattern)
     return false
   end
 
