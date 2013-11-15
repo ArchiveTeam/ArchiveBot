@@ -59,6 +59,13 @@ Dashboard.DownloadUpdateEntry = Ember.Object.extend
     [@get('response_code'), @get('wget_code'), @get('url')].join(' ')
   ).property('response_code', 'wget_code', 'url')
 
+Dashboard.IgnoredUrlEntry = Ember.Object.extend
+  classNames: ['ignored']
+
+  text: (->
+    "Pattern #{@get('pattern')} matches #{@get('url')}; skipping"
+  ).property('url', 'pattern')
+
 Dashboard.StdoutUpdateEntry = Ember.Object.extend
   classNames: []
 
@@ -120,11 +127,15 @@ Dashboard.MessageProcessor = Ember.Object.extend
     switch type
       when 'download' then @processDownloadUpdate(json, job)
       when 'stdout' then @processStdoutUpdate(json, job)
+      when 'ignore' then @processIgnoreUpdate(json, job)
 
   processDownloadUpdate: (json, job) ->
     job.addLogEntry Dashboard.DownloadUpdateEntry.create(json)
 
   processStdoutUpdate: (json, job) ->
     job.addLogEntry Dashboard.StdoutUpdateEntry.create(json)
+
+  processIgnoreUpdate: (json, job) ->
+    job.addLogEntry Dashboard.IgnoredUrlEntry.create(json)
 
 # vim:ts=2:sw=2:et:tw=78

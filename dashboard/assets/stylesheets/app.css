@@ -148,6 +148,10 @@ h1 {
   color: hsl(0, 100%, 50%);
 }
 
+.log-view .ignored {
+  color: hsl(0, 0%, 50%);
+}
+
 .log-view .aborted {
   background-color: hsl(0, 100%, 25%);
   color: hsl(0, 100%, 75%);
