@@ -7,7 +7,11 @@ module AddIgnoreSets
   private
 
   def add_ignore_sets(job, params, reply_buffer)
-    patterns = couchdb.patterns_in_ignore_sets(params['ignore_sets'])
+    ignore_sets = params['ignore_sets']
+
+    return unless ignore_sets && !ignore_sets.empty?
+
+    patterns = couchdb.patterns_in_ignore_sets(ignore_sets)
     job.add_ignore_patterns(patterns)
 
     reply_buffer << "Added #{patterns.length} ignore patterns."
