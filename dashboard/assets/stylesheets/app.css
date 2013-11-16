@@ -148,8 +148,13 @@ h1 {
   color: hsl(0, 100%, 50%);
 }
 
-.log-view .ignored {
+.log-view.show-ignores .ignored {
+  display: block;
   color: hsl(0, 0%, 50%);
+}
+
+.log-view .ignored {
+  display: none;
 }
 
 .log-view .aborted {

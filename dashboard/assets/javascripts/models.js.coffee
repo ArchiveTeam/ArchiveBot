@@ -73,7 +73,7 @@ Dashboard.StdoutUpdateEntry = Ember.Object.extend
 
 Dashboard.MessageProcessor = Ember.Object.extend
   registerJob: (ident) ->
-    job = Dashboard.Job.create autoScroll: true, messageProcessor: this
+    job = Dashboard.Job.create autoScroll: true, showIgnores: true, messageProcessor: this
 
     @get('jobIndex')[ident] = job
     @get('jobs').unshiftObject job

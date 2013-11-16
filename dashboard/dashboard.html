@@ -133,7 +133,8 @@
           {{view Dashboard.ResponseDistributionView itemBinding=job}}
         </header>
         {{view Dashboard.LogView incomingBinding=job.latestEntries
-            autoScrollBinding=job.autoScroll}}
+            autoScrollBinding=job.autoScroll
+            showIgnoresBinding=job.showIgnores}}
         <section>
           <span class="downloaded">{{job.mbDownloaded}} MB downloaded</span>
           <span>1xx: {{job.r1xx}}</span>
@@ -143,6 +144,10 @@
           <span>5xx: {{job.r5xx}}</span>
           <span>Unknown: {{job.runk}}</span>
           <div class="auto-scroll">
+            <label>
+              {{input type=checkbox checked=job.showIgnores}}
+              Show ignores
+            </label>
             <label>
               {{input type=checkbox checked=job.autoScroll}}
               Auto-scroll

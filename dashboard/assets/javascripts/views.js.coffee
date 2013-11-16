@@ -37,6 +37,7 @@ Dashboard.ResponseDistributionView = Ember.View.extend
 
 Dashboard.LogView = Ember.View.extend
   classNames: ['terminal', 'log-view']
+  classNameBindings: ['showIgnores']
 
   templateName: 'log-view'
 
