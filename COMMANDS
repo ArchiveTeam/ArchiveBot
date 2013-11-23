@@ -42,7 +42,26 @@
       < Use !status 5sid4pgxkiu6zynhbt3q1gi2s for updates, !abort
         5sid4pgxkiu6zynhbt3q1gi2s to abort.
 
+- !ignore IDENT PATTERN, !ig IDENT PATTERN: add an ignore pattern
+
+    > !ig 1q2qydhkeh3gfnrcxuf6py70b obnoxious%?foo=%d+
+    < Added ignore pattern obnoxious%?foo=%d+ to job
+      1q2qydhkeh3gfnrcxuf6py70b.
+
+  The pattern must be expressed in Lua pattern syntax.  For more
+  information, see:
+
+  http://lua-users.org/wiki/PatternsTutorial
+  http://www.lua.org/manual/5.1/manual.html#5.4.1
+
+- !unignore IDENT PATTERN, !unig IDENT PATTERN: remove an ignore pattern
+
+    > !unig 1q2qydhkeh3gfnrcxuf6py70b obnoxious%?foo=%d+
+    < Removed ignore pattern obnoxious%?foo=%d+ from job
+      1q2qydhkeh3gfnrcxuf6py70b.
+
 - !abort IDENT: abort a job
+
     > !abort 1q2qydhkeh3gfnrcxuf6py70b
     < Initiating abort for job 1q2qydhkeh3gfnrcxuf6py70b.
 
