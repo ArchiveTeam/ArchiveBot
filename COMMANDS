@@ -1,9 +1,4 @@
-- !status: print job summary
-
-    > !status
-    < Job status: 0 completed, 0 aborted, 0 in progress, 0 pending
-
-- !archive URL, !a URL: begin recursive retrieval from a URL
+* !archive URL, !a URL: begin recursive retrieval from a URL
 
     > !archive http://artscene.textfiles.com/litpacks/
     < Archiving http://artscene.textfiles.com/litpacks/.
@@ -23,7 +18,14 @@
       < Use !status 5sid4pgxkiu6zynhbt3q1gi2s for updates, !abort
         5sid4pgxkiu6zynhbt3q1gi2s to abort.
 
-- !archiveonly URL, !ao URL: non-recursive retrieval of the given URL
+
+* !abort IDENT: abort a job
+
+    > !abort 1q2qydhkeh3gfnrcxuf6py70b
+    < Initiating abort for job 1q2qydhkeh3gfnrcxuf6py70b.
+
+
+* !archiveonly URL, !ao URL: non-recursive retrieval of the given URL
 
     > !archiveonly http://store.steampowered.com/livingroom
     < Archiving http://store.steampowered.com/livingroom without
@@ -42,7 +44,8 @@
       < Use !status 5sid4pgxkiu6zynhbt3q1gi2s for updates, !abort
         5sid4pgxkiu6zynhbt3q1gi2s to abort.
 
-- !ignore IDENT PATTERN, !ig IDENT PATTERN: add an ignore pattern
+
+* !ignore IDENT PATTERN, !ig IDENT PATTERN: add an ignore pattern
 
     > !ig 1q2qydhkeh3gfnrcxuf6py70b obnoxious%?foo=%d+
     < Added ignore pattern obnoxious%?foo=%d+ to job
@@ -54,18 +57,21 @@
   http://lua-users.org/wiki/PatternsTutorial
   http://www.lua.org/manual/5.1/manual.html#5.4.1
 
-- !unignore IDENT PATTERN, !unig IDENT PATTERN: remove an ignore pattern
+
+* !unignore IDENT PATTERN, !unig IDENT PATTERN: remove an ignore pattern
 
     > !unig 1q2qydhkeh3gfnrcxuf6py70b obnoxious%?foo=%d+
     < Removed ignore pattern obnoxious%?foo=%d+ from job
       1q2qydhkeh3gfnrcxuf6py70b.
 
-- !abort IDENT: abort a job
 
-    > !abort 1q2qydhkeh3gfnrcxuf6py70b
-    < Initiating abort for job 1q2qydhkeh3gfnrcxuf6py70b.
+* !status: print job summary
 
-- !status IDENT, !status URL: print information about a job or URL
+    > !status
+    < Job status: 0 completed, 0 aborted, 0 in progress, 0 pending
+
+
+* !status IDENT, !status URL: print information about a job or URL
 
     For an unknown job:
     > !status 1q2qydhkeh3gfnrcxuf6py70b
