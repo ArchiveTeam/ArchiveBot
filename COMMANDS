@@ -3,7 +3,7 @@
     > !status
     < Job status: 0 completed, 0 aborted, 0 in progress, 0 pending
 
-- !archive URL: begin recursive retrieval from a URL
+- !archive URL, !a URL: begin recursive retrieval from a URL
 
     > !archive http://artscene.textfiles.com/litpacks/
     < Archiving http://artscene.textfiles.com/litpacks/.
@@ -23,7 +23,7 @@
       < Use !status 5sid4pgxkiu6zynhbt3q1gi2s for updates, !abort
         5sid4pgxkiu6zynhbt3q1gi2s to abort.
 
-- !archiveonly URL: non-recursive retrieval of the given URL
+- !archiveonly URL, !ao URL: non-recursive retrieval of the given URL
 
     > !archiveonly http://store.steampowered.com/livingroom
     < Archiving http://store.steampowered.com/livingroom without
