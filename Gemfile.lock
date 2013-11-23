@@ -1,10 +1,4 @@
 GIT
-  remote: https://github.com/cinchrb/cinch.git
-  revision: a78bfad4adea7498fcfefc2f1acf84d5e70bcb9c
-  specs:
-    cinch (2.0.9)
-
-GIT
   remote: https://github.com/lgierth/webmachine-sprockets.git
   revision: 0ed606cffe35820331995009962e7a74d630e96d
   specs:
@@ -47,6 +41,7 @@ GEM
     celluloid-redis (0.0.2)
       celluloid-io (>= 0.13.0.pre)
       redis
+    cinch (2.0.10)
     coffee-script (2.2.0)
       coffee-script-source
       execjs
@@ -100,7 +95,7 @@ DEPENDENCIES
   analysand!
   celluloid
   celluloid-redis
-  cinch!
+  cinch (~> 2.0.9)
   coffee-script
   json
   redis

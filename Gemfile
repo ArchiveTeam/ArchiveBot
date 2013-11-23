@@ -1,7 +1,7 @@
 source "https://rubygems.org"
 
 gem 'analysand', :git => 'https://github.com/yipdw/analysand.git'
-gem 'cinch', :git => 'https://github.com/cinchrb/cinch.git'
+gem 'cinch', '~> 2.0.9'
 gem 'celluloid'
 gem 'celluloid-redis'
 gem 'coffee-script'
