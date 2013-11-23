@@ -5,6 +5,7 @@ require 'uri'
 
 require File.expand_path('../brain', __FILE__)
 require File.expand_path('../command_patterns', __FILE__)
+require File.expand_path('../finish_notifier', __FILE__)
 require File.expand_path('../../lib/couchdb', __FILE__)
 
 opts = Trollop.options do
@@ -35,6 +36,10 @@ bot = Cinch::Bot.new do
     c.port = uri.port
     c.nick = opts[:nick]
     c.channels = channels
+    c.plugins.plugins = [FinishNotifier]
+    c.plugins.options[FinishNotifier] = {
+      redis: redis
+    }
   end
 
   couchdb = Couchdb.new(URI(opts[:db]), opts[:db_credentials])
