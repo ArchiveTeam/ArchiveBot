@@ -17,7 +17,7 @@ from seesaw.externalprocess import *
 
 from seesaw.util import find_executable
 
-VERSION = "20131114.02"
+VERSION = "20131123.01"
 USER_AGENT = "ArchiveTeam ArchiveBot/%s" % VERSION
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
 WGET_LUA = find_executable('Wget+Lua', "GNU Wget 1.14.0-archivebot1",
@@ -122,12 +122,19 @@ class WriteInfo(SimpleTask):
     def process(self, item):
         job_data = self.redis.hgetall(item['ident'])
 
-        # Yeah, we're just copying keys.  The difference is interface.
-        #
-        # This JSON object's fieldset will remain much more stable than
-        # ArchiveBot's internal structures.
-        info = {
+        # The "aborted" key might not have been written by any prior process,
+        # i.e. if the job wasn't aborted.  For accessor convenience, we add
+        # that key here.
+        if 'aborted' in job_data:
+            aborted = job_data['aborted']
+        else:
+            aborted = False
+
+        # This JSON object's fieldset is an externally visible interface.
+        # Adding fields is fine; changing existing ones, not so much.
+        item['info'] = {
                 'url': job_data['url'],
+                'aborted': aborted,
                 'fetch_depth': job_data['fetch_depth'],
                 'queued_at': job_data['queued_at'],
                 'started_in': job_data['started_in'],
@@ -135,7 +142,7 @@ class WriteInfo(SimpleTask):
         }
 
         with open(item['source_info_file'], 'w') as f:
-            f.write(json.dumps(info, indent=True))
+            f.write(json.dumps(item['info'], indent=True))
 
 class MoveFiles(SimpleTask):
     def __init__(self):
@@ -271,7 +278,6 @@ pipeline = Pipeline(
     GetItemFromQueue(r),
     SetFetchDepth(r),
     PreparePaths(),
-    WriteInfo(r),
     WgetDownload([WGET_LUA,
         '-U', USER_AGENT,
         '-nv',
@@ -311,6 +317,7 @@ pipeline = Pipeline(
         'REDIS_DB': str(redis_db)
     }),
     RelabelIfAborted(r),
+    WriteInfo(r),
     MoveFiles(),
     SetWarcFileSizeInRedis(r),
     LimitConcurrent(2,
