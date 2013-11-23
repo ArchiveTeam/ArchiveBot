@@ -17,7 +17,7 @@ from seesaw.externalprocess import *
 
 from seesaw.util import find_executable
 
-VERSION = "20131123.01"
+VERSION = "20131123.02"
 USER_AGENT = "ArchiveTeam ArchiveBot/%s" % VERSION
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
 WGET_LUA = find_executable('Wget+Lua', "GNU Wget 1.14.0-archivebot1",
@@ -184,7 +184,7 @@ class MarkItemAsDone(SimpleTask):
 
     def process(self, item):
         self.mark_done(keys=[item['ident']], args=[EXPIRE_TIME, LOG_CHANNEL,
-            int(time.time())])
+            int(time.time()), json.dumps(item['info'])])
 
 # ------------------------------------------------------------------------------
 
@@ -199,6 +199,7 @@ local ident = KEYS[1]
 local expire_time = ARGV[1]
 local log_channel = ARGV[2]
 local finished_at = ARGV[3]
+local info = ARGV[4]
 
 redis.call('hmset', ident, 'finished_at', finished_at)
 redis.call('lrem', 'working', 1, ident)
@@ -221,6 +222,7 @@ else
     redis.call('expire', ident..'_ignores', expire_time)
 end
 
+redis.call('rpush', 'finish_notifications', info)
 redis.call('publish', log_channel, ident)
 '''
 
