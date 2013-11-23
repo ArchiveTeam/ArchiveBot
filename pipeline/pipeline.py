@@ -114,6 +114,29 @@ class PreparePaths(SimpleTask, TargetPathMixin):
 
         self.set_target_paths(item)
 
+class MoveFiles(SimpleTask):
+    def __init__(self):
+        SimpleTask.__init__(self, "MoveFiles")
+
+    def process(self, item):
+        os.rename(item['source_warc_file'], item['target_warc_file'])
+        os.rename(item['source_info_file'], item['target_info_file'])
+        shutil.rmtree("%(item_dir)s" % item)
+
+class RelabelIfAborted(SimpleTask, TargetPathMixin):
+    def __init__(self, redis):
+        SimpleTask.__init__(self, 'RelabelIfAborted')
+        self.redis = redis
+
+    def process(self, item):
+        if self.redis.hget(item['ident'], 'aborted'):
+            item['warc_file_base'] = '%(warc_file_base)s-aborted' % item
+
+            self.set_target_paths(item)
+
+            item.log_output('Adjusted target WARC path to %(target_warc_file)s' %
+                    item)
+
 class WriteInfo(SimpleTask):
     def __init__(self, redis):
         SimpleTask.__init__(self, 'WriteNfo')
@@ -143,29 +166,6 @@ class WriteInfo(SimpleTask):
 
         with open(item['source_info_file'], 'w') as f:
             f.write(json.dumps(item['info'], indent=True))
-
-class MoveFiles(SimpleTask):
-    def __init__(self):
-        SimpleTask.__init__(self, "MoveFiles")
-
-    def process(self, item):
-        os.rename(item['source_warc_file'], item['target_warc_file'])
-        os.rename(item['source_info_file'], item['target_info_file'])
-        shutil.rmtree("%(item_dir)s" % item)
-
-class RelabelIfAborted(SimpleTask, TargetPathMixin):
-    def __init__(self, redis):
-        SimpleTask.__init__(self, 'RelabelIfAborted')
-        self.redis = redis
-
-    def process(self, item):
-        if self.redis.hget(item['ident'], 'aborted'):
-            item['warc_file_base'] = '%(warc_file_base)s-aborted' % item
-
-            self.set_target_paths(item)
-
-            item.log_output('Adjusted target WARC path to %(target_warc_file)s' %
-                    item)
 
 class SetWarcFileSizeInRedis(SimpleTask):
     def __init__(self, redis):
