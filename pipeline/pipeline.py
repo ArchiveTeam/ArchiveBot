@@ -102,7 +102,7 @@ class PreparePaths(SimpleTask, TargetPathMixin):
         SimpleTask.__init__(self, 'PreparePaths')
 
     def process(self, item):
-        item_dir = '%s/%s' % (item['data_dir'], item['ident'])
+        item_dir = '%(data_dir)s/%(ident)s' % item
 
         if os.path.isdir(item_dir):
             shutil.rmtree(item_dir)
