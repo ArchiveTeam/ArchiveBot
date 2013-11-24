@@ -108,6 +108,9 @@ class Job < Struct.new(:uri, :redis)
   # dashboard clients.
   attr_reader :last_broadcasted_log_entry
 
+  # The score of the last trimmed log entry.
+  attr_reader :last_trimmed_log_entry
+
   # A bucket for HTTP responses that aren't in the (100..599) range.
   class UnknownResponseCode
     def include?(resp_code)
@@ -202,6 +205,7 @@ class Job < Struct.new(:uri, :redis)
       @started_in = h['started_in']
       @last_analyzed_log_entry = h['last_analyzed_log_entry'].to_f
       @last_broadcasted_log_entry = h['last_broadcasted_log_entry'].to_f
+      @last_trimmed_log_entry = h['last_trimmed_log_entry'].to_f
 
       response_buckets.each do |_, bucket, attr|
         instance_variable_set("@#{attr}", h[bucket.to_s].to_i)
@@ -281,5 +285,57 @@ class Job < Struct.new(:uri, :redis)
 
   def total_responses
     response_counts.values.inject(0) { |c, a| c + a }
+  end
+
+  ##
+  # Trims this job's logs.
+  #
+  # By "trim", we really mean "remove and return them".
+  #
+  # Note: if you run this and then run #reset_analysis, you won't get the
+  # whole picture on any subsequent #analyze.  (Nor should you; after all, you
+  # removed log data.)
+  #
+  # Theory of operation
+  # -------------------
+  #
+  # There are two log bookmarks in a job: the last analyzed entry and the last
+  # broadcasted entry.  The minimum of the two identifies the oldest useful
+  # entry, i.e. the oldest entry that we still need to do something with.
+  #
+  # Everything older than that can be trimmed.  Here is pseudocode:
+  #
+  #   m = min(last_analyzed_log_entry, last_broadcasted_log_entry)
+  #   l = last_trimmed_log_entry
+  #
+  #   if (m - l) >= THRESHOLD
+  #     trim the oldest (m - l) log entries
+  #     set last_trimmed_log_entry to m
+  #     return trimmed entries
+  #   otherwise
+  #     return []
+  #
+  # --------------------------------------------------------------------------
+  #
+  # Returns the trimmed log entries as an array of strings.
+  #
+  # Note: As described above, the threshold parameter for this method doesn't
+  # mean "number of entries to remove".  What it really determines is the
+  # largest permissible gap between the last trimmed and last "useful" log
+  # entry.
+  def trim_logs!(threshold = 1000)
+    m = [last_analyzed_log_entry, last_broadcasted_log_entry].min
+    l = last_trimmed_log_entry
+    entries = []
+
+    diff = m - last_trimmed_log_entry
+
+    if m - last_trimmed_log_entry >= threshold
+      entries = redis.zrangebyscore(log_key, l, m)
+      redis.zremrangebyscore(log_key, l, m)
+      redis.hset(ident, 'last_trimmed_log_entry', m)
+    end
+
+    entries
   end
 end
