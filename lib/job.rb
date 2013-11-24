@@ -165,6 +165,10 @@ class Job < Struct.new(:uri, :redis)
     "#{ident}_ignores"
   end
 
+  def log_key
+    "#{ident}_log"
+  end
+
   def add_ignore_pattern(pattern)
     redis.sadd(ignore_patterns_set_key, pattern)
     redis.hincrby(ident, 'ignore_patterns_set_age', 1)
@@ -225,6 +229,7 @@ class Job < Struct.new(:uri, :redis)
   def register(depth, started_by, started_in)
     redis.hmset(ident, 'url', url,
                        'fetch_depth', depth,
+                       'log_key', log_key,
                        'slug', "#{uri.host}-#{depth}",
                        'started_by', started_by,
                        'started_in', started_in)

@@ -42,7 +42,7 @@ local log_ignored_url = function(url, pattern)
     type = 'ignore'
   }
 
-  do_log(1, ident, json.encode(entry), log_channel)
+  do_log(1, ident, json.encode(entry), log_channel, log_key)
 end
 
 wget.callbacks.download_child_p = function(urlpos, parent, depth, start_url_parsed, iri, verdict, reason)
@@ -144,7 +144,7 @@ wget.callbacks.httploop_result = function(url, err, http_stat)
   }
 
   -- Publish the log entry, and bump the log counter.
-  do_log(1, ident, json.encode(result), log_channel)
+  do_log(1, ident, json.encode(result), log_channel, log_key)
 
   -- Update ignore patterns.
   if update_ignore_patterns() then

@@ -64,6 +64,7 @@ class GetItemFromQueue(Task):
             item['ident'] = ident
             item['url'] = self.redis.hget(ident, 'url')
             item['slug'] = self.redis.hget(ident, 'slug')
+            item['log_key'] = self.redis.hget(ident, 'log_key')
             item.log_output('Received item %s.' % ident)
             self.complete_item(item)
 
@@ -184,7 +185,7 @@ class MarkItemAsDone(SimpleTask):
 
     def process(self, item):
         self.mark_done(keys=[item['ident']], args=[EXPIRE_TIME, LOG_CHANNEL,
-            int(time.time()), json.dumps(item['info'])])
+            int(time.time()), json.dumps(item['info']), item['log_key']])
 
 # ------------------------------------------------------------------------------
 
@@ -200,6 +201,7 @@ local expire_time = ARGV[1]
 local log_channel = ARGV[2]
 local finished_at = ARGV[3]
 local info = ARGV[4]
+local log_key = ARGV[5]
 
 redis.call('hmset', ident, 'finished_at', finished_at)
 redis.call('lrem', 'working', 1, ident)
@@ -213,12 +215,12 @@ local was_aborted = redis.call('hget', ident, 'aborted')
 if was_aborted then
     redis.call('incr', 'jobs_aborted')
     redis.call('expire', ident, 5)
-    redis.call('expire', ident..'_log', 5)
+    redis.call('expire', log_key, 5)
     redis.call('expire', ident..'_ignores', 5)
 else
     redis.call('incr', 'jobs_completed')
     redis.call('expire', ident, expire_time)
-    redis.call('expire', ident..'_log', expire_time)
+    redis.call('expire', log_key, expire_time)
     redis.call('expire', ident..'_ignores', expire_time)
 end
 
@@ -238,10 +240,11 @@ LOGGER = '''
 local ident = KEYS[1]
 local message = ARGV[1]
 local log_channel = ARGV[2]
+local log_key = ARGV[3]
 
 local nextseq = redis.call('hincrby', ident, 'log_score', 1)
 
-redis.call('zadd', ident..'_log', nextseq, message)
+redis.call('zadd', log_key, nextseq, message)
 redis.call('publish', log_channel, ident)
 '''
 
@@ -255,14 +258,15 @@ log_script = r.register_script(LOGGER)
 def tee_to_redis(self, data, full_line=True):
     old_logger(self, data, full_line)
 
-    if 'ident' in self:
+    if 'ident' in self and 'log_key' in self:
         packet = {
             'type': 'stdout',
             'ts': int(time.time()),
             'message': data
         }
 
-        log_script(keys=[self['ident']], args=[json.dumps(packet), LOG_CHANNEL])
+        log_script(keys=[self['ident']], args=[json.dumps(packet),
+            LOG_CHANNEL, self['log_key']])
 
 Item.log_output = tee_to_redis
 
@@ -311,7 +315,7 @@ pipeline = Pipeline(
         'ITEM_IDENT': ItemInterpolation('%(ident)s'),
         'ABORT_SCRIPT': MARK_ABORTED,
         'LOG_SCRIPT': LOGGER,
-        'LOG_KEY': ItemInterpolation('%(ident)s_log'),
+        'LOG_KEY': ItemInterpolation('%(log_key)s'),
         'IGNORE_PATTERNS_KEY': ItemInterpolation('%(ident)s_ignores'),
         'LOG_CHANNEL': LOG_CHANNEL,
         'REDIS_HOST': redis_url.hostname,
