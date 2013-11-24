@@ -328,8 +328,6 @@ class Job < Struct.new(:uri, :redis)
     l = last_trimmed_log_entry
     entries = []
 
-    diff = m - last_trimmed_log_entry
-
     if m - last_trimmed_log_entry >= threshold
       entries = redis.zrangebyscore(log_key, l, m)
       redis.zremrangebyscore(log_key, l, m)
