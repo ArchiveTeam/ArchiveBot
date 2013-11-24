@@ -60,11 +60,12 @@ class GetItemFromQueue(Task):
             self.schedule_retry(item)
         else:
             self.redis.hset(ident, 'started_at', int(time.time()))
+            data = self.redis.hmget(ident, 'url', 'slug', 'log_key')
 
             item['ident'] = ident
-            item['url'] = self.redis.hget(ident, 'url')
-            item['slug'] = self.redis.hget(ident, 'slug')
-            item['log_key'] = self.redis.hget(ident, 'log_key')
+            item['url'] = data['url']
+            item['slug'] = data['slug']
+            item['log_key'] = data['log_key']
             item.log_output('Received item %s.' % ident)
             self.complete_item(item)
 
