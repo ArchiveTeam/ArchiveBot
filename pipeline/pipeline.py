@@ -209,7 +209,7 @@ redis.call('lrem', 'working', 1, ident)
 
 local was_aborted = redis.call('hget', ident, 'aborted')
 
--- If the job was aborted, we ignore the given expire time.    Instead, we set a
+-- If the job was aborted, we ignore the given expire time.  Instead, we set a
 -- much shorter expire time -- one that's long enough for (most) subscribers
 -- to read a message, but short enough to not cause undue suffering in the
 -- case of retrying an aborted job.
