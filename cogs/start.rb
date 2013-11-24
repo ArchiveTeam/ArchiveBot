@@ -1,9 +1,11 @@
 require 'celluloid'
 require 'trollop'
 
+require File.expand_path('../job_recorder', __FILE__)
+require File.expand_path('../../lib/job', __FILE__)
+require File.expand_path('../../lib/log_update_listener', __FILE__)
 require File.expand_path('../log_analyzer', __FILE__)
 require File.expand_path('../log_trimmer', __FILE__)
-require File.expand_path('../job_recorder', __FILE__)
 
 opts = Trollop.options do
   opt :redis, 'URL of Redis server', :default => ENV['REDIS_URL'] || 'redis://localhost:6379/0'
@@ -14,16 +16,28 @@ opts = Trollop.options do
   opt :log_db_credentials, 'Credentials for log database (USERNAME:PASSWORD)', :type => String, :default => nil
 end
 
-LogAnalyzer.supervise_as :log_analyzer, opts[:redis], opts[:log_update_channel]
-LogTrimmer.supervise_as :log_trimmer, opts[:redis], opts[:log_update_channel],
-  opts[:log_db], opts[:log_db_credentials]
-JobRecorder.supervise_as :job_recorder, opts[:redis],
-  opts[:log_update_channel], opts[:db], opts[:db_credentials]
+class Broadcaster < LogUpdateListener
+  def on_receive(ident)
+    job = ::Job.from_ident(ident, uredis)
+    return unless job
+
+    job.freeze
+
+    Celluloid::Actor[:log_analyzer].async.process(job)
+    Celluloid::Actor[:job_recorder].async.process(job)
+    Celluloid::Actor[:log_trimmer].async.process(job)
+  end
+end
+
+Broadcaster.supervise_as :broadcaster, opts[:redis], opts[:log_update_channel]
+JobRecorder.supervise_as :job_recorder, opts[:db], opts[:db_credentials]
+LogAnalyzer.supervise_as :log_analyzer
+LogTrimmer.supervise_as :log_trimmer
 
 at_exit do
-  Celluloid::Actor[:log_analyzer].stop
-  Celluloid::Actor[:job_recorder].stop
-  Celluloid::Actor[:log_trimmer].stop
+  Celluloid::Actor[:broadcaster].stop
 end
+
+puts 'ArchiveBot cogs set in motion; use ^C to stop'
 
 sleep

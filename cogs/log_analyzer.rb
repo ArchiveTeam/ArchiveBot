@@ -1,10 +1,9 @@
-require File.expand_path('../../lib/log_update_listener', __FILE__)
-require File.expand_path('../../lib/job', __FILE__)
+require 'celluloid'
 
-class LogAnalyzer < LogUpdateListener
-  def on_receive(ident)
-    job = ::Job.from_ident(ident, uredis)
+class LogAnalyzer
+  include Celluloid
 
-    job.analyze if job
+  def process(job)
+    job.analyze
   end
 end

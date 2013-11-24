@@ -1,4 +1,8 @@
-require File.expand_path('../../lib/log_update_listener', __FILE__)
+require 'celluloid'
 
-class LogTrimmer < LogUpdateListener
+class LogTrimmer
+  include Celluloid
+
+  def process(job)
+  end
 end
