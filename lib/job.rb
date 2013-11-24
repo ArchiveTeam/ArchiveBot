@@ -96,6 +96,18 @@ class Job < Struct.new(:uri, :redis)
   # Returns a string.
   attr_reader :started_in
 
+  # The score of the last analyzed log entry.
+  #
+  # An analyzed log entry is one that has been categorized into a response set
+  # bucket.
+  attr_reader :last_analyzed_log_entry
+
+  # The score of the last broadcasted log entry.
+  #
+  # A broadcasted log entry is one that has been sent to all connected
+  # dashboard clients.
+  attr_reader :last_broadcasted_log_entry
+
   # A bucket for HTTP responses that aren't in the (100..599) range.
   class UnknownResponseCode
     def include?(resp_code)
@@ -184,6 +196,8 @@ class Job < Struct.new(:uri, :redis)
       @started_at = h['started_at']
       @started_by = h['started_by']
       @started_in = h['started_in']
+      @last_analyzed_log_entry = h['last_analyzed_log_entry'].to_f
+      @last_broadcasted_log_entry = h['last_broadcasted_log_entry'].to_f
 
       response_buckets.each do |_, bucket, attr|
         instance_variable_set("@#{attr}", h[bucket.to_s].to_i)
