@@ -325,6 +325,8 @@ class Job < Struct.new(:uri, :redis)
   # mean "number of entries to remove".  What it really determines is the
   # largest permissible gap between the last trimmed and last "useful" log
   # entry.
+  #
+  # Set threshold to zero to trim all stale entries.
   def trim_logs!(threshold = 1000)
     m = [last_analyzed_log_entry, last_broadcasted_log_entry].min
     l = last_trimmed_log_entry

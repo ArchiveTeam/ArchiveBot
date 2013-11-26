@@ -31,7 +31,11 @@ class LogTrimmer
   end
 
   def process(job)
-    entries = job.trim_logs!
+    entries = if job.finished?
+                job.trim_logs!(0)
+              else
+                job.trim_logs!
+              end
 
     @log_db.add_entries(entries, job)
   end
