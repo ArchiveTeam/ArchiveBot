@@ -9,7 +9,7 @@ require File.expand_path('../finish_notifier', __FILE__)
 require File.expand_path('../../lib/couchdb', __FILE__)
 
 opts = Trollop.options do
-  opt :server, 'IRC server, expressed as a URI (irc://SERVER:PORT or //SERVER:PORT)', :type => String
+  opt :server, 'IRC server, expressed as a URI (irc://SERVER:PORT or ircs://SERVER:PORT for SSL)', :type => String
   opt :nick, 'Nick to use', :default => 'ArchiveBot'
   opt :channels, 'Comma-separated list of channels', :type => String
   opt :schemes, 'Comma-separated list of acceptable URI schemes', :default => 'http,https'
@@ -40,6 +40,10 @@ bot = Cinch::Bot.new do
     c.plugins.options[FinishNotifier] = {
       redis: redis
     }
+
+    if uri.scheme == 'ircs'
+      c.ssl.use = true
+    end
   end
 
   couchdb = Couchdb.new(URI(opts[:db]), opts[:db_credentials])
