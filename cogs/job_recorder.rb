@@ -1,14 +1,13 @@
 require 'analysand'
 require 'celluloid'
-require 'uri'
 
 require File.expand_path('../../lib/couchdb', __FILE__)
 
 class JobRecorder
   include Celluloid
 
-  def initialize(db_url, db_credentials)
-    @db = Couchdb.new(URI(db_url), db_credentials)
+  def initialize(db_uri, db_credentials)
+    @db = Couchdb.new(db_uri, db_credentials)
   end
 
   def process(job)

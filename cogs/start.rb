@@ -1,5 +1,6 @@
 require 'celluloid'
 require 'trollop'
+require 'uri'
 
 require File.expand_path('../job_recorder', __FILE__)
 require File.expand_path('../../lib/job', __FILE__)
@@ -30,9 +31,10 @@ class Broadcaster < LogUpdateListener
 end
 
 Broadcaster.supervise_as :broadcaster, opts[:redis], opts[:log_update_channel]
-JobRecorder.supervise_as :job_recorder, opts[:db], opts[:db_credentials]
+JobRecorder.supervise_as :job_recorder, URI(opts[:db]), opts[:db_credentials]
 LogAnalyzer.supervise_as :log_analyzer
-LogTrimmer.supervise_as :log_trimmer
+LogTrimmer.supervise_as :log_trimmer, URI(opts[:log_db]),
+  opts[:log_db_credentials]
 
 at_exit do
   Celluloid::Actor[:broadcaster].stop
