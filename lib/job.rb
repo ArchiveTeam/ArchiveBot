@@ -317,7 +317,9 @@ class Job < Struct.new(:uri, :redis)
   #
   # --------------------------------------------------------------------------
   #
-  # Returns the trimmed log entries as an array of strings.
+  # Returns the trimmed log entries interleaved with their scores, i.e.
+  #
+  #   [["log1", 1.0], ["log2", 2.0], ...]
   #
   # Note: As described above, the threshold parameter for this method doesn't
   # mean "number of entries to remove".  What it really determines is the
@@ -329,7 +331,7 @@ class Job < Struct.new(:uri, :redis)
     entries = []
 
     if m - last_trimmed_log_entry >= threshold
-      entries = redis.zrangebyscore(log_key, l, m)
+      entries = redis.zrangebyscore(log_key, l, m, :with_scores => true)
       redis.zremrangebyscore(log_key, l, m)
       redis.hset(ident, 'last_trimmed_log_entry', m)
     end

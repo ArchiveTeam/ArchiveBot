@@ -1,5 +1,7 @@
 require 'celluloid'
 
+require File.expand_path('../log_db', __FILE__)
+
 ##
 # The pipeline stashes log entries in Redis; the cogs and dashboard analyze
 # them at some future time (usually not-too-distant).
@@ -15,13 +17,22 @@ require 'celluloid'
 # Actually, this job just repeatedly calls Job#trim_logs.  See that method for
 # its theory of operation.
 #
-# Job#trim_logs will give us back the trimmed log entries as a set of strings.
+# Job#trim_logs will give us back the trimmed log entries interleaved with
+# their scores:
 #
-# Eventually, this job will shove log results into a CouchDB database.
+#   [["ent1", 1.0], ["ent2", 2.0], ...]
+#
+# LogDb#add_entries then archives those logs.
 class LogTrimmer
   include Celluloid
 
+  def initialize(uri, credentials)
+    @log_db = LogDb.new(uri, credentials)
+  end
+
   def process(job)
-    job.trim_logs!
+    entries = job.trim_logs!
+
+    @log_db.add_entries(entries, job)
   end
 end
