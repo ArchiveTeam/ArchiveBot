@@ -63,9 +63,9 @@ class GetItemFromQueue(Task):
             data = self.redis.hmget(ident, 'url', 'slug', 'log_key')
 
             item['ident'] = ident
-            item['url'] = data['url']
-            item['slug'] = data['slug']
-            item['log_key'] = data['log_key']
+            item['url'] = data[0]
+            item['slug'] = data[1]
+            item['log_key'] = data[2]
             item.log_output('Received item %s.' % ident)
             self.complete_item(item)
 
