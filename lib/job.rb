@@ -144,6 +144,12 @@ class Job < Struct.new(:uri, :redis)
     new(URI.parse(url), redis).tap(&:amplify)
   end
 
+  def self.working(redis)
+    idents = redis.lrange('working', 0, -1)
+
+    idents.map { |ident| from_ident(ident, redis) }
+  end
+
   def aborted?
     !!aborted
   end
