@@ -346,4 +346,10 @@ class Job < Struct.new(:uri, :redis)
 
     entries
   end
+
+  ##
+  # Returns the +count+ most recent log entries for this job.
+  def most_recent_log_entries(count)
+    redis.zrange(log_key, -count, -1)
+  end
 end
