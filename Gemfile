@@ -14,8 +14,10 @@ group :test do
 end
 
 group :dashboard do
-  gem 'reel'
+  gem 'ember-source', '~> 1.2.0'
+  gem 'handlebars-source'
   gem 'json'
+  gem 'reel'
   gem 'webmachine', :git => 'https://github.com/seancribbs/webmachine-ruby.git'
   gem 'webmachine-sprockets', :git => 'https://github.com/lgierth/webmachine-sprockets.git'
 end
