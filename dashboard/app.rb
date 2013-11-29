@@ -7,6 +7,8 @@ require 'webmachine/sprockets'
 
 require File.expand_path('../../lib/couchdb', __FILE__)
 require File.expand_path('../log_actors', __FILE__)
+require File.expand_path('../resources/dashboard', __FILE__)
+require File.expand_path('../resources/history', __FILE__)
 
 opts = Trollop.options do
   opt :url, 'URL to bind to', :default => 'http://localhost:4567'
@@ -20,45 +22,7 @@ bind_uri = URI.parse(opts[:url])
 
 DB = Couchdb.new(URI(opts[:db]), opts[:db_credentials])
 
-class History < Webmachine::Resource
-  def run_query
-    @query ||= DB.history(requested_url, limit, start_at)
-  end
-
-  def limit
-    100
-  end
-
-  def start_at
-    request.query['start_at']
-  end
-
-  def requested_url
-    request.query['url']
-  end
-
-  def resource_exists?
-    run_query
-
-    @query.success?
-  end
-
-  def content_types_provided
-    [['application/json', :to_json]]
-  end
-
-  def to_json
-    run_query
-
-    @query.body.to_json
-  end
-end
-
-class Dashboard < Webmachine::Resource
-  def to_html
-    File.read(File.expand_path('../dashboard.html', __FILE__))
-  end
-end
+History.db = DB
 
 App = Webmachine::Application.new do |app|
   sprockets = Sprockets::Environment.new
