@@ -7,7 +7,7 @@ module Message
     { 'job_data' => job.as_json }
   end
 
-  def to_json
+  def to_json(*)
     as_json.to_json
   end
 end
