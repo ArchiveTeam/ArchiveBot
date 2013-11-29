@@ -45,23 +45,27 @@ Dashboard.LogView = Ember.View.extend
 
   maxSize: 512
 
+  autoScrollBinding: 'job.autoScroll'
+  showIgnoresBinding: 'job.showIgnores'
+
   didInsertElement: ->
     @refreshBuffer()
 
-  onIncomingChange: (->
-    @refreshBuffer()
-  ).observes('incoming', 'maxSize')
+  onLatestEntriesChange: (->
+    if @get('job.latestEntries.length') > 0
+      @refreshBuffer()
+  ).observes('job.latestEntries.@each', 'maxSize')
 
   refreshBuffer: ->
     buf = @get 'eventBuffer'
     maxSize = @get 'maxSize'
-    incoming = @get('incoming') || []
 
     if !buf
       @set 'eventBuffer', []
       buf = @get 'eventBuffer'
 
-    buf.pushObjects incoming
+    buf.pushObjects @get('job.latestEntries')
+    @get('job.latestEntries').clear()
     
     if buf.length > maxSize
       overage = buf.length - maxSize

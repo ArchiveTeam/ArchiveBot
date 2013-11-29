@@ -25,8 +25,11 @@ Calculations = Ember.Mixin.create
 Dashboard.Job = Ember.Object.extend Calculations,
   idBinding: 'ident'
 
+  init: ->
+    @set 'latestEntries', []
+
   addLogEntry: (entry) ->
-    @set 'latestEntries', [entry]
+    @get('latestEntries').pushObject entry
 
   # Properties directly copied from a JSON representation of this job.
   directCopiedProperties: [
@@ -91,7 +94,10 @@ Dashboard.MessageProcessor = Ember.Object.extend
     delete @get('jobIndex')[ident]
 
   process: (data) ->
-    json = JSON.parse data
+    if typeof(data) == 'string'
+      json = JSON.parse data
+    else
+      json = data
 
     # Sanity-check the message.
     job_data = json['job_data']
@@ -114,7 +120,7 @@ Dashboard.MessageProcessor = Ember.Object.extend
       @registerJob ident
 
       Ember.run.next =>
-        @process data
+        @process json
 
       return
 
