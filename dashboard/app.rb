@@ -9,6 +9,7 @@ require File.expand_path('../../lib/couchdb', __FILE__)
 require File.expand_path('../log_actors', __FILE__)
 require File.expand_path('../resources/dashboard', __FILE__)
 require File.expand_path('../resources/history', __FILE__)
+require File.expand_path('../resources/recent', __FILE__)
 
 opts = Trollop.options do
   opt :url, 'URL to bind to', :default => 'http://localhost:4567'
@@ -21,8 +22,10 @@ end
 bind_uri = URI.parse(opts[:url])
 
 DB = Couchdb.new(URI(opts[:db]), opts[:db_credentials])
+R = Redis.new(:url => opts[:redis])
 
 History.db = DB
+Recent.redis = R
 
 App = Webmachine::Application.new do |app|
   sprockets = Sprockets::Environment.new
@@ -46,6 +49,7 @@ App = Webmachine::Application.new do |app|
 
   app.routes do
     add [], Dashboard
+    add ['logs', 'recent'], Recent
     add ['histories'], History
     add ['assets', '*'], resource
   end
