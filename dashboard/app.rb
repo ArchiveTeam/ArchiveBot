@@ -34,6 +34,7 @@ App = Webmachine::Application.new do |app|
   sprockets.append_path(File.expand_path('../assets/stylesheets', __FILE__))
   sprockets.append_path(File.expand_path('../assets/javascripts', __FILE__))
   sprockets.append_path(File.expand_path('../assets/fonts', __FILE__))
+  sprockets.append_path(File.expand_path('../vendor/assets/javascripts', __FILE__))
   sprockets.append_path(File.dirname(Ember::Source.bundled_path_for('ember.js')))
   sprockets.append_path(File.dirname(Handlebars::Source.bundled_path))
 
