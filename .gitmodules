@@ -1,6 +1,3 @@
 [submodule "pipeline/vendor/redis-lua"]
 	path = pipeline/vendor/redis-lua
 	url = https://github.com/nrk/redis-lua.git
-[submodule "dashboard/vendor/ember.js"]
-	path = dashboard/vendor/ember.js
-	url = https://github.com/emberjs/ember.js.git
