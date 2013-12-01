@@ -125,7 +125,10 @@
         </header>
         {{view Dashboard.LogView jobBinding="job"}}
         <section>
-          <span class="downloaded">{{job.mbDownloaded}} MB downloaded</span>
+          <span class="downloaded">
+            <i class="fa fa-download"></i>
+            {{job.mbDownloaded}} MB
+          </span>
           <span>1xx: {{job.r1xx}}</span>
           <span>2xx: {{job.r2xx}}</span>
           <span>3xx: {{job.r3xx}}</span>

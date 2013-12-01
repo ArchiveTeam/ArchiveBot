@@ -10,6 +10,12 @@
   font-weight: normal;
 }
 
+@font-face {
+  font-family: 'FontAwesome';
+  src: url('/assets/fontawesome-webfont.ttf');
+  font-weight: normal;
+}
+
 html {
   font-family: 'Source Sans Pro', sans-serif;
   font-size: 18px;
