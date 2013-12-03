@@ -285,6 +285,7 @@ pipeline = Pipeline(
     GetItemFromQueue(r),
     SetFetchDepth(r),
     PreparePaths(),
+    WriteInfo(r),
     WgetDownload([WGET_LUA,
         '-U', USER_AGENT,
         '-nv',
