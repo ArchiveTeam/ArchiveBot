@@ -141,7 +141,7 @@ class RelabelIfAborted(SimpleTask, TargetPathMixin):
 
 class WriteInfo(SimpleTask):
     def __init__(self, redis):
-        SimpleTask.__init__(self, 'WriteNfo')
+        SimpleTask.__init__(self, 'WriteInfo')
         self.redis = redis
 
     def process(self, item):
