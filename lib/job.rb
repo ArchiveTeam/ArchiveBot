@@ -229,11 +229,19 @@ class Job < Struct.new(:uri, :redis)
     redis.hset(ident, 'abort_requested', true)
   end
 
-  def queue
+  def queue(direction = :back)
     t = Time.now
 
+    case direction
+    when :back
+      redis.lpush('pending', ident)
+    when :front
+      redis.rpush('pending', ident)
+    else
+      raise 'Unknown queue end (known: :back, :front)'
+    end
+
     redis.hset(ident, 'queued_at', t.to_i)
-    redis.lpush('pending', ident)
   end
 
   def register(depth, started_by, started_in)

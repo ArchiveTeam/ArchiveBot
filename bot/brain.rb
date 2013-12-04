@@ -82,8 +82,14 @@ class Brain
 
     run_post_registration_hooks(job, h, rep)
 
-    # Queue it up.
-    job.queue
+    if depth == :shallow
+      # If this is a shallow depth job, it gets priority over jobs that go
+      # deeper.
+      job.queue(:front)
+    else
+      # If this job goes deeper, shove it at the back of the queue.
+      job.queue
+    end
 
     reply m, *rep
   end
