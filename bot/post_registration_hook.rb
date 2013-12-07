@@ -8,6 +8,6 @@
 # This module must be included before any module that modifies
 # run_post_registration_hooks.
 module PostRegistrationHook
-  def run_post_registration_hooks(job, params, reply_buffer)
+  def run_post_registration_hooks(m, job, params)
   end
 end

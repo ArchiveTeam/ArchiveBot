@@ -62,7 +62,7 @@ bot = Cinch::Bot.new do
   end
 
   on :message, /\A!status (#{ident_regex})\Z/ do |m, ident|
-    brain.request_status_by_ident(m, ident)
+    brain.find_job(ident, m) { |j| brain.request_status(m, j) }
   end
 
   on :message, /\A!status (#{brain.url_pattern})\Z/ do |m, url|
@@ -70,15 +70,19 @@ bot = Cinch::Bot.new do
   end
 
   on :message, /\A!ig(?:nore)? (#{ident_regex}) (.+)/ do |m, ident, pattern|
-    brain.add_ignore_pattern(m, ident, pattern)
+    brain.find_job(ident, m) { |j| brain.add_ignore_pattern(m, j, pattern) }
   end
 
   on :message, /\A!unig(?:nore)? (#{ident_regex}) (.+)/ do |m, ident, pattern|
-    brain.remove_ignore_pattern(m, ident, pattern)
+    brain.find_job(ident, m) { |j| brain.remove_ignore_pattern(m, j, pattern) }
+  end
+
+  on :message, /\A!ig(?:nore)?set (#{ident_regex}) (.+)/ do |m, ident, sets|
+    brain.find_job(ident, m) { |j| brain.add_ignore_sets(m, j, sets) }
   end
 
   on :message, /\A!abort (#{ident_regex})\Z/ do |m, ident|
-    brain.initiate_abort(m, ident)
+    brain.find_job(ident, m) { |j| brain.initiate_abort(m, j) }
   end
 end
 

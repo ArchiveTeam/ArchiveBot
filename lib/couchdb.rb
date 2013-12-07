@@ -51,12 +51,10 @@ class Couchdb
     end
   end
 
-  def patterns_in_ignore_sets(names)
-    params = { :keys => names }
+  def resolve_ignore_sets(names)
+    resp = @db.view!('ignore_patterns/by_name', { keys: names }, @credentials)
 
-    resp = @db.view!('ignore_patterns/by_name', params, @credentials)
-
-    resp.rows.map { |r| r['value'] }
+    resp.rows.map { |r| [r['key'], r['value']] }
   end
 
   private

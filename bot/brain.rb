@@ -26,6 +26,16 @@ class Brain
     @url_pattern ||= %r{(?:#{schemes.join('|')})://.+}
   end
 
+  def find_job(ident, m)
+    job = Job.from_ident(ident, redis)
+
+    if !job
+      reply m, "Sorry, I don't know anything about #{ident}."
+    else
+      yield job
+    end
+  end
+
   def request_archive(m, target, params, depth='inf')
     # Is the user authorized?
     return unless authorized?(m)
@@ -69,29 +79,28 @@ class Brain
     end
 
     # OK, add the job.
-    rep = []
-    job.register(depth, m.user.nick, m.channel.name)
+    batch_reply(m) do
+      job.register(depth, m.user.nick, m.channel.name)
 
-    if depth == :shallow
-      rep << "Archiving #{uri.to_s} without recursion."
-    else
-      rep << "Archiving #{uri.to_s}."
+      if depth == :shallow
+        reply m, "Archiving #{uri.to_s} without recursion."
+      else
+        reply m, "Archiving #{uri.to_s}."
+      end
+
+      reply m, "Use !status #{job.ident} for updates, !abort #{job.ident} to abort."
+
+      run_post_registration_hooks(m, job, h)
+
+      if depth == :shallow
+        # If this is a shallow depth job, it gets priority over jobs that go
+        # deeper.
+        job.queue(:front)
+      else
+        # If this job goes deeper, shove it at the back of the queue.
+        job.queue
+      end
     end
-
-    rep <<  "Use !status #{job.ident} for updates, !abort #{job.ident} to abort."
-
-    run_post_registration_hooks(job, h, rep)
-
-    if depth == :shallow
-      # If this is a shallow depth job, it gets priority over jobs that go
-      # deeper.
-      job.queue(:front)
-    else
-      # If this job goes deeper, shove it at the back of the queue.
-      job.queue
-    end
-
-    reply m, *rep
   end
 
   def request_status_by_url(m, url)
@@ -150,59 +159,52 @@ class Brain
     end
   end
 
-  def request_status_by_ident(m, ident)
-    job = Job.from_ident(ident, redis)
-
-    if !job
-      reply m, "Sorry, I don't know anything about job #{ident}."
-    else
-      reply m, *job.to_status
-    end
+  def request_status(m, job)
+    reply m, *job.to_status
   end
 
-  def initiate_abort(m, ident)
-    # Is the user authorized?
+  def initiate_abort(m, job)
     return unless authorized?(m)
-
-    job = Job.from_ident(ident, redis)
-
-    if !job
-      reply m, "Sorry, I don't know anything about job #{ident}."
-      return
-    end
 
     job.abort
     reply m, "Initiated abort for #{job.url}."
   end
 
-  def add_ignore_pattern(m, ident, pattern)
-    # Is the user authorized?
+  def add_ignore_pattern(m, job, pattern)
     return unless authorized?(m)
-
-    job = Job.from_ident(ident, redis)
-
-    if !job
-      reply m, "Sorry, I don't know anything about job #{ident}."
-      return
-    end
 
     job.add_ignore_pattern(pattern)
-    reply m, "Added ignore pattern #{pattern} to job #{ident}."
+    reply m, "Added ignore pattern #{pattern} to job #{job.ident}."
   end
 
-  def remove_ignore_pattern(m, ident, pattern)
-    # Is the user authorized?
-    return unless authorized?(m)
-
-    job = Job.from_ident(ident, redis)
-
-    if !job
-      reply m, "Sorry, I don't know anything about job #{ident}."
-      return
+  def add_ignore_sets(m, job, names)
+    if !names.respond_to?(:each)
+      names = names.split(',').map(&:strip)
     end
 
+    return unless names && !names.empty?
+
+    ignore_pairs = couchdb.resolve_ignore_sets(names)
+
+    resolved = ignore_pairs.map(&:first).uniq
+    patterns = ignore_pairs.map(&:last)
+
+    job.add_ignore_patterns(patterns) unless patterns.empty?
+
+    reply m, "Added #{patterns.length} ignore patterns."
+
+    unknown = names - resolved
+
+    if !unknown.empty?
+      reply m, "The following sets are unknown: #{unknown.join(', ')}"
+    end
+  end
+
+  def remove_ignore_pattern(m, job, pattern)
+    return unless authorized?(m)
+
     job.remove_ignore_pattern(pattern)
-    reply m, "Removed ignore pattern #{pattern} from job #{ident}."
+    reply m, "Removed ignore pattern #{pattern} from job #{job.ident}."
   end
 
   def request_summary(m)
@@ -238,7 +240,25 @@ class Brain
     return true
   end
 
+  def batch_reply(m)
+    begin
+      @batch_mode = true
+      @buf = []
+      yield
+      @batch_mode = false
+      reply m, *@buf
+    ensure
+      # If we catch an exception, reset the batch mode flag, but don't send
+      # anything.
+      @batch_mode = false
+    end
+  end
+
   def reply(m, *args)
-    args.each { |msg| m.reply "#{m.user.nick}: #{msg}" }
+    if @batch_mode
+      @buf += args
+    else
+      args.each { |msg| m.safe_reply(msg, true) }
+    end
   end
 end
