@@ -241,22 +241,24 @@ class Brain
   end
 
   def batch_reply(m)
+    c = Thread.current
+
     begin
-      @batch_mode = true
-      @buf = []
+      c[:batch_mode] = true
+      c[:buf] = []
       yield
-      @batch_mode = false
-      reply m, *@buf
+      c[:batch_mode] = false
+      reply m, *c[:buf]
     ensure
       # If we catch an exception, reset the batch mode flag, but don't send
       # anything.
-      @batch_mode = false
+      c[:buf] = false
     end
   end
 
   def reply(m, *args)
-    if @batch_mode
-      @buf += args
+    if Thread.current[:batch_mode]
+      Thread.current[:buf] += args
     else
       args.each { |msg| m.safe_reply(msg, true) }
     end
