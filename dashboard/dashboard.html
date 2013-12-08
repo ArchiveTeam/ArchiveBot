@@ -135,15 +135,12 @@
           <span>4xx: {{job.r4xx}}</span>
           <span>5xx: {{job.r5xx}}</span>
           <span>Unknown: {{job.runk}}</span>
-          <div class="auto-scroll">
+          <div class="controls">
             <label>
               {{input type=checkbox checked=job.showIgnores}}
               Show ignores
             </label>
-            <label>
-              {{input type=checkbox checked=job.autoScroll}}
-              Auto-scroll
-            </label>
+            {{view Dashboard.ToggleFreezeView jobBinding="job"}}
           </div>
         </section>
       {{/view}}

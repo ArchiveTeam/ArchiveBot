@@ -140,7 +140,7 @@ h1 {
   margin-right: 1em;
 }
 
-.job .auto-scroll {
+.job .controls {
   float: right;
 }
 
@@ -172,6 +172,12 @@ h1 {
 .log-view .finished {
   background-color: hsl(120, 100%, 25%);
   color: hsl(120, 100%, 75%);
+  text-transform: uppercase;
+}
+
+.log-view .frozen, .log-view .unfrozen {
+  background-color: hsl(-120, 50%, 25%);
+  color: hsl(-120, 100%, 75%);
   text-transform: uppercase;
 }
 

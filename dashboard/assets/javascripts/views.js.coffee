@@ -45,16 +45,18 @@ Dashboard.LogView = Ember.View.extend
 
   maxSize: 512
 
-  autoScrollBinding: 'job.autoScroll'
+  frozenBinding: 'job.frozen'
   showIgnoresBinding: 'job.showIgnores'
 
-  didInsertElement: ->
-    @refreshBuffer()
-
   onLatestEntriesChange: (->
-    if @get('job.latestEntries.length') > 0
-      @refreshBuffer()
+    if @get('frozen')
+      @acknowledgeLatestEntries()
+    else
+      @refreshBuffer() if @get('job.latestEntries.length') > 0
   ).observes('job.latestEntries.@each', 'maxSize')
+
+  acknowledgeLatestEntries: ->
+    @get('job.latestEntries').clear()
 
   refreshBuffer: ->
     buf = @get 'eventBuffer'
@@ -65,17 +67,33 @@ Dashboard.LogView = Ember.View.extend
       buf = @get 'eventBuffer'
 
     buf.pushObjects @get('job.latestEntries')
-    @get('job.latestEntries').clear()
+    @acknowledgeLatestEntries()
     
     if buf.length > maxSize
       overage = buf.length - maxSize
       buf.removeAt 0, overage
 
-    if @get('autoScroll')
-      Ember.run.next =>
-        container = @$()
-        return unless container
+    Ember.run.next =>
+      container = @$()
+      return unless container
 
-        container.scrollTop container.prop('scrollHeight')
+      container.scrollTop container.prop('scrollHeight')
+
+Dashboard.ToggleFreezeView = Ember.View.extend
+  tagName: 'button'
+
+  template: Ember.Handlebars.compile '''
+    {{view.title}}
+  '''
+
+  title: (->
+    if @get('job.frozen')
+      'Resume'
+    else
+      'Pause'
+  ).property('job.frozen')
+
+  click: ->
+    @job.toggleFreeze()
 
 # vim:ts=2:sw=2:et:tw=78

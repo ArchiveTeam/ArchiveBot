@@ -74,9 +74,23 @@ Dashboard.StdoutUpdateEntry = Ember.Object.extend
 
   textBinding: 'message'
 
+Dashboard.FreezeUpdateEntry = Ember.Object.extend
+  classNames: ['frozen']
+
+  text: (->
+    'Paused'
+  ).property()
+
+Dashboard.UnfreezeUpdateEntry = Ember.Object.extend
+  classNames: ['unfrozen']
+
+  text: (->
+    'Resumed'
+  ).property()
+
 Dashboard.MessageProcessor = Ember.Object.extend
   registerJob: (ident) ->
-    job = Dashboard.Job.create autoScroll: true, showIgnores: true, messageProcessor: this
+    job = Dashboard.Job.create frozen: false, showIgnores: true, messageProcessor: this
 
     @get('jobIndex')[ident] = job
     @get('jobs').unshiftObject job

@@ -47,6 +47,23 @@ Dashboard.JobController = Ember.ObjectController.extend
 
   finishedBinding: 'content.finished'
 
+  frozenBinding: 'content.frozen'
+
+  freeze: ->
+    @get('content').addLogEntry Dashboard.FreezeUpdateEntry.create()
+    @set 'frozen', true
+
+  unfreeze: ->
+    @set 'frozen', false
+    Ember.run.next =>
+      @get('content').addLogEntry Dashboard.UnfreezeUpdateEntry.create()
+
+  toggleFreeze: ->
+    if @get('frozen')
+      @unfreeze()
+    else
+      @freeze()
+
   okPercentage: (->
     total = @get 'total'
     errored = @get 'error_count'
