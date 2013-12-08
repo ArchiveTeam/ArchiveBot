@@ -78,14 +78,14 @@ Dashboard.FreezeUpdateEntry = Ember.Object.extend
   classNames: ['frozen']
 
   text: (->
-    'Paused'
+    'Output paused'
   ).property()
 
 Dashboard.UnfreezeUpdateEntry = Ember.Object.extend
   classNames: ['unfrozen']
 
   text: (->
-    'Resumed'
+    'Output resumed'
   ).property()
 
 Dashboard.MessageProcessor = Ember.Object.extend

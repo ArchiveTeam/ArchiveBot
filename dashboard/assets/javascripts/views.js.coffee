@@ -88,9 +88,9 @@ Dashboard.ToggleFreezeView = Ember.View.extend
 
   title: (->
     if @get('job.frozen')
-      'Resume'
+      'Resume output'
     else
-      'Pause'
+      'Pause output'
   ).property('job.frozen')
 
   click: ->
