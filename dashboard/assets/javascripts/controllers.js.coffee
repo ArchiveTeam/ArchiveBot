@@ -64,20 +64,6 @@ Dashboard.JobController = Ember.ObjectController.extend
     else
       @freeze()
 
-  okPercentage: (->
-    total = @get 'total'
-    errored = @get 'error_count'
-
-    100 * ((total - errored) / total)
-  ).property('total', 'error_count')
-
-  errorPercentage: (->
-    total = @get 'total'
-    errored = @get 'error_count'
-
-    100 * (errored / total)
-  ).property('total', 'error_count')
-
   urlForDisplay: (->
     url = @get 'url'
 
