@@ -1,39 +1,20 @@
+# ---------------------------------------------------------------------------
+# JOB OUTPUT
+# ---------------------------------------------------------------------------
+
+##
+# The index page of the dashboard shows a list of job logs.
 Dashboard.IndexController = Ember.Controller.extend
   needs: ['jobs']
 
   jobsBinding: 'controllers.jobs'
 
+##
+# The job log list is sorted by URL, minus the "www." bit if said URL has one.
+# (A lot of people don't read the "www" anymore.)
 Dashboard.JobsController = Ember.ArrayController.extend
   itemController: 'job'
   sortProperties: ['urlWithoutWww']
-
-Dashboard.HistoryController = Ember.ArrayController.extend
-  itemController: 'historyRecord'
-
-  hideHistoryLink: true
-
-  urlBinding: 'content.url'
-  urlForDisplayBinding: 'url'
-
-Dashboard.HistoryRecordController = Ember.ObjectController.extend
-  classNames: (->
-    classes = []
-
-    classes.pushObject('finished') if @get('finished')
-    classes.pushObject('aborted') if @get('aborted')
-
-    classes.join(' ')
-  ).property('aborted', 'finished')
-
-  queuedAtForDisplay: (->
-    stored = (@get('queued_at') || 0) * 1000
-
-    moment.utc(stored).local().fromNow()
-  ).property('queued_at')
-
-  warcSizeMb: (->
-    (@get('warc_size') / (1000 * 1000)).toFixed(2)
-  ).property('warc_size')
 
 Dashboard.JobController = Ember.ObjectController.extend
   unregister: ->
@@ -83,5 +64,38 @@ Dashboard.JobController = Ember.ObjectController.extend
       entry = Ember.Object.create params
 
       @get('content').addLogEntry [entry]
+
+# ---------------------------------------------------------------------------
+# HISTORY BROWSING
+# ---------------------------------------------------------------------------
+
+Dashboard.HistoryController = Ember.ArrayController.extend
+  itemController: 'historyRecord'
+
+  hideHistoryLink: true
+
+  urlBinding: 'content.url'
+  urlForDisplayBinding: 'url'
+
+Dashboard.HistoryRecordController = Ember.ObjectController.extend
+  classNames: (->
+    classes = []
+
+    classes.pushObject('finished') if @get('finished')
+    classes.pushObject('aborted') if @get('aborted')
+
+    classes.join(' ')
+  ).property('aborted', 'finished')
+
+  queuedAtForDisplay: (->
+    stored = (@get('queued_at') || 0) * 1000
+
+    moment.utc(stored).local().fromNow()
+  ).property('queued_at')
+
+  warcSizeMb: (->
+    (@get('warc_size') / (1000 * 1000)).toFixed(2)
+  ).property('warc_size')
+
 
 # vim:ts=2:sw=2:et:tw=78
