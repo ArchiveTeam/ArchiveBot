@@ -108,9 +108,10 @@
 
     <script type="text/x-handlebars" data-template-name="log-view">
       <ol>
-        {{#each view.eventBuffer}}
-          <li {{bind-attr class=classNames}}>
-            {{text}}
+        {{#each entry in view.eventBuffer}}
+          <li>
+            {{view Dashboard.LogEntryView entryBinding="entry"
+              classNameBindings="entry.classNames"}}
           </li>
         {{else}}
           <li>No events</li>

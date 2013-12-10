@@ -163,6 +163,10 @@ h1 {
   display: none;
 }
 
+.log-view a {
+  color: inherit;
+}
+
 .log-view .aborted {
   background-color: hsl(0, 100%, 25%);
   color: hsl(0, 100%, 75%);

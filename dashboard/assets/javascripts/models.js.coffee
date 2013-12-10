@@ -54,16 +54,8 @@ Dashboard.DownloadUpdateEntry = Ember.Object.extend
     classes
   ).property('is_warning', 'is_error')
 
-  text: (->
-    [@get('response_code'), @get('wget_code'), @get('url')].join(' ')
-  ).property('response_code', 'wget_code', 'url')
-
 Dashboard.IgnoredUrlEntry = Ember.Object.extend
   classNames: ['ignored']
-
-  text: (->
-    "Pattern #{@get('pattern')} matches #{@get('url')}; skipping"
-  ).property('url', 'pattern')
 
 Dashboard.StdoutUpdateEntry = Ember.Object.extend
   classNames: []
