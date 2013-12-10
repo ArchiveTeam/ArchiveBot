@@ -45,6 +45,10 @@ Dashboard.JobController = Ember.ObjectController.extend
     else
       @freeze()
 
+  urlWithoutWww: (->
+    (@get('url') || '').replace('www.', '')
+  ).property('url')
+
   urlForDisplay: (->
     url = @get 'url'
 

@@ -42,10 +42,6 @@ Dashboard.Job = Ember.Object.extend Calculations,
     props[key] = json[key] for key in @directCopiedProperties
     @setProperties props
 
-  urlWithoutWww: (->
-    (@get('url') || '').replace('www.', '')
-  ).property('url')
-
 Dashboard.JobHistoryEntry = Ember.Object.extend Calculations
 
 Dashboard.DownloadUpdateEntry = Ember.Object.extend
