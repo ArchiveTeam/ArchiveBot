@@ -36,7 +36,7 @@ Dashboard.ResponseDistributionView = Ember.View.extend
       @$(".#{bucket}").css(width: width)
 
 Dashboard.LogEntryView = Ember.View.extend
-  tagName: 'span'
+  tagName: 'div'
 
   template: Ember.Handlebars.compile '''
     {{#if view.isDownloadEntry}}
