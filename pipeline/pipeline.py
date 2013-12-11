@@ -1,6 +1,9 @@
+import atexit
 import datetime
 import os
 import re
+import psutil
+import socket
 import string
 import shutil
 import redis
@@ -349,5 +352,41 @@ pipeline = Pipeline(
     ),
     MarkItemAsDone(r, MARK_DONE)
 )
+
+# ------------------------------------------------------------------------------
+# SYSTEM MONITORING
+# ------------------------------------------------------------------------------
+
+hostname = socket.gethostname()
+fqdn = socket.getfqdn()
+pid = os.getpid()
+
+pipeline_id = "%s:%s:%s" % (hostname, fqdn, pid)
+
+def do_report(pipeline, redis):
+    process_report = {
+        'id': pipeline_id,
+        'hostname': hostname,
+        'fqdn': fqdn,
+        'pid': pid,
+        'version': VERSION,
+        'mem_usage': psutil.virtual_memory().percent,
+        'disk_usage': psutil.disk_usage(pipeline.data_dir).percent
+    }
+
+    redis.sadd('pipelines', pipeline_id)
+    redis.hmset(pipeline_id, process_report)
+
+def unregister_pipeline():
+    r.delete(pipeline_id)
+    r.srem('pipelines', pipeline_id)
+
+atexit.register(unregister_pipeline)
+
+cb = tornado.ioloop.PeriodicCallback(
+        functools.partial(do_report, pipeline, r),
+        1000)
+
+cb.start()
 
 # vim:ts=4:sw=4:et:tw=78
