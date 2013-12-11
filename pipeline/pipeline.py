@@ -40,6 +40,8 @@ REDIS_URL = env['REDIS_URL']
 LOG_CHANNEL = env['LOG_CHANNEL']
 
 # ------------------------------------------------------------------------------
+# TASKS
+# ------------------------------------------------------------------------------
 
 class GetItemFromQueue(Task):
     def __init__(self, redis, retry_delay=5):
@@ -188,11 +190,15 @@ class MarkItemAsDone(SimpleTask):
             int(time.time()), json.dumps(item['info']), item['log_key']])
 
 # ------------------------------------------------------------------------------
+# REDIS CONNECTION
+# ------------------------------------------------------------------------------
 
 redis_url = urlparse(REDIS_URL)
 redis_db = int(redis_url.path[1:])
 r = redis.StrictRedis(host=redis_url.hostname, port=redis_url.port, db=redis_db)
 
+# ------------------------------------------------------------------------------
+# REDIS SCRIPTS
 # ------------------------------------------------------------------------------
 
 MARK_DONE = '''
@@ -249,6 +255,8 @@ redis.call('publish', log_channel, ident)
 '''
 
 # ------------------------------------------------------------------------------
+# SEESAW EXTENSIONS
+# ------------------------------------------------------------------------------
 
 # Each item has a log output.  We want to be able to broadcast that in the
 # ArchiveBot Dashboard; therefore, we tee the item log output to Redis.
@@ -270,6 +278,8 @@ def tee_to_redis(self, data, full_line=True):
 
 Item.log_output = tee_to_redis
 
+# ------------------------------------------------------------------------------
+# PIPELINE
 # ------------------------------------------------------------------------------
 
 project = Project(
