@@ -42,7 +42,7 @@ Dashboard.LogEntryView = Ember.View.extend
     {{#if view.isDownloadEntry}}
       {{#with view.entry}}
         {{response_code}} {{wget_code}}
-        <a {{bind-attr href="url"}}>{{url}}</a>
+        <a {{bind-attr href="url"}} rel="noreferrer">{{url}}</a>
       {{/with}}
     {{else}}
       {{#if view.isIgnoreEntry}}
