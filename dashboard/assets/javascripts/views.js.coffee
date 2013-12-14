@@ -57,7 +57,7 @@ Dashboard.LogEntryView = Ember.View.extend
   '''
 
   isDownloadEntry: (->
-    @get('entry.url') && @get('entry.response_code') && @get('entry.wget_code')
+    @get('entry.url') && @get('entry.response_code')? && @get('entry.wget_code')?
   ).property('entry')
 
   isIgnoreEntry: (->
