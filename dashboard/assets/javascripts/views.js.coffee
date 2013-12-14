@@ -48,7 +48,7 @@ Dashboard.LogEntryView = Ember.View.extend
       {{#if view.isIgnoreEntry}}
         {{#with view.entry}}
           {{pattern}} omits
-          <a {{bind-attr href="url"}}>{{url}}</a>
+          <a {{bind-attr href="url"}} rel="noreferrer">{{url}}</a>
         {{/with}}
       {{else}}
         {{view.entry.text}}
