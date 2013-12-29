@@ -1,5 +1,6 @@
 import atexit
 import datetime
+import hashlib
 import os
 import re
 import psutil
@@ -20,7 +21,7 @@ from seesaw.externalprocess import *
 
 from seesaw.util import find_executable
 
-VERSION = "20131228.01"
+VERSION = "20131228.02"
 USER_AGENT = "ArchiveTeam ArchiveBot/%s" % VERSION
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
 WGET_LUA = find_executable('Wget+Lua', "GNU Wget 1.14.0-archivebot1",
@@ -391,7 +392,10 @@ hostname = socket.gethostname()
 fqdn = socket.getfqdn()
 pid = os.getpid()
 
-pipeline_id = "%s:%s:%s" % (hostname, fqdn, pid)
+pipeline_id_input = "%s:%s:%s" % (hostname, fqdn, pid)
+m = hashlib.md5()
+m.update(pipeline_id_input)
+pipeline_id = m.hexdigest()
 
 def do_report(pipeline, redis):
     process_report = {
