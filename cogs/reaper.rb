@@ -28,7 +28,7 @@ require File.expand_path('../../lib/job', __FILE__)
 #    timer if one already exists.  If the death timer exceeds a given
 #    threshold, the job is reaped.
 #
-# The death threshold is 30 cycles without any heartbeat activity.  One cycle
+# The death threshold is 3600 cycles without any heartbeat activity.  One cycle
 # is triggered every two seconds.
 class Reaper
   include Celluloid
@@ -47,7 +47,7 @@ class Reaper
   HB = 'heartbeat'
   LAH = 'last_acknowledged_heartbeat'
   DEATH_TIMER = 'death_timer'
-  THRESHOLD = 30
+  THRESHOLD = 3600
 
   def check_one(ident)
     data = @redis.hmget(ident, LAH, HB)
