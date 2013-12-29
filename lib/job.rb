@@ -144,8 +144,12 @@ class Job < Struct.new(:uri, :redis)
     new(URI.parse(url), redis).tap(&:amplify)
   end
 
+  def self.working_job_idents(redis)
+    redis.lrange('working', 0, -1)
+  end
+
   def self.working(redis)
-    idents = redis.lrange('working', 0, -1)
+    idents = working_job_idents(redis)
 
     idents.map { |ident| from_ident(ident, redis) }
   end

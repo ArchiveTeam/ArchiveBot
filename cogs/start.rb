@@ -7,6 +7,7 @@ require File.expand_path('../../lib/job', __FILE__)
 require File.expand_path('../../lib/log_update_listener', __FILE__)
 require File.expand_path('../log_analyzer', __FILE__)
 require File.expand_path('../log_trimmer', __FILE__)
+require File.expand_path('../reaper', __FILE__)
 
 opts = Trollop.options do
   opt :redis, 'URL of Redis server', :default => ENV['REDIS_URL'] || 'redis://localhost:6379/0'
@@ -35,6 +36,8 @@ JobRecorder.supervise_as :job_recorder, URI(opts[:db]), opts[:db_credentials]
 LogAnalyzer.supervise_as :log_analyzer
 LogTrimmer.supervise_as :log_trimmer, URI(opts[:log_db]),
   opts[:log_db_credentials]
+
+Reaper.supervise_as :reaper, opts[:redis]
 
 at_exit do
   Celluloid::Actor[:broadcaster].stop
