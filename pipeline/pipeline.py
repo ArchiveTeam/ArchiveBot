@@ -20,7 +20,7 @@ from seesaw.externalprocess import *
 
 from seesaw.util import find_executable
 
-VERSION = "20131211.01"
+VERSION = "20131228.01"
 USER_AGENT = "ArchiveTeam ArchiveBot/%s" % VERSION
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
 WGET_LUA = find_executable('Wget+Lua', "GNU Wget 1.14.0-archivebot1",
@@ -76,6 +76,23 @@ class GetItemFromQueue(Task):
     def schedule_retry(self, item):
         IOLoop.instance().add_timeout(datetime.timedelta(seconds=self.retry_delay),
             functools.partial(self.send_request, item))
+
+class StartHeartbeat(SimpleTask):
+    def __init__(self, redis):
+        SimpleTask.__init__(self, 'StartHeartbeat')
+        self.redis = redis
+
+    def process(self, item):
+        cb = tornado.ioloop.PeriodicCallback(
+                functools.partial(self.send_heartbeat, item),
+                1000)
+
+        item['heartbeat'] = cb
+
+        cb.start()
+
+    def send_heartbeat(self, item):
+        self.redis.hincrby(item['ident'], 'heartbeat', 1)
 
 class SetFetchDepth(SimpleTask):
     def __init__(self, redis):
@@ -181,6 +198,17 @@ class SetWarcFileSizeInRedis(SimpleTask):
     def process(self, item):
         sz = os.stat(item['target_warc_file']).st_size
         self.redis.hset(item['ident'], 'warc_size', sz)
+
+class StopHeartbeat(SimpleTask):
+    def __init__(self):
+        SimpleTask.__init__(self, 'StopHeartbeat')
+
+    def process(self, item):
+        if 'heartbeat' in item:
+            item['heartbeat'].stop()
+            del item['heartbeat']
+        else:
+            item.log_output("Warning: couldn't find a heartbeat to stop")
 
 class MarkItemAsDone(SimpleTask):
     def __init__(self, redis, mark_done_script):
@@ -295,6 +323,7 @@ class AcceptAny:
 
 pipeline = Pipeline(
     GetItemFromQueue(r),
+    StartHeartbeat(r),
     SetFetchDepth(r),
     PreparePaths(),
     WriteInfo(r),
@@ -350,6 +379,7 @@ pipeline = Pipeline(
             ]
         )
     ),
+    StopHeartbeat(),
     MarkItemAsDone(r, MARK_DONE)
 )
 
