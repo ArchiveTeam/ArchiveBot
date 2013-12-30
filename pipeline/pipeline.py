@@ -21,7 +21,7 @@ from seesaw.externalprocess import *
 
 from seesaw.util import find_executable
 
-VERSION = "20131228.02"
+VERSION = "20131230.01"
 USER_AGENT = "ArchiveTeam ArchiveBot/%s" % VERSION
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
 WGET_LUA = find_executable('Wget+Lua', "GNU Wget 1.14.0-archivebot1",
@@ -44,13 +44,53 @@ REDIS_URL = env['REDIS_URL']
 LOG_CHANNEL = env['LOG_CHANNEL']
 
 # ------------------------------------------------------------------------------
+# REDIS CONNECTION
+# ------------------------------------------------------------------------------
+
+redis_url = urlparse(REDIS_URL)
+redis_db = int(redis_url.path[1:])
+r = redis.StrictRedis(host=redis_url.hostname, port=redis_url.port, db=redis_db)
+
+# ------------------------------------------------------------------------------
+# SYSTEM MONITORING
+# ------------------------------------------------------------------------------
+
+hostname = socket.gethostname()
+fqdn = socket.getfqdn()
+pid = os.getpid()
+
+pipeline_id_input = "%s:%s:%s" % (hostname, fqdn, pid)
+m = hashlib.md5()
+m.update(pipeline_id_input)
+pipeline_id = 'pipeline:%s' % m.hexdigest()
+
+def do_report(pipeline, redis):
+    process_report = {
+        'id': pipeline_id,
+        'hostname': hostname,
+        'fqdn': fqdn,
+        'pid': pid,
+        'version': VERSION,
+        'mem_usage': psutil.virtual_memory().percent,
+        'disk_usage': psutil.disk_usage(pipeline.data_dir).percent
+    }
+
+    redis.sadd('pipelines', pipeline_id)
+    redis.hmset(pipeline_id, process_report)
+
+def unregister_pipeline():
+    r.delete(pipeline_id)
+    r.srem('pipelines', pipeline_id)
+
+# ------------------------------------------------------------------------------
 # TASKS
 # ------------------------------------------------------------------------------
 
 class GetItemFromQueue(Task):
-    def __init__(self, redis, retry_delay=5):
+    def __init__(self, redis, pipeline_id, retry_delay=5):
         Task.__init__(self, 'GetItemFromQueue')
         self.redis = redis
+        self.pipeline_id = pipeline_id
         self.retry_delay = retry_delay
 
     def enqueue(self, item):
@@ -64,7 +104,13 @@ class GetItemFromQueue(Task):
         if ident == None:
             self.schedule_retry(item)
         else:
-            self.redis.hset(ident, 'started_at', int(time.time()))
+            pipeline_attrs = {
+                'started_at': int(time.time()),
+                'pipeline_id': self.pipeline_id
+            }
+
+            self.redis.hmset(ident, pipeline_attrs)
+
             data = self.redis.hmget(ident, 'url', 'slug', 'log_key')
 
             item['ident'] = ident
@@ -185,7 +231,8 @@ class WriteInfo(SimpleTask):
                 'fetch_depth': job_data['fetch_depth'],
                 'queued_at': job_data['queued_at'],
                 'started_in': job_data['started_in'],
-                'started_by': job_data['started_by']
+                'started_by': job_data['started_by'],
+                'pipeline_id': job_data['pipeline_id']
         }
 
         with open(item['source_info_file'], 'w') as f:
@@ -220,14 +267,6 @@ class MarkItemAsDone(SimpleTask):
     def process(self, item):
         self.mark_done(keys=[item['ident']], args=[EXPIRE_TIME, LOG_CHANNEL,
             int(time.time()), json.dumps(item['info']), item['log_key']])
-
-# ------------------------------------------------------------------------------
-# REDIS CONNECTION
-# ------------------------------------------------------------------------------
-
-redis_url = urlparse(REDIS_URL)
-redis_db = int(redis_url.path[1:])
-r = redis.StrictRedis(host=redis_url.hostname, port=redis_url.port, db=redis_db)
 
 # ------------------------------------------------------------------------------
 # REDIS SCRIPTS
@@ -323,7 +362,7 @@ class AcceptAny:
         return True
 
 pipeline = Pipeline(
-    GetItemFromQueue(r),
+    GetItemFromQueue(r, pipeline_id),
     StartHeartbeat(r),
     SetFetchDepth(r),
     PreparePaths(),
@@ -384,36 +423,7 @@ pipeline = Pipeline(
     MarkItemAsDone(r, MARK_DONE)
 )
 
-# ------------------------------------------------------------------------------
-# SYSTEM MONITORING
-# ------------------------------------------------------------------------------
-
-hostname = socket.gethostname()
-fqdn = socket.getfqdn()
-pid = os.getpid()
-
-pipeline_id_input = "%s:%s:%s" % (hostname, fqdn, pid)
-m = hashlib.md5()
-m.update(pipeline_id_input)
-pipeline_id = m.hexdigest()
-
-def do_report(pipeline, redis):
-    process_report = {
-        'id': pipeline_id,
-        'hostname': hostname,
-        'fqdn': fqdn,
-        'pid': pid,
-        'version': VERSION,
-        'mem_usage': psutil.virtual_memory().percent,
-        'disk_usage': psutil.disk_usage(pipeline.data_dir).percent
-    }
-
-    redis.sadd('pipelines', pipeline_id)
-    redis.hmset(pipeline_id, process_report)
-
-def unregister_pipeline():
-    r.delete(pipeline_id)
-    r.srem('pipelines', pipeline_id)
+# Activate system monitoring.
 
 atexit.register(unregister_pipeline)
 
