@@ -34,6 +34,14 @@ body {
   margin-top: 1em;
 }
 
+a {
+  color: hsl(240, 100%, 75%);
+}
+
+a:visited {
+  color: hsl(280, 25%, 60%);
+}
+
 h1 {
   font-size: 120%;
   margin-bottom: 1em;
@@ -78,10 +86,6 @@ h1 {
 
 .job h1.url {
   float: left;
-}
-
-.job h1.url a {
-  color: hsl(240, 100%, 75%);
 }
 
 .job h1.url a.history {
