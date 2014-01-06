@@ -171,13 +171,15 @@ class PreparePaths(SimpleTask, TargetPathMixin):
 
     def process(self, item):
         item_dir = '%(data_dir)s/%(ident)s' % item
+        last_five = item['ident'][0:5]
 
         if os.path.isdir(item_dir):
             shutil.rmtree(item_dir)
         os.makedirs(item_dir)
 
         item['item_dir'] = item_dir
-        item['warc_file_base'] = '%s-%s' % (item['slug'], time.strftime("%Y%m%d-%H%M%S"))
+        item['warc_file_base'] = '%s-%s-%s' % (item['slug'],
+                time.strftime("%Y%m%d-%H%M%S"), last_five)
         item['source_warc_file'] = '%(item_dir)s/%(warc_file_base)s.warc.gz' % item
         item['source_info_file'] = '%(item_dir)s/%(warc_file_base)s.json' % item
         item['cookie_jar'] = '%(item_dir)s/cookies.txt' % item
