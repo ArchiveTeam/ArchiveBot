@@ -233,6 +233,16 @@ class Job < Struct.new(:uri, :redis)
     redis.hset(ident, 'abort_requested', true)
   end
 
+  def fail
+    redis.hset(ident, 'failed', true)
+    redis.incr('jobs_failed')
+    redis.lrem('pending', 0, ident)
+    redis.lrem('working', 0, ident)
+    redis.expire(ident, 5)
+    redis.expire(log_key, 5)
+    redis.expire(ignore_patterns_set_key, 5)
+  end
+
   def queue(direction = :back)
     t = Time.now
 
