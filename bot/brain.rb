@@ -233,7 +233,7 @@ class Brain
 
   def authorized?(m)
     if !m.channel.opped?(m.user)
-      reply m, "Sorry, only channel operators may start archive jobs."
+      reply m, "Sorry, only channel operators may use that command."
       return false
     end
 
