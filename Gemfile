@@ -9,6 +9,10 @@ gem 'redis'
 gem 'trollop'
 gem 'uuidtools'
 
+platform :rbx do
+  gem 'rubysl'
+end
+
 group :test do
   gem 'rspec'
 end
