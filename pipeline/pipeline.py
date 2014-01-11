@@ -21,7 +21,7 @@ from seesaw.externalprocess import *
 
 from seesaw.util import find_executable
 
-VERSION = "20140107.01"
+VERSION = "20140111.01"
 USER_AGENT = "ArchiveTeam ArchiveBot/%s" % VERSION
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
 WGET_LUA = find_executable('Wget+Lua', "GNU Wget 1.14.0-archivebot1",
@@ -390,8 +390,6 @@ pipeline = Pipeline(
         '--warc-header', 'operator: Archive Team',
         '--warc-header', 'downloaded-by: ArchiveBot',
         '--warc-header', ItemInterpolation('archivebot-job-ident: %(ident)s'),
-        '--wait', '0.25',
-        '--random-wait',
         '--lua-script', 'archivebot.lua',
         ItemInterpolation('%(url)s')
     ],

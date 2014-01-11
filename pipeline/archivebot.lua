@@ -161,6 +161,11 @@ wget.callbacks.httploop_result = function(url, err, http_stat)
     return wget.actions.ABORT
   end
 
+  -- OK, we've finished our fetch attempt.  Sleep a bit before the next
+  -- iteration.
+  local sleeptime = math.random(250, 375) / 1000
+  socket.sleep(sleeptime)
+
   return wget.actions.NOTHING
 end
 
