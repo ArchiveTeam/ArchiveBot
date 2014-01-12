@@ -1,5 +1,8 @@
-dofile("redis_script_exec.lua")
+archivebot = {}
+
 dofile("acceptance_heuristics.lua")
+dofile("redis_script_exec.lua")
+dofile("settings.lua")
 
 require('socket')
 
@@ -10,28 +13,11 @@ local rconn = redis.connect(os.getenv('REDIS_HOST'), os.getenv('REDIS_PORT'))
 local aborter = os.getenv('ABORT_SCRIPT')
 local log_key = os.getenv('LOG_KEY')
 local log_channel = os.getenv('LOG_CHANNEL')
-local ignore_patterns_key = os.getenv('IGNORE_PATTERNS_KEY')
 
 local do_abort = eval_redis(os.getenv('ABORT_SCRIPT'), rconn)
 local do_log = eval_redis(os.getenv('LOG_SCRIPT'), rconn)
 
 rconn:select(os.getenv('REDIS_DB'))
-
--- Cached copy of URL patterns that we'll ignore.
-local ignore_patterns = {}
-local ignore_patterns_set_age = nil
-
--- If a URL matches an ignore pattern, returns the matching pattern.
--- Otherwise, returns false.
-local matches_ignore_pattern = function(url)
-  for i, pattern in ipairs(ignore_patterns) do
-   if string.find(url, pattern) then
-     return pattern
-   end
- end
-
- return false
-end
 
 -- Generates a log entry for ignored URLs.
 local log_ignored_url = function(url, pattern)
@@ -47,7 +33,7 @@ end
 
 wget.callbacks.download_child_p = function(urlpos, parent, depth, start_url_parsed, iri, verdict, reason)
   -- Does the URL match any of the ignore patterns?
-  local pattern = matches_ignore_pattern(urlpos.url.url)
+  local pattern = archivebot.ignore_url_p(urlpos.url.url)
 
   if pattern then
     log_ignored_url(urlpos.url.url, pattern)
@@ -99,24 +85,8 @@ local is_warning = function(statcode, err)
   return statcode >= 400 and statcode < 500
 end
 
--- Check for new ignore patterns.
---
--- If new ignore patterns exist, updates ignore_patterns and returns true.
--- Otherwise, leaves ignore_patterns unchanged and returns false.
-local update_ignore_patterns = function()
-  local age = rconn:hget(ident, 'ignore_patterns_set_age')
-
-  if age ~= ignore_patterns_set_age then
-    ignore_patterns = rconn:smembers(ignore_patterns_key)
-    ignore_patterns_set_age = age
-    return true
-  else
-    return false
-  end
-end
-
 wget.callbacks.httploop_proceed_p = function(url, http_stat)
-  local pattern = matches_ignore_pattern(url.url)
+  local pattern = archivebot.ignore_url_p(url.url)
 
   if pattern then
     log_ignored_url(url.url, pattern)
@@ -146,9 +116,11 @@ wget.callbacks.httploop_result = function(url, err, http_stat)
   -- Publish the log entry, and bump the log counter.
   do_log(1, ident, json.encode(result), log_channel, log_key)
 
-  -- Update ignore patterns.
-  if update_ignore_patterns() then
-    io.stdout:write(table.getn(ignore_patterns).." ignore patterns loaded\n")
+  -- Update settings.
+  if archivebot.update_settings(ident, rconn) then
+    io.stdout:write("Settings updated: ")
+    io.stdout:write(archivebot.inspect_settings())
+    io.stdout:write("\n")
     io.stdout:flush()
   end
 
@@ -163,8 +135,8 @@ wget.callbacks.httploop_result = function(url, err, http_stat)
 
   -- OK, we've finished our fetch attempt.  Sleep a bit before the next
   -- iteration.
-  local sleeptime = math.random(250, 375) / 1000
-  socket.sleep(sleeptime)
+  local sl, sm = archivebot.sleep_time_range()
+  socket.sleep(math.random(sl, sm) / 1000)
 
   return wget.actions.NOTHING
 end

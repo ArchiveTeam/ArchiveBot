@@ -184,14 +184,14 @@ class Job < Struct.new(:uri, :redis)
 
   def add_ignore_pattern(pattern)
     redis.sadd(ignore_patterns_set_key, pattern)
-    redis.hincrby(ident, 'ignore_patterns_set_age', 1)
+    redis.hincrby(ident, 'settings_age', 1)
   end
 
   alias_method :add_ignore_patterns, :add_ignore_pattern
 
   def remove_ignore_pattern(pattern)
     redis.srem(ignore_patterns_set_key, pattern)
-    redis.hincrby(ident, 'ignore_patterns_set_age', 1)
+    redis.hincrby(ident, 'settings_age', 1)
   end
 
   # More convenient access for modules.
@@ -262,6 +262,9 @@ class Job < Struct.new(:uri, :redis)
     redis.hmset(ident, 'url', url,
                        'fetch_depth', depth,
                        'log_key', log_key,
+                       'ignore_patterns_set_key', ignore_patterns_set_key,
+                       'sleep_min', 250,
+                       'sleep_max', 375,
                        'slug', "#{uri.host}-#{depth}",
                        'started_by', started_by,
                        'started_in', started_in)

@@ -399,7 +399,6 @@ pipeline = Pipeline(
         'ABORT_SCRIPT': MARK_ABORTED,
         'LOG_SCRIPT': LOGGER,
         'LOG_KEY': ItemInterpolation('%(log_key)s'),
-        'IGNORE_PATTERNS_KEY': ItemInterpolation('%(ident)s_ignores'),
         'LOG_CHANNEL': LOG_CHANNEL,
         'REDIS_HOST': redis_url.hostname,
         'REDIS_PORT': str(redis_url.port),
