@@ -65,6 +65,18 @@
       1q2qydhkeh3gfnrcxuf6py70b.
 
 
+* !ignoreset IDENT NAME, !igset IDENT NAME: add a set of ignore patterns
+
+    > !igset 1q2qydhkeh3gfnrcxuf6py70b blogs
+    < Added 17 ignore patterns to job 1q2qydhkeh3gfnrcxuf6py70b.
+
+  You may specify multiple ignore sets.  Ignore sets that are unknown
+  are, well, ignored:
+
+    > !igset 1q2qydhkeh3gfnrcxuf6py70b blogs, other
+    < Added 17 ignore patterns to job 1q2qydhkeh3gfnrcxuf6py70b.
+    < The following sets are unknown: other
+
 * !status: print job summary
 
     > !status

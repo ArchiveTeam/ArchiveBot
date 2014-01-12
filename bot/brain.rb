@@ -191,7 +191,7 @@ class Brain
 
     job.add_ignore_patterns(patterns) unless patterns.empty?
 
-    reply m, "Added #{patterns.length} ignore patterns."
+    reply m, "Added #{patterns.length} ignore patterns to job #{job.ident}."
 
     unknown = names - resolved
 
