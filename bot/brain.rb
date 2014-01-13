@@ -261,7 +261,7 @@ class Brain
   end
 
   def delay_ok?(min, max, m)
-    if min > max
+    if min.to_f > max.to_f
       reply m, 'Sorry, min delay must be less than or equal to max delay.'
       return false
     end
