@@ -74,4 +74,42 @@ describe CommandPatterns do
       md[2].should == '--ignores=blogs --someother=param'
     end
   end
+
+  shared_examples_for 'a set delay command' do |cmd|
+    it "recognizes #{cmd} IDENT MIN MAX" do
+      md = regex.match "#{cmd} f4pg9usx4j96ki3zczwlczu51 500 750"
+
+      md[1].should == 'f4pg9usx4j96ki3zczwlczu51'
+      md[2].should == '500'
+      md[3].should == '750'
+    end
+
+    it "recognizes #{cmd} IDENT MIN MAX with non-integral numbers" do
+      md = regex.match "#{cmd} f4pg9usx4j96ki3zczwlczu51 500.5 751.5"
+
+      md[1].should == 'f4pg9usx4j96ki3zczwlczu51'
+      md[2].should == '500.5'
+      md[3].should == '751.5'
+    end
+
+    it "does not recognize negative delays" do
+      md = regex.match "#{cmd} f4pg9usx4j96ki3zczwlczu51 500.5 -751.5"
+
+      md.should be_nil
+    end
+  end
+
+  describe 'Set delay command' do
+    let(:regex) { CommandPatterns::SET_DELAY }
+
+    it_should_behave_like 'a set delay command', '!delay'
+    it_should_behave_like 'a set delay command', '!d'
+  end
+
+  describe 'Set page requisite delay command' do
+    let(:regex) { CommandPatterns::SET_PAGEREQ_DELAY }
+
+    it_should_behave_like 'a set delay command', '!reqdelay'
+    it_should_behave_like 'a set delay command', '!reqd'
+  end
 end

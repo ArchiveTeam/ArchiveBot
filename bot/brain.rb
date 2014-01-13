@@ -209,6 +209,24 @@ class Brain
     reply m, "Removed ignore pattern #{pattern} from job #{job.ident}."
   end
 
+  def set_delay(job, min, max, m)
+    return unless authorized?(m)
+    return unless delay_ok?(min, max, m)
+
+    job.set_delay(min, max)
+
+    reply m, "Inter-request delay for job #{job.ident} set to [#{min}, #{max}] ms."
+  end
+
+  def set_pagereq_delay(job, min, max, m)
+    return unless authorized?(m)
+    return unless delay_ok?(min, max, m)
+
+    job.set_pagereq_delay(min, max)
+
+    reply m, "Page requisite delay for job #{job.ident} set to [#{min}, #{max}] ms."
+  end
+
   def request_summary(m)
     s = Summary.new(redis)
     s.run
@@ -240,6 +258,15 @@ class Brain
     end
 
     return true
+  end
+
+  def delay_ok?(min, max, m)
+    if min > max
+      reply m, 'Sorry, min delay must be less than or equal to max delay.'
+      return false
+    end
+
+    true
   end
 
   def batch_reply(m)

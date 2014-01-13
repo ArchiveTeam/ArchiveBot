@@ -184,14 +184,14 @@ class Job < Struct.new(:uri, :redis)
 
   def add_ignore_pattern(pattern)
     redis.sadd(ignore_patterns_set_key, pattern)
-    redis.hincrby(ident, 'settings_age', 1)
+    increment_settings_age
   end
 
   alias_method :add_ignore_patterns, :add_ignore_pattern
 
   def remove_ignore_pattern(pattern)
     redis.srem(ignore_patterns_set_key, pattern)
-    redis.hincrby(ident, 'settings_age', 1)
+    increment_settings_age
   end
 
   # More convenient access for modules.
@@ -259,17 +259,30 @@ class Job < Struct.new(:uri, :redis)
   end
 
   def register(depth, started_by, started_in)
-    redis.hmset(ident, 'url', url,
-                       'fetch_depth', depth,
-                       'log_key', log_key,
-                       'ignore_patterns_set_key', ignore_patterns_set_key,
-                       'delay_min', 250,
-                       'delay_max', 375,
-                       'pagereq_delay_min', 25,
-                       'pagereq_delay_max', 100,
-                       'slug', "#{uri.host}-#{depth}",
-                       'started_by', started_by,
-                       'started_in', started_in)
+    redis.pipelined do
+      redis.hmset(ident, 'url', url,
+                         'fetch_depth', depth,
+                         'log_key', log_key,
+                         'ignore_patterns_set_key', ignore_patterns_set_key,
+                         'slug', "#{uri.host}-#{depth}",
+                         'started_by', started_by,
+                         'started_in', started_in)
+
+      set_delay(250, 375)
+      set_pagereq_delay(25, 100)
+    end
+
+    true
+  end
+
+  def set_delay(min, max)
+    redis.hmset(ident, 'delay_min', min, 'delay_max', max)
+    increment_settings_age
+  end
+
+  def set_pagereq_delay(min, max)
+    redis.hmset(ident, 'pagereq_delay_min', min, 'pagereq_delay_max', max)
+    increment_settings_age
   end
 
   def exists?
@@ -378,5 +391,11 @@ class Job < Struct.new(:uri, :redis)
   # Returns the +count+ most recent log entries for this job.
   def most_recent_log_entries(count)
     redis.zrange(log_key, -count, -1)
+  end
+
+  private
+
+  def increment_settings_age
+    redis.hincrby(ident, 'settings_age', 1)
   end
 end
