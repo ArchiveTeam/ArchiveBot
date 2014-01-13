@@ -178,6 +178,8 @@ class Brain
   end
 
   def add_ignore_sets(m, job, names)
+    return unless authorized?(m)
+
     if !names.respond_to?(:each)
       names = names.split(',').map(&:strip)
     end
