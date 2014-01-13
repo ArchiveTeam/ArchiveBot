@@ -396,6 +396,10 @@ class Job < Struct.new(:uri, :redis)
   private
 
   def increment_settings_age
-    redis.hincrby(ident, 'settings_age', 1)
+    if started_at.to_i >= 1389590178
+      redis.hincrby(ident, 'settings_age', 1)
+    else
+      redis.hincrby(ident, 'ignore_patterns_set_age', 1)
+    end
   end
 end
