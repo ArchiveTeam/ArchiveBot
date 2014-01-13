@@ -77,6 +77,31 @@
     < Added 17 ignore patterns to job 1q2qydhkeh3gfnrcxuf6py70b.
     < The following sets are unknown: other
 
+
+* !delay IDENT MIN MAX, !d IDENT MIN MAX: set inter-request delay
+
+    > !delay 1q2qydhkeh3gfnrcxuf6py70b 500 750
+    < Inter-request delay for job 1q2qydhkeh3gfnrcxuf6py70b set to [500,
+      750 ms].
+
+  Delays may be any non-negative number, and are interpreted as
+  milliseconds.  The default inter-request delay range is [250, 375] ms.
+
+
+* !reqdelay IDENT MIN MAX, !reqd IDENT MIN MAX: set page requisite delay
+
+    > !reqdelay 1q2qydhkeh3gfnrcxuf6py70b 500 750
+    < Page requisite delay for job 1q2qydhkeh3gfnrcxuf6py70b set to [500,
+      750 ms].
+
+  Page requisites include most assets linked from the page, e.g. images,
+  CSS, and linked <object>s.  (It does not include any assets loaded by
+  code executed in linked <object>s, though.)
+
+  Delays may be any non-negative number, and are interpreted as
+  milliseconds.  The default page requisite delay range is [25, 100] ms.
+
+
 * !status: print job summary
 
     > !status
