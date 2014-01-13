@@ -263,8 +263,10 @@ class Job < Struct.new(:uri, :redis)
                        'fetch_depth', depth,
                        'log_key', log_key,
                        'ignore_patterns_set_key', ignore_patterns_set_key,
-                       'sleep_min', 250,
-                       'sleep_max', 375,
+                       'delay_min', 250,
+                       'delay_max', 375,
+                       'pagereq_delay_min', 25,
+                       'pagereq_delay_max', 100,
                        'slug', "#{uri.host}-#{depth}",
                        'started_by', started_by,
                        'started_in', started_in)

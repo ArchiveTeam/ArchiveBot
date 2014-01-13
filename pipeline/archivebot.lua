@@ -31,6 +31,12 @@ local log_ignored_url = function(url, pattern)
   do_log(1, ident, json.encode(entry), log_channel, log_key)
 end
 
+local requisite_urls = {}
+
+local add_as_page_requisite = function(url)
+  requisite_urls[url] = true
+end
+
 wget.callbacks.download_child_p = function(urlpos, parent, depth, start_url_parsed, iri, verdict, reason)
   -- Does the URL match any of the ignore patterns?
   local pattern = archivebot.ignore_url_p(urlpos.url.url)
@@ -51,12 +57,22 @@ wget.callbacks.download_child_p = function(urlpos, parent, depth, start_url_pars
 
     -- Is this a URL of a non-hyperlinked page requisite?
     if is_page_requisite(urlpos) then
-      -- Yeah, grab these too.
+      -- Yeah, grab these too.  We also flag the URL as a page requisite here
+      -- because we'll need to know that when we calculate the post-request
+      -- delay.
+      add_as_page_requisite(urlpos.url.url)
       return true
     end
   end
 
-  -- Return the original verdict.
+  -- If we're looking at a page requisite that didn't require verdict
+  -- override, flag it as a requisite.
+  if verdict and is_page_requisite(urlpos) then
+    add_as_page_requisite(urlpos.url.url)
+  end
+
+  -- If we get here, none of our exceptions apply.  Return the original
+  -- verdict.
   return verdict
 end
 
@@ -133,9 +149,20 @@ wget.callbacks.httploop_result = function(url, err, http_stat)
     return wget.actions.ABORT
   end
 
-  -- OK, we've finished our fetch attempt.  Sleep a bit before the next
-  -- iteration.
-  local sl, sm = archivebot.sleep_time_range()
+  -- OK, we've finished our fetch attempt.  Now we need to figure out how much
+  -- we should delay.  We delay different amounts for page requisites vs.
+  -- non-page requisites because browsers act that way.
+  local sl, sm
+
+  if requisite_urls[url.url] then
+    -- Yes, this will eventually free the memory needed for the key
+    requisite_urls[url.url] = nil
+
+    sl, sm = archivebot.pagereq_delay_time_range()
+  else
+    sl, sm = archivebot.delay_time_range()
+  end
+
   socket.sleep(math.random(sl, sm) / 1000)
 
   return wget.actions.NOTHING
