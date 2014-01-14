@@ -28,8 +28,6 @@ schemes = opts[:schemes].split(',').map(&:strip)
 channels = opts[:channels].split(',').map(&:strip)
 uri = URI.parse(opts[:server])
 
-ident_regex = /[0-9a-z]+/
-
 bot = Cinch::Bot.new do
   configure do |c|
     c.server = uri.host
@@ -61,7 +59,7 @@ bot = Cinch::Bot.new do
     brain.request_summary(m)
   end
 
-  on :message, /\A!status (#{ident_regex})\Z/ do |m, ident|
+  on :message, /\A!status (#{CommandPatterns::IDENT})\Z/ do |m, ident|
     brain.find_job(ident, m) { |j| brain.request_status(m, j) }
   end
 
@@ -69,15 +67,15 @@ bot = Cinch::Bot.new do
     brain.request_status_by_url(m, url)
   end
 
-  on :message, /\A!ig(?:nore)? (#{ident_regex}) (.+)/ do |m, ident, pattern|
+  on :message, /\A!ig(?:nore)? (#{CommandPatterns::IDENT}) (.+)/ do |m, ident, pattern|
     brain.find_job(ident, m) { |j| brain.add_ignore_pattern(m, j, pattern) }
   end
 
-  on :message, /\A!unig(?:nore)? (#{ident_regex}) (.+)/ do |m, ident, pattern|
+  on :message, /\A!unig(?:nore)? (#{CommandPatterns::IDENT}) (.+)/ do |m, ident, pattern|
     brain.find_job(ident, m) { |j| brain.remove_ignore_pattern(m, j, pattern) }
   end
 
-  on :message, /\A!ig(?:nore)?set (#{ident_regex}) (.+)/ do |m, ident, sets|
+  on :message, /\A!ig(?:nore)?set (#{CommandPatterns::IDENT}) (.+)/ do |m, ident, sets|
     brain.find_job(ident, m) { |j| brain.add_ignore_sets(m, j, sets) }
   end
 
@@ -96,7 +94,7 @@ bot = Cinch::Bot.new do
     end
   end
 
-  on :message, /\A!abort (#{ident_regex})\Z/ do |m, ident|
+  on :message, /\A!abort (#{CommandPatterns::IDENT})\Z/ do |m, ident|
     brain.find_job(ident, m) { |j| brain.initiate_abort(m, j) }
   end
 end
