@@ -102,6 +102,20 @@
   milliseconds.  The default page requisite delay range is [25, 100] ms.
 
 
+* !yahoo IDENT: set zero second delays
+
+    > !yahoo 1q2qydhkeh3gfnrcxuf6py70b
+    < Inter-request delay for job 1q2qydhkeh3gfnrcxuf6py70b set to
+      [0, 0] ms.
+    < Page requisite delay for job 1q2qydhkeh3gfnrcxuf6py70b set to
+      [0, 0] ms.
+
+  Only recommended for use when archiving data from hosts with gobs of
+  bandwidth and processing power (e.g. Yahoo, Google, Amazon).  Keep in
+  mind that this is likely to trigger any rate limiters that the target
+  may have.
+
+
 * !status: print job summary
 
     > !status
