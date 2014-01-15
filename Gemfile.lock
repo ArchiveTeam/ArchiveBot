@@ -15,11 +15,10 @@ GIT
       i18n (>= 0.4.0)
       multi_json
 
-GIT
-  remote: https://github.com/yipdw/analysand.git
-  revision: 4db86d95b7ea2ad0996d942800b19fb9740dcb96
+GEM
+  remote: https://rubygems.org/
   specs:
-    analysand (3.0.0)
+    analysand (3.0.1)
       celluloid (~> 0.15.0)
       celluloid-io
       http_parser.rb
@@ -28,10 +27,6 @@ GIT
       net-http-persistent
       rack
       yajl-ruby
-
-GEM
-  remote: https://rubygems.org/
-  specs:
     as-notifications (1.0.1)
     celluloid (0.15.1)
       timers (~> 1.1.0)
@@ -59,7 +54,7 @@ GEM
     http_parser.rb (0.6.0.beta.2)
     i18n (0.6.5)
     json (1.8.1)
-    json-stream (0.1.2)
+    json-stream (0.1.3)
     multi_json (1.8.0)
     net-http-persistent (2.9)
     nio4r (0.5.0)
@@ -292,13 +287,13 @@ GEM
     uuidtools (2.1.4)
     websocket_parser (0.1.4)
       http
-    yajl-ruby (1.1.0)
+    yajl-ruby (1.2.0)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
-  analysand!
+  analysand (~> 3.0.1)
   celluloid
   celluloid-redis
   cinch (~> 2.0.9)

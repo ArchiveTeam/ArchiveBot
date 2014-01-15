@@ -1,6 +1,6 @@
 source "https://rubygems.org"
 
-gem 'analysand', :git => 'https://github.com/yipdw/analysand.git'
+gem 'analysand', '~> 3.0.1'
 gem 'cinch', '~> 2.0.9'
 gem 'celluloid'
 gem 'celluloid-redis'
