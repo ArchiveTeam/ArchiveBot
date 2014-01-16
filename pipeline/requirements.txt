@@ -1,3 +1,3 @@
-seesaw==0.0.15
+seesaw==0.1.5
 psutil
 redis==2.8.0
