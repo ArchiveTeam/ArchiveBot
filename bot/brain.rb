@@ -83,9 +83,9 @@ class Brain
       job.register(depth, m.user.nick, m.channel.name)
 
       if depth == :shallow
-        reply m, "Archiving #{uri.to_s} without recursion."
+        reply m, "Queued #{uri.to_s} for archival without recursion."
       else
-        reply m, "Archiving #{uri.to_s}."
+        reply m, "Queued #{uri.to_s}."
       end
 
       reply m, "Use !status #{job.ident} for updates, !abort #{job.ident} to abort."
