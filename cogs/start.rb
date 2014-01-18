@@ -50,6 +50,10 @@ at_exit do
   Celluloid::Actor[:ignore_pattern_updater].stop
 end
 
+trap('INT') do
+  exit 0
+end
+
 puts 'ArchiveBot cogs set in motion; use ^C to stop'
 
 sleep
