@@ -2,6 +2,7 @@ require 'celluloid'
 require 'trollop'
 require 'uri'
 
+require File.expand_path('../ignore_pattern_updater', __FILE__)
 require File.expand_path('../job_recorder', __FILE__)
 require File.expand_path('../../lib/job', __FILE__)
 require File.expand_path('../../lib/log_update_listener', __FILE__)
@@ -39,8 +40,14 @@ LogTrimmer.supervise_as :log_trimmer, URI(opts[:log_db]),
 
 Reaper.supervise_as :reaper, opts[:redis]
 
+ignore_patterns_path = File.expand_path('../../db/ignore_patterns', __FILE__)
+
+IgnorePatternUpdater.supervise_as :ignore_pattern_updater,
+  ignore_patterns_path, URI(opts[:db]), opts[:db_credentials]
+
 at_exit do
   Celluloid::Actor[:broadcaster].stop
+  Celluloid::Actor[:ignore_pattern_updater].stop
 end
 
 puts 'ArchiveBot cogs set in motion; use ^C to stop'
