@@ -75,8 +75,8 @@ def do_report(pipeline, redis):
         'disk_usage': psutil.disk_usage(pipeline.data_dir).percent
     }
 
-    redis.sadd('pipelines', pipeline_id)
     redis.hmset(pipeline_id, process_report)
+    redis.sadd('pipelines', pipeline_id)
 
 def unregister_pipeline():
     r.delete(pipeline_id)
