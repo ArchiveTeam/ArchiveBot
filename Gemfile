@@ -9,6 +9,7 @@ gem 'listen', '~> 2.0'
 gem 'redis'
 gem 'trollop'
 gem 'uuidtools'
+gem 'twitter', '~> 5.5.1'
 
 platform :rbx do
   gem 'rubysl'
