@@ -18,9 +18,7 @@ opts = Trollop.options do
   opt :db_credentials, 'Credentials for history database (USERNAME:PASSWORD)', :type => String, :default => nil
   opt :log_db, 'URL of CouchDB log database', :default => ENV['LOGDB_URL'] || 'http://localhost:5984/archivebot_logs'
   opt :log_db_credentials, 'Credentials for log database (USERNAME:PASSWORD)', :type => String, :default => nil
-  opt :twitter_username, 'Twitter username', :type => String, :default => nil
-  opt :twitter_config, 'Filename containing Twitter key config', :type => String, 
-    :default => File.expand_path('../twitter_conf.json', __FILE__)
+  opt :twitter_config, 'Filename containing Twitter key config', :type => String, :default => nil
 end
 
 class Broadcaster < LogUpdateListener
@@ -33,7 +31,7 @@ class Broadcaster < LogUpdateListener
     Celluloid::Actor[:log_analyzer].async.process(job)
     Celluloid::Actor[:job_recorder].async.process(job)
     Celluloid::Actor[:log_trimmer].async.process(job)
-    Celluloid::Actor[:twitter_tweeter].async.process(job)
+    Celluloid::Actor[:twitter_tweeter].async.process(job) if opts[:twitter_config]
   end
 end
 
@@ -45,8 +43,8 @@ LogTrimmer.supervise_as :log_trimmer, URI(opts[:log_db]),
 
 Reaper.supervise_as :reaper, opts[:redis]
 
-if opts[:twitter_username]
-  TwitterTweeter.supervise_as :twitter_tweeter, opts[:redis], opts[:twitter_username], opts[:twitter_config]
+if opts[:twitter_config]
+  TwitterTweeter.supervise_as :twitter_tweeter, opts[:redis], opts[:twitter_config]
 end
 
 ignore_patterns_path = File.expand_path('../../db/ignore_patterns', __FILE__)
