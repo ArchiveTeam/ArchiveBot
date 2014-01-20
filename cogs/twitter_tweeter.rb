@@ -19,11 +19,14 @@ class TwitterTweeter
   PROCESS_QUEUE_INTERVAL = 120
   TWEET_DELAY = 120
   def initialize(redis, twitter_config_filename)
+    return if !twitter_config_filename
+
     @redis = ::Redis.new(:url => redis)
     twitter_config = JSON.load(File.open(twitter_config_filename))
 
     authenticate_account(twitter_config)
 
+    @configured = true
     @processing = false
     @remove_old_timer = every(REMOVE_OLD_INTERVAL) { remove_old_messages }
     @processing_timer = every(PROCESS_QUEUE_INTERVAL) { process_queue }
@@ -32,16 +35,9 @@ class TwitterTweeter
     async.remove_old_messages
   end
 
-  def authenticate_account(config)
-    username = config.delete('username')
-    @client = Twitter::REST::Client.new(config)
-
-    @client.user(username)
-
-    info "Twitter authentication success."
-  end
-
   def process(job)
+    return unless @configured
+
     message = nil
 
     if job.aborted?
@@ -55,6 +51,17 @@ class TwitterTweeter
     if message
       queue_message(message)
     end
+  end
+
+  private
+
+  def authenticate_account(config)
+    username = config.delete('username')
+    @client = Twitter::REST::Client.new(config)
+
+    @client.user(username)
+
+    info "Twitter authentication success."
   end
 
   def queue_message(message)

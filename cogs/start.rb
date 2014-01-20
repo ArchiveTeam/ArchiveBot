@@ -31,7 +31,7 @@ class Broadcaster < LogUpdateListener
     Celluloid::Actor[:log_analyzer].async.process(job)
     Celluloid::Actor[:job_recorder].async.process(job)
     Celluloid::Actor[:log_trimmer].async.process(job)
-    Celluloid::Actor[:twitter_tweeter].async.process(job) if opts[:twitter_config]
+    Celluloid::Actor[:twitter_tweeter].async.process(job)
   end
 end
 
@@ -42,10 +42,7 @@ LogTrimmer.supervise_as :log_trimmer, URI(opts[:log_db]),
   opts[:log_db_credentials]
 
 Reaper.supervise_as :reaper, opts[:redis]
-
-if opts[:twitter_config]
-  TwitterTweeter.supervise_as :twitter_tweeter, opts[:redis], opts[:twitter_config]
-end
+TwitterTweeter.supervise_as :twitter_tweeter, opts[:redis], opts[:twitter_config]
 
 ignore_patterns_path = File.expand_path('../../db/ignore_patterns', __FILE__)
 
