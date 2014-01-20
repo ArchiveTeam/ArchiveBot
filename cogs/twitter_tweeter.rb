@@ -102,7 +102,7 @@ class TwitterTweeter
       debug "Attempt to Tweet: #{message}."
       @client.update(message)
       debug "Tweet OK."
-    rescue Twitter::Error, StandardError => error
+    rescue Twitter::Error => error
       error "Tweet went wrong: #{error}."
 
       tries_left -= 1
