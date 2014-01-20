@@ -48,7 +48,7 @@ class TwitterTweeter
       message = "Archive job #{job.ident} on #{job.url} by #{job.started_by} started."
     end
 
-    if message
+    if message and !message_queued?(message) and !message_posted?(message)
       queue_message(message)
     end
   end
@@ -65,14 +65,17 @@ class TwitterTweeter
   end
 
   def queue_message(message)
-    return if message_queued?(message)
-
     debug "Queue message: #{message}"
     @redis.zadd(REDIS_KEY_QUEUE, Time.now.to_i, message)
   end
 
   def message_queued?(message)
     score = @redis.zscore(REDIS_KEY_QUEUE, message)
+    return !score.nil?
+  end
+
+  def message_posted?(message)
+    score = @redis.zscore(REDIS_KEY_DONE, message)
     return !score.nil?
   end
 
@@ -95,9 +98,12 @@ class TwitterTweeter
 
       message = message_array[0]
 
-      post_message(message)
+      if !message_posted?(message)
+        post_message(message)
+        sleep(TWEET_DELAY)
+      end
+
       @redis.zrem(REDIS_KEY_QUEUE, message)
-      sleep(TWEET_DELAY)
     end
 
     @processing = false
