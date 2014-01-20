@@ -113,7 +113,6 @@ class TwitterTweeter
       else
         warn "Gave up attempt to Tweet, discarding!"
       end
-    rescue
     end
 
     @redis.zadd(REDIS_KEY_DONE, Time.now.to_i, message)
