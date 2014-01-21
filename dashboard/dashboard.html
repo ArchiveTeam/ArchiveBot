@@ -40,7 +40,10 @@
             <a {{bindAttr href=historyRoute}} class="history">History</a>
           {{/unless}}
         </h1>
-        <h1 class="ident terminal">{{ident}}</h1>
+        <h1 class="ident terminal">
+          {{view Ember.TextField valueBinding="ident" readonly=true
+            sizeBinding="ident.length"}}
+        </h1>
       </header>
       {{yield}}
     </script>

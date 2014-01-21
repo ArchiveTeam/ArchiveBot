@@ -104,6 +104,14 @@ h1 {
   float: right;
 }
 
+.job h1.ident input {
+  background-color: inherit;
+  border: 0;
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+}
+
 .job .proportion-view {
   width: 100%;
   height: 0.5em;
