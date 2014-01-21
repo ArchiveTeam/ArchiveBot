@@ -41,11 +41,9 @@ class TwitterTweeter
     message = nil
 
     if job.aborted?
-      message = "Job #{job.ident} on #{job.url} aborted."
-    elsif job.finished?
-      message = "Job #{job.ident} on #{job.url} finished."
+      message = "Aborted archiving of #{job.url}"
     elsif job.in_progress?
-      message = "Archive job #{job.ident} on #{job.url} by #{job.started_by} started."
+      message = "Archiving #{job.url}"
     end
 
     if message and !message_queued?(message) and !message_posted?(message)
