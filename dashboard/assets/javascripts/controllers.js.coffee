@@ -14,7 +14,7 @@ Dashboard.IndexController = Ember.Controller.extend
 # (A lot of people don't read the "www" anymore.)
 Dashboard.JobsController = Ember.ArrayController.extend
   itemController: 'job'
-  sortProperties: ['urlWithoutWww']
+  sortProperties: ['url']
 
 Dashboard.JobController = Ember.ObjectController.extend
   unregister: ->
@@ -44,10 +44,6 @@ Dashboard.JobController = Ember.ObjectController.extend
       @unfreeze()
     else
       @freeze()
-
-  urlWithoutWww: (->
-    (@get('url') || '').replace('www.', '')
-  ).property('url')
 
   urlForDisplay: (->
     url = @get 'url'
