@@ -22,24 +22,24 @@ class Feed < Webmachine::Resource
   def to_rss
     input = File.read(RSS_FILENAME)
     eruby = Erubis::Eruby.new(input)
-    messages = prepped_messages(true)
+    messages = prepped_messages(rfc822_date=true)
     eruby.result(:items=>messages)
   end
 
   def to_atom
     input = File.read(ATOM_FILENAME)
     eruby = Erubis::Eruby.new(input)
-    messages = prepped_messages(false)
+    messages = prepped_messages
     eruby.result(:items=>messages, :updated => Time.now.iso8601)
   end
 
   def to_json
-    prepped_messages(false).to_json
+    prepped_messages.to_json
   end
 
   protected
 
-  def prepped_messages(rfc822_date)
+  def prepped_messages(rfc822_date=false)
     messages = Feed::redis.zrange(REDIS_KEY_DONE, -100, -1, {withscores: true})
 
     prepped_messages = []
