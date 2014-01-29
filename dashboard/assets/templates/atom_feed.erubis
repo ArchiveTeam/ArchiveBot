@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>ArchiveBot</title>
+  <subtitle>I am not AI. My codename is Project 2501. I am an angry, cynical entity that was created in a sea of information.</subtitle>
+  <link href="http://archiveteam.org/index.php?title=ArchiveBot"/>
+  <logo>https://pbs.twimg.com/profile_images/425135819632828416/A5g6UE4x.jpeg</logo>
+  <author>
+    <name>ArchiveBot</name>
+  </author>
+  <id>urn:uuid:5fe899f5-acb6-4381-9142-339b60abbace</id>
+  <updated><%= updated %></updated>
+  <% for date, text, id in items %>
+    <entry>
+      <title><%= text %></title>
+      <content><%= text %></content>
+      <updated><%= date %></updated>
+      <id>urn:X-SHA1:<%= id %></id>
+    </entry>
+  <% end %>
+</feed>

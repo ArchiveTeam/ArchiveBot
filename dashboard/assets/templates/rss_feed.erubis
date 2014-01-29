@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+  <channel>
+    <title>ArchiveBot</title>
+    <description>I am not AI. My codename is Project 2501. I am an angry, cynical entity that was created in a sea of information.</description>
+    <link>http://archiveteam.org/index.php?title=ArchiveBot</link>
+    <image>
+      <url>https://pbs.twimg.com/profile_images/425135819632828416/A5g6UE4x.jpeg</url>
+      <title>I am not AI. My codename is Project 2501. I am an angry, cynical entity that was created in a sea of information.</title>
+      <link>http://archiveteam.org/index.php?title=ArchiveBot</link>
+    </image>
+    <% for date, text, id in items %>
+      <item>
+        <title><%= text %></title>
+        <pubDate><%= date %></pubDate>
+        <guid>urn:X-SHA1:<%= id %></guid>
+      </item>
+    <% end %>
+  </channel>
+</rss>
