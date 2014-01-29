@@ -8,13 +8,13 @@
     <name>ArchiveBot</name>
   </author>
   <id>urn:uuid:5fe899f5-acb6-4381-9142-339b60abbace</id>
-  <updated><%= updated %></updated>
+  <updated><%== updated %></updated>
   <% for date, text, id in items %>
     <entry>
-      <title><%= text %></title>
-      <content><%= text %></content>
-      <updated><%= date %></updated>
-      <id>urn:X-SHA1:<%= id %></id>
+      <title><%== text %></title>
+      <content><%== text %></content>
+      <updated><%== date %></updated>
+      <id>urn:X-SHA1:<%== id %></id>
     </entry>
   <% end %>
 </feed>

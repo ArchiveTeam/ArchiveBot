@@ -11,9 +11,9 @@
     </image>
     <% for date, text, id in items %>
       <item>
-        <title><%= text %></title>
-        <pubDate><%= date %></pubDate>
-        <guid>urn:X-SHA1:<%= id %></guid>
+        <title><%== text %></title>
+        <pubDate><%== date %></pubDate>
+        <guid>urn:X-SHA1:<%== id %></guid>
       </item>
     <% end %>
   </channel>
