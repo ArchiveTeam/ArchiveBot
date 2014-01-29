@@ -61,18 +61,18 @@ class Feed < Webmachine::Resource
   end
 end
 
-class AtomFeed <Feed
+class AtomFeed < Feed
   def content_types_provided
-      [
-        ['application/atom+xml', :to_atom],
-      ]
-    end
+    [
+      ['application/atom+xml', :to_atom],
+    ]
+  end
 end
 
 class RssFeed < Feed
   def content_types_provided
-      [
-        ['application/rss+xml', :to_rss],
-      ]
-    end
+    [
+      ['application/rss+xml', :to_rss],
+    ]
+  end
 end
