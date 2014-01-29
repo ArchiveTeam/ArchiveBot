@@ -26,4 +26,5 @@ group :dashboard do
   gem 'reel'
   gem 'webmachine', :git => 'https://github.com/seancribbs/webmachine-ruby.git'
   gem 'webmachine-sprockets', :git => 'https://github.com/lgierth/webmachine-sprockets.git'
+  gem 'erubis'
 end

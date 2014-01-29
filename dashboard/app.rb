@@ -12,6 +12,7 @@ require File.expand_path('../log_actors', __FILE__)
 require File.expand_path('../resources/dashboard', __FILE__)
 require File.expand_path('../resources/history', __FILE__)
 require File.expand_path('../resources/recent', __FILE__)
+require File.expand_path('../resources/feed', __FILE__)
 
 opts = Trollop.options do
   opt :url, 'URL to bind to', :default => 'http://localhost:4567'
@@ -28,6 +29,7 @@ R = Redis.new(:url => opts[:redis])
 
 History.db = DB
 Recent.redis = R
+Feed.redis = R
 
 App = Webmachine::Application.new do |app|
   sprockets = Sprockets::Environment.new
@@ -60,6 +62,9 @@ App = Webmachine::Application.new do |app|
     add ['logs', 'recent'], Recent
     add ['histories'], History
     add ['assets', '*'], resource
+    add ['feed', 'archivebot.rss'], RssFeed
+    add ['feed', 'archivebot.atom'], AtomFeed
+    add ['feed'], Feed
   end
 end
 
