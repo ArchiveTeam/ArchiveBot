@@ -42,9 +42,7 @@ class Feed < Webmachine::Resource
   def prepped_messages(rfc822_date=false)
     messages = Feed::redis.zrange(REDIS_KEY_DONE, -100, -1, {withscores: true})
 
-    prepped_messages = []
-
-    for message, timestamp in messages.reverse_each
+    messages.reverse_each.with_object([]) do |(message, timestamp), items|
       id = Digest::SHA1.hexdigest("#{timestamp}-#{message}")
       time = Time.at(timestamp)
 
@@ -54,10 +52,8 @@ class Feed < Webmachine::Resource
         date_str = time.iso8601
       end
 
-      prepped_messages.push([date_str, message, id])
+      items.push([date_str, message, id])
     end
-
-    return prepped_messages
   end
 end
 
