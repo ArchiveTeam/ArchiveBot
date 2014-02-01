@@ -335,6 +335,7 @@ DEPENDENCIES
   handlebars-source
   json
   listen (~> 2.0)
+  net-http-persistent
   redis
   reel
   rspec
