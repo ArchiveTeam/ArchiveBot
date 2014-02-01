@@ -52,11 +52,6 @@ class Job < Struct.new(:uri, :redis)
   # "shallow" (no recursion).
   attr_reader :depth
 
-  # A URL for the fetched WARC, if one has been generated.
-  #
-  # Returns a URL as a string or nil.
-  attr_reader :archive_url
-
   # How many bytes have been downloaded from the target.
   #
   # Returns a Bignum, though the actual range of the returned value is
@@ -204,7 +199,6 @@ class Job < Struct.new(:uri, :redis)
       @aborted = h['aborted']
       @abort_requested = h['abort_requested']
       @depth = h['fetch_depth']
-      @archive_url = h['archive_url']
       @bytes_downloaded = h['bytes_downloaded'].to_i
       @warc_size = h['warc_size'].to_i
       @error_count = h['error_count'].to_i
@@ -299,7 +293,6 @@ class Job < Struct.new(:uri, :redis)
 
   def as_json
     { 'aborted' => aborted?,
-      'archive_url' => archive_url,
       'bytes_downloaded' => bytes_downloaded,
       'depth' => depth,
       'error_count' => error_count,

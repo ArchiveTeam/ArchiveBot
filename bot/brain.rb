@@ -122,12 +122,7 @@ class Brain
         rep << "#{url}:"
 
         if doc['finished']
-          if doc['archive_url']
-            rep << "Archived to #{doc['archive_url']}; last ran at #{queued_time}."
-          else
-            rep << "Job finished; last ran at #{queued_time}."
-          end
-
+          rep << "Job finished; last ran at #{queued_time}."
           rep << "Eligible for re-archiving."
         elsif doc['aborted']
           rep << "Job aborted; last ran at #{queued_time}."

@@ -76,13 +76,7 @@
                   <td>{{view Dashboard.ResponseDistributionView
                         itemBinding="r"}}</td>
                   <td>
-                    {{#if r.archive_url}}
-                      <a {{bind-attr href=r.archive_url}}>WARC</a>
-                      ({{r.warcSizeMb}} MB)
-                    {{else}}
-                      No archive URL
-                    {{/if}}
-
+                    No archive URL
                     <span class="aborted-warning">Aborted</span>
                   </td>
                 </tr>
