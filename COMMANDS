@@ -38,7 +38,7 @@
     * --ignore-sets SET1,...,SETN: specify sets of URL patterns to
       ignore
 
-      > !archiveonly http://example.blogspot.com/ --ignore-sets=blogspot,google
+      > !archiveonly http://example.blogspot.com/ --ignore-sets=blogs,forums
       < Archiving http://example.blogspot.com/ without recursion.
       < 14 ignore patterns loaded.
       < Use !status 5sid4pgxkiu6zynhbt3q1gi2s for updates, !abort
