@@ -3,14 +3,14 @@ require 'celluloid/autostart'
 require 'reel'
 
 require File.expand_path('../../lib/job', __FILE__)
-require File.expand_path('../../lib/log_update_listener', __FILE__)
+require File.expand_path('../../lib/redis_subscriber', __FILE__)
 require File.expand_path('../messages', __FILE__)
 
 UPDATE_TOPIC = 'updates'.freeze
 
 # Receives messages from the log update pubsub channel, fetches log messages
 # and relevant data, and sends said data out to all connected clients.
-class LogReceiver < LogUpdateListener
+class LogReceiver < RedisSubscriber
   include Celluloid::Notifications
 
   def on_receive(ident)

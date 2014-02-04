@@ -2,18 +2,18 @@ require 'celluloid'
 require 'celluloid/io'
 require 'celluloid/redis'
 
-class LogUpdateListener
+class RedisSubscriber
   include Celluloid::IO
   include Celluloid::Logger
 
-  # The Redis connection listening for log updates.
+  # The Redis connection used for the subscription.
   attr_reader :lredis
 
   # The Redis connection used to shut down the subscription.  Can also be used
   # to run the usual Redis commands.
   attr_reader :uredis
 
-  # The pubsub channel used for log updates.
+  # The pubsub channel name.
   attr_reader :channel
 
   # The shutdown sentinel.  Set at initialization.

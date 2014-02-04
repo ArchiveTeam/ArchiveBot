@@ -5,7 +5,7 @@ require 'uri'
 require File.expand_path('../ignore_pattern_updater', __FILE__)
 require File.expand_path('../job_recorder', __FILE__)
 require File.expand_path('../../lib/job', __FILE__)
-require File.expand_path('../../lib/log_update_listener', __FILE__)
+require File.expand_path('../../lib/redis_subscriber', __FILE__)
 require File.expand_path('../log_analyzer', __FILE__)
 require File.expand_path('../log_trimmer', __FILE__)
 require File.expand_path('../reaper', __FILE__)
@@ -21,7 +21,7 @@ opts = Trollop.options do
   opt :twitter_config, 'Filename containing Twitter key config', :type => String, :default => nil
 end
 
-class Broadcaster < LogUpdateListener
+class Broadcaster < RedisSubscriber
   def on_receive(ident)
     job = ::Job.from_ident(ident, uredis)
     return unless job
