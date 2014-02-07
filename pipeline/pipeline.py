@@ -21,14 +21,14 @@ from seesaw.externalprocess import *
 
 from seesaw.util import find_executable
 
-VERSION = "20140119.01"
+VERSION = "2014MMDD.XX"  # TODO: edit me before using
 USER_AGENT = "ArchiveTeam ArchiveBot/%s" % VERSION
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
-WGET_LUA = find_executable('Wget+Lua', "GNU Wget 1.14.0-archivebot1",
-        [ './wget-lua' ])
+WPULL_EXE = find_executable('Wpull', "LATEST_VERSION_HERE",  # TODO: edit me before using
+        [ './wpull' ])
 
-if not WGET_LUA:
-    raise Exception("No usable Wget+Lua found.")
+if not WPULL_EXE:
+    raise Exception("No usable Wpull found.")
 
 if 'RSYNC_URL' not in env:
     raise Exception('RSYNC_URL not set.')
@@ -363,36 +363,51 @@ class AcceptAny:
     def __contains__(self, item):
         return True
 
+
+class WpullArgs(object):
+    def realize(self, item):
+        args = [WPULL_EXE,
+            '-U', USER_AGENT,
+            '--quiet',
+            '--ascii-print',
+            '-o', '%(item_dir)s/wpull.log' % item,
+            '--database', '%(item_dir)s/wpull.db' % item,
+            '--save-cookies', '%(cookie_jar)s' % item,
+            '--no-check-certificate',
+            '--delete-after',
+            '--no-robots',
+            '--page-requisites',
+            '--no-parent',
+            '--timeout', '20',
+            '--tries', '10',
+            '--waitretry', '5',
+            '--warc-file', '%(item_dir)s/%(warc_file_base)s' % item,
+            '--warc-header', 'operator: Archive Team',
+            '--warc-header', 'downloaded-by: ArchiveBot',
+            '--warc-header', 'archivebot-job-ident: %(ident)s' % item,
+            '--python-script', 'archivebot.py',
+            '%(url)s' % item
+        ]
+
+        self.add_args(args, ['%(recursive)s', '%(level)s', '%(depth)s'], item)
+
+        return args
+
+    @classmethod
+    def add_args(cls, args, names, item):
+        for name in names:
+            value = name % item
+            if value:
+                args.append(value)
+
+
 pipeline = Pipeline(
     GetItemFromQueue(r, pipeline_id),
     StartHeartbeat(r),
     SetFetchDepth(r),
     PreparePaths(),
     WriteInfo(r),
-    WgetDownload([WGET_LUA,
-        '-U', USER_AGENT,
-        '-nv',
-        '-o', ItemInterpolation('%(item_dir)s/wget.log'),
-        '--save-cookies', ItemInterpolation('%(cookie_jar)s'),
-        '--no-check-certificate',
-        '--output-document', ItemInterpolation('%(item_dir)s/wget.tmp'),
-        '--truncate-output',
-        '-e', 'robots=off',
-        ItemInterpolation('%(recursive)s'),
-        ItemInterpolation('%(level)s'),
-        ItemInterpolation('%(depth)s'),
-        '--page-requisites',
-        '--no-parent',
-        '--timeout', '20',
-        '--tries', '10',
-        '--waitretry', '5',
-        '--warc-file', ItemInterpolation('%(item_dir)s/%(warc_file_base)s'),
-        '--warc-header', 'operator: Archive Team',
-        '--warc-header', 'downloaded-by: ArchiveBot',
-        '--warc-header', ItemInterpolation('archivebot-job-ident: %(ident)s'),
-        '--lua-script', 'archivebot.lua',
-        ItemInterpolation('%(url)s')
-    ],
+    WgetDownload(WpullArgs(),
     accept_on_exit_code=AcceptAny(),
     env={
         'ITEM_IDENT': ItemInterpolation('%(ident)s'),
