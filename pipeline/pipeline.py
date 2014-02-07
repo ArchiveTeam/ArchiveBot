@@ -7,12 +7,12 @@ import psutil
 import socket
 import string
 import shutil
+import sys
 import redis
 import time
 import json
 
 from os import environ as env
-from urlparse import urlparse
 from seesaw.project import *
 from seesaw.item import *
 from seesaw.task import *
@@ -20,6 +20,12 @@ from seesaw.pipeline import *
 from seesaw.externalprocess import *
 
 from seesaw.util import find_executable
+
+if sys.version_info[0] == 2:
+  from urlparse import urlparse
+else:
+  from urllib.parse import urlparse
+
 
 VERSION = "2014MMDD.XX"  # TODO: edit me before using
 USER_AGENT = "ArchiveTeam ArchiveBot/%s" % VERSION
