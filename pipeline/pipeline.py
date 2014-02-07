@@ -55,7 +55,11 @@ LOG_CHANNEL = env['LOG_CHANNEL']
 
 redis_url = urlparse(REDIS_URL)
 redis_db = int(redis_url.path[1:])
-r = redis.StrictRedis(host=redis_url.hostname, port=redis_url.port, db=redis_db)
+r = redis.StrictRedis(
+  host=redis_url.hostname,
+  port=redis_url.port, db=redis_db,
+  decode_responses=False if sys.version_info[0] == 2 else True,
+)
 
 # ------------------------------------------------------------------------------
 # SYSTEM MONITORING
@@ -67,7 +71,7 @@ pid = os.getpid()
 
 pipeline_id_input = "%s:%s:%s" % (hostname, fqdn, pid)
 m = hashlib.md5()
-m.update(pipeline_id_input)
+m.update(pipeline_id_input.encode('ascii'))
 pipeline_id = 'pipeline:%s' % m.hexdigest()
 
 def do_report(pipeline, redis):
