@@ -3,3 +3,4 @@ git+https://github.com/ArchiveTeam/seesaw-kit@python3/development#egg=seesaw
 psutil
 redis==2.8.0
 wpull
+sqlalchemy
