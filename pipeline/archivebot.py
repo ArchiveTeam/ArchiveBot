@@ -11,7 +11,7 @@ import redis
 
 
 ident = os.environ['ITEM_IDENT']
-rconn = redis.StrictRedis(host=os.environ['REDIS_HOST'], port=os.environ['REDIS_PORT'], db=os.environ['REDIS_DB'])
+rconn = redis.StrictRedis(host=os.environ['REDIS_HOST'], port=int(os.environ['REDIS_PORT']), db=os.environ['REDIS_DB'])
 aborter = os.environ['ABORT_SCRIPT']
 log_key = os.environ['LOG_KEY']
 log_channel = os.environ['LOG_CHANNEL']
