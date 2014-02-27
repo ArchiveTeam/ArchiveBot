@@ -58,6 +58,9 @@ class Job < Struct.new(:uri, :redis)
   # restricted to that of a 64-bit signed integer.  (It's a Redis limitation.)
   attr_reader :bytes_downloaded
 
+  # The ID of the pipeline that this job is running on.
+  attr_reader :pipeline_id
+
   # The size of the generated WARC.
   #
   # This is nil until the job completes.
@@ -200,6 +203,7 @@ class Job < Struct.new(:uri, :redis)
       @abort_requested = h['abort_requested']
       @depth = h['fetch_depth']
       @bytes_downloaded = h['bytes_downloaded'].to_i
+      @pipeline_id = h['pipeline_id']
       @warc_size = h['warc_size'].to_i
       @error_count = h['error_count'].to_i
       @queued_at = h['queued_at'].to_i
@@ -294,6 +298,7 @@ class Job < Struct.new(:uri, :redis)
   def as_json
     { 'aborted' => aborted?,
       'bytes_downloaded' => bytes_downloaded,
+      'pipeline_id' => pipeline_id,
       'depth' => depth,
       'error_count' => error_count,
       'finished' => finished?,
