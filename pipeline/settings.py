@@ -1,4 +1,9 @@
+import os
 import re
+import pattern_conversion
+
+
+pattern_conversion_enabled = os.environ.get('LUA_PATTERN_CONVERSION')
 
 # Runtime settings.  These are updated every time httploop_result is called.
 settings = dict(
@@ -37,6 +42,9 @@ def ignore_url_p(url):
   for pattern in settings['ignore_patterns']:
     if isinstance(pattern, bytes):
       pattern = pattern.decode('utf-8')
+
+    if pattern_conversion_enabled:
+      pattern = pattern_conversion.lua_pattern_to_regex(pattern)
 
     try:
       match = re.search(pattern, url)

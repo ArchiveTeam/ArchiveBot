@@ -427,7 +427,8 @@ pipeline = Pipeline(
         'LOG_CHANNEL': LOG_CHANNEL,
         'REDIS_HOST': redis_url.hostname,
         'REDIS_PORT': str(redis_url.port),
-        'REDIS_DB': str(redis_db)
+        'REDIS_DB': str(redis_db),
+        'LUA_PATTERN_CONVERSION': 'yes',  # Comment line out if needed
     }),
     RelabelIfAborted(r),
     WriteInfo(r),
