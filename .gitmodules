@@ -1,3 +1,0 @@
-[submodule "pipeline/vendor/redis-lua"]
-	path = pipeline/vendor/redis-lua
-	url = https://github.com/nrk/redis-lua.git
