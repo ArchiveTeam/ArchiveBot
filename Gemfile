@@ -21,7 +21,7 @@ group :test do
 end
 
 group :dashboard do
-  gem 'ember-source', '~> 1.2.0'
+  gem 'ember-source', '~> 1.4.0'
   gem 'handlebars-source'
   gem 'json'
   gem 'reel'
