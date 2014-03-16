@@ -3,3 +3,4 @@
 
 data
 ./wget-lua
+*.pyc
