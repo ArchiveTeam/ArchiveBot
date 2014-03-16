@@ -27,10 +27,10 @@ else:
   from urllib.parse import urlparse
 
 
-VERSION = "2014MMDD.XX"  # TODO: edit me before using
+VERSION = "20140317.01"
 USER_AGENT = "ArchiveTeam ArchiveBot/%s" % VERSION
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
-WPULL_EXE = find_executable('Wpull', "LATEST_VERSION_HERE",  # TODO: edit me before using
+WPULL_EXE = find_executable('Wpull', '0.26',
         [ './wpull' ])
 
 if not WPULL_EXE:
