@@ -198,30 +198,34 @@ class Job < Struct.new(:uri, :redis)
   end
 
   def amplify
-    redis.hgetall(ident).tap do |h|
-      @aborted = h['aborted']
-      @abort_requested = h['abort_requested']
-      @depth = h['fetch_depth']
-      @bytes_downloaded = h['bytes_downloaded'].to_i
-      @pipeline_id = h['pipeline_id']
-      @warc_size = h['warc_size'].to_i
-      @error_count = h['error_count'].to_i
-      @queued_at = h['queued_at'].to_i
-      @finished_at = h['finished_at'].to_i
-      @started_at = h['started_at'].to_i
-      @started_by = h['started_by']
-      @started_in = h['started_in']
-      @last_analyzed_log_entry = h['last_analyzed_log_entry'].to_f
-      @last_broadcasted_log_entry = h['last_broadcasted_log_entry'].to_f
-      @last_trimmed_log_entry = h['last_trimmed_log_entry'].to_f
-
-      response_buckets.each do |_, bucket, attr|
-        instance_variable_set("@#{attr}", h[bucket.to_s].to_i)
-      end
-    end
+    redis.hgetall(ident).tap { |h| from_hash(h) }
   end
 
   alias_method :reload, :amplify
+
+  def from_hash(h)
+    ts = ->(v) { v.to_i if v }
+
+    @aborted = h['aborted']
+    @abort_requested = h['abort_requested']
+    @depth = h['fetch_depth']
+    @bytes_downloaded = h['bytes_downloaded'].to_i
+    @pipeline_id = h['pipeline_id']
+    @warc_size = h['warc_size'].to_i
+    @error_count = h['error_count'].to_i
+    @queued_at = ts.(h['queued_at'])
+    @finished_at = ts.(h['finished_at'])
+    @started_at = ts.(h['started_at'])
+    @started_by = h['started_by']
+    @started_in = h['started_in']
+    @last_analyzed_log_entry = h['last_analyzed_log_entry'].to_f
+    @last_broadcasted_log_entry = h['last_broadcasted_log_entry'].to_f
+    @last_trimmed_log_entry = h['last_trimmed_log_entry'].to_f
+
+    response_buckets.each do |_, bucket, attr|
+      instance_variable_set("@#{attr}", h[bucket.to_s].to_i)
+    end
+  end
 
   def url
     uri.to_s
