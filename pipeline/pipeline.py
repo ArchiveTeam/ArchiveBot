@@ -4,6 +4,7 @@ import hashlib
 import os
 import re
 import psutil
+import shared_config
 import socket
 import string
 import shutil
@@ -18,7 +19,6 @@ from seesaw.item import *
 from seesaw.task import *
 from seesaw.pipeline import *
 from seesaw.externalprocess import *
-
 from seesaw.util import find_executable
 
 if sys.version_info[0] == 2:
@@ -42,12 +42,9 @@ if 'RSYNC_URL' not in env:
 if 'REDIS_URL' not in env:
     raise Exception('REDIS_URL not set.')
 
-if 'LOG_CHANNEL' not in env:
-    raise Exception('LOG_CHANNEL not set.')
-
 RSYNC_URL = env['RSYNC_URL']
 REDIS_URL = env['REDIS_URL']
-LOG_CHANNEL = env['LOG_CHANNEL']
+LOG_CHANNEL = shared_config.log_channel()
 
 # ------------------------------------------------------------------------------
 # REDIS CONNECTION
@@ -424,7 +421,6 @@ pipeline = Pipeline(
         'ABORT_SCRIPT': MARK_ABORTED,
         'LOG_SCRIPT': LOGGER,
         'LOG_KEY': ItemInterpolation('%(log_key)s'),
-        'LOG_CHANNEL': LOG_CHANNEL,
         'REDIS_HOST': redis_url.hostname,
         'REDIS_PORT': str(redis_url.port),
         'REDIS_DB': str(redis_db),

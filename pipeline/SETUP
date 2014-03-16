@@ -28,6 +28,5 @@ As user archivebot, in second screen session:
 
 cd ~/ArchiveBot/pipeline
 export RSYNC_URL=rsync://fos.textfiles.com/archivebot/
-export LOG_CHANNEL=updates
 export REDIS_URL=redis://127.0.0.1:16379/0
 ~/.local/bin/run-pipeline3 pipeline.py --disable-web-server --concurrent 2 ignorednick

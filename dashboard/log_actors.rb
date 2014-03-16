@@ -4,9 +4,10 @@ require 'reel'
 
 require File.expand_path('../../lib/job', __FILE__)
 require File.expand_path('../../lib/redis_subscriber', __FILE__)
+require File.expand_path('../../lib/shared_config', __FILE__)
 require File.expand_path('../messages', __FILE__)
 
-UPDATE_TOPIC = 'updates'.freeze
+UPDATE_TOPIC = SharedConfig.log_channel.freeze
 
 # Receives messages from the log update pubsub channel, fetches log messages
 # and relevant data, and sends said data out to all connected clients.
