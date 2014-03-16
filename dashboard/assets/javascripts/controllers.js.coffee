@@ -34,7 +34,7 @@ Dashboard.JobController = Ember.ObjectController.extend
     started = moment.unix @get('content.started_at')
 
     moment.duration(moment() - started).humanize()
-  ).property().volatile()
+  ).property('content.started_at').volatile()
 
   freeze: ->
     @get('content').addLogEntry Dashboard.FreezeUpdateEntry.create()
