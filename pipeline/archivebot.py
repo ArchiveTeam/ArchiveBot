@@ -3,7 +3,6 @@ import time
 import random
 
 import acceptance_heuristics
-import redis_script_exec
 import settings
 
 import json
@@ -16,9 +15,8 @@ aborter = os.environ['ABORT_SCRIPT']
 log_key = os.environ['LOG_KEY']
 log_channel = os.environ['LOG_CHANNEL']
 
-do_abort = redis_script_exec.eval_redis(os.environ['ABORT_SCRIPT'], rconn)
-do_log = redis_script_exec.eval_redis(os.environ['LOG_SCRIPT'], rconn)
-
+do_abort = rconn.register_script(os.environ['ABORT_SCRIPT'])
+do_log = rconn.register_script(os.environ['LOG_SCRIPT'])
 
 # Generates a log entry for ignored URLs.
 def log_ignored_url(url, pattern):
@@ -29,8 +27,7 @@ def log_ignored_url(url, pattern):
     type='ignore'
   )
 
-  do_log(1, ident, json.dumps(entry), log_channel, log_key)
-
+  do_log(keys=[ident], args=[json.dumps(entry), log_channel, log_key])
 
 requisite_urls = {}
 
@@ -128,7 +125,7 @@ def handle_result(url_info, error_info, http_info):
   )
 
   # Publish the log entry, and bump the log counter.
-  do_log(1, ident, json.dumps(result), log_channel, log_key)
+  do_log(keys=[ident], args=[json.dumps(result), log_channel, log_key])
 
   # Update settings.
   if settings.update_settings(ident, rconn):
@@ -137,7 +134,7 @@ def handle_result(url_info, error_info, http_info):
   # Should we abort?
   if abort_requested():
     print("Wget terminating on bot command")
-    do_abort(1, ident, log_channel)
+    do_abort(keys=[ident], args=[log_channel])
 
     return wpull_hook.actions.STOP
 
