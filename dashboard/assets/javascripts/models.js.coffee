@@ -33,7 +33,7 @@ Dashboard.Job = Ember.Object.extend Calculations,
 
   # Properties directly copied from a JSON representation of this job.
   directCopiedProperties: [
-    'url', 'ident', 'aborted', 'finished',
+    'url', 'ident', 'aborted', 'finished', 'started_at',
     'error_count', 'bytes_downloaded'
   ].pushObjects(RESPONSE_BUCKETS)
 

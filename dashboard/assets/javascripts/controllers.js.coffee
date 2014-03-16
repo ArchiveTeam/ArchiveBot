@@ -30,6 +30,12 @@ Dashboard.JobController = Ember.ObjectController.extend
 
   frozenBinding: 'content.frozen'
 
+  elapsedTime: (->
+    started = moment.unix @get('content.started_at')
+
+    moment.duration(moment() - started).humanize()
+  ).property().volatile()
+
   freeze: ->
     @get('content').addLogEntry Dashboard.FreezeUpdateEntry.create()
     @set 'frozen', true

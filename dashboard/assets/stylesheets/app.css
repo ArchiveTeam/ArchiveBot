@@ -148,7 +148,7 @@ h1 {
   margin-top: 0;
 }
 
-.job .downloaded {
+.job .downloaded, .job .elapsed {
   margin-right: 1em;
 }
 
