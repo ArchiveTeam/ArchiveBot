@@ -8,6 +8,6 @@
 channels:
   # The pubsub channel through which the pipeline sends log updates.
   # The dashboard and cogs programs subscribe and do their thing from there.
-  log: archivebot.log_updates
+  log: updates
 
 # vim:ts=2:sw=2:et:tw=78
