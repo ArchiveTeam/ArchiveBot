@@ -4,7 +4,6 @@ import hashlib
 import os
 import re
 import psutil
-import shared_config
 import socket
 import string
 import shutil
@@ -12,6 +11,14 @@ import sys
 import redis
 import time
 import json
+
+# FIXME: This is a bit of a hack.
+#
+# Pipeline scripts are run with pwd set to their directory, which is why
+# getcwd will (often) return the Right Thing.  A more robust solution would be
+# nice, though.
+sys.path.append(os.getcwd())
+import shared_config
 
 from os import environ as env
 from seesaw.project import *
@@ -26,8 +33,7 @@ if sys.version_info[0] == 2:
 else:
   from urllib.parse import urlparse
 
-
-VERSION = "20140317.02"
+VERSION = "20140317.03"
 USER_AGENT = "ArchiveTeam ArchiveBot/%s" % VERSION
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
 WPULL_EXE = find_executable('Wpull', '0.26',
