@@ -51,6 +51,7 @@ if 'REDIS_URL' not in env:
 RSYNC_URL = env['RSYNC_URL']
 REDIS_URL = env['REDIS_URL']
 LOG_CHANNEL = shared_config.log_channel()
+PIPELINE_CHANNEL = shared_config.pipeline_channel()
 
 # ------------------------------------------------------------------------------
 # REDIS CONNECTION
@@ -90,10 +91,12 @@ def do_report(pipeline, redis):
 
     redis.hmset(pipeline_id, process_report)
     redis.sadd('pipelines', pipeline_id)
+    redis.publish(PIPELINE_CHANNEL, pipeline_id)
 
 def unregister_pipeline():
     r.delete(pipeline_id)
     r.srem('pipelines', pipeline_id)
+    r.publish(PIPELINE_CHANNEL, pipeline_id)
 
 # ------------------------------------------------------------------------------
 # TASKS

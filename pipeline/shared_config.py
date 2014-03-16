@@ -13,4 +13,9 @@ def log_channel():
 
     return c['channels']['log']
 
+def pipeline_channel():
+    c = config()
+
+    return c['channels']['pipeline']
+
 # vim:ts=4:sw=4:et:tw=78

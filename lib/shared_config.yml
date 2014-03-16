@@ -10,4 +10,7 @@ channels:
   # The dashboard and cogs programs subscribe and do their thing from there.
   log: updates
 
+  # The pubsub channel for pipeline updates.
+  pipeline: archivebot:pipeline_updates
+
 # vim:ts=2:sw=2:et:tw=78
