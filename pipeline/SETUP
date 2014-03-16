@@ -1,6 +1,9 @@
 As root:
 
-apt-get install python-pip build-essential lua5.1 liblua5.1-0-dev liblua5.1-socket2 liblua5.1-json python-dev git-core rsync screen libssl-dev
+apt-get update
+apt-get install python3-pip build-essential python3-dev git-core rsync \
+  screen libxml2-dev libxslt-dev zlib1g-dev libssl-dev libsqlite3-dev
+
 adduser archivebot
 
 As user archivebot:
@@ -15,8 +18,7 @@ cd ArchiveBot
 git submodule init
 git submodule update
 cd pipeline
-pip install --user -r requirements.txt
-./get-wget-lua.sh
+pip3 install --user -r requirements.txt
 
 As user archivebot, in first screen session:
 
@@ -28,4 +30,4 @@ cd ~/ArchiveBot/pipeline
 export RSYNC_URL=rsync://fos.textfiles.com/archivebot/
 export LOG_CHANNEL=updates
 export REDIS_URL=redis://127.0.0.1:16379/0
-python ~/.local/bin/run-pipeline pipeline.py --disable-web-server --concurrent 2 ignorednick
+~/.local/bin/run-pipeline3 pipeline.py --disable-web-server --concurrent 2 ignorednick

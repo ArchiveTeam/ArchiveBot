@@ -1,0 +1,13 @@
+#!/usr/bin/env python3
+# Wrapper script to find a wpull module.
+# Adjust path of Python (2.6, 2.7, 3.3, etc) as needed.
+
+if __name__ == '__main__':
+    # Uncomment below if not installed in Python path.
+    # Note that if Python 2 is used, invoke setup.py so the py2src_noedit
+    # directory is generated.
+    # It is recommended that pip install [--user] is used however.
+    # import sys
+    # sys.path.append('LOCATION_OF_WPULL_PARENT_DIR')
+    import wpull.__main__
+    wpull.__main__.main()

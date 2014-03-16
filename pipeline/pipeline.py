@@ -7,12 +7,12 @@ import psutil
 import socket
 import string
 import shutil
+import sys
 import redis
 import time
 import json
 
 from os import environ as env
-from urlparse import urlparse
 from seesaw.project import *
 from seesaw.item import *
 from seesaw.task import *
@@ -21,14 +21,20 @@ from seesaw.externalprocess import *
 
 from seesaw.util import find_executable
 
-VERSION = "20140119.01"
+if sys.version_info[0] == 2:
+  from urlparse import urlparse
+else:
+  from urllib.parse import urlparse
+
+
+VERSION = "20140317.01"
 USER_AGENT = "ArchiveTeam ArchiveBot/%s" % VERSION
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
-WGET_LUA = find_executable('Wget+Lua', "GNU Wget 1.14.0-archivebot1",
-        [ './wget-lua' ])
+WPULL_EXE = find_executable('Wpull', '0.26',
+        [ './wpull' ])
 
-if not WGET_LUA:
-    raise Exception("No usable Wget+Lua found.")
+if not WPULL_EXE:
+    raise Exception("No usable Wpull found.")
 
 if 'RSYNC_URL' not in env:
     raise Exception('RSYNC_URL not set.')
@@ -49,7 +55,11 @@ LOG_CHANNEL = env['LOG_CHANNEL']
 
 redis_url = urlparse(REDIS_URL)
 redis_db = int(redis_url.path[1:])
-r = redis.StrictRedis(host=redis_url.hostname, port=redis_url.port, db=redis_db)
+r = redis.StrictRedis(
+  host=redis_url.hostname,
+  port=redis_url.port, db=redis_db,
+  decode_responses=False if sys.version_info[0] == 2 else True,
+)
 
 # ------------------------------------------------------------------------------
 # SYSTEM MONITORING
@@ -61,7 +71,7 @@ pid = os.getpid()
 
 pipeline_id_input = "%s:%s:%s" % (hostname, fqdn, pid)
 m = hashlib.md5()
-m.update(pipeline_id_input)
+m.update(pipeline_id_input.encode('ascii'))
 pipeline_id = 'pipeline:%s' % m.hexdigest()
 
 def do_report(pipeline, redis):
@@ -363,36 +373,51 @@ class AcceptAny:
     def __contains__(self, item):
         return True
 
+
+class WpullArgs(object):
+    def realize(self, item):
+        args = [WPULL_EXE,
+            '-U', USER_AGENT,
+            '--quiet',
+            '--ascii-print',
+            '-o', '%(item_dir)s/wpull.log' % item,
+            '--database', '%(item_dir)s/wpull.db' % item,
+            '--save-cookies', '%(cookie_jar)s' % item,
+            '--no-check-certificate',
+            '--delete-after',
+            '--no-robots',
+            '--page-requisites',
+            '--no-parent',
+            '--timeout', '20',
+            '--tries', '10',
+            '--waitretry', '5',
+            '--warc-file', '%(item_dir)s/%(warc_file_base)s' % item,
+            '--warc-header', 'operator: Archive Team',
+            '--warc-header', 'downloaded-by: ArchiveBot',
+            '--warc-header', 'archivebot-job-ident: %(ident)s' % item,
+            '--python-script', 'archivebot.py',
+            '%(url)s' % item
+        ]
+
+        self.add_args(args, ['%(recursive)s', '%(level)s', '%(depth)s'], item)
+
+        return args
+
+    @classmethod
+    def add_args(cls, args, names, item):
+        for name in names:
+            value = name % item
+            if value:
+                args.append(value)
+
+
 pipeline = Pipeline(
     GetItemFromQueue(r, pipeline_id),
     StartHeartbeat(r),
     SetFetchDepth(r),
     PreparePaths(),
     WriteInfo(r),
-    WgetDownload([WGET_LUA,
-        '-U', USER_AGENT,
-        '-nv',
-        '-o', ItemInterpolation('%(item_dir)s/wget.log'),
-        '--save-cookies', ItemInterpolation('%(cookie_jar)s'),
-        '--no-check-certificate',
-        '--output-document', ItemInterpolation('%(item_dir)s/wget.tmp'),
-        '--truncate-output',
-        '-e', 'robots=off',
-        ItemInterpolation('%(recursive)s'),
-        ItemInterpolation('%(level)s'),
-        ItemInterpolation('%(depth)s'),
-        '--page-requisites',
-        '--no-parent',
-        '--timeout', '20',
-        '--tries', '10',
-        '--waitretry', '5',
-        '--warc-file', ItemInterpolation('%(item_dir)s/%(warc_file_base)s'),
-        '--warc-header', 'operator: Archive Team',
-        '--warc-header', 'downloaded-by: ArchiveBot',
-        '--warc-header', ItemInterpolation('archivebot-job-ident: %(ident)s'),
-        '--lua-script', 'archivebot.lua',
-        ItemInterpolation('%(url)s')
-    ],
+    WgetDownload(WpullArgs(),
     accept_on_exit_code=AcceptAny(),
     env={
         'ITEM_IDENT': ItemInterpolation('%(ident)s'),
@@ -402,7 +427,8 @@ pipeline = Pipeline(
         'LOG_CHANNEL': LOG_CHANNEL,
         'REDIS_HOST': redis_url.hostname,
         'REDIS_PORT': str(redis_url.port),
-        'REDIS_DB': str(redis_db)
+        'REDIS_DB': str(redis_db),
+        'PATH': os.environ['PATH']
     }),
     RelabelIfAborted(r),
     WriteInfo(r),
