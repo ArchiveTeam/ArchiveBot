@@ -73,6 +73,7 @@ GEM
     multipart-post (2.0.0)
     net-http-persistent (2.9)
     nio4r (1.0.0)
+    psych (2.0.4)
     rack (1.5.2)
     rb-fsevent (0.9.4)
     rb-inotify (0.9.3)
@@ -336,6 +337,7 @@ DEPENDENCIES
   json
   listen (~> 2.0)
   net-http-persistent
+  psych (~> 2.0, >= 2.0.1)
   redis
   reel
   rspec

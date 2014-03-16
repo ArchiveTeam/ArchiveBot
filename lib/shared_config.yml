@@ -1,0 +1,13 @@
+# This file contains configuration that is
+#
+# 1. shared across multiple components of ArchiveBot
+# 2. in principle tweakable; in practice, rarely changed
+#
+# This file must remain valid YAML.  (It's YAML because you can comment in
+# YAML.  You can't do that with JSON.)
+channels:
+  # The pubsub channel through which the pipeline sends log updates.
+  # The dashboard and cogs programs subscribe and do their thing from there.
+  log: archivebot.log_updates
+
+# vim:ts=2:sw=2:et:tw=78
