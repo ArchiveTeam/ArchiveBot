@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <link rel="stylesheet" type="text/css" href="/assets/all.css" />
+    <link rel="stylesheet" type="text/css" href="/assets/style.css" />
     <link rel="alternate" type="application/rss+xml" title="RSS Feed" href="/feed/archivebot.rss" />
     <link rel="alternate" type="application/atom+xml" title="Atom Feed" href="/feed/archivebot.atom" />
     <title>ArchiveBot dashboard</title>
@@ -16,22 +16,42 @@
     <script type="text/javascript" src="/assets/all.js"></script>
 
     <script type="text/x-handlebars">
+      <header class="upper">
         <h1>
           <a
           href="http://www.archiveteam.org/index.php?title=ArchiveBot">ArchiveBot</a>
           dashboard
         </h1>
+      </header>
       {{outlet}}
     </script>
 
     <script type="text/x-handlebars" data-template-name="index">
-      <ul class="dashboard-job-list">
-        {{#each job in jobs}}
-          <li>{{partial "job"}}</li>
-        {{else}}
-          No running jobs
-        {{/each}}
-      </ul>
+      <section id="pipelines">
+        <header>
+          <h1>Pipelines</h1>
+        </header>
+        <ul>
+          <li>
+            <span class="ident">
+              pipeline:c2dc3c66d4b2452576232c6b9ec956ea
+            </span>
+          </li>
+        </ul>
+      </section>
+
+      <section id="jobs">
+        <header>
+          <h1>Jobs</h1>
+        </header>
+        <ul class="job-list">
+          {{#each job in jobs}}
+            <li>{{partial "job"}}</li>
+          {{else}}
+            No running jobs
+          {{/each}}
+        </ul>
+      </section>
     </script>
 
     <script type="text/x-handlebars" data-template-name="job-layout">
@@ -42,7 +62,7 @@
             <a {{bindAttr href=historyRoute}} class="history">History</a>
           {{/unless}}
         </h1>
-        <h1 class="ident terminal">
+        <h1 class="ident">
           {{view Ember.TextField valueBinding="ident" readonly=true
             sizeBinding="ident.length"}}
         </h1>

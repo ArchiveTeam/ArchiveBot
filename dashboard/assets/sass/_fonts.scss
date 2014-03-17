@@ -1,0 +1,21 @@
+@font-face {
+  font-family: 'Source Sans Pro';
+  src: url('/assets/SourceSansPro-Regular.ttf');
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: 'Inconsolata';
+  src: url('/assets/Inconsolata-Regular.ttf');
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: 'FontAwesome';
+  src: url('/assets/fontawesome-webfont.ttf');
+  font-weight: normal;
+}
+
+@mixin terminal {
+  font-family: 'Inconsolata', monospace;
+}

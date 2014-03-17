@@ -1,0 +1,200 @@
+// Screen
+// ======
+
+@import "compass/css3/transform";
+@import "compass/css3/transition";
+@import "compass/reset";
+@import "fonts";
+@import "grids";
+
+$base-font-size: 18px;
+$base-line-height: 24px;
+$background-color: #333;
+$foreground-color: #ccc;
+$vertical-space: $base-line-height;
+
+$ok-color: hsl(120, 100%, 25%);
+$warning-color: hsl(60, 100%, 25%);
+$error-color: hsl(0, 100%, 25%);
+$border-color: darken($background-color, 5%);
+
+$job-terminal-background-color: darken($background-color, 20%);
+$job-terminal-font-size: $base-font-size * 0.8;
+$job-terminal-line-height: $job-terminal-font-size;
+$job-terminal-rows: 16;
+
+html {
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: $base-font-size;
+  line-height: $base-line-height;
+  background-color: $background-color;
+  color: $foreground-color;
+  height: 100%;
+}
+
+body {
+  @include container;
+}
+
+h1 {
+  font-size: 120%;
+  font-variant: small-caps;
+} 
+h2 {
+  font-size: 100%;
+  font-variant: small-caps;
+}
+
+a {
+  color: hsl(240, 100%, 75%);
+}
+
+a:visited {
+  color: hsl(280, 25%, 60%);
+}
+
+.upper {
+  @include full;
+
+  background-color: darken($background-color, 10%);
+  margin-bottom: $vertical-space / 2;
+  padding-bottom: $vertical-space / 2;
+}
+
+#pipelines {
+  @include span(3);
+}
+
+#jobs {
+  @include span(last 8);
+
+  @include with-layout(8 after) {
+    .job {
+      @include full;
+
+      border-bottom: 1px solid $border-color;
+      margin-bottom: $vertical-space;
+      padding-bottom: $vertical-space;
+
+      header {
+        @include full;
+      }
+
+      h1 {
+        margin-bottom: $vertical-space / 4;
+      }
+
+      h1.url {
+        float: left;
+        font-variant: normal;
+
+        a.history {
+          text-transform: lowercase;
+
+          &:before {
+            content: '[';
+          }
+
+          &:after {
+            content: ']';
+          }
+        }
+      }
+
+      h1.ident {
+        @include terminal;
+
+        float: right;
+
+        input {
+          background-color: inherit;
+          border: 0;
+          color: inherit;
+          font-family: inherit;
+          font-size: inherit;
+        }
+      }
+
+      .proportion-view {
+        width: 100%;
+        height: $vertical-space / 2;
+        overflow: hidden;
+
+        .proportion {
+          height: 100%;
+          float: left;
+        }
+
+        .ok {
+          background-color: $ok-color;
+        }
+
+        .warning {
+          background-color: $warning-color;
+        }
+
+        .error {
+          background-color: $error-color;
+        }
+      }
+
+      .terminal {
+        @include full;
+        @include terminal;
+
+        background-color: $job-terminal-background-color;
+        font-size: $job-terminal-font-size;
+        height: $job-terminal-line-height * $job-terminal-rows;
+        line-height: $job-terminal-line-height;
+        overflow-y: auto;
+      }
+
+      .log-view {
+        a {
+          color: inherit;
+        }
+
+        .warning {
+          background-color: $warning-color;
+          color: lighten($warning-color, 50%);
+        }
+
+        .error {
+          background-color: $error-color;
+          color: lighten($error-color, 50%);
+        }
+
+        .ignored {
+          display: none;
+        }
+
+        .frozen, .unfrozen {
+          background-color: hsl(-120, 50%, 25%);
+          color: hsl(-120, 100%, 75%);
+          text-transform: uppercase;
+        }
+      }
+
+      .log-view.show-ignores {
+        .ignored {
+          display: block;
+          color: hsl(0, 0%, 50%);
+        }
+      }
+
+      .controls {
+        float: right;
+      }
+    }
+
+    .job.finished {
+      @include transition-property(all);
+      @include transition-duration(0.25s);
+      @include transition-timing-function(linear);
+      @include transition-delay(10s);
+      @include transform(scale(1, 0));
+    }
+  }
+}
+
+// vim:ts=2:sw=2:et:tw=78

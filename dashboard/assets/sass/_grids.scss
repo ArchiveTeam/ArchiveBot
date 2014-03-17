@@ -1,0 +1,12 @@
+// Requirements
+// ============
+
+@import "susy";
+
+$total-columns: 12;
+
+$susy: (
+  columns: $total-columns,
+  gutters: 1/4,
+  gutter-position: inside
+);
