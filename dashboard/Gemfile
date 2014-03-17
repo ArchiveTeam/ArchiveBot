@@ -1,0 +1,22 @@
+source "https://rubygems.org"
+
+gem 'analysand', '~> 3.0.1'
+gem 'celluloid'
+gem 'celluloid-redis'
+gem 'coffee-script'
+gem 'compass', '~> 1.0.0.alpha.19'
+gem 'ember-source', '~> 1.4.0'
+gem 'erubis'
+gem 'handlebars-source'
+gem 'json'
+gem 'redis'
+gem 'reel'
+
+# Psych 2.0.0 as shipped with Ruby 2.0 doesn't include Psych.safe_load
+gem 'psych', '~> 2.0', '>= 2.0.1'
+
+gem 'susy'
+gem 'trollop'
+gem 'uuidtools'
+gem 'webmachine', :git => 'https://github.com/seancribbs/webmachine-ruby.git'
+gem 'webmachine-sprockets', :git => 'https://github.com/lgierth/webmachine-sprockets.git'

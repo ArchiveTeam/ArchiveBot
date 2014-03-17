@@ -1,0 +1,125 @@
+GIT
+  remote: https://github.com/lgierth/webmachine-sprockets.git
+  revision: cf8c0d4e0c2383f39f4c68eff9979ccc4a7f7fe9
+  specs:
+    webmachine-sprockets (0.2.0)
+      sprockets (~> 2.0)
+      webmachine (~> 1.0)
+
+GIT
+  remote: https://github.com/seancribbs/webmachine-ruby.git
+  revision: 003775edfbb0bd0e1233166002a9ab16c1c20816
+  specs:
+    webmachine (1.2.2)
+      as-notifications (~> 1.0)
+      i18n (>= 0.4.0)
+      multi_json
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    analysand (3.0.1)
+      celluloid (~> 0.15.0)
+      celluloid-io
+      http_parser.rb
+      json
+      json-stream
+      net-http-persistent
+      rack
+      yajl-ruby
+    as-notifications (1.0.1)
+    celluloid (0.15.2)
+      timers (~> 1.1.0)
+    celluloid-io (0.15.0)
+      celluloid (>= 0.15.0)
+      nio4r (>= 0.5.0)
+    celluloid-redis (0.0.2)
+      celluloid-io (>= 0.13.0.pre)
+      redis
+    chunky_png (1.3.0)
+    coffee-script (2.2.0)
+      coffee-script-source
+      execjs
+    coffee-script-source (1.7.0)
+    compass (1.0.0.alpha.19)
+      chunky_png (~> 1.2)
+      compass-core (~> 1.0.0.alpha.19)
+      compass-import-once (~> 1.0.3)
+      json
+      listen (~> 1.1.0)
+      sass (>= 3.3.0, < 3.5)
+    compass-core (1.0.0.alpha.19)
+      multi_json (~> 1.0)
+      sass (>= 3.3.0, < 3.5)
+    compass-import-once (1.0.3)
+      sass (>= 3.2, < 3.5)
+    ember-source (1.4.0)
+      handlebars-source (~> 1.0)
+    erubis (2.7.0)
+    execjs (2.0.2)
+    ffi (1.9.3)
+    handlebars-source (1.3.0)
+    hike (1.2.3)
+    http (0.5.0)
+      http_parser.rb
+    http_parser.rb (0.6.0)
+    i18n (0.6.9)
+    json (1.8.1)
+    json-stream (0.1.3)
+    listen (1.1.6)
+      rb-fsevent (>= 0.9.3)
+      rb-inotify (>= 0.9)
+      rb-kqueue (>= 0.2)
+    multi_json (1.9.0)
+    net-http-persistent (2.9.4)
+    nio4r (1.0.0)
+    psych (2.0.4)
+    rack (1.5.2)
+    rb-fsevent (0.9.4)
+    rb-inotify (0.9.3)
+      ffi (>= 0.5.0)
+    rb-kqueue (0.2.2)
+      ffi (>= 0.5.0)
+    redis (3.0.7)
+    reel (0.4.0)
+      celluloid (>= 0.15.1)
+      celluloid-io (>= 0.15.0)
+      http (>= 0.5.0)
+      http_parser.rb (>= 0.6.0.beta.2)
+      websocket_parser (>= 0.1.4)
+    sass (3.3.3)
+    sprockets (2.12.0)
+      hike (~> 1.2)
+      multi_json (~> 1.0)
+      rack (~> 1.0)
+      tilt (~> 1.1, != 1.3.0)
+    susy (2.1.1)
+      sass (~> 3.3.0)
+    tilt (1.4.1)
+    timers (1.1.0)
+    trollop (2.0)
+    uuidtools (2.1.4)
+    websocket_parser (0.1.6)
+    yajl-ruby (1.2.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  analysand (~> 3.0.1)
+  celluloid
+  celluloid-redis
+  coffee-script
+  compass (~> 1.0.0.alpha.19)
+  ember-source (~> 1.4.0)
+  erubis
+  handlebars-source
+  json
+  psych (~> 2.0, >= 2.0.1)
+  redis
+  reel
+  susy
+  trollop
+  uuidtools
+  webmachine!
+  webmachine-sprockets!
