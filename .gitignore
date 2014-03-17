@@ -4,3 +4,6 @@
 data
 ./wget-lua
 *.pyc
+
+.sass-cache
+dashboard/assets/stylesheets/*.css
