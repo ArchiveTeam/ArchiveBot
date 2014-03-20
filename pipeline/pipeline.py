@@ -33,7 +33,7 @@ if sys.version_info[0] == 2:
 else:
   from urllib.parse import urlparse
 
-VERSION = "20140320.01"
+VERSION = "20140320.02"
 USER_AGENT = "ArchiveTeam ArchiveBot/%s" % VERSION
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
 WPULL_EXE = find_executable('Wpull', '0.26',
@@ -86,7 +86,8 @@ def do_report(pipeline, redis):
         'pid': pid,
         'version': VERSION,
         'mem_usage': psutil.virtual_memory().percent,
-        'disk_usage': psutil.disk_usage(pipeline.data_dir).percent
+        'disk_usage': psutil.disk_usage(pipeline.data_dir).percent,
+        'ts': int(time.time())
     }
 
     redis.hmset(pipeline_id, process_report)
