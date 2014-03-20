@@ -245,14 +245,20 @@ class Job < Struct.new(:uri, :redis)
     redis.expire(ignore_patterns_set_key, 5)
   end
 
-  def queue(direction = :back)
+  def queue(destination = nil, direction = :back)
     t = Time.now
+
+    queue = if destination
+              "pending:#{destination}"
+            else
+              'pending'
+            end
 
     case direction
     when :back
-      redis.lpush('pending', ident)
+      redis.lpush(queue, ident)
     when :front
-      redis.rpush('pending', ident)
+      redis.rpush(queue, ident)
     else
       raise 'Unknown queue end (known: :back, :front)'
     end

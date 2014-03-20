@@ -88,6 +88,13 @@ class Brain
         reply m, "Queued #{uri.to_s}."
       end
 
+      destination = nil
+
+      if h['pipeline']
+        destination = h['pipeline'].first
+        reply m, "Job will run on pipeline #{destination}."
+      end
+
       reply m, "Use !status #{job.ident} for updates, !abort #{job.ident} to abort."
 
       run_post_registration_hooks(m, job, h)
@@ -95,10 +102,10 @@ class Brain
       if depth == :shallow
         # If this is a shallow depth job, it gets priority over jobs that go
         # deeper.
-        job.queue(:front)
+        job.queue(destination, :front)
       else
         # If this job goes deeper, shove it at the back of the queue.
-        job.queue
+        job.queue(destination)
       end
     end
   end
@@ -232,7 +239,7 @@ class Brain
   private
 
   VALID_PARAMETERS = {
-    :archive => %w(ignore_sets)
+    :archive => %w(ignore_sets pipeline)
   }
 
   def delete_unknown_parameters(h, command)

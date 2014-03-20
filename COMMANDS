@@ -18,6 +18,15 @@
       < Use !status 5sid4pgxkiu6zynhbt3q1gi2s for updates, !abort
         5sid4pgxkiu6zynhbt3q1gi2s to abort.
 
+    * --pipeline PIPELINE_ID: specify pipeline to use
+
+      > !archive http://example.blogspot.com/
+          --pipeline=pipeline:1234567890abcdef
+      < Archiving http://example.blogspot.com/.
+      < Job will run on pipeline pipeline:1234567890abcdef.
+      < Use !status 5sid4pgxkiu6zynhbt3q1gi2s for updates, !abort
+        5sid4pgxkiu6zynhbt3q1gi2s to abort.
+
 
 * !abort IDENT: abort a job
 
@@ -41,6 +50,15 @@
       > !archiveonly http://example.blogspot.com/ --ignore-sets=blogs,forums
       < Archiving http://example.blogspot.com/ without recursion.
       < 14 ignore patterns loaded.
+      < Use !status 5sid4pgxkiu6zynhbt3q1gi2s for updates, !abort
+        5sid4pgxkiu6zynhbt3q1gi2s to abort.
+
+    * --pipeline PIPELINE_ID: specify pipeline to use
+
+      > !archiveonly http://example.blogspot.com/
+          --pipeline=pipeline:1234567890abcdef
+      < Archiving http://example.blogspot.com/.
+      < Job will run on pipeline pipeline:1234567890abcdef.
       < Use !status 5sid4pgxkiu6zynhbt3q1gi2s for updates, !abort
         5sid4pgxkiu6zynhbt3q1gi2s to abort.
 
