@@ -33,7 +33,7 @@ if sys.version_info[0] == 2:
 else:
   from urllib.parse import urlparse
 
-VERSION = "20140317.03"
+VERSION = "20140320.01"
 USER_AGENT = "ArchiveTeam ArchiveBot/%s" % VERSION
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
 WPULL_EXE = find_executable('Wpull', '0.26',
@@ -108,6 +108,7 @@ class GetItemFromQueue(Task):
         self.redis = redis
         self.pipeline_id = pipeline_id
         self.retry_delay = retry_delay
+        self.pipeline_queue = 'pending:%s' % self.pipeline_id
 
     def enqueue(self, item):
         self.start_item(item)
@@ -115,7 +116,7 @@ class GetItemFromQueue(Task):
         self.send_request(item)
 
     def send_request(self, item):
-        ident = self.redis.rpoplpush('pending', 'working')
+        ident = self.get_item()
 
         if ident == None:
             self.schedule_retry(item)
@@ -135,6 +136,14 @@ class GetItemFromQueue(Task):
             item['log_key'] = data[2]
             item.log_output('Received item %s.' % ident)
             self.complete_item(item)
+
+    def get_item(self):
+        ident = self.redis.rpoplpush(self.pipeline_queue, 'working')
+
+        if ident == None:
+            return self.redis.rpoplpush('pending', 'working')
+        else:
+            return ident
 
     def schedule_retry(self, item):
         IOLoop.instance().add_timeout(datetime.timedelta(seconds=self.retry_delay),
