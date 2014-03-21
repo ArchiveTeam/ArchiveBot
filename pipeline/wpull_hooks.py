@@ -1,14 +1,12 @@
 import os
 import time
 import random
-
-import acceptance_heuristics
-import settings
-import shared_config
-
 import json
 import redis
 
+from archivebot import acceptance_heuristics
+from archivebot import settings
+from archivebot import shared_config
 
 ident = os.environ['ITEM_IDENT']
 rconn = redis.StrictRedis(host=os.environ['REDIS_HOST'], port=int(os.environ['REDIS_PORT']), db=os.environ['REDIS_DB'])

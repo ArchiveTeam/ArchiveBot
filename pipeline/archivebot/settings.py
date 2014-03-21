@@ -1,7 +1,7 @@
 import os
 import re
-import pattern_conversion
 
+from . import pattern_conversion
 
 pattern_conversion_enabled = os.environ.get('LUA_PATTERN_CONVERSION')
 
