@@ -8,68 +8,77 @@ import tornado.ioloop
 
 from seesaw.task import Task, SimpleTask
 from tornado.ioloop import IOLoop
+from archivebot.control import ConnectionError
 
-# ------------------------------------------------------------------------------
-
-class GetItemFromQueue(Task):
-    def __init__(self, redis, pipeline_id, retry_delay=5):
-        Task.__init__(self, 'GetItemFromQueue')
-        self.redis = redis
-        self.pipeline_id = pipeline_id
-        self.retry_delay = retry_delay
-        self.pipeline_queue = 'pending:%s' % self.pipeline_id
+class RetryableTask(Task):
+    retry_delay = 5
+    cancelable = False
 
     def enqueue(self, item):
         self.start_item(item)
         item.log_output('Starting %s for %s' % (self, item.description()))
-        self.send_request(item)
-
-    def send_request(self, item):
-        ident = self.get_item()
-
-        if ident == None:
-            self.schedule_retry(item)
-        else:
-            pipeline_attrs = {
-                'started_at': int(time.time()),
-                'pipeline_id': self.pipeline_id
-            }
-
-            self.redis.hmset(ident, pipeline_attrs)
-
-            data = self.redis.hmget(ident, 'url', 'slug', 'log_key')
-
-            item['ident'] = ident
-            item['url'] = data[0]
-            item['slug'] = data[1]
-            item['log_key'] = data[2]
-            item.log_output('Received item %s.' % ident)
-            self.complete_item(item)
-
-    def get_item(self):
-        ident = self.redis.rpoplpush(self.pipeline_queue, 'working')
-
-        if ident == None:
-            return self.redis.rpoplpush('pending', 'working')
-        else:
-            return ident
+        self.process(item)
 
     def schedule_retry(self, item):
-        item.may_be_canceled = True
-
-        def retry():
-            item.may_be_canceled = False
-            self.send_request(item)
+        item.may_be_canceled = self.cancelable
 
         IOLoop.instance().add_timeout(datetime.timedelta(seconds=self.retry_delay),
-                retry)
+               functools.partial(self.retry, item))
+
+    def retry(self, item):
+        if not item.canceled:
+            item.may_be_canceled = False
+
+            self.process(item)
+
+    def notify_retry(self, reason, item):
+        item.log_output("%s. Retrying %s in %s seconds." %
+                (reason, self, self.retry_delay))
+   
+    def notify_connection_error(self, item):
+        self.notify_retry('Lost connection to ArchiveBot controller', item)
+
+# ------------------------------------------------------------------------------
+
+class GetItemFromQueue(RetryableTask):
+    def __init__(self, control, pipeline_id, retry_delay=5):
+        RetryableTask.__init__(self, 'GetItemFromQueue')
+        self.control = control
+        self.pipeline_id = pipeline_id
+        self.retry_delay = retry_delay
+        self.cancelable = True
+        self.pipeline_queue = 'pending:%s' % self.pipeline_id
+
+    def process(self, item):
+        try: 
+            ident, job_data = self.control.reserve_job(self.pipeline_id).get()
+
+            if ident == None:
+                self.schedule_retry(item)
+            else:
+                item['fetch_depth'] = job_data.get('fetch_depth')
+                item['ident'] = ident
+                item['log_key'] = job_data.get('log_key')
+                item['pipeline_id'] = self.pipeline_id
+                item['queued_at'] = job_data.get('queued_at')
+                item['slug'] = job_data.get('slug')
+                item['started_by'] = job_data.get('started_by')
+                item['started_in'] = job_data.get('started_in')
+                item['url'] = job_data.get('url')
+
+                item.log_output('Received item %s.' % ident)
+
+                self.complete_item(item)
+        except ConnectionError:
+            self.notify_connection_error(item)
+            self.schedule_retry(item)
 
 # ------------------------------------------------------------------------------
 
 class StartHeartbeat(SimpleTask):
-    def __init__(self, redis):
+    def __init__(self, control):
         SimpleTask.__init__(self, 'StartHeartbeat')
-        self.redis = redis
+        self.control = control
 
     def process(self, item):
         cb = tornado.ioloop.PeriodicCallback(
@@ -81,17 +90,16 @@ class StartHeartbeat(SimpleTask):
         cb.start()
 
     def send_heartbeat(self, item):
-        self.redis.hincrby(item['ident'], 'heartbeat', 1)
+        self.control.heartbeat(item['ident'])
 
 # ------------------------------------------------------------------------------
 
 class SetFetchDepth(SimpleTask):
-    def __init__(self, redis):
+    def __init__(self):
         SimpleTask.__init__(self, 'SetFetchDepth')
-        self.redis = redis
 
     def process(self, item):
-        depth = self.redis.hget(item['ident'], 'fetch_depth')
+        depth = item['fetch_depth']
 
         # Unfortunately, depth zero means the same thing as infinite depth to
         # wget, so we need to special-case it
@@ -136,19 +144,26 @@ class PreparePaths(SimpleTask, TargetPathMixin):
 
 # ------------------------------------------------------------------------------
 
-class RelabelIfAborted(SimpleTask, TargetPathMixin):
-    def __init__(self, redis):
-        SimpleTask.__init__(self, 'RelabelIfAborted')
-        self.redis = redis
+class RelabelIfAborted(RetryableTask, TargetPathMixin):
+    def __init__(self, control):
+        RetryableTask.__init__(self, 'RelabelIfAborted')
+        self.control = control
 
     def process(self, item):
-        if self.redis.hget(item['ident'], 'aborted'):
-            item['warc_file_base'] = '%(warc_file_base)s-aborted' % item
+        try:
+            if self.control.is_aborted(item['ident']).get():
+                item['aborted'] = True
+                item['warc_file_base'] = '%(warc_file_base)s-aborted' % item
 
-            self.set_target_paths(item)
+                self.set_target_paths(item)
 
-            item.log_output('Adjusted target WARC path to %(target_warc_file)s' %
-                    item)
+                item.log_output('Adjusted target WARC path to %(target_warc_file)s' %
+                        item)
+
+            self.complete_item(item)
+        except ConnectionError:
+            self.notify_connection_error(item)
+            self.schedule_retry(item)
 
 # ------------------------------------------------------------------------------
 
@@ -164,31 +179,28 @@ class MoveFiles(SimpleTask):
 # ------------------------------------------------------------------------------
 
 class WriteInfo(SimpleTask):
-    def __init__(self, redis):
+    def __init__(self):
         SimpleTask.__init__(self, 'WriteInfo')
-        self.redis = redis
 
     def process(self, item):
-        job_data = self.redis.hgetall(item['ident'])
-
         # The "aborted" key might not have been written by any prior process,
         # i.e. if the job wasn't aborted.  For accessor convenience, we add
         # that key here.
-        if 'aborted' in job_data:
-            aborted = job_data['aborted']
+        if 'aborted' in item:
+            aborted = item['aborted']
         else:
             aborted = False
 
         # This JSON object's fieldset is an externally visible interface.
         # Adding fields is fine; changing existing ones, not so much.
         item['info'] = {
-                'url': job_data['url'],
                 'aborted': aborted,
-                'fetch_depth': job_data['fetch_depth'],
-                'queued_at': job_data['queued_at'],
-                'started_in': job_data['started_in'],
-                'started_by': job_data['started_by'],
-                'pipeline_id': job_data['pipeline_id']
+                'fetch_depth': item['fetch_depth'],
+                'pipeline_id': item['pipeline_id'],
+                'queued_at': item['queued_at'],
+                'started_by': item['started_by'],
+                'started_in': item['started_in'],
+                'url': item['url']
         }
 
         with open(item['source_info_file'], 'w') as f:
@@ -196,14 +208,19 @@ class WriteInfo(SimpleTask):
 
 # ------------------------------------------------------------------------------
 
-class SetWarcFileSizeInRedis(SimpleTask):
-    def __init__(self, redis):
-        SimpleTask.__init__(self, 'SetWarcFileSizeInRedis')
-        self.redis = redis
+class SetWarcFileSizeInRedis(RetryableTask):
+    def __init__(self, control):
+        RetryableTask.__init__(self, 'SetWarcFileSizeInRedis')
+        self.control = control
 
     def process(self, item):
-        sz = os.stat(item['target_warc_file']).st_size
-        self.redis.hset(item['ident'], 'warc_size', sz)
+        try:
+            self.control.set_warc_size(item['ident'],
+                    item['target_warc_file'])
+            self.complete_item(item)
+        except ConnectionError:
+            self.notify_connection_error(item)
+            self.schedule_retry(item)
 
 # ------------------------------------------------------------------------------
 
@@ -220,18 +237,18 @@ class StopHeartbeat(SimpleTask):
 
 # ------------------------------------------------------------------------------
 
-class MarkItemAsDone(SimpleTask):
-    def __init__(self, redis, expire_time, log_channel, mark_done_script):
-        SimpleTask.__init__(self, 'MarkItemAsDone')
-        self.redis = redis
+class MarkItemAsDone(RetryableTask):
+    def __init__(self, control, expire_time):
+        RetryableTask.__init__(self, 'MarkItemAsDone')
+        self.control = control
         self.expire_time = expire_time
-        self.log_channel = log_channel
-        self.mark_done = self.redis.register_script(mark_done_script)
 
     def process(self, item):
-        self.mark_done(keys=[item['ident']], args=[self.expire_time,
-            self.log_channel, int(time.time()), json.dumps(item['info']),
-            item['log_key']])
-
+        try:
+            self.control.mark_done(item, self.expire_time)
+            self.complete_item(item)
+        except ConnectionError:
+            self.notify_connection_error(item)
+            self.schedule_retry(item)
 
 # vim:ts=4:sw=4:et:tw=78

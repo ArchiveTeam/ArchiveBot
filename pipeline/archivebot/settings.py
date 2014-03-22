@@ -1,6 +1,7 @@
 import os
 import re
 
+from archivebot.control import ConnectionError
 from . import pattern_conversion
 
 pattern_conversion_enabled = os.environ.get('LUA_PATTERN_CONVERSION')
@@ -15,26 +16,30 @@ settings = dict(
   pagereq_delay_max=None
 )
 
+def int_or_none(v):
+  if v:
+    return int(v)
+  else:
+    return None
+
 # If updated settings exist, updates all settings and returns true.
 # Otherwise, leaves settings unchanged and returns false.
-def update_settings(ident, rconn):
-  age = rconn.hget(ident, 'settings_age')
+def update_settings(ident, control):
+  try:
+    new_settings = control.get_settings(ident, settings['age']).get()
 
-  if age != settings['age']:
-    results = rconn.hmget(ident,
-      'delay_min', 'delay_max', 'pagereq_delay_min', 'pagereq_delay_max',
-      'ignore_patterns_set_key')
-
-    settings['delay_min'] = int(results[0]) if results[0] else None
-    settings['delay_max'] = int(results[1]) if results[1] else None
-    settings['pagereq_delay_min'] = int(results[2]) if results[2] else None
-    settings['pagereq_delay_max'] = int(results[3]) if results[3] else None
-    settings['ignore_patterns'] = rconn.smembers(results[4])
-    settings['age'] = age
-    return True
-  else:
+    if new_settings == 'same':
+      return False
+    else:
+      settings['delay_min'] = int_or_none(new_settings['delay_min'])
+      settings['delay_max'] = int_or_none(new_settings['delay_max'])
+      settings['pagereq_delay_min'] = int_or_none(new_settings['pagereq_delay_min'])
+      settings['pagereq_delay_max'] = int_or_none(new_settings['pagereq_delay_max'])
+      settings['ignore_patterns'] = new_settings['ignore_patterns']
+      settings['age'] = new_settings['age']
+      return True
+  except ConnectionError:
     return False
-
 
 # If a URL matches an ignore pattern, returns the matching pattern.
 # Otherwise, returns false.

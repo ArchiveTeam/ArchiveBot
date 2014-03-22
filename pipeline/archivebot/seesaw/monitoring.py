@@ -17,7 +17,7 @@ def pipeline_id():
     m.update(pipeline_id_input.encode('ascii'))
     return (pid, hostname, fqdn, 'pipeline:%s' % m.hexdigest())
 
-def start(pipeline, redis, version, pipeline_channel):
+def start(pipeline, control, version):
     pid, hostname, fqdn, pipe_id = pipeline_id()
 
     def report():
@@ -32,14 +32,10 @@ def start(pipeline, redis, version, pipeline_channel):
             'ts': int(time.time())
         }
 
-        redis.hmset(pipe_id, process_report)
-        redis.sadd('pipelines', pipe_id)
-        redis.publish(pipeline_channel, pipe_id)
+        control.pipeline_report(pipe_id, process_report)
 
     def unregister():
-        redis.delete(pipe_id)
-        redis.srem('pipelines', pipe_id)
-        redis.publish(pipeline_channel, pipe_id)
+        control.unregister_pipeline(pipe_id)
 
     atexit.register(unregister)
 

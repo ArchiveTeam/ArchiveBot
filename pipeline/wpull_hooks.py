@@ -1,45 +1,82 @@
-import os
-import time
-import random
+import archivebot.control
 import json
-import redis
+import os
+import random
+import time
 
 from archivebot import acceptance_heuristics
-from archivebot import settings
 from archivebot import shared_config
+from archivebot import settings
 
 ident = os.environ['ITEM_IDENT']
-rconn = redis.StrictRedis(host=os.environ['REDIS_HOST'], port=int(os.environ['REDIS_PORT']), db=os.environ['REDIS_DB'])
-aborter = os.environ['ABORT_SCRIPT']
+redis_url = os.environ['REDIS_URL']
 log_key = os.environ['LOG_KEY']
 log_channel = shared_config.log_channel()
+pipeline_channel = shared_config.pipeline_channel()
 
-do_abort = rconn.register_script(os.environ['ABORT_SCRIPT'])
-do_log = rconn.register_script(os.environ['LOG_SCRIPT'])
+control_ref = archivebot.control.Control.start(redis_url, log_channel,
+    pipeline_channel)
+control = control_ref.proxy()
 
-# Generates a log entry for ignored URLs.
-def log_ignored_url(url, pattern):
-  entry = dict(
+requisite_urls = {}
+
+def log_ignore(url, pattern):
+  packet = dict(
     ts=time.time(),
     url=url,
     pattern=pattern,
     type='ignore'
   )
 
-  do_log(keys=[ident], args=[json.dumps(entry), log_channel, log_key])
+  control.log(packet, ident, log_key)
 
-requisite_urls = {}
+def log_result(url, statcode, error):
+  packet = dict(
+    ts=time.time(),
+    url=url,
+    response_code=statcode,
+    wget_code=error,
+    is_error=is_error(statcode, error),
+    is_warning=is_warning(statcode, error),
+    type='download'
+  )
+
+  control.log(packet, ident, log_key)
+
+def is_error(statcode, err):
+    '''
+    Determines whether a given status code/error code combination should be
+    flagged as an error.
+    '''
+    # 5xx: yes
+    if statcode >= 500:
+        return True
+
+    # Response code zero with non-OK wpull code: yes
+    if err != 'OK':
+        return True
+
+    # Could be an error, but we don't know it as such
+    return False
+
+def is_warning(statcode, err):
+    '''
+    Determines whether a given status code/error code combination should be
+    flagged as a warning.
+    '''
+    return statcode >= 400 and statcode < 500
 
 def add_as_page_requisite(url):
   requisite_urls[url] = True
 
-
 def accept_url(url_info, record_info, verdict, reasons):
+  url = url_info['url']
+
   # Does the URL match any of the ignore patterns?
-  pattern = settings.ignore_url_p(url_info['url'])
+  pattern = settings.ignore_url_p(url)
 
   if pattern:
-    log_ignored_url(url_info['url'], pattern)
+    log_ignore(url, pattern)
     return False
 
   # Second-guess wget's host-spanning restrictions.
@@ -68,34 +105,10 @@ def accept_url(url_info, record_info, verdict, reasons):
   # verdict.
   return verdict
 
-
-def abort_requested():
-  return rconn.hget(ident, 'abort_requested')
-
-
-# Should this result be flagged as an error?
-def is_error(statcode, err):
-  # 5xx: yes
-  if statcode >= 500:
-    return True
-
-  # Response code zero with non-RETRFINISHED wget code: yes
-  if err != 'OK':
-    return True
-
-  # Could be an error, but we don't know it as such
-  return False
-
-
-# Should this result be flagged as a warning?
-def is_warning(statcode, err):
-  return statcode >= 400 and statcode < 500
-
-
 def handle_result(url_info, error_info, http_info):
   if http_info:
     # Update the traffic counters.
-    rconn.hincrby(ident, 'bytes_downloaded', http_info['body']['content_size'])
+    control.update_bytes_downloaded(ident, http_info['body']['content_size'])
 
   statcode = 0
   error = 'OK'
@@ -103,7 +116,7 @@ def handle_result(url_info, error_info, http_info):
   pattern = settings.ignore_url_p(url_info['url'])
 
   if pattern:
-    log_ignored_url(url_info['url'], pattern)
+    log_ignore(url_info['url'], pattern)
     return wpull_hook.actions.FINISH
 
   if http_info:
@@ -113,27 +126,23 @@ def handle_result(url_info, error_info, http_info):
     error = error_info['error']
 
   # Record the current time, URL, response code, and wget's error code.
-  result = dict(
-    ts=time.time(),
-    url=url_info['url'],
-    response_code=statcode,
-    wget_code=error,
-    is_error=is_error(statcode, error),
-    is_warning=is_warning(statcode, error),
-    type='download'
-  )
-
-  # Publish the log entry, and bump the log counter.
-  do_log(keys=[ident], args=[json.dumps(result), log_channel, log_key])
+  log_result(url_info['url'], statcode, error)
 
   # Update settings.
-  if settings.update_settings(ident, rconn):
+  if settings.update_settings(ident, control):
     print("Settings updated: ", settings.inspect_settings())
 
   # Should we abort?
-  if abort_requested():
+  if control.abort_requested(ident).get():
     print("Wget terminating on bot command")
-    do_abort(keys=[ident], args=[log_channel])
+
+    while True:
+      try:
+        control.mark_aborted(ident)
+        break
+      except ConnectionError:
+        time.sleep(5)
+        pass
 
     return wpull_hook.actions.STOP
 
@@ -166,10 +175,13 @@ def handle_error(url_info, error_info):
 def finish_statistics(start_time, end_time, num_urls, bytes_downloaded):
   print(" ", bytes_downloaded, "bytes.")
 
+def exit_status(exit_code):
+  control.stop()
 
 wpull_hook.callbacks.accept_url = accept_url
 wpull_hook.callbacks.handle_response = handle_response
 wpull_hook.callbacks.handle_error = handle_error
 wpull_hook.callbacks.finish_statistics = finish_statistics
+wpull_hook.callbacks.exit_status = exit_status
 
 # vim:ts=2:sw=2:et:tw=78
