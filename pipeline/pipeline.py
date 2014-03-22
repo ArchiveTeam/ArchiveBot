@@ -27,7 +27,7 @@ if sys.version_info[0] == 2:
 else:
   from urllib.parse import urlparse
 
-VERSION = "20140321.01"
+VERSION = "20140322.01"
 USER_AGENT = "ArchiveTeam ArchiveBot/%s" % VERSION
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
 WPULL_EXE = find_executable('Wpull', '0.26',
