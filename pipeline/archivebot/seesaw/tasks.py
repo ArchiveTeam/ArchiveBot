@@ -55,8 +55,14 @@ class GetItemFromQueue(Task):
             return ident
 
     def schedule_retry(self, item):
+        item.may_be_canceled = True
+
+        def retry():
+            item.may_be_canceled = False
+            self.send_request(item)
+
         IOLoop.instance().add_timeout(datetime.timedelta(seconds=self.retry_delay),
-            functools.partial(self.send_request, item))
+                retry)
 
 # ------------------------------------------------------------------------------
 
