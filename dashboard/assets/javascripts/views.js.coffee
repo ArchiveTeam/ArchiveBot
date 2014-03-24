@@ -72,7 +72,7 @@ Dashboard.LogView = Ember.View.extend
 
   tagName: 'section'
 
-  maxSize: 512
+  maxSize: 256
 
   frozenBinding: 'job.frozen'
   showIgnoresBinding: 'job.showIgnores'
