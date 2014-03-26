@@ -148,4 +148,9 @@ pipeline.on_cleanup += stop_control
 # Activate system monitoring.
 monitoring.start(pipeline, control, VERSION)
 
+print('*' * 60)
+print('Pipeline ID: %s' % pipeline_id)
+print('*' * 60)
+print()
+
 # vim:ts=4:sw=4:et:tw=78
