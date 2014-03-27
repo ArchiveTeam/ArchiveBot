@@ -12,17 +12,17 @@
     * --ignore-sets SET1,...,SETN: specify sets of URL patterns to
       ignore
 
-      > !archive http://example.blogspot.com/ --ignore-sets=blogspot,google
-      < Archiving http://example.blogspot.com/.
+      > !archive http://example.blogspot.com/ncr --ignore-sets=blogs,forums
+      < Archiving http://example.blogspot.com/ncr.
       < 14 ignore patterns loaded.
       < Use !status 5sid4pgxkiu6zynhbt3q1gi2s for updates, !abort
         5sid4pgxkiu6zynhbt3q1gi2s to abort.
 
     * --pipeline PIPELINE_ID: specify pipeline to use
 
-      > !archive http://example.blogspot.com/
+      > !archive http://example.blogspot.com/ncr
           --pipeline=pipeline:1234567890abcdef
-      < Archiving http://example.blogspot.com/.
+      < Archiving http://example.blogspot.com/ncr.
       < Job will run on pipeline pipeline:1234567890abcdef.
       < Use !status 5sid4pgxkiu6zynhbt3q1gi2s for updates, !abort
         5sid4pgxkiu6zynhbt3q1gi2s to abort.
@@ -65,21 +65,21 @@
 
 * !ignore IDENT PATTERN, !ig IDENT PATTERN: add an ignore pattern
 
-    > !ig 1q2qydhkeh3gfnrcxuf6py70b obnoxious%?foo=%d+
-    < Added ignore pattern obnoxious%?foo=%d+ to job
+    > !ig 1q2qydhkeh3gfnrcxuf6py70b obnoxious\?foo=\d+
+    < Added ignore pattern obnoxious\?foo=\d+ to job
       1q2qydhkeh3gfnrcxuf6py70b.
 
-  The pattern must be expressed in Lua pattern syntax.  For more
+  The pattern must be expressed as regular expressions.  For more
   information, see:
 
-  http://lua-users.org/wiki/PatternsTutorial
-  http://www.lua.org/manual/5.1/manual.html#5.4.1
+  http://docs.python.org/3/howto/regex.html#regex-howto
+  http://docs.python.org/3/library/re.html#regular-expression-syntax
 
 
 * !unignore IDENT PATTERN, !unig IDENT PATTERN: remove an ignore pattern
 
-    > !unig 1q2qydhkeh3gfnrcxuf6py70b obnoxious%?foo=%d+
-    < Removed ignore pattern obnoxious%?foo=%d+ from job
+    > !unig 1q2qydhkeh3gfnrcxuf6py70b obnoxious\?foo=\d+
+    < Removed ignore pattern obnoxious\?foo=\d+ from job
       1q2qydhkeh3gfnrcxuf6py70b.
 
 
