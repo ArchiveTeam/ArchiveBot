@@ -30,7 +30,7 @@ else:
 VERSION = "20140322.01"
 USER_AGENT = "ArchiveTeam ArchiveBot/%s" % VERSION
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
-WPULL_EXE = find_executable('Wpull', '0.26',
+WPULL_EXE = find_executable('Wpull', '0.28',
         [ './wpull' ])
 
 if not WPULL_EXE:
