@@ -3,6 +3,11 @@ Dashboard.Router.map ->
 
 Dashboard.IndexRoute = Ember.Route.extend
   setupController: (controller) ->
+    $.getJSON('logs/recent').then (logs) ->
+      logs.forEach (log) ->
+        Dashboard.get('messageProcessor').process(log)
+      controller.set('dataLoaded', true)
+
     controller.set('controllers.jobs.model', Dashboard.get('messageProcessor.jobs'))
 
   gotoHistory: (url) ->

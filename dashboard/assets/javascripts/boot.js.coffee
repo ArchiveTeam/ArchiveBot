@@ -11,9 +11,4 @@ ws = new WebSocket('ws://' + window.location.host + '/stream')
 ws.onmessage = (msg) ->
   messageProcessor.process(msg.data)
 
-# Prime ourselves with the latest log entries.
-$.getJSON('logs/recent').then (logs) ->
-  logs.forEach (log) ->
-    messageProcessor.process(log)
-
 # vim:ts=2:sw=2:et:tw=78

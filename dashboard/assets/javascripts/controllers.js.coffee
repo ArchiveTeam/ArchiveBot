@@ -9,6 +9,8 @@ Dashboard.IndexController = Ember.Controller.extend
 
   jobsBinding: 'controllers.jobs'
 
+  dataLoaded: false
+
 ##
 # The job log list is sorted by URL, minus the "www." bit if said URL has one.
 # (A lot of people don't read the "www" anymore.)

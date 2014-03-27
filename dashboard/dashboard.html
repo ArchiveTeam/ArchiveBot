@@ -29,7 +29,11 @@
         {{#each job in jobs}}
           <li>{{partial "job"}}</li>
         {{else}}
-          No running jobs
+          {{#if dataLoaded}}
+            No running jobs
+          {{else}}
+            Loading job data
+          {{/if}}
         {{/each}}
       </ul>
     </script>
