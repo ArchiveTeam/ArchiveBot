@@ -7,13 +7,21 @@
 Dashboard.IndexController = Ember.Controller.extend
   needs: ['jobs']
 
-  jobsBinding: 'controllers.jobs'
-
   dataLoaded: false
 
-##
-# The job log list is sorted by URL, minus the "www." bit if said URL has one.
-# (A lot of people don't read the "www" anymore.)
+  filteredJobs: (->
+    fv = @get('filterValue')
+
+    if !fv
+      @get('controllers.jobs')
+    else
+      @get('controllers.jobs').filter (item, index, controller) ->
+        url = item.get('url')
+        ident = item.get('ident')
+
+        url.indexOf(fv) != -1 || ident.indexOf(fv) != -1
+  ).property('filterValue')
+
 Dashboard.JobsController = Ember.ArrayController.extend
   itemController: 'job'
   sortProperties: ['url']

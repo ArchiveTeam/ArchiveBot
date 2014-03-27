@@ -76,6 +76,15 @@ h1 {
   opacity: 0;
 }
 
+input.filter {
+  background-color: inherit;
+  border: 0;
+  color: inherit;
+  display: inline;
+  font-family: inherit;
+  font-size: inherit;
+}
+
 .job h1 {
   margin-bottom: 0.25em;
 }

@@ -16,23 +16,28 @@
     <script type="text/javascript" src="/assets/all.js"></script>
 
     <script type="text/x-handlebars">
-        <h1>
-          <a
-          href="http://www.archiveteam.org/index.php?title=ArchiveBot">ArchiveBot</a>
-          dashboard
-        </h1>
       {{outlet}}
     </script>
 
     <script type="text/x-handlebars" data-template-name="index">
+      <h1>
+        <a
+        href="http://www.archiveteam.org/index.php?title=ArchiveBot">ArchiveBot</a>
+        dashboard:
+        {{input type="text" value=filterValue class="filter" placeholder="(all jobs)"}}
+      </h1>
       <ul class="dashboard-job-list">
-        {{#each job in jobs}}
+        {{#each job in filteredJobs}}
           <li>{{partial "job"}}</li>
         {{else}}
-          {{#if dataLoaded}}
-            No running jobs
+          {{#if filterValue}}
+            No matching jobs
           {{else}}
-            Loading job data
+            {{#if dataLoaded}}
+              No running jobs
+            {{else}}
+              Loading job data
+            {{/if}}
           {{/if}}
         {{/each}}
       </ul>
