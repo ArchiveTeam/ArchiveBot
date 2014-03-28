@@ -82,8 +82,15 @@
                   <td>{{r.queuedAtForDisplay}}</td>
                   <td>{{r.depth}}</td>
                   <td>{{r.mbDownloaded}} MB</td>
-                  <td>{{view Dashboard.ResponseDistributionView
-                        itemBinding="r"}}</td>
+                  <td>
+                    {{view Dashboard.ResponseDistributionView
+                      itemBinding="r"}}
+                    <div class="response-count">
+                      {{#with r}}
+                        {{partial 'response-count'}}
+                      {{/with}}
+                    </div>
+                  </td>
                   <td>
                     No archive URL
                     <span class="aborted-warning">Aborted</span>
@@ -130,6 +137,15 @@
       </ol>
     </script>
 
+    <script type="text/x-handlebars" data-template-name="_response-count">
+      <span>1xx: {{r1xx}}</span>
+      <span>2xx: {{r2xx}}</span>
+      <span>3xx: {{r3xx}}</span>
+      <span>4xx: {{r4xx}}</span>
+      <span>5xx: {{r5xx}}</span>
+      <span>Unknown: {{runk}}</span>
+    </script>
+
     <script type="text/x-handlebars" data-template-name="_job">
       {{#view Dashboard.JobView}}
         <header>
@@ -145,12 +161,9 @@
             <i class="fa fa-clock-o"></i>
             {{job.elapsedTime}}
           </span>
-          <span>1xx: {{job.r1xx}}</span>
-          <span>2xx: {{job.r2xx}}</span>
-          <span>3xx: {{job.r3xx}}</span>
-          <span>4xx: {{job.r4xx}}</span>
-          <span>5xx: {{job.r5xx}}</span>
-          <span>Unknown: {{job.runk}}</span>
+          {{#with job}}
+            {{partial 'response-count'}}
+          {{/with}}
           <div class="controls">
             <label>
               {{input type=checkbox checked=job.showIgnores}}
