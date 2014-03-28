@@ -7,4 +7,3 @@
 //= require routes
 //= require controllers
 //= require views
-//= require boot

@@ -2,13 +2,22 @@ Dashboard.Router.map ->
   @route 'history', path: '/histories/*url'
 
 Dashboard.IndexRoute = Ember.Route.extend
-  setupController: (controller) ->
+  setupController: (controller, model) ->
+    # Pass the message processor to the controller.
+    controller.set('messageProcessor', model)
+    controller.startLogSocket()
+
+    # Bootstrap the processor.
     $.getJSON('logs/recent').then (logs) ->
-      logs.forEach (log) ->
-        Dashboard.get('messageProcessor').process(log)
+      model.process(log) for log in logs
       controller.set('dataLoaded', true)
 
-    controller.set('controllers.jobs.model', Dashboard.get('messageProcessor.jobs'))
+  model: (params) ->
+    Dashboard.MessageProcessor.create(jobIndex: {}, jobs: [])
+
+  actions:
+    willTransition: (transition) ->
+      @controllerFor('index').stopLogSocket()
 
   gotoHistory: (url) ->
     @transitionTo 'history', url

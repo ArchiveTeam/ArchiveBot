@@ -9,6 +9,17 @@ Dashboard.IndexController = Ember.Controller.extend
 
   dataLoaded: false
 
+  messageProcessorBinding: 'controllers.jobs.messageProcessor'
+
+  startLogSocket: ->
+    @ws = new WebSocket('ws://' + window.location.host + '/stream')
+
+    @ws.onmessage = (msg) =>
+      @get('messageProcessor').process(msg.data)
+
+  stopLogSocket: ->
+    @ws?.close()
+
   filteredJobs: (->
     fv = @get('filterValue')
 
@@ -26,10 +37,9 @@ Dashboard.JobsController = Ember.ArrayController.extend
   itemController: 'job'
   sortProperties: ['url']
 
-Dashboard.JobController = Ember.ObjectController.extend
-  unregister: ->
-    @get('messageProcessor').unregisterJob @get('ident')
+  modelBinding: 'messageProcessor.jobs'
 
+Dashboard.JobController = Ember.ObjectController.extend
   # TODO: If/when Ember.js permits links to be generated on more than model
   # IDs, remove this hack
   historyRoute: (->
@@ -41,6 +51,8 @@ Dashboard.JobController = Ember.ObjectController.extend
   frozenBinding: 'content.frozen'
 
   currentTimeBinding: 'Dashboard.currentTime'
+
+  messageProcessorBinding: 'parentController.messageProcessor'
 
   elapsedTime: (->
     started = moment.unix @get('content.started_at')
@@ -63,6 +75,9 @@ Dashboard.JobController = Ember.ObjectController.extend
       @unfreeze()
     else
       @freeze()
+
+  unregister: ->
+    @get('messageProcessor').unregisterJob @get('ident')
 
   urlForDisplay: (->
     url = @get 'url'
