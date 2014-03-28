@@ -14,13 +14,17 @@ def install_stdout_extension(control):
     def tee_to_control(self, data, full_line=True):
         old_logger(self, data, full_line)
 
-        packet = {
-            'type': 'stdout',
-            'ts': int(time.time()),
-            'message': data
-        }
+        if 'ident' in self and 'log_key' in self:
+            ident = self['ident']
+            log_key = self['log_key']
 
-        control.log(packet, self)
+            packet = {
+                'type': 'stdout',
+                'ts': int(time.time()),
+                'message': data
+            }
+
+            control.log(packet, ident, log_key)
 
     Item.log_output = tee_to_control
 
