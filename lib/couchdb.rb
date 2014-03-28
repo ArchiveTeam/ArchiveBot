@@ -57,6 +57,12 @@ class Couchdb
     resp.rows.map { |r| [r['key'], r['value']] }
   end
 
+  def archive_urls(ident)
+    resp = @db.view!('archive_urls/by_ident', { key: ident }, @credentials)
+
+    resp.rows.map { |r| r['value'] }
+  end
+
   private
 
   def endkey(url, prefix)

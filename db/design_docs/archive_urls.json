@@ -1,0 +1,10 @@
+{
+    "_id": "_design/archive_urls",
+    "_rev": "1-f55cf02a39b0dff5d65c4e7f49e64757",
+    "language": "javascript",
+    "views": {
+        "by_ident": {
+            "map": "function(doc) {\n  if (doc['type'] === 'archive_url') {\n    emit(doc['ident'], doc['archive_url']);\n  }\n}"
+        }
+    }
+}
