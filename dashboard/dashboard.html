@@ -161,6 +161,10 @@
             <i class="fa fa-clock-o"></i>
             {{job.elapsedTime}}
           </span>
+          <span class="response-rate" title="Response rate">
+            <i class="fa fa-flash"></i>
+            {{job.responseRate}} resps/sec
+          </span>
           {{#with job}}
             {{partial 'response-count'}}
           {{/with}}

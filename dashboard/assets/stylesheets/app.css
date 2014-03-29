@@ -161,6 +161,10 @@ input.filter {
   margin-right: 1em;
 }
 
+.job .response-rate {
+  margin-right: 1em;
+}
+
 .job .controls {
   float: right;
 }
