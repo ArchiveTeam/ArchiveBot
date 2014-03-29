@@ -95,6 +95,8 @@
     < Added 17 ignore patterns to job 1q2qydhkeh3gfnrcxuf6py70b.
     < The following sets are unknown: other
 
+  Ignore set definitions can be found under db/ignore_patterns/.
+
 
 * !delay IDENT MIN MAX, !d IDENT MIN MAX: set inter-request delay
 
