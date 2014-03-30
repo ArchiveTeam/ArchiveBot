@@ -131,5 +131,12 @@ Dashboard.HistoryRecordController = Ember.ObjectController.extend
     (@get('warc_size') / (1000 * 1000)).toFixed(2)
   ).property('warc_size')
 
+  downloads: (->
+    for obj in @get('archive_urls')
+      Ember.Object.create
+        url: obj['archive_url'],
+        mbSize: (obj['file_size'] / (1000 * 1000)).toFixed(2),
+        host: $.url(obj['archive_url']).attr('host')
+  ).property('content.archive_urls')
 
 # vim:ts=2:sw=2:et:tw=78
