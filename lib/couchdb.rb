@@ -11,28 +11,32 @@ class Couchdb
     @db.put!(doc_id, job, @credentials)
   end
 
-  def history(url, limit, start_at = nil, prefix = false)
+  def history(url)
     params = {
-      :include_docs => true,
-      :limit => limit,
-      :reduce => false,
       :descending => true,
-      :endkey_docid => start_at,
-      :endkey => [url, 0],
-      :startkey => endkey(url, prefix)
-    }.reject! { |_,v| v.nil? }
+      :include_docs => true,
+      :key => url
+    }.reject { |_,v| v.nil? }
 
-    @db.view('jobs/by_url_and_queue_time', params, @credentials)
+    resp = @db.view!('jobs/history', params, @credentials)
+
+    # Group by ident and queue time.
+    grouped = resp.docs.group_by { |d| [d['ident'], d['queued_at'].to_i] }.values
+
+    # The stupid man's outer join.
+    grouped.map do |gs|
+      gs.each_with_object({'archive_urls' => []}) do |d, h|
+        if d['type'] == 'archive_url'
+          h['archive_urls'] << d
+        else
+          h.update(d)
+        end
+      end
+    end
   end
 
   def latest_job_record(url)
-    resp = history(url, 1)
-
-    if resp.rows.length == 1
-      resp.rows.first['doc']
-    else
-      nil
-    end
+    history(url).first
   end
 
   def attempts_on_children(url)

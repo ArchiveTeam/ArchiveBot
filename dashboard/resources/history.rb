@@ -6,15 +6,7 @@ class History < Webmachine::Resource
   end
 
   def run_query
-    @query ||= self.class.db.history(requested_url, limit, start_at)
-  end
-
-  def limit
-    100
-  end
-
-  def start_at
-    request.query['start_at']
+    @query ||= self.class.db.history(requested_url)
   end
 
   def requested_url
@@ -24,7 +16,7 @@ class History < Webmachine::Resource
   def resource_exists?
     run_query
 
-    @query.success?
+    @query.length > 0
   end
 
   def content_types_provided
@@ -34,6 +26,6 @@ class History < Webmachine::Resource
   def to_json
     run_query
 
-    @query.body.to_json
+    { 'rows' => @query }.to_json
   end
 end

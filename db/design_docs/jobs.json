@@ -1,14 +1,17 @@
 {
    "_id": "_design/jobs",
-   "_rev": "2-19a34229fedba13026303c3dbf0682a0",
+   "_rev": "24-b5fca4aec25388eeb8597f31da0bbd51",
    "language": "javascript",
    "views": {
        "by_url_and_queue_time": {
-           "map": "function(doc) {\n  var status = {\n    aborted: doc['aborted'],\n    completed: doc['completed'],\n    depth: doc['depth']\n  };\n\n  emit([doc['url'], doc['queued_at']], [1, doc['queued_at'], status]);\n}",
-           "reduce": "function (keys, values, rereduce) {\n  var i, status, maxtime = 0;\n \n  for(i = 0; i < values.length; ++i) {\n    if (maxtime <= values[i][1]) {\n      maxtime = values[i][1];\n      status = values[i][2];\n    }\n  }\n\n  return [values.length, maxtime, status];\n}"
+           "map": "function (doc) {\n  var status, qint;\n\n  if (doc['type'] === 'job' || !doc['type']) {\n    status = {\n      aborted: doc['aborted'],\n      completed: doc['completed'],\n      depth: doc['depth']\n    };\n\n    qint = parseInt(doc['queued_at'], 10);\n\n    emit([doc['url'], qint], [qint, status]);\n  } else if (doc['type'] === 'archive_url') {\n    status = {\n      archive_url: doc['archive_url']\n    };\n\n    emit([doc['url'], doc['queued_at']], [doc['queued_at'], status]);\n  }\n}\n",
+           "reduce": "function (keys, values, rereduce) {\n  var i, status, maxtime = 0;\n \n  for(i = 0; i < values.length; ++i) {\n    if (maxtime <= values[i][1] && values[i][2]) {\n      maxtime = values[i][1];\n      status = values[i][2];\n    }\n  }\n\n  return [values.length, maxtime, status];\n}"
        },
        "by_ident": {
-           "map": "function(doc) {\n  emit(doc['ident'], true);\n}"
+           "map": "function(doc) {\n    if (doc['type'] === 'job') {\n      emit(doc['ident'], true);\n    }\n}"
+       },
+       "history": {
+           "map": "function(doc) {\n  if (doc[\"type\"] === \"ignore_patterns\") {\n    return;\n  } else {\n    emit(doc[\"url\"], 1);\n  }\n}"
        }
    }
 }

@@ -27,7 +27,7 @@ Dashboard.HistoryRoute = Ember.Route.extend
     url = @requestedUrl(params)
 
     $.getJSON("/histories?url=#{encodeURIComponent(url)}").then (data) ->
-      ret = data['rows'].map (row) -> Dashboard.JobHistoryEntry.create row['doc']
+      ret = data['rows'].map (row) -> Dashboard.JobHistoryEntry.create row
       ret.set 'url', url
       ret
 
