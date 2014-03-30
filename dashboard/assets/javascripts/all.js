@@ -2,6 +2,7 @@
 //= require handlebars
 //= require ember
 //= require moment+langs.min
+//= require purl
 //= require app
 //= require models
 //= require routes
