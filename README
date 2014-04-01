@@ -27,7 +27,21 @@ For a polished installation guide, submit a pull request.
 Copyright 2013 David Yip; made available under the MIT license.  See
 LICENSE for details.
 
-4. Special thanks
+4. Acknowledgments
+
+ArchiveBot uses wpull <https://github.com/chfoo/wpull> as its web
+crawler.  An earlier version of ArchiveBot used a GNU Wget augmented
+with Lua scripting support <https://github.com/alard/wget-lua/>.
+
+Other major ArchiveBot components:
+
+* Celluloid <http://celluloid.io/>
+* Cinch <https://github.com/cinchrb/cinch/>
+* CouchDB <http://couchdb.apache.org/>
+* Ember.js <http://emberjs.com/>
+* Redis <http://redis.io/>
+
+5. Special thanks
 
 Dragonette, Barnaby Bright, Vienna Teng, NONONO.
 
