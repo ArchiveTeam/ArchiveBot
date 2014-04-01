@@ -40,6 +40,7 @@ Other major ArchiveBot components:
 * CouchDB <http://couchdb.apache.org/>
 * Ember.js <http://emberjs.com/>
 * Redis <http://redis.io/>
+* Seesaw <https://github.com/ArchiveTeam/seesaw-kit>
 
 5. Special thanks
 
