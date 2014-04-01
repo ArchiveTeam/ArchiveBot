@@ -136,6 +136,24 @@
   may have.
 
 
+* !expire IDENT: for expiring jobs, expire a job immediately
+
+    > !expire 1q2qydhkeh3gfnrcxuf6py70b
+    < Job 1q2qydhkeh3gfnrcxuf6py70b expired.
+
+  In rare cases, the 48 hour timeout enforced by ArchiveBot on archive
+  jobs is too long.  This command permits faster snapshotting.  It
+  should be used sparingly; abuse is very easy to spot.
+
+  If a job's expiry timer has not yet started, this command does not
+  affect the given job:
+
+    > !expire 5sid4pgxkiu6zynhbt3q1gi2s
+    < Job 5sid4pgxkiu6zynhbt3q1gi2s does not yet have an expiry timer.
+
+  This is intended to prevent expiration of active jobs.
+
+
 * !status: print job summary
 
     > !status

@@ -204,6 +204,17 @@ class Brain
     end
   end
 
+  def expire(m, job)
+    return unless authorized?(m)
+
+    if job.ttl < 0
+      reply m, "Job #{job.ident} does not yet have an expiry timer."
+    else
+      job.expire
+      reply m, "Job #{job.ident} expired."
+    end
+  end
+
   def remove_ignore_pattern(m, job, pattern)
     return unless authorized?(m)
 

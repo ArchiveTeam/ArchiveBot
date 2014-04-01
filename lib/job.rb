@@ -301,6 +301,14 @@ class Job < Struct.new(:uri, :redis)
     redis.ttl(ident)
   end
 
+  def expire
+    redis.pipelined do
+      [ident, log_key, ignore_patterns_set_key].each do |k|
+        redis.expire(k, 0)
+      end
+    end
+  end
+
   def incr_error_count(by = 1)
     redis.hincrby(ident, 'error_count', by)
   end
