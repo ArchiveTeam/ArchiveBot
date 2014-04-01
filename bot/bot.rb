@@ -79,7 +79,7 @@ bot = Cinch::Bot.new do
     brain.find_job(ident, m) { |j| brain.add_ignore_sets(m, j, sets) }
   end
 
-  on :message, /\A!expire (#{CommandPatterns::IDENT})/ do |m, ident|
+  on :message, /\A!expire (#{CommandPatterns::IDENT})\Z/ do |m, ident|
     brain.find_job(ident, m) { |j| brain.expire(m, j) }
   end
 
