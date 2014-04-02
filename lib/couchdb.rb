@@ -7,8 +7,21 @@ class Couchdb
     @credentials = parse_credentials(credentials)
   end
 
-  def put!(doc_id, job)
-    @db.put!(doc_id, job, @credentials)
+  def record_job(job)
+    begin
+      doc_id ="#{job.ident}:#{job.queued_at.to_i}"
+      @db.put!(doc_id, job, @credentials)
+    rescue Analysand::DocumentNotSaved => e
+      # A conflict indicates that doc_id already exists.  The ident is unique
+      # with high probability, so this situation is a very strong indication
+      # that we just received a duplicate message.  As such, we ignore
+      # conflicts.
+      #
+      # However, other issues are treated as fatal.
+      if !e.response.conflict?
+        throw e
+      end
+    end
   end
 
   def history(url)
