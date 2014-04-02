@@ -11,6 +11,7 @@ require File.expand_path('../log_analyzer', __FILE__)
 require File.expand_path('../log_trimmer', __FILE__)
 require File.expand_path('../reaper', __FILE__)
 require File.expand_path('../twitter_tweeter', __FILE__)
+require File.expand_path('../archive_finder', __FILE__)
 
 opts = Trollop.options do
   opt :redis, 'URL of Redis server', :default => ENV['REDIS_URL'] || 'redis://localhost:6379/0'
@@ -35,24 +36,27 @@ class Broadcaster < RedisSubscriber
   end
 end
 
+db_uri = URI(opts[:db])
 
 Broadcaster.supervise_as :broadcaster, opts[:redis], SharedConfig.log_channel
-JobRecorder.supervise_as :job_recorder, URI(opts[:db]), opts[:db_credentials]
+JobRecorder.supervise_as :job_recorder, db_uri, opts[:db_credentials]
 LogAnalyzer.supervise_as :log_analyzer
 LogTrimmer.supervise_as :log_trimmer, URI(opts[:log_db]),
   opts[:log_db_credentials]
 
 Reaper.supervise_as :reaper, opts[:redis]
 TwitterTweeter.supervise_as :twitter_tweeter, opts[:redis], opts[:twitter_config]
+ArchiveFinder.supervise_as :archive_finder, db_uri, opts[:db_credentials]
 
 ignore_patterns_path = File.expand_path('../../db/ignore_patterns', __FILE__)
 
 IgnorePatternUpdater.supervise_as :ignore_pattern_updater,
-  ignore_patterns_path, URI(opts[:db]), opts[:db_credentials]
+  ignore_patterns_path, db_uri, opts[:db_credentials]
 
 at_exit do
   Celluloid::Actor[:broadcaster].stop
   Celluloid::Actor[:ignore_pattern_updater].stop
+  Celluloid::Actor[:archive_finder].stop
 end
 
 trap('INT') do
