@@ -3,6 +3,7 @@ require 'json'
 require 'logger'
 require 'net/http'
 
+require File.expand_path('../../../archive_url', __FILE__)
 require File.expand_path('../fetcher', __FILE__)
 require File.expand_path('../../internet_archive', __FILE__)
 
@@ -80,13 +81,13 @@ module ArchiveUrlGenerators::InternetArchive
           warc_size = url_set.warc_size
           json = url_set.json
 
-          a << {
+          a << ArchiveUrl.new(
             url: json['url'],
-            queued_at: json['queued_at'].to_i,
+            queued_at: json['queued_at'],
             ident: json['ident'],
-            file_size: warc_size.to_i,
+            file_size: warc_size,
             archive_url: url_set.warc_url
-          }
+          )
         else
           erroneous = true
         end

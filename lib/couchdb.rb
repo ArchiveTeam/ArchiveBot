@@ -10,7 +10,7 @@ class Couchdb
   def record_job(job)
     begin
       doc_id ="#{job.ident}:#{job.queued_at.to_i}"
-      @db.put!(doc_id, job, @credentials)
+      put!(doc_id, job)
     rescue Analysand::DocumentNotSaved => e
       # A conflict indicates that doc_id already exists.  The ident is unique
       # with high probability, so this situation is a very strong indication
@@ -22,6 +22,10 @@ class Couchdb
         throw e
       end
     end
+  end
+
+  def put!(id, object)
+    @db.put!(id, object, @credentials)
   end
 
   def history(url)
