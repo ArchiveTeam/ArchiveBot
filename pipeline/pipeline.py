@@ -29,7 +29,7 @@ WPULL_VERSION = '0.28'
 VERSION = "20140328.01"
 USER_AGENT = "ArchiveTeam ArchiveBot/%s (wpull %s)" % (VERSION, WPULL_VERSION)
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
-WPULL_EXE = find_executable('Wpull', WPULL_VERSION, [ './wpull' ])
+WPULL_EXE = find_executable('Wpull', None, [ './wpull' ])
 
 if not WPULL_EXE:
     raise Exception("No usable Wpull found.")
