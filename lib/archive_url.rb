@@ -66,6 +66,7 @@ class ArchiveUrl
       'queued_at' => queued_at.to_i,
       'ident' => ident,
       'file_size' => file_size.to_i,
+      'type' => 'archive_url',
       'archive_url' => archive_url
     }
   end
