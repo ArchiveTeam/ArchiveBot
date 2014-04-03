@@ -2,6 +2,7 @@ import os
 import sys
 import redis
 import atexit
+import subprocess
 
 # FIXME: This is a bit of a hack.
 #
@@ -65,14 +66,22 @@ project = Project(
         title = "ArchiveBot request handler"
 )
 
+def wpull_version():
+    output = subprocess.check_output([WPULL_EXE, '--version'],
+            stderr=subprocess.STDOUT)
+
+    return output.decode('utf-8').strip()
+
 class AcceptAny:
     def __contains__(self, item):
         return True
 
 class WpullArgs(object):
     def realize(self, item):
+
         args = [WPULL_EXE,
-            '-U', USER_AGENT,
+            '-U', 'ArchiveTeam ArchiveBot/%s (wpull %s)' % (VERSION,
+                wpull_version()),
             '--quiet',
             '--ascii-print',
             '-o', '%(item_dir)s/wpull.log' % item,
