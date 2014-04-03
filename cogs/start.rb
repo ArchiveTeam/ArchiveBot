@@ -46,7 +46,8 @@ LogTrimmer.supervise_as :log_trimmer, URI(opts[:log_db]),
 
 Reaper.supervise_as :reaper, opts[:redis]
 TwitterTweeter.supervise_as :twitter_tweeter, opts[:redis], opts[:twitter_config]
-ArchiveFinder.supervise_as :archive_finder, db_uri, opts[:db_credentials]
+ArchiveFinder.supervise_as :archive_finder, opts[:redis], db_uri,
+  opts[:db_credentials]
 
 ignore_patterns_path = File.expand_path('../../db/ignore_patterns', __FILE__)
 
