@@ -150,7 +150,7 @@ class Brain
             rep << "However, there have been #{child_attempts} download attempts on child URLs."
           end
 
-          rep << "See the ArchiveBot dashboard for more information."
+          rep << "More info: http://archivebot.at.ninjawedding.org:4567/#/histories/#{url}"
         end
       end
 
