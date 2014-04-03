@@ -81,13 +81,19 @@ module ArchiveUrlGenerators::InternetArchive
           warc_size = url_set.warc_size
           json = url_set.json
 
-          a << ArchiveUrl.new(
+          record = ArchiveUrl.new(
             url: json['url'],
             queued_at: json['queued_at'],
             ident: json['ident'],
             file_size: warc_size,
             archive_url: url_set.warc_url
           )
+
+          if record.valid?
+            a << record
+          else
+            error "ArchiveUrl for #{url_set.warc_url} is invalid; skipping import"
+          end
         else
           erroneous = true
         end
