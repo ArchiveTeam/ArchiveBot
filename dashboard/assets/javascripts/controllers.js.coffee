@@ -9,6 +9,17 @@ Dashboard.IndexController = Ember.Controller.extend
 
   dataLoaded: false
 
+  messageProcessorBinding: 'controllers.jobs.messageProcessor'
+
+  startLogSocket: ->
+    @ws = new WebSocket('ws://' + window.location.host + '/stream')
+
+    @ws.onmessage = (msg) =>
+      @get('messageProcessor').process(msg.data)
+
+  stopLogSocket: ->
+    @ws?.close()
+
   filteredJobs: (->
     fv = @get('filterValue')
 
@@ -26,10 +37,9 @@ Dashboard.JobsController = Ember.ArrayController.extend
   itemController: 'job'
   sortProperties: ['url']
 
-Dashboard.JobController = Ember.ObjectController.extend
-  unregister: ->
-    @get('messageProcessor').unregisterJob @get('ident')
+  modelBinding: 'messageProcessor.jobs'
 
+Dashboard.JobController = Ember.ObjectController.extend
   # TODO: If/when Ember.js permits links to be generated on more than model
   # IDs, remove this hack
   historyRoute: (->
@@ -41,6 +51,8 @@ Dashboard.JobController = Ember.ObjectController.extend
   frozenBinding: 'content.frozen'
 
   currentTimeBinding: 'Dashboard.currentTime'
+
+  messageProcessorBinding: 'parentController.messageProcessor'
 
   elapsedTimeAsMoment: (->
     started = moment.unix @get('content.started_at')
@@ -74,6 +86,9 @@ Dashboard.JobController = Ember.ObjectController.extend
       @unfreeze()
     else
       @freeze()
+
+  unregister: ->
+    @get('messageProcessor').unregisterJob @get('ident')
 
   urlForDisplay: (->
     url = @get 'url'
@@ -127,5 +142,12 @@ Dashboard.HistoryRecordController = Ember.ObjectController.extend
     (@get('warc_size') / (1000 * 1000)).toFixed(2)
   ).property('warc_size')
 
+  downloads: (->
+    for obj in @get('archive_urls')
+      Ember.Object.create
+        url: obj['archive_url'],
+        mbSize: (obj['file_size'] / (1000 * 1000)).toFixed(2),
+        host: $.url(obj['archive_url']).attr('host')
+  ).property('content.archive_urls')
 
 # vim:ts=2:sw=2:et:tw=78

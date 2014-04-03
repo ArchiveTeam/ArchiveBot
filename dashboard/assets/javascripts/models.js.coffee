@@ -134,9 +134,7 @@ Dashboard.MessageProcessor = Ember.Object.extend
 
       return
 
-    # OK, we have a job.
-
-    # Read the updated job data.
+    # OK, we have a job.  Read the updated job data.
     job.amplify(job_data)
 
     # Now, update the log buffer.  This part depends on the message type.
