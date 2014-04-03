@@ -37,8 +37,8 @@ class Couchdb
 
     resp = @db.view!('jobs/history', params, @credentials)
 
-    # Group by ident and queue time.
-    grouped = resp.docs.group_by { |d| [d['ident'], d['queued_at'].to_i] }.values
+    # Group by url and queue time.
+    grouped = resp.docs.group_by { |d| [d['url'], d['queued_at'].to_i] }.values
 
     # The stupid man's outer join.
     grouped.map do |gs|
