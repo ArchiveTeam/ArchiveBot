@@ -3,5 +3,5 @@ psutil
 pykka
 pyyaml
 redis==2.8.0
-wpull==0.28
+wpull==0.29
 sqlalchemy
