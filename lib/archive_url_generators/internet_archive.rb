@@ -12,7 +12,8 @@ module ArchiveUrlGenerators
 
         if ok
           archive_urls, errored = ge.archive_urls(urls)
-          errored ||= recorder.record_archive_urls(archive_urls)
+          ok = recorder.record_archive_urls(archive_urls)
+          errored ||= !ok
 
           if errored
             logger.error "#{pack_url} did not completely process"
