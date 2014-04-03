@@ -65,8 +65,14 @@ module ArchiveUrlGenerators::InternetArchive
     def latest_addeddate(json)
       metadata = json['metadata']
 
+      # Addeddate looks like this:
+      #
+      #   "addeddate":["2013-11-24 15:43:19"]
+      #
+      # Appending "UTC" is enough to get Time.parse to interpret that as UTC.
+      # (I sure hope IA lists dates in UTC.)
       metadata['addeddate'].map do |date|
-        Time.parse(date) rescue nil
+        Time.parse(date + ' UTC') rescue nil
       end.compact.sort.last
     end
 

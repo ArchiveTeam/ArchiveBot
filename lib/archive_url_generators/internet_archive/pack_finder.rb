@@ -61,7 +61,19 @@ module ArchiveUrlGenerators::InternetArchive
       ]
 
       if threshold
-        query << "addeddate:[#{threshold} TO null]"
+        # We get one sort of dates back from our pack search, but we need to
+        # feed a different format into IA.
+        #
+        # Additionally, we want to get everything *after* the given threshold,
+        # but not *including* it.  Lucene supports {} notation for exclusive
+        # ranges, but IA's search engine doesn't.  Workaround: add one second
+        # to the threshold.
+        begin
+          date = (Time.parse(threshold) + 1).utc.strftime('%Y-%m-%dT%H:%M:%SZ')
+          query << "addeddate:[#{date} TO null]"
+        rescue ArgumentError => e
+          logger.error "#{threshold} could not be parsed as a time; skipping threshold"
+        end
       end
         
       uri = URI.parse('https://archive.org/advancedsearch.php')
