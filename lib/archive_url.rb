@@ -1,9 +1,12 @@
 require 'json'
+require 'uuidtools'
 
 ##
 # An ArchiveUrl object points to a WARC file for an ArchiveBot job run on some
 # site at some time.
 class ArchiveUrl
+  ARCHIVEBOT_V0_NAMESPACE = UUIDTools::UUID.parse('7eb4872c-d60d-4a08-a4c9-53a85dd345fa')
+
   ##
   # The URL for the job.  Required.
   #
@@ -44,6 +47,13 @@ class ArchiveUrl
     self.archive_url = archive_url
     self.ident = ident
     self.file_size = file_size
+  end
+
+  ##
+  # Generates a v5 UUID for this object from #url, #queued_at, and #archive_url.
+  def uuid
+    UUIDTools::UUID.sha1_create(ARCHIVEBOT_V0_NAMESPACE,
+                                "#{url}#{queued_at}#{archive_url}")
   end
 
   def valid?
