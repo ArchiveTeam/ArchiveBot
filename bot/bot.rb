@@ -99,6 +99,7 @@ bot = Cinch::Bot.new do
     brain.find_job(ident, m) do |j|
       brain.set_delay(j, 0, 0, m)
       brain.set_pagereq_delay(j, 0, 0, m)
+      brain.set_concurrency(j, 11, m)
     end
   end
 
