@@ -105,6 +105,22 @@ class WpullArgs(object):
 
         self.add_args(args, ['%(recursive)s', '%(level)s', '%(depth)s'], item)
 
+        if item['grabber'] == 'phantomjs':
+            item.log_output('Telling wpull to use PhantomJS.')
+
+            phantomjs_args = [
+                '--no-phantomjs-snapshot',
+                '--phantomjs',
+                '--phantomjs-scroll', item['phantomjs_scroll'],
+                '--phantomjs-wait', item['phantomjs_wait']
+            ]
+
+            if item['no_phantomjs_smart_scroll']:
+                phantomjs_args.append('--no-phantomjs-smart-scroll')
+
+            item.log_output('Setting PhantomJS args: %s' % phantomjs_args)
+            args.extend(phantomjs_args)
+
         return args
 
     @classmethod

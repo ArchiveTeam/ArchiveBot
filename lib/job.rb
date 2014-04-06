@@ -3,7 +3,19 @@ require 'uuidtools'
 require 'json'
 
 require File.expand_path('../job_analysis', __FILE__)
+require File.expand_path('../phantomjs_job', __FILE__)
 require File.expand_path('../shared_config', __FILE__)
+
+##
+# Base implementations of Job methods that may be chained through modules.
+module ChainableJobMethods
+  def as_json
+    {}
+  end
+
+  def from_hash(h)
+  end
+end
 
 # Ruby representation of an archive job.
 #
@@ -22,7 +34,9 @@ require File.expand_path('../shared_config', __FILE__)
 # As you may have guessed, none of ArchiveBot's facilities really use the
 # second pattern.
 class Job < Struct.new(:uri, :redis)
+  include ChainableJobMethods
   include JobAnalysis
+  include PhantomJSJob
 
   ARCHIVEBOT_V0_NAMESPACE = UUIDTools::UUID.parse('82244de1-c354-4c89-bf2b-f153ce23af43')
 
@@ -226,6 +240,8 @@ class Job < Struct.new(:uri, :redis)
     response_buckets.each do |_, bucket, attr|
       instance_variable_set("@#{attr}", h[bucket.to_s].to_i)
     end
+
+    super
   end
 
   def url
@@ -345,6 +361,8 @@ class Job < Struct.new(:uri, :redis)
       response_buckets.each do |_, bucket, attr|
         h[bucket.to_s] = send(attr)
       end
+
+      h.merge(super)
     end
   end
 

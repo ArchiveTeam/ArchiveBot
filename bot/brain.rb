@@ -5,14 +5,15 @@ require File.expand_path('../summary', __FILE__)
 require File.expand_path('../post_registration_hook', __FILE__)
 require File.expand_path('../add_ignore_sets', __FILE__)
 require File.expand_path('../job_status_generation', __FILE__)
-require File.expand_path('../parameter_parsing', __FILE__)
+require File.expand_path('../job_options_parser', __FILE__)
+require File.expand_path('../pipeline_options', __FILE__)
 
 Job.send(:include, JobStatusGeneration)
 
 class Brain
-  include ParameterParsing
   include PostRegistrationHook
   include AddIgnoreSets
+  include PipelineOptions
 
   attr_reader :couchdb
   attr_reader :redis
@@ -48,14 +49,14 @@ class Brain
       return
     end
 
-    # Parse parameters.
-    h = parse_params(params)
+    # Parse parameters.  If we run into an unknown option, report it and don't
+    # run the job.
+    h = nil
 
-    # Eliminate unknown parameters.  If we find any such parameters, report
-    # them and don't run the job.
-    unknown = delete_unknown_parameters(h, :archive)
-    if !unknown.empty?
-      reply m, "Sorry, #{unknown.join(', ')} are unrecognized parameters."
+    begin
+      h = JobOptionsParser.new.parse(params)
+    rescue JobOptionsParser::UnknownOptionError => e
+      reply m, "Sorry, I can't parse that.  The error: #{e.message}."
       return
     end
 
@@ -88,24 +89,19 @@ class Brain
         reply m, "Queued #{uri.to_s}."
       end
 
-      destination = nil
-
-      if h['pipeline']
-        destination = h['pipeline'].first
-        reply m, "Job will run on pipeline #{destination}."
-      end
-
       reply m, "Use !status #{job.ident} for updates, !abort #{job.ident} to abort."
 
       run_post_registration_hooks(m, job, h)
 
+      pipeline = h[:pipeline]
+
       if depth == :shallow
         # If this is a shallow depth job, it gets priority over jobs that go
         # deeper.
-        job.queue(destination, :front)
+        job.queue(pipeline, :front)
       else
         # If this job goes deeper, shove it at the back of the queue.
-        job.queue(destination)
+        job.queue(pipeline)
       end
     end
   end
@@ -258,21 +254,6 @@ class Brain
   end
 
   private
-
-  VALID_PARAMETERS = {
-    :archive => %w(ignore_sets pipeline)
-  }
-
-  def delete_unknown_parameters(h, command)
-    [].tap do |a|
-      h.keys.each do |k|
-        if !VALID_PARAMETERS[command].include?(k)
-          h.delete k
-          a << k
-        end
-      end
-    end
-  end
 
   def authorized?(m)
     if !m.channel.opped?(m.user)
