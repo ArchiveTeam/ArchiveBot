@@ -3,6 +3,7 @@ require 'uuidtools'
 require 'json'
 
 require File.expand_path('../job_analysis', __FILE__)
+require File.expand_path('../shared_config', __FILE__)
 
 # Ruby representation of an archive job.
 #
@@ -182,14 +183,14 @@ class Job < Struct.new(:uri, :redis)
 
   def add_ignore_pattern(pattern)
     redis.sadd(ignore_patterns_set_key, pattern)
-    increment_settings_age
+    job_parameters_changed
   end
 
   alias_method :add_ignore_patterns, :add_ignore_pattern
 
   def remove_ignore_pattern(pattern)
     redis.srem(ignore_patterns_set_key, pattern)
-    increment_settings_age
+    job_parameters_changed
   end
 
   # More convenient access for modules.
@@ -233,6 +234,7 @@ class Job < Struct.new(:uri, :redis)
 
   def abort
     redis.hset(ident, 'abort_requested', true)
+    job_parameters_changed
   end
 
   def fail
@@ -286,17 +288,17 @@ class Job < Struct.new(:uri, :redis)
 
   def set_delay(min, max)
     redis.hmset(ident, 'delay_min', min, 'delay_max', max)
-    increment_settings_age
+    job_parameters_changed
   end
 
   def set_pagereq_delay(min, max)
     redis.hmset(ident, 'pagereq_delay_min', min, 'pagereq_delay_max', max)
-    increment_settings_age
+    job_parameters_changed
   end
 
   def set_concurrency(level)
     redis.hset(ident, 'concurrency', level)
-    increment_settings_age
+    job_parameters_changed
   end
 
   def exists?
@@ -417,7 +419,8 @@ class Job < Struct.new(:uri, :redis)
 
   private
 
-  def increment_settings_age
+  def job_parameters_changed
     redis.hincrby(ident, 'settings_age', 1)
+    redis.publish(SharedConfig.job_channel, ident)
   end
 end

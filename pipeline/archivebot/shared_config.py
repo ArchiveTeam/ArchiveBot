@@ -18,4 +18,9 @@ def pipeline_channel():
 
     return c['channels']['pipeline']
 
+def job_channel():
+    c = config()
+
+    return c['channels']['job']
+
 # vim:ts=4:sw=4:et:tw=78

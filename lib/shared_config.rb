@@ -12,4 +12,8 @@ module SharedConfig
   def log_channel
     config['channels']['log']
   end
+
+  def job_channel
+    config['channels']['job']
+  end
 end

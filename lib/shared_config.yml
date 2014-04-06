@@ -13,4 +13,7 @@ channels:
   # The pubsub channel for pipeline updates.
   pipeline: archivebot:pipeline_updates
 
+  # The pubsub channel for job updates.
+  job: archivebot:job_updates
+
 # vim:ts=2:sw=2:et:tw=78
