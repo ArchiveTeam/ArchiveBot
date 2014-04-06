@@ -38,7 +38,6 @@ end
 
 db_uri = URI(opts[:db])
 
-Broadcaster.supervise_as :broadcaster, opts[:redis], SharedConfig.log_channel
 JobRecorder.supervise_as :job_recorder, db_uri, opts[:db_credentials]
 LogAnalyzer.supervise_as :log_analyzer
 LogTrimmer.supervise_as :log_trimmer, URI(opts[:log_db]),
@@ -53,6 +52,10 @@ ignore_patterns_path = File.expand_path('../../db/ignore_patterns', __FILE__)
 
 IgnorePatternUpdater.supervise_as :ignore_pattern_updater,
   ignore_patterns_path, db_uri, opts[:db_credentials]
+
+# This should be started after all actors it references have started, which is
+# why it's the last actor to start up.
+Broadcaster.supervise_as :broadcaster, opts[:redis], SharedConfig.log_channel
 
 at_exit do
   Celluloid::Actor[:broadcaster].stop
