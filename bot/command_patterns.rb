@@ -7,4 +7,5 @@ module CommandPatterns
   ARCHIVEONLY       = %r{\A(?:\!ao|\!archiveonly) #{AC}\Z}
   SET_DELAY         = %r{\A\!d(?:elay)?\s+(#{IDENT})\s+(#{DELAY_SPEC})\s+(#{DELAY_SPEC})}
   SET_PAGEREQ_DELAY = %r{\A\!reqd(?:elay)?\s+(#{IDENT})\s+(#{DELAY_SPEC})\s+(#{DELAY_SPEC})}
+  SET_CONCURRENCY   = %r{\A\!con(?:currency)?\s+(#{IDENT})\s+(\d+)}
 end

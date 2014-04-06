@@ -278,6 +278,7 @@ class Job < Struct.new(:uri, :redis)
 
       set_delay(250, 375)
       set_pagereq_delay(25, 100)
+      set_concurrency(1)
     end
 
     true
@@ -290,6 +291,11 @@ class Job < Struct.new(:uri, :redis)
 
   def set_pagereq_delay(min, max)
     redis.hmset(ident, 'pagereq_delay_min', min, 'pagereq_delay_max', max)
+    increment_settings_age
+  end
+
+  def set_concurrency(level)
+    redis.hset(ident, 'concurrency', level)
     increment_settings_age
   end
 

@@ -240,6 +240,17 @@ class Brain
     reply m, "Page requisite delay for job #{job.ident} set to [#{min}, #{max}] ms."
   end
 
+  def set_concurrency(job, level, m)
+    return unless authorized?(m)
+    return unless concurrency_ok?(level, m)
+
+    job.set_concurrency(level)
+
+    noun = level == 1 ? 'worker' : 'workers'
+
+    reply m, "Job #{job.ident} set to use #{level} #{noun}."
+  end
+
   def request_summary(m)
     s = Summary.new(redis)
     s.run
@@ -276,6 +287,15 @@ class Brain
   def delay_ok?(min, max, m)
     if min.to_f > max.to_f
       reply m, 'Sorry, min delay must be less than or equal to max delay.'
+      return false
+    end
+
+    true
+  end
+
+  def concurrency_ok?(level, m)
+    if level.to_i < 1
+      reply m, 'Sorry, concurrency level must be at least 1.'
       return false
     end
 
