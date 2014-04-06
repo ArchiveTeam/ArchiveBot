@@ -122,13 +122,24 @@
   milliseconds.  The default page requisite delay range is [25, 100] ms.
 
 
-* !yahoo IDENT: set zero second delays
+* !concurrency IDENT LEVEL, !con IDENT LEVEL: set concurrency level
+
+    > !concurrency 1q2qydhkeh3gfnrcxuf6py70b 8
+    < Job 1q2qydhkeh3gfnrcxuf6py70b set to use 8 workers.
+
+  Adding additional workers may speed up grabs if the target site has
+  capacity to spare, but it also puts additional pressure on the target.
+  Use wisely.
+
+
+* !yahoo IDENT: set zero second delays, crank concurrency to 11
 
     > !yahoo 1q2qydhkeh3gfnrcxuf6py70b
     < Inter-request delay for job 1q2qydhkeh3gfnrcxuf6py70b set to
       [0, 0] ms.
     < Page requisite delay for job 1q2qydhkeh3gfnrcxuf6py70b set to
       [0, 0] ms.
+    < Job 1q2qydhkeh3gfnrcxuf6py70b set to use 11 workers.
 
   Only recommended for use when archiving data from hosts with gobs of
   bandwidth and processing power (e.g. Yahoo, Google, Amazon).  Keep in
