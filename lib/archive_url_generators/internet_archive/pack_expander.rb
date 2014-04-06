@@ -15,12 +15,10 @@ module ArchiveUrlGenerators::InternetArchive
     include Enumerable
 
     attr_reader :logger
-    attr_reader :fetcher
 
     def initialize(pack_urls, logger = ::Logger.new($stderr))
       @pack_urls = pack_urls
       @logger = logger
-      @fetcher = Fetcher.pool(size: 4, args: [logger])
     end
 
     ##
@@ -40,18 +38,23 @@ module ArchiveUrlGenerators::InternetArchive
     #
     # For non-success responses, urls will be [] and addeddate will be nil.
     def each
+      fetcher = Fetcher.pool(size: 4, args: [logger])
       pairs = @pack_urls.map { |pu| [pu, fetcher.future(:fetch, pu)] }
 
-      pairs.each do |pu, f|
-        resp = f.value
+      begin
+        pairs.each do |pu, f|
+          resp = f.value
 
-        if Net::HTTPSuccess === resp
-          json = JSON.parse(resp.body)
+          if Net::HTTPSuccess === resp
+            json = JSON.parse(resp.body)
 
-          yield pu, resp, true, latest_addeddate(json), urls_in_json(json)
-        else
-          yield pu, resp, false, nil, []
+            yield pu, resp, true, latest_addeddate(json), urls_in_json(json)
+          else
+            yield pu, resp, false, nil, []
+          end
         end
+      ensure
+        fetcher.terminate
       end
     end
 

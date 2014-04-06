@@ -13,14 +13,24 @@ module ArchiveUrlGenerators::InternetArchive
   # records.
   class Generator
     attr_reader :logger
-    attr_reader :fetcher
 
     def initialize(logger = ::Logger.new($stderr))
       @logger = logger
-      @fetcher = Fetcher.pool(size: 8, args: [logger])
     end
 
     def archive_urls(urls)
+      fetcher = Fetcher.pool(size: 8, args: [logger])
+
+      begin
+        archive_urls_with_fetcher(urls, fetcher)
+      ensure
+        fetcher.terminate
+      end
+    end
+
+    private
+
+    def archive_urls_with_fetcher(urls, fetcher)
       # We look for pairs of URLs matching the form
       #
       #   BASENAME.warc.gz
