@@ -306,6 +306,10 @@ class Job < Struct.new(:uri, :redis)
     job_parameters_changed
   end
 
+  def use_js_grabber
+    redis.hset(ident, 'grabber', 'phantomjs')
+  end
+
   def exists?
     !redis.keys(ident).empty?
   end

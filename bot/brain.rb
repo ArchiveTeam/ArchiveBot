@@ -6,12 +6,14 @@ require File.expand_path('../post_registration_hook', __FILE__)
 require File.expand_path('../add_ignore_sets', __FILE__)
 require File.expand_path('../job_status_generation', __FILE__)
 require File.expand_path('../job_options_parser', __FILE__)
+require File.expand_path('../pipeline_options', __FILE__)
 
 Job.send(:include, JobStatusGeneration)
 
 class Brain
   include PostRegistrationHook
   include AddIgnoreSets
+  include PipelineOptions
 
   attr_reader :couchdb
   attr_reader :redis
@@ -87,24 +89,19 @@ class Brain
         reply m, "Queued #{uri.to_s}."
       end
 
-      destination = nil
-
-      if h[:pipeline]
-        destination = h[:pipeline].first
-        reply m, "Job will run on pipeline #{destination}."
-      end
-
       reply m, "Use !status #{job.ident} for updates, !abort #{job.ident} to abort."
 
       run_post_registration_hooks(m, job, h)
 
+      pipeline = h[:pipeline]
+
       if depth == :shallow
         # If this is a shallow depth job, it gets priority over jobs that go
         # deeper.
-        job.queue(destination, :front)
+        job.queue(pipeline, :front)
       else
         # If this job goes deeper, shove it at the back of the queue.
-        job.queue(destination)
+        job.queue(pipeline)
       end
     end
   end

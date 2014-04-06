@@ -65,6 +65,7 @@ class GetItemFromQueue(RetryableTask):
                 item['started_by'] = job_data.get('started_by')
                 item['started_in'] = job_data.get('started_in')
                 item['url'] = job_data.get('url')
+                item['grabber'] = job_data.get('grabber')
 
                 item.log_output('Received item %s.' % ident)
 

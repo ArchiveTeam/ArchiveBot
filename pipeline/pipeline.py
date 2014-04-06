@@ -105,6 +105,15 @@ class WpullArgs(object):
 
         self.add_args(args, ['%(recursive)s', '%(level)s', '%(depth)s'], item)
 
+        if item['grabber'] == 'phantomjs':
+            item.log_output('Telling wpull to use PhantomJS.')
+
+            self.add_args(args, [
+                '--phantomjs',
+                '--phantomjs-scroll', '100',
+                '--phantomjs-wait', '2.0'
+            ], item)
+
         return args
 
     @classmethod
