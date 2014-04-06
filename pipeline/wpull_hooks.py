@@ -132,6 +132,10 @@ def handle_result(url_info, error_info, http_info):
   if settings.update_settings(ident, control):
     print("Settings updated: ", settings.inspect_settings())
 
+    # If settings changed, concurrency level may have also changed.
+    clevel = settings.concurrency()
+    wpull_hook.factory.get('Engine').set_concurrent(clevel)
+
   # Should we abort?
   if control.abort_requested(ident).get():
     print("Wget terminating on bot command")

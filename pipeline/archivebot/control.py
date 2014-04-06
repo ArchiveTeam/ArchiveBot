@@ -157,6 +157,7 @@ class Control(pykka.ThreadingActor):
             
             data = self.redis.hmget(ident, 'delay_min', 'delay_max',
                     'pagereq_delay_min', 'pagereq_delay_max',
+                    'concurrency',
                     'ignore_patterns_set_key')
 
             result = dict(
@@ -164,11 +165,12 @@ class Control(pykka.ThreadingActor):
                     delay_max=data[1],
                     pagereq_delay_min=data[2],
                     pagereq_delay_max=data[3],
+                    concurrency=data[4],
                     age=age
                     )
 
-            if data[4]:
-                result['ignore_patterns'] = self.redis.smembers(data[4])
+            if data[5]:
+                result['ignore_patterns'] = self.redis.smembers(data[5])
             else:
                 result['ignore_patterns'] = []
 

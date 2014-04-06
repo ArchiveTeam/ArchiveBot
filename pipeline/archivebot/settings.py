@@ -9,6 +9,7 @@ pattern_conversion_enabled = os.environ.get('LUA_PATTERN_CONVERSION')
 # Runtime settings.  These are updated every time httploop_result is called.
 settings = dict(
   age=None,
+  concurrency=None,
   ignore_patterns={},
   delay_min=None,
   delay_max=None,
@@ -37,6 +38,8 @@ def update_settings(ident, control):
       settings['pagereq_delay_max'] = int_or_none(new_settings['pagereq_delay_max'])
       settings['ignore_patterns'] = new_settings['ignore_patterns']
       settings['age'] = new_settings['age']
+      settings['concurrency'] = int_or_none(new_settings['concurrency'])
+
       return True
   except ConnectionError:
     return False
@@ -73,6 +76,9 @@ def delay_time_range():
 def pagereq_delay_time_range():
   return settings['pagereq_delay_min'] or 0, settings['pagereq_delay_max'] or 0
 
+# Number of wpull fetchers to run.
+def concurrency():
+  return settings['concurrency'] or 1
 
 # Returns a string describing the current settings.
 def inspect_settings():
@@ -80,7 +86,8 @@ def inspect_settings():
   sl, sm = delay_time_range()
   rsl, rsm = pagereq_delay_time_range()
 
-  report = '' + str(iglen) + ' ignore patterns, '
+  report = str(concurrency()) + ' workers, '
+  report += str(iglen) + ' ignores, '
   report += 'delay min/max: [' + str(sl) + ', ' + str(sm) + '] ms, '
   report += 'pagereq delay min/max: [' + str(rsl) + ', ' + str(rsm) + '] ms'
 
