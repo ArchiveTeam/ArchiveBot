@@ -4,3 +4,5 @@
 data
 ./wget-lua
 *.pyc
+
+.sass-cache
