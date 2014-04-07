@@ -18,9 +18,12 @@ def pipeline_channel():
 
     return c['channels']['pipeline']
 
-def job_channel():
+def job_channel(ident):
+    return '%s%s' % (job_channel_prefix(), ident)
+
+def job_channel_prefix():
     c = config()
 
-    return c['channels']['job']
+    return c['channels']['job_prefix']
 
 # vim:ts=4:sw=4:et:tw=78

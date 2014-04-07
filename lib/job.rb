@@ -420,7 +420,8 @@ class Job < Struct.new(:uri, :redis)
   private
 
   def job_parameters_changed
-    redis.hincrby(ident, 'settings_age', 1)
-    redis.publish(SharedConfig.job_channel, ident)
+    age = redis.hincrby(ident, 'settings_age', 1)
+
+    redis.publish(SharedConfig.job_channel(ident), age)
   end
 end

@@ -13,7 +13,8 @@ channels:
   # The pubsub channel for pipeline updates.
   pipeline: archivebot:pipeline_updates
 
-  # The pubsub channel for job updates.
-  job: archivebot:job_updates
+  # Each job has its own channel.  The channel name is this prefix prefixed to
+  # the job's ident.
+  job_prefix: 'archivebot:job:'
 
 # vim:ts=2:sw=2:et:tw=78
