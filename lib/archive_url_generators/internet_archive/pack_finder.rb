@@ -57,7 +57,7 @@ module ArchiveUrlGenerators::InternetArchive
     def search_uri(threshold)
       query = [
         'title:(archivebot go pack)',
-        'collection:(archiveteam)'
+        'collection:(archivebot)'
       ]
 
       if threshold
