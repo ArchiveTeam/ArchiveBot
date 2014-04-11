@@ -25,7 +25,7 @@ from seesaw.pipeline import *
 from seesaw.externalprocess import *
 from seesaw.util import find_executable
 
-VERSION = "20140405.01"
+VERSION = "20140411.01"
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
 WPULL_EXE = find_executable('Wpull', None, [ './wpull' ])
 
