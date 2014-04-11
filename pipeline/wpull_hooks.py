@@ -18,7 +18,7 @@ control_ref = archivebot.control.Control.start(redis_url, log_channel,
     pipeline_channel)
 control = control_ref.proxy()
 
-requisite_urls = {}
+requisite_urls = set()
 
 def log_ignore(url, pattern):
   packet = dict(
@@ -67,7 +67,7 @@ def is_warning(statcode, err):
     return statcode >= 400 and statcode < 500
 
 def add_as_page_requisite(url):
-  requisite_urls[url] = True
+  requisite_urls.add(url)
 
 def accept_url(url_info, record_info, verdict, reasons):
   url = url_info['url']
@@ -155,9 +155,9 @@ def handle_result(url_info, error_info, http_info):
   # non-page requisites because browsers act that way.
   sl, sm = None, None
 
-  if requisite_urls.get(url_info['url']):
+  if url_info['url'] in requisite_urls:
     # Yes, this will eventually free the memory needed for the key
-    requisite_urls[url_info['url']] = None
+    requisite_urls.remove(url_info['url'])
 
     sl, sm = settings.pagereq_delay_time_range()
   else:
