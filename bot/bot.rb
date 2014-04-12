@@ -96,11 +96,7 @@ bot = Cinch::Bot.new do
   end
 
   on :message, /\A!yahoo (#{CommandPatterns::IDENT})\Z/ do |m, ident|
-    brain.find_job(ident, m) do |j|
-      brain.set_delay(j, 0, 0, m)
-      brain.set_pagereq_delay(j, 0, 0, m)
-      brain.set_concurrency(j, 11, m)
-    end
+    brain.find_job(ident, m) { |j| brain.yahoo(j, m) }
   end
 
   on :message, /\A!abort (#{CommandPatterns::IDENT})\Z/ do |m, ident|

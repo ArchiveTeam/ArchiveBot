@@ -303,6 +303,16 @@ class Job < Struct.new(:uri, :redis)
     job_parameters_changed
   end
 
+  def yahoo
+    silently do
+      set_delay(0, 0)
+      set_pagereq_delay(0, 0)
+      set_concurrency(11)
+    end
+
+    job_parameters_changed
+  end
+
   def exists?
     !redis.keys(ident).empty?
   end

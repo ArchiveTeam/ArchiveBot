@@ -251,6 +251,14 @@ class Brain
     reply m, "Job #{job.ident} set to use #{level} #{noun}."
   end
 
+  def yahoo(job, m)
+    return unless authorized?(m)
+
+    job.yahoo
+
+    reply m, "Job #{job.ident} set to Yahoo! mode."
+  end
+
   def request_summary(m)
     s = Summary.new(redis)
     s.run
