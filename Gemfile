@@ -22,6 +22,7 @@ end
 
 group :test do
   gem 'rspec'
+  gem 'sinatra'
 end
 
 group :dashboard do
