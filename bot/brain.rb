@@ -88,6 +88,13 @@ class Brain
         reply m, "Queued #{uri.to_s}."
       end
 
+      destination = nil
+
+      if h['pipeline']
+        destination = h['pipeline'].first
+        reply m, "Job will run on pipeline #{destination}."
+      end
+
       reply m, "Use !status #{job.ident} for updates, !abort #{job.ident} to abort."
 
       run_post_registration_hooks(m, job, h)
@@ -95,10 +102,10 @@ class Brain
       if depth == :shallow
         # If this is a shallow depth job, it gets priority over jobs that go
         # deeper.
-        job.queue(:front)
+        job.queue(destination, :front)
       else
         # If this job goes deeper, shove it at the back of the queue.
-        job.queue
+        job.queue(destination)
       end
     end
   end
@@ -143,7 +150,7 @@ class Brain
             rep << "However, there have been #{child_attempts} download attempts on child URLs."
           end
 
-          rep << "See the ArchiveBot dashboard for more information."
+          rep << "More info: http://archivebot.at.ninjawedding.org:4567/#/histories/#{url}"
         end
       end
 
@@ -197,6 +204,17 @@ class Brain
     end
   end
 
+  def expire(m, job)
+    return unless authorized?(m)
+
+    if job.ttl < 0
+      reply m, "Job #{job.ident} does not yet have an expiry timer."
+    else
+      job.expire
+      reply m, "Job #{job.ident} expired."
+    end
+  end
+
   def remove_ignore_pattern(m, job, pattern)
     return unless authorized?(m)
 
@@ -222,6 +240,25 @@ class Brain
     reply m, "Page requisite delay for job #{job.ident} set to [#{min}, #{max}] ms."
   end
 
+  def set_concurrency(job, level, m)
+    return unless authorized?(m)
+    return unless concurrency_ok?(level, m)
+
+    job.set_concurrency(level)
+
+    noun = level == 1 ? 'worker' : 'workers'
+
+    reply m, "Job #{job.ident} set to use #{level} #{noun}."
+  end
+
+  def yahoo(job, m)
+    return unless authorized?(m)
+
+    job.yahoo
+
+    reply m, "Job #{job.ident} set to Yahoo! mode."
+  end
+
   def request_summary(m)
     s = Summary.new(redis)
     s.run
@@ -232,7 +269,7 @@ class Brain
   private
 
   VALID_PARAMETERS = {
-    :archive => %w(ignore_sets)
+    :archive => %w(ignore_sets pipeline)
   }
 
   def delete_unknown_parameters(h, command)
@@ -258,6 +295,15 @@ class Brain
   def delay_ok?(min, max, m)
     if min.to_f > max.to_f
       reply m, 'Sorry, min delay must be less than or equal to max delay.'
+      return false
+    end
+
+    true
+  end
+
+  def concurrency_ok?(level, m)
+    if level.to_i < 1
+      reply m, 'Sorry, concurrency level must be at least 1.'
       return false
     end
 

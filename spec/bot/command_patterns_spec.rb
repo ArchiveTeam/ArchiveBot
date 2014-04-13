@@ -112,4 +112,22 @@ describe CommandPatterns do
     it_should_behave_like 'a set delay command', '!reqdelay'
     it_should_behave_like 'a set delay command', '!reqd'
   end
+
+  describe 'Set concurrency command' do
+    let(:regex) { CommandPatterns::SET_CONCURRENCY }
+
+    it 'recognizes !concurrency IDENT LEVEL' do
+      md = regex.match '!concurrency f4pg9usx4j96ki3zczwlczu51 8'
+
+      md[1].should == 'f4pg9usx4j96ki3zczwlczu51'
+      md[2].should == '8'
+    end
+
+    it 'recognizes !con IDENT LEVEL' do
+      md = regex.match '!con f4pg9usx4j96ki3zczwlczu51 8'
+
+      md[1].should == 'f4pg9usx4j96ki3zczwlczu51'
+      md[2].should == '8'
+    end
+  end
 end

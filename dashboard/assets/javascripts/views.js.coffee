@@ -35,35 +35,6 @@ Dashboard.ResponseDistributionView = Ember.View.extend
 
       @$(".#{bucket}").css(width: width)
 
-Dashboard.LogEntryView = Ember.View.extend
-  tagName: 'div'
-
-  template: Ember.Handlebars.compile '''
-    {{#if view.isDownloadEntry}}
-      {{#with view.entry}}
-        {{response_code}} {{wget_code}}
-        <a {{bind-attr href="url"}} rel="noreferrer">{{url}}</a>
-      {{/with}}
-    {{else}}
-      {{#if view.isIgnoreEntry}}
-        {{#with view.entry}}
-          {{pattern}} omits
-          <a {{bind-attr href="url"}} rel="noreferrer">{{url}}</a>
-        {{/with}}
-      {{else}}
-        {{view.entry.text}}
-      {{/if}}
-    {{/if}}
-  '''
-
-  isDownloadEntry: (->
-    @get('entry.url') && @get('entry.response_code')? && @get('entry.wget_code')?
-  ).property('entry')
-
-  isIgnoreEntry: (->
-    @get('entry.pattern')
-  ).property('entry')
-
 Dashboard.LogView = Ember.View.extend
   classNames: ['terminal', 'log-view']
   classNameBindings: ['showIgnores']
@@ -72,7 +43,7 @@ Dashboard.LogView = Ember.View.extend
 
   tagName: 'section'
 
-  maxSize: 512
+  maxSize: 256
 
   frozenBinding: 'job.frozen'
   showIgnoresBinding: 'job.showIgnores'

@@ -15,8 +15,6 @@ module JobStatusGeneration
       rep << "See the ArchiveBot dashboard for more information."
     end
 
-    rep << "No archive URL currently available."
-
     if (t = ttl) && (t != -1)
       rep << "Eligible for rearchival in #{formatted_ttl(t)}."
     end

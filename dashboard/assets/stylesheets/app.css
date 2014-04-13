@@ -28,7 +28,7 @@ html {
 }
 
 body {
-  width: 80%;
+  width: 90%;
   margin-left: auto;
   margin-right: auto;
   margin-top: 1em;
@@ -74,6 +74,15 @@ h1 {
   -o-transition-delay: 10s;
   -ms-transition-delay: 10s;
   opacity: 0;
+}
+
+input.filter {
+  background-color: inherit;
+  border: 0;
+  color: inherit;
+  display: inline;
+  font-family: inherit;
+  font-size: inherit;
 }
 
 .job h1 {
@@ -152,6 +161,10 @@ h1 {
   margin-right: 1em;
 }
 
+.job .response-rate {
+  margin-right: 1em;
+}
+
 .job .controls {
   float: right;
 }
@@ -219,6 +232,10 @@ section.history th, section.history td {
 
 section.history td {
   vertical-align: middle;
+}
+
+section.history .response-count {
+  font-size: 80%;
 }
 
 section.history tr.finished {

@@ -79,6 +79,10 @@ bot = Cinch::Bot.new do
     brain.find_job(ident, m) { |j| brain.add_ignore_sets(m, j, sets) }
   end
 
+  on :message, /\A!expire (#{CommandPatterns::IDENT})\Z/ do |m, ident|
+    brain.find_job(ident, m) { |j| brain.expire(m, j) }
+  end
+
   on :message, CommandPatterns::SET_DELAY do |m, ident, min, max|
     brain.find_job(ident, m) { |j| brain.set_delay(j, min, max, m) }
   end
@@ -87,11 +91,12 @@ bot = Cinch::Bot.new do
     brain.find_job(ident, m) { |j| brain.set_pagereq_delay(j, min, max, m) }
   end
 
+  on :message, CommandPatterns::SET_CONCURRENCY do |m, ident, level|
+    brain.find_job(ident, m) { |j| brain.set_concurrency(j, level, m) }
+  end
+
   on :message, /\A!yahoo (#{CommandPatterns::IDENT})\Z/ do |m, ident|
-    brain.find_job(ident, m) do |j|
-      brain.set_delay(j, 0, 0, m)
-      brain.set_pagereq_delay(j, 0, 0, m)
-    end
+    brain.find_job(ident, m) { |j| brain.yahoo(j, m) }
   end
 
   on :message, /\A!abort (#{CommandPatterns::IDENT})\Z/ do |m, ident|

@@ -12,9 +12,18 @@
     * --ignore-sets SET1,...,SETN: specify sets of URL patterns to
       ignore
 
-      > !archive http://example.blogspot.com/ --ignore-sets=blogspot,google
-      < Archiving http://example.blogspot.com/.
+      > !archive http://example.blogspot.com/ncr --ignore-sets=blogs,forums
+      < Archiving http://example.blogspot.com/ncr.
       < 14 ignore patterns loaded.
+      < Use !status 5sid4pgxkiu6zynhbt3q1gi2s for updates, !abort
+        5sid4pgxkiu6zynhbt3q1gi2s to abort.
+
+    * --pipeline PIPELINE_ID: specify pipeline to use
+
+      > !archive http://example.blogspot.com/ncr
+          --pipeline=pipeline:1234567890abcdef
+      < Archiving http://example.blogspot.com/ncr.
+      < Job will run on pipeline pipeline:1234567890abcdef.
       < Use !status 5sid4pgxkiu6zynhbt3q1gi2s for updates, !abort
         5sid4pgxkiu6zynhbt3q1gi2s to abort.
 
@@ -44,24 +53,33 @@
       < Use !status 5sid4pgxkiu6zynhbt3q1gi2s for updates, !abort
         5sid4pgxkiu6zynhbt3q1gi2s to abort.
 
+    * --pipeline PIPELINE_ID: specify pipeline to use
+
+      > !archiveonly http://example.blogspot.com/
+          --pipeline=pipeline:1234567890abcdef
+      < Archiving http://example.blogspot.com/.
+      < Job will run on pipeline pipeline:1234567890abcdef.
+      < Use !status 5sid4pgxkiu6zynhbt3q1gi2s for updates, !abort
+        5sid4pgxkiu6zynhbt3q1gi2s to abort.
+
 
 * !ignore IDENT PATTERN, !ig IDENT PATTERN: add an ignore pattern
 
-    > !ig 1q2qydhkeh3gfnrcxuf6py70b obnoxious%?foo=%d+
-    < Added ignore pattern obnoxious%?foo=%d+ to job
+    > !ig 1q2qydhkeh3gfnrcxuf6py70b obnoxious\?foo=\d+
+    < Added ignore pattern obnoxious\?foo=\d+ to job
       1q2qydhkeh3gfnrcxuf6py70b.
 
-  The pattern must be expressed in Lua pattern syntax.  For more
+  The pattern must be expressed as regular expressions.  For more
   information, see:
 
-  http://lua-users.org/wiki/PatternsTutorial
-  http://www.lua.org/manual/5.1/manual.html#5.4.1
+  http://docs.python.org/3/howto/regex.html#regex-howto
+  http://docs.python.org/3/library/re.html#regular-expression-syntax
 
 
 * !unignore IDENT PATTERN, !unig IDENT PATTERN: remove an ignore pattern
 
-    > !unig 1q2qydhkeh3gfnrcxuf6py70b obnoxious%?foo=%d+
-    < Removed ignore pattern obnoxious%?foo=%d+ from job
+    > !unig 1q2qydhkeh3gfnrcxuf6py70b obnoxious\?foo=\d+
+    < Removed ignore pattern obnoxious\?foo=\d+ from job
       1q2qydhkeh3gfnrcxuf6py70b.
 
 
@@ -76,6 +94,8 @@
     > !igset 1q2qydhkeh3gfnrcxuf6py70b blogs, other
     < Added 17 ignore patterns to job 1q2qydhkeh3gfnrcxuf6py70b.
     < The following sets are unknown: other
+
+  Ignore set definitions can be found under db/ignore_patterns/.
 
 
 * !delay IDENT MIN MAX, !d IDENT MIN MAX: set inter-request delay
@@ -102,18 +122,47 @@
   milliseconds.  The default page requisite delay range is [25, 100] ms.
 
 
-* !yahoo IDENT: set zero second delays
+* !concurrency IDENT LEVEL, !con IDENT LEVEL: set concurrency level
+
+    > !concurrency 1q2qydhkeh3gfnrcxuf6py70b 8
+    < Job 1q2qydhkeh3gfnrcxuf6py70b set to use 8 workers.
+
+  Adding additional workers may speed up grabs if the target site has
+  capacity to spare, but it also puts additional pressure on the target.
+  Use wisely.
+
+
+* !yahoo IDENT: set zero second delays, crank concurrency to 11
 
     > !yahoo 1q2qydhkeh3gfnrcxuf6py70b
     < Inter-request delay for job 1q2qydhkeh3gfnrcxuf6py70b set to
       [0, 0] ms.
     < Page requisite delay for job 1q2qydhkeh3gfnrcxuf6py70b set to
       [0, 0] ms.
+    < Job 1q2qydhkeh3gfnrcxuf6py70b set to use 11 workers.
 
   Only recommended for use when archiving data from hosts with gobs of
   bandwidth and processing power (e.g. Yahoo, Google, Amazon).  Keep in
   mind that this is likely to trigger any rate limiters that the target
   may have.
+
+
+* !expire IDENT: for expiring jobs, expire a job immediately
+
+    > !expire 1q2qydhkeh3gfnrcxuf6py70b
+    < Job 1q2qydhkeh3gfnrcxuf6py70b expired.
+
+  In rare cases, the 48 hour timeout enforced by ArchiveBot on archive
+  jobs is too long.  This command permits faster snapshotting.  It
+  should be used sparingly; abuse is very easy to spot.
+
+  If a job's expiry timer has not yet started, this command does not
+  affect the given job:
+
+    > !expire 5sid4pgxkiu6zynhbt3q1gi2s
+    < Job 5sid4pgxkiu6zynhbt3q1gi2s does not yet have an expiry timer.
+
+  This is intended to prevent expiration of active jobs.
 
 
 * !status: print job summary

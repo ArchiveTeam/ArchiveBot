@@ -54,8 +54,16 @@ Dashboard.DownloadUpdateEntry = Ember.Object.extend
     classes
   ).property('is_warning', 'is_error')
 
+  text: (->
+    "#{@get('response_code')} #{@get('wget_code')} #{@get('url')}"
+  ).property('response_code', 'wget_code', 'url')
+
 Dashboard.IgnoredUrlEntry = Ember.Object.extend
   classNames: ['ignored']
+
+  text: (->
+    "#{@get('pattern')} omits #{@get('url')}"
+  ).property('pattern', 'url')
 
 Dashboard.StdoutUpdateEntry = Ember.Object.extend
   classNames: []
@@ -126,9 +134,7 @@ Dashboard.MessageProcessor = Ember.Object.extend
 
       return
 
-    # OK, we have a job.
-
-    # Read the updated job data.
+    # OK, we have a job.  Read the updated job data.
     job.amplify(job_data)
 
     # Now, update the log buffer.  This part depends on the message type.

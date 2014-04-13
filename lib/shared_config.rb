@@ -12,4 +12,12 @@ module SharedConfig
   def log_channel
     config['channels']['log']
   end
+
+  def job_channel(ident)
+    "#{job_channel_prefix}#{ident}"
+  end
+
+  def job_channel_prefix
+    config['channels']['job_prefix']
+  end
 end

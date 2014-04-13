@@ -3,6 +3,7 @@ require 'uuidtools'
 require 'json'
 
 require File.expand_path('../job_analysis', __FILE__)
+require File.expand_path('../shared_config', __FILE__)
 
 # Ruby representation of an archive job.
 #
@@ -182,14 +183,14 @@ class Job < Struct.new(:uri, :redis)
 
   def add_ignore_pattern(pattern)
     redis.sadd(ignore_patterns_set_key, pattern)
-    increment_settings_age
+    job_parameters_changed
   end
 
   alias_method :add_ignore_patterns, :add_ignore_pattern
 
   def remove_ignore_pattern(pattern)
     redis.srem(ignore_patterns_set_key, pattern)
-    increment_settings_age
+    job_parameters_changed
   end
 
   # More convenient access for modules.
@@ -233,6 +234,7 @@ class Job < Struct.new(:uri, :redis)
 
   def abort
     redis.hset(ident, 'abort_requested', true)
+    job_parameters_changed
   end
 
   def fail
@@ -245,14 +247,20 @@ class Job < Struct.new(:uri, :redis)
     redis.expire(ignore_patterns_set_key, 5)
   end
 
-  def queue(direction = :back)
+  def queue(destination = nil, direction = :back)
     t = Time.now
+
+    queue = if destination
+              "pending:#{destination}"
+            else
+              'pending'
+            end
 
     case direction
     when :back
-      redis.lpush('pending', ident)
+      redis.lpush(queue, ident)
     when :front
-      redis.rpush('pending', ident)
+      redis.rpush(queue, ident)
     else
       raise 'Unknown queue end (known: :back, :front)'
     end
@@ -270,8 +278,11 @@ class Job < Struct.new(:uri, :redis)
                          'started_by', started_by,
                          'started_in', started_in)
 
-      set_delay(250, 375)
-      set_pagereq_delay(25, 100)
+      silently do
+        set_delay(250, 375)
+        set_pagereq_delay(25, 100)
+        set_concurrency(1)
+      end
     end
 
     true
@@ -279,12 +290,27 @@ class Job < Struct.new(:uri, :redis)
 
   def set_delay(min, max)
     redis.hmset(ident, 'delay_min', min, 'delay_max', max)
-    increment_settings_age
+    job_parameters_changed
   end
 
   def set_pagereq_delay(min, max)
     redis.hmset(ident, 'pagereq_delay_min', min, 'pagereq_delay_max', max)
-    increment_settings_age
+    job_parameters_changed
+  end
+
+  def set_concurrency(level)
+    redis.hset(ident, 'concurrency', level)
+    job_parameters_changed
+  end
+
+  def yahoo
+    silently do
+      set_delay(0, 0)
+      set_pagereq_delay(0, 0)
+      set_concurrency(4)
+    end
+
+    job_parameters_changed
   end
 
   def exists?
@@ -293,6 +319,14 @@ class Job < Struct.new(:uri, :redis)
 
   def ttl
     redis.ttl(ident)
+  end
+
+  def expire
+    redis.pipelined do
+      [ident, log_key, ignore_patterns_set_key].each do |k|
+        redis.expire(k, 0)
+      end
+    end
   end
 
   def incr_error_count(by = 1)
@@ -397,7 +431,20 @@ class Job < Struct.new(:uri, :redis)
 
   private
 
-  def increment_settings_age
-    redis.hincrby(ident, 'settings_age', 1)
+  def job_parameters_changed
+    age = redis.hincrby(ident, 'settings_age', 1)
+
+    unless @no_change_message
+      redis.publish(SharedConfig.job_channel(ident), age)
+    end
+  end
+
+  def silently
+    begin
+      @no_change_message = true
+      yield
+    ensure
+      @no_change_message = false
+    end
   end
 end

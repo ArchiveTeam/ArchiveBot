@@ -5,6 +5,7 @@
     <link rel="stylesheet" type="text/css" href="/assets/style.css" />
     <link rel="alternate" type="application/rss+xml" title="RSS Feed" href="/feed/archivebot.rss" />
     <link rel="alternate" type="application/atom+xml" title="Atom Feed" href="/feed/archivebot.atom" />
+    <link rel="icon" type="image/png" href="/assets/favicon.png" />
     <title>ArchiveBot dashboard</title>
   </head>
 
@@ -20,7 +21,8 @@
         <h1>
           <a
           href="http://www.archiveteam.org/index.php?title=ArchiveBot">ArchiveBot</a>
-          dashboard
+          dashboard:
+          {{input type="text" value=filterValue class="filter" placeholder="(all jobs)"}}
         </h1>
       </header>
       {{outlet}}
@@ -44,11 +46,19 @@
         <header>
           <h1>Jobs</h1>
         </header>
-        <ul class="job-list">
-          {{#each job in jobs}}
+        <ul class="dashboard-job-list">
+          {{#each job in filteredJobs}}
             <li>{{partial "job"}}</li>
           {{else}}
-            No running jobs
+            {{#if filterValue}}
+              No matching jobs
+            {{else}}
+              {{#if dataLoaded}}
+                No running jobs
+              {{else}}
+                Loading job data
+              {{/if}}
+            {{/if}}
           {{/each}}
         </ul>
       </section>
@@ -82,9 +92,9 @@
               <tr>
                 <th>Started (your time zone)</th>
                 <th>Fetch depth</th>
-                <th>Downloaded</th>
                 <th>Response distribution</th>
-                <th></th>
+                <th>Downloaded</th>
+                <th>Downloads</th>
               </tr>
             </thead>
             <tbody>
@@ -92,12 +102,31 @@
                 <tr {{bind-attr class=r.classNames}}>
                   <td>{{r.queuedAtForDisplay}}</td>
                   <td>{{r.depth}}</td>
-                  <td>{{r.mbDownloaded}} MB</td>
-                  <td>{{view Dashboard.ResponseDistributionView
-                        itemBinding="r"}}</td>
                   <td>
-                    No archive URL
+                    {{view Dashboard.ResponseDistributionView
+                      itemBinding="r"}}
+                    <div class="response-count">
+                      {{#with r}}
+                        {{partial 'response-count'}}
+                      {{/with}}
+                    </div>
+                  </td>
+                  <td>
+                    {{r.mbDownloaded}} MB
                     <span class="aborted-warning">Aborted</span>
+                  </td>
+                  <td>
+                    <ol>
+                      {{#each download in r.downloads}}
+                        <li>
+                          <a {{bind-attr href=download.url}}>
+                            {{download.host}}, {{download.mbSize}} MB
+                          </a>
+                        </li>
+                      {{else}}
+                        No available downloads
+                      {{/each}}
+                    </ol>
                   </td>
                 </tr>
               {{else}}
@@ -132,14 +161,22 @@
     <script type="text/x-handlebars" data-template-name="log-view">
       <ol>
         {{#each entry in view.eventBuffer}}
-          <li>
-            {{view Dashboard.LogEntryView entryBinding="entry"
-              classNameBindings="entry.classNames"}}
+          <li {{bind-attr class="entry.classNames"}}>
+            {{entry.text}}
           </li>
         {{else}}
           <li>No events</li>
         {{/each}}
       </ol>
+    </script>
+
+    <script type="text/x-handlebars" data-template-name="_response-count">
+      <span>1xx: {{r1xx}}</span>
+      <span>2xx: {{r2xx}}</span>
+      <span>3xx: {{r3xx}}</span>
+      <span>4xx: {{r4xx}}</span>
+      <span>5xx: {{r5xx}}</span>
+      <span>Unknown: {{runk}}</span>
     </script>
 
     <script type="text/x-handlebars" data-template-name="_job">
@@ -157,12 +194,13 @@
             <i class="fa fa-clock-o"></i>
             {{job.elapsedTime}}
           </span>
-          <span>1xx: {{job.r1xx}}</span>
-          <span>2xx: {{job.r2xx}}</span>
-          <span>3xx: {{job.r3xx}}</span>
-          <span>4xx: {{job.r4xx}}</span>
-          <span>5xx: {{job.r5xx}}</span>
-          <span>Unknown: {{job.runk}}</span>
+          <span class="response-rate" title="Response rate">
+            <i class="fa fa-flash"></i>
+            {{job.responseRate}} resps/sec
+          </span>
+          {{#with job}}
+            {{partial 'response-count'}}
+          {{/with}}
           <div class="controls">
             <label>
               {{input type=checkbox checked=job.showIgnores}}
