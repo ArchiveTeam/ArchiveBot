@@ -278,9 +278,11 @@ class Job < Struct.new(:uri, :redis)
                          'started_by', started_by,
                          'started_in', started_in)
 
-      set_delay(250, 375)
-      set_pagereq_delay(25, 100)
-      set_concurrency(1)
+      silently do
+        set_delay(250, 375)
+        set_pagereq_delay(25, 100)
+        set_concurrency(1)
+      end
     end
 
     true
@@ -422,6 +424,17 @@ class Job < Struct.new(:uri, :redis)
   def job_parameters_changed
     age = redis.hincrby(ident, 'settings_age', 1)
 
-    redis.publish(SharedConfig.job_channel(ident), age)
+    unless @no_change_message
+      redis.publish(SharedConfig.job_channel(ident), age)
+    end
+  end
+
+  def silently
+    begin
+      @no_change_message = true
+      yield
+    ensure
+      @no_change_message = false
+    end
   end
 end
