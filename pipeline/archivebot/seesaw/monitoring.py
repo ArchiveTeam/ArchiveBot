@@ -21,14 +21,19 @@ def start(pipeline, control, version):
     pid, hostname, fqdn, pipe_id = pipeline_id()
 
     def report():
+        du = psutil.disk_usage(pipeline.data_dir)
+        mu = psutil.virtual_memory()
+
         process_report = {
             'id': pipe_id,
             'hostname': hostname,
             'fqdn': fqdn,
             'pid': pid,
             'version': version,
-            'mem_usage': psutil.virtual_memory().percent,
-            'disk_usage': psutil.disk_usage(pipeline.data_dir).percent,
+            'mem_usage': mu.percent,
+            'mem_available': mu.available,
+            'disk_usage': du.percent,
+            'disk_available': du.free,
             'ts': int(time.time())
         }
 
