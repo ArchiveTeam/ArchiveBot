@@ -307,7 +307,7 @@ class Job < Struct.new(:uri, :redis)
     silently do
       set_delay(0, 0)
       set_pagereq_delay(0, 0)
-      set_concurrency(11)
+      set_concurrency(4)
     end
 
     job_parameters_changed
