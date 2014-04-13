@@ -237,7 +237,8 @@ def build_patterns(strings):
             pattern = re.compile(string)
             patterns.append(pattern)
         except re.error as error:
-            print(string + ' could not be compiled: ' + str(error) + '; ignoring')
+            print('Pattern %s could not be compiled.  Error: %s.  Ignoring.' %
+                    (string, str(error)))
 
     return patterns
 
