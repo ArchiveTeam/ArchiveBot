@@ -11,6 +11,7 @@ require File.expand_path('../log_analyzer', __FILE__)
 require File.expand_path('../log_trimmer', __FILE__)
 require File.expand_path('../reaper', __FILE__)
 require File.expand_path('../twitter_tweeter', __FILE__)
+require File.expand_path('../twitter_listener', __FILE__)
 require File.expand_path('../archive_finder', __FILE__)
 
 opts = Trollop.options do
@@ -45,6 +46,7 @@ LogTrimmer.supervise_as :log_trimmer, URI(opts[:log_db]),
 
 Reaper.supervise_as :reaper, opts[:redis]
 TwitterTweeter.supervise_as :twitter_tweeter, opts[:redis], opts[:twitter_config]
+TwitterListener.supervise_as :twitter_listener, db_uri, opts[:db_credentials], opts[:twitter_config]
 ArchiveFinder.supervise_as :archive_finder, opts[:redis], db_uri,
   opts[:db_credentials]
 
