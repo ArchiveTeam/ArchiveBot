@@ -1,4 +1,3 @@
-import archivebot.control
 import json
 import os
 import random
@@ -6,7 +5,9 @@ import time
 
 from archivebot import acceptance_heuristics
 from archivebot import shared_config
-from archivebot import settings
+from archivebot.control import Control
+from archivebot.wpull import settings as mod_settings
+from pykka.registry import ActorRegistry
 
 ident = os.environ['ITEM_IDENT']
 redis_url = os.environ['REDIS_URL']
@@ -14,11 +15,17 @@ log_key = os.environ['LOG_KEY']
 log_channel = shared_config.log_channel()
 pipeline_channel = shared_config.pipeline_channel()
 
-control_ref = archivebot.control.Control.start(redis_url, log_channel,
-    pipeline_channel)
+settings_ref = mod_settings.Settings.start()
+settings = settings_ref.proxy()
+
+control_ref = Control.start(redis_url, log_channel, pipeline_channel)
 control = control_ref.proxy()
 
+settings_listener = mod_settings.Listener(redis_url, settings, control, ident)
+settings_listener.start()
+
 requisite_urls = set()
+last_age = 0
 
 def log_ignore(url, pattern):
   packet = dict(
@@ -73,7 +80,7 @@ def accept_url(url_info, record_info, verdict, reasons):
   url = url_info['url']
 
   # Does the URL match any of the ignore patterns?
-  pattern = settings.ignore_url_p(url)
+  pattern = settings.ignore_url_p(url).get()
 
   if pattern:
     log_ignore(url, pattern)
@@ -106,6 +113,8 @@ def accept_url(url_info, record_info, verdict, reasons):
   return verdict
 
 def handle_result(url_info, error_info, http_info):
+  global last_age
+
   if http_info:
     # Update the traffic counters.
     control.update_bytes_downloaded(ident, http_info['body']['content_size'])
@@ -113,7 +122,7 @@ def handle_result(url_info, error_info, http_info):
   statcode = 0
   error = 'OK'
 
-  pattern = settings.ignore_url_p(url_info['url'])
+  pattern = settings.ignore_url_p(url_info['url']).get()
 
   if pattern:
     log_ignore(url_info['url'], pattern)
@@ -128,16 +137,20 @@ def handle_result(url_info, error_info, http_info):
   # Record the current time, URL, response code, and wget's error code.
   log_result(url_info['url'], statcode, error)
 
-  # Update settings.
-  if settings.update_settings(ident, control):
-    print("Settings updated: ", settings.inspect_settings())
+  # If settings were updated, print out a report.
+  settings_age = settings.age().get()
 
-    # If settings changed, concurrency level may have also changed.
-    clevel = settings.concurrency()
+  if last_age < settings_age:
+    last_age = settings_age
+
+    print("Settings updated: ", settings.inspect().get())
+
+    # Also adjust concurrency level.
+    clevel = settings.concurrency().get()
     wpull_hook.factory.get('Engine').set_concurrent(clevel)
 
   # Should we abort?
-  if control.abort_requested(ident).get():
+  if settings.abort_requested().get():
     print("Wget terminating on bot command")
 
     while True:
@@ -159,9 +172,9 @@ def handle_result(url_info, error_info, http_info):
     # Yes, this will eventually free the memory needed for the key
     requisite_urls.remove(url_info['url'])
 
-    sl, sm = settings.pagereq_delay_time_range()
+    sl, sm = settings.pagereq_delay_time_range().get()
   else:
-    sl, sm = settings.delay_time_range()
+    sl, sm = settings.delay_time_range().get()
 
   time.sleep(random.uniform(sl, sm) / 1000)
 
@@ -180,7 +193,8 @@ def finish_statistics(start_time, end_time, num_urls, bytes_downloaded):
   print(" ", bytes_downloaded, "bytes.")
 
 def exit_status(exit_code):
-  control.stop()
+  settings_listener.stop()
+  ActorRegistry.stop_all()
 
 wpull_hook.callbacks.accept_url = accept_url
 wpull_hook.callbacks.handle_response = handle_response

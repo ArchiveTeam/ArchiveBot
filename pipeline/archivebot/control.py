@@ -108,14 +108,6 @@ class Control(pykka.ThreadingActor):
         with conn(self):
             self.mark_aborted_script(keys=[ident], args=[self.log_channel])
 
-    def abort_requested(self, ident):
-        try:
-            with conn(self):
-                return self.redis.hget(ident, 'abort_requested')
-        except ConnectionError:
-            # If we can't connect, assume we keep going
-            return False
-
     def update_bytes_downloaded(self, ident, size):
         try:
             with conn(self):
@@ -152,16 +144,13 @@ class Control(pykka.ThreadingActor):
         except ConnectionError:
             pass
 
-    def get_settings(self, ident, current_age):
+    def get_settings(self, ident):
         with conn(self):
-            age = self.redis.hget(ident, 'settings_age')
-
-            if age == current_age:
-                return 'same'
-            
             data = self.redis.hmget(ident, 'delay_min', 'delay_max',
                     'pagereq_delay_min', 'pagereq_delay_max',
                     'concurrency',
+                    'settings_age',
+                    'abort_requested',
                     'ignore_patterns_set_key')
 
             result = dict(
@@ -170,11 +159,12 @@ class Control(pykka.ThreadingActor):
                     pagereq_delay_min=data[2],
                     pagereq_delay_max=data[3],
                     concurrency=data[4],
-                    age=age
+                    age=data[5],
+                    abort_requested=data[6]
                     )
 
-            if data[5]:
-                result['ignore_patterns'] = self.redis.smembers(data[5])
+            if data[7]:
+                result['ignore_patterns'] = self.redis.smembers(data[7])
             else:
                 result['ignore_patterns'] = []
 
