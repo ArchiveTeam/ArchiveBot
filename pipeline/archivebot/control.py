@@ -9,18 +9,11 @@ from redis.exceptions import ConnectionError as RedisConnectionError
 
 class ConnectionError(Exception):
     '''
-    Represents connection errors that can occur when talking to the
-    ArchiveBot controller, Redis or otherwise.
-
-    The error that originally caused the exception, if present, is accessible
-    via the inner attribute.
+    Represents connection errors that can occur when talking to the ArchiveBot
+    control node, Redis or otherwise.
     '''
 
-    def __init__(self, inner):
-        self.inner = inner
-
-    def __str__(self):
-        return "Connection error; inner exception:\n" + str(self.inner)
+    pass
 
 @contextmanager
 def conn(controller):
@@ -30,7 +23,7 @@ def conn(controller):
         yield
     except RedisConnectionError as e:
         controller.redis = None
-        raise(ConnectionError(e))
+        raise ConnectionError(str(e)) from e
 
 class Control(pykka.ThreadingActor):
     '''
