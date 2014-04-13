@@ -18,11 +18,11 @@ class ConnectionError(Exception):
 @contextmanager
 def conn(controller):
     try:
-        if controller.redis == None:
-            controller.make_redis()
+        if not controller.connected():
+            controller.connect()
         yield
     except RedisConnectionError as e:
-        controller.redis = None
+        controller.disconnect()
         raise ConnectionError(str(e)) from e
 
 class Control(pykka.ThreadingActor):
@@ -37,16 +37,27 @@ class Control(pykka.ThreadingActor):
     def __init__(self, redis_url, log_channel, control_channel):
         super(Control, self).__init__()
 
-        self.redis_url = redis_url
         self.log_channel = log_channel
         self.control_channel = control_channel
         self.bytes_outstanding = 0
-        self.make_redis()
+        self.redis_url = redis_url
 
-    def make_redis(self):
+        self.connect()
+
+    def connected(self):
+        return self.redis is not None
+
+    def connect(self):
+        if self.redis_url is None:
+            raise ConnectionError('self.redis_url not set')
+
         self.redis = redis.StrictRedis.from_url(self.redis_url,
                 decode_responses=True)
+
         self.register_scripts()
+
+    def disconnect(self):
+        self.redis = None
 
     def register_scripts(self):
         self.mark_done_script = self.redis.register_script(MARK_DONE_SCRIPT)
