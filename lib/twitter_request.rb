@@ -1,5 +1,7 @@
 require 'json'
 
+##
+# Represents an archive request from Twitter.
 class TwitterRequest < Struct.new(:url, :tweet_id, :user_id, :username)
   ##
   # The Redis key where accepted requests live.
@@ -12,6 +14,8 @@ class TwitterRequest < Struct.new(:url, :tweet_id, :user_id, :username)
         json['username'])
   end
 
+  ##
+  # Queue requests in Redis.
   def self.queue(requests, redis)
     redis.sadd(ACCEPTED_REQUESTS_KEY, requests.map(&:to_json))
   end
