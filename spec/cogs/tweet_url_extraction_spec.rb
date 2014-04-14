@@ -28,16 +28,16 @@ describe TweetUrlExtraction do
       end
     end
 
+    it 'does not modify non-t.co-shortened URLs' do
+      VCR.use_cassette('twitter_url_expansion') do
+        vessel.expand_urls(str).should include('http://bit.ly/foobar')
+      end
+    end
+
     describe 'on t.co URLs' do
       it 'resolves t.co-shortened URLs to their expansions' do
         VCR.use_cassette('twitter_url_expansion') do
           vessel.expand_urls(str).should include('http://www.archiveteam.org/index.php?title=ArchiveBot')
-        end
-      end
-
-      it 'does not modify non-t.co-shortened URLs' do
-        VCR.use_cassette('twitter_url_expansion') do
-          vessel.expand_urls(str).should include('http://bit.ly/foobar')
         end
       end
 
