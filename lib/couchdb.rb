@@ -84,6 +84,12 @@ class Couchdb
     resp.rows.map { |r| r['value'] }
   end
 
+  def accept_tweets_from(user_id)
+    resp = @db.view!('access_lists/archive_via_twitter', { key: user_id }, @credentials)
+
+    resp.rows.length > 0
+  end
+
   private
 
   def endkey(url, prefix)
