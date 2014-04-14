@@ -44,6 +44,8 @@ GEM
       coffee-script-source
       execjs
     coffee-script-source (1.6.3)
+    crack (0.4.2)
+      safe_yaml (~> 1.0.0)
     descendants_tracker (0.0.3)
     diff-lcs (1.2.5)
     ember-source (1.4.0)
@@ -297,6 +299,7 @@ GEM
     rubysl-xmlrpc (2.0.0)
     rubysl-yaml (2.0.4)
     rubysl-zlib (2.0.1)
+    safe_yaml (1.0.2)
     simple_oauth (0.2.0)
     sinatra (1.4.4)
       rack (~> 1.4)
@@ -324,6 +327,10 @@ GEM
       memoizable (~> 0.4.0)
       simple_oauth (~> 0.2.0)
     uuidtools (2.1.4)
+    vcr (2.9.0)
+    webmock (1.17.4)
+      addressable (>= 2.2.7)
+      crack (>= 0.3.2)
     websocket_parser (0.1.5)
       http
     yajl-ruby (1.2.0)
@@ -352,5 +359,7 @@ DEPENDENCIES
   trollop
   twitter (~> 5.5.1)
   uuidtools
+  vcr
   webmachine!
   webmachine-sprockets!
+  webmock

@@ -23,6 +23,8 @@ end
 group :test do
   gem 'rspec'
   gem 'sinatra'
+  gem 'vcr'
+  gem 'webmock'
 end
 
 group :dashboard do
