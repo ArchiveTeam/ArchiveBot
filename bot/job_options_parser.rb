@@ -3,7 +3,7 @@ require 'trollop'
 class JobOptionsParser
   def initialize
     @parser = Trollop::Parser.new do
-      opt :js, 'Use PhantomJS grabber'
+      opt :phantomjs, 'Use PhantomJS grabber'
       opt :ignore_sets, 'Ignore sets to apply', :type => :string
       opt :pipeline, 'Run job on this pipeline', :type => :string
     end

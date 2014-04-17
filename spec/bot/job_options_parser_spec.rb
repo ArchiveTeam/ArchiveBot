@@ -5,8 +5,8 @@ require 'bot/job_options_parser'
 describe JobOptionsParser do
   let(:parser) { JobOptionsParser.new }
 
-  it 'recognizes --js' do
-    parser.parse('--js')[:js].should be_true
+  it 'recognizes --phantomjs' do
+    parser.parse('--phantomjs')[:phantomjs].should be_true
   end
 
   it 'parses --ignore-sets=A,B to an array' do

@@ -7,7 +7,7 @@ module PipelineOptions
       reply m, "Job will run on pipeline #{pipeline}."
     end
 
-    if params[:js]
+    if params[:phantomjs]
       job.use_js_grabber
       reply m, "Job will run using PhantomJS."
     end
