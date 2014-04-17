@@ -111,6 +111,7 @@ class WpullArgs(object):
             self.add_args(args, [
                 '--phantomjs',
                 '--phantomjs-scroll', '100',
+                '--no-phantomjs-snapshot',
                 '--phantomjs-wait', '2.0'
             ], item)
 
