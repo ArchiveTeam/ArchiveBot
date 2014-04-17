@@ -151,7 +151,7 @@ class ListenerWorkerThread(threading.Thread):
     '''
 
     def __init__(self, redis_url, settings, control, ident):
-        super(ListenerWorkerThread, self).__init__(daemon=True)
+        super(ListenerWorkerThread, self).__init__()
 
         self.redis_url = redis_url
         self.settings = settings
