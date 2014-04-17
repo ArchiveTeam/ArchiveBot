@@ -24,7 +24,6 @@ control = control_ref.proxy()
 settings_listener = mod_settings.Listener(redis_url, settings, control, ident)
 settings_listener.start()
 
-requisite_urls = set()
 last_age = 0
 
 def log_ignore(url, pattern):
@@ -73,8 +72,6 @@ def is_warning(statcode, err):
     '''
     return statcode >= 400 and statcode < 500
 
-def add_as_page_requisite(url):
-  requisite_urls.add(url)
 
 def accept_url(url_info, record_info, verdict, reasons):
   url = url_info['url']
@@ -97,22 +94,14 @@ def accept_url(url_info, record_info, verdict, reasons):
 
     # Is this a URL of a non-hyperlinked page requisite?
     if acceptance_heuristics.is_page_requisite(record_info):
-      # Yeah, grab these too.  We also flag the URL as a page requisite here
-      # because we'll need to know that when we calculate the post-request
-      # delay.
-      add_as_page_requisite(url_info['url'])
+      # Yeah, grab these too.
       return True
-
-  # If we're looking at a page requisite that didn't require verdict
-  # override, flag it as a requisite.
-  if verdict and acceptance_heuristics.is_page_requisite(record_info):
-    add_as_page_requisite(url_info['url'])
 
   # If we get here, none of our exceptions apply.  Return the original
   # verdict.
   return verdict
 
-def handle_result(url_info, error_info, http_info):
+def handle_result(url_info, record_info, error_info=None, http_info=None):
   global last_age
 
   if http_info:
@@ -168,10 +157,7 @@ def handle_result(url_info, error_info, http_info):
   # non-page requisites because browsers act that way.
   sl, sm = None, None
 
-  if url_info['url'] in requisite_urls:
-    # Yes, this will eventually free the memory needed for the key
-    requisite_urls.remove(url_info['url'])
-
+  if acceptance_heuristics.is_page_requisite(record_info):
     sl, sm = settings.pagereq_delay_time_range().get()
   else:
     sl, sm = settings.delay_time_range().get()
@@ -181,12 +167,12 @@ def handle_result(url_info, error_info, http_info):
   return wpull_hook.actions.NORMAL
 
 
-def handle_response(url_info, http_info):
-  return handle_result(url_info, None, http_info)
+def handle_response(url_info, record_info, http_info):
+  return handle_result(url_info, record_info, http_info=http_info)
 
 
-def handle_error(url_info, error_info):
-  return handle_result(url_info, error_info, None)
+def handle_error(url_info, record_info, error_info):
+  return handle_result(url_info, record_info, error_info=error_info)
 
 
 def finish_statistics(start_time, end_time, num_urls, bytes_downloaded):
@@ -196,6 +182,10 @@ def exit_status(exit_code):
   settings_listener.stop()
   ActorRegistry.stop_all()
 
+
+assert 2 in wpull_hook.callbacks.AVAILABLE_VERSIONS
+
+wpull_hook.callbacks.version = 2
 wpull_hook.callbacks.accept_url = accept_url
 wpull_hook.callbacks.handle_response = handle_response
 wpull_hook.callbacks.handle_error = handle_error
