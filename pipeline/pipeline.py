@@ -3,6 +3,7 @@ import sys
 import redis
 import atexit
 import subprocess
+import sys
 
 # FIXME: This is a bit of a hack.
 #
@@ -25,18 +26,19 @@ from seesaw.pipeline import *
 from seesaw.externalprocess import *
 from seesaw.util import find_executable
 
-VERSION = "20140417.02"
+VERSION = "20140418.01"
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
 WPULL_EXE = find_executable('Wpull', None, [ './wpull' ])
 
-if not WPULL_EXE:
-    raise Exception("No usable Wpull found.")
+version_integer = (sys.version_info.major * 10) + sys.version_info.minor
 
-if 'RSYNC_URL' not in env:
-    raise Exception('RSYNC_URL not set.')
+assert version_integer >= 33, \
+        "This pipeline requires Python >= 3.3.  You are running %s." % \
+        sys.version
 
-if 'REDIS_URL' not in env:
-    raise Exception('REDIS_URL not set.')
+assert WPULL_EXE, 'No usable Wpull found.'
+assert 'RSYNC_URL' in env, 'RSYNC_URL not set.'
+assert 'REDIS_URL' in env, 'REDIS_URL not set.'
 
 RSYNC_URL = env['RSYNC_URL']
 REDIS_URL = env['REDIS_URL']
