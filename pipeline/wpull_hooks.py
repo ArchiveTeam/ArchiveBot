@@ -152,20 +152,13 @@ def handle_result(url_info, record_info, error_info=None, http_info=None):
 
     return wpull_hook.actions.STOP
 
-  # OK, we've finished our fetch attempt.  Now we need to figure out how much
-  # we should delay.  We delay different amounts for page requisites vs.
-  # non-page requisites because browsers act that way.
-  sl, sm = None, None
-
-  if acceptance_heuristics.is_page_requisite(record_info):
-    sl, sm = settings.pagereq_delay_time_range().get()
-  else:
-    sl, sm = settings.delay_time_range().get()
-
-  time.sleep(random.uniform(sl, sm) / 1000)
-
+  # All clear.
   return wpull_hook.actions.NORMAL
 
+def wait_time(seconds):
+    sl, sm = settings.delay_time_range().get()
+
+    return random.uniform(sl, sm) / 1000
 
 def handle_response(url_info, record_info, http_info):
   return handle_result(url_info, record_info, http_info=http_info)
@@ -191,5 +184,6 @@ wpull_hook.callbacks.handle_response = handle_response
 wpull_hook.callbacks.handle_error = handle_error
 wpull_hook.callbacks.finish_statistics = finish_statistics
 wpull_hook.callbacks.exit_status = exit_status
+wpull_hook.callbacks.wait_time = wait_time
 
 # vim:ts=2:sw=2:et:tw=78
