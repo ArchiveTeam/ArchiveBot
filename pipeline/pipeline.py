@@ -29,6 +29,8 @@ from seesaw.util import find_executable
 VERSION = "20140422.01"
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
 WPULL_EXE = find_executable('Wpull', None, [ './wpull' ])
+PHANTOMJS = find_executable('PhantomJS', '1.9.0',
+        ['phantomjs', './phantomjs'], '-v')
 
 version_integer = (sys.version_info.major * 10) + sys.version_info.minor
 
@@ -37,6 +39,7 @@ assert version_integer >= 33, \
         sys.version
 
 assert WPULL_EXE, 'No usable Wpull found.'
+assert PHANTOMJS, 'PhantomJS 1.9.0 was not found.'
 assert 'RSYNC_URL' in env, 'RSYNC_URL not set.'
 assert 'REDIS_URL' in env, 'REDIS_URL not set.'
 
