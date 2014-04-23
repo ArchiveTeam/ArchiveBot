@@ -44,8 +44,8 @@ class Settings(pykka.ThreadingActor):
 
     def ignore_url_p(self, url):
         '''
-        If a URL matches an ignore pattern, returns the matching pattern.
-        Otherwise, returns false.
+        If a URL matches an ignore pattern, returns the string representation
+        of the matching pattern.  Otherwise, returns false.
         '''
 
         for pattern in self.settings['ignore_patterns']:
@@ -57,7 +57,7 @@ class Settings(pykka.ThreadingActor):
                 return False
     
             if match:
-                return pattern
+                return pattern.pattern
     
         return False
 
