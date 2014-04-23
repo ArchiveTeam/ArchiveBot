@@ -106,13 +106,6 @@ describe CommandPatterns do
     it_should_behave_like 'a set delay command', '!d'
   end
 
-  describe 'Set page requisite delay command' do
-    let(:regex) { CommandPatterns::SET_PAGEREQ_DELAY }
-
-    it_should_behave_like 'a set delay command', '!reqdelay'
-    it_should_behave_like 'a set delay command', '!reqd'
-  end
-
   describe 'Set concurrency command' do
     let(:regex) { CommandPatterns::SET_CONCURRENCY }
 

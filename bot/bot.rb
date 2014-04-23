@@ -87,10 +87,6 @@ bot = Cinch::Bot.new do
     brain.find_job(ident, m) { |j| brain.set_delay(j, min, max, m) }
   end
 
-  on :message, CommandPatterns::SET_PAGEREQ_DELAY do |m, ident, min, max|
-    brain.find_job(ident, m) { |j| brain.set_pagereq_delay(j, min, max, m) }
-  end
-
   on :message, CommandPatterns::SET_CONCURRENCY do |m, ident, level|
     brain.find_job(ident, m) { |j| brain.set_concurrency(j, level, m) }
   end

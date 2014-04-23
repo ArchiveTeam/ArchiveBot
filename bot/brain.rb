@@ -231,15 +231,6 @@ class Brain
     reply m, "Inter-request delay for job #{job.ident} set to [#{min}, #{max}] ms."
   end
 
-  def set_pagereq_delay(job, min, max, m)
-    return unless authorized?(m)
-    return unless delay_ok?(min, max, m)
-
-    job.set_pagereq_delay(min, max)
-
-    reply m, "Page requisite delay for job #{job.ident} set to [#{min}, #{max}] ms."
-  end
-
   def set_concurrency(job, level, m)
     return unless authorized?(m)
     return unless concurrency_ok?(level, m)

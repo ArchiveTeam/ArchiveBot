@@ -280,7 +280,6 @@ class Job < Struct.new(:uri, :redis)
 
       silently do
         set_delay(250, 375)
-        set_pagereq_delay(25, 100)
         set_concurrency(1)
       end
     end
@@ -293,11 +292,6 @@ class Job < Struct.new(:uri, :redis)
     job_parameters_changed
   end
 
-  def set_pagereq_delay(min, max)
-    redis.hmset(ident, 'pagereq_delay_min', min, 'pagereq_delay_max', max)
-    job_parameters_changed
-  end
-
   def set_concurrency(level)
     redis.hset(ident, 'concurrency', level)
     job_parameters_changed
@@ -306,7 +300,6 @@ class Job < Struct.new(:uri, :redis)
   def yahoo
     silently do
       set_delay(0, 0)
-      set_pagereq_delay(0, 0)
       set_concurrency(4)
     end
 

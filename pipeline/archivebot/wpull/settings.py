@@ -21,9 +21,7 @@ class Settings(pykka.ThreadingActor):
             abort_requested=None,
             ignore_patterns={},
             delay_min=None,
-            delay_max=None,
-            pagereq_delay_min=None,
-            pagereq_delay_max=None
+            delay_max=None
     )
 
     def update_settings(self, new_settings):
@@ -32,8 +30,6 @@ class Settings(pykka.ThreadingActor):
         '''
         self.settings['delay_min'] = int_or_none(new_settings['delay_min'])
         self.settings['delay_max'] = int_or_none(new_settings['delay_max'])
-        self.settings['pagereq_delay_min'] = int_or_none(new_settings['pagereq_delay_min'])
-        self.settings['pagereq_delay_max'] = int_or_none(new_settings['pagereq_delay_max'])
         self.settings['ignore_patterns'] = build_patterns(new_settings['ignore_patterns'])
         self.settings['age'] = int_or_none(new_settings['age'])
         self.settings['concurrency'] = int_or_none(new_settings['concurrency'])
@@ -75,14 +71,6 @@ class Settings(pykka.ThreadingActor):
 
         return self.settings['delay_min'] or 0, self.settings['delay_max'] or 0
 
-    def pagereq_delay_time_range(self):
-        '''
-        Returns a range of valid sleep times for page requisites.  Sleep times
-        are in milliseconds.
-        '''
-
-        return self.settings['pagereq_delay_min'] or 0, self.settings['pagereq_delay_max'] or 0
-
     def concurrency(self):
         '''
         Number of wpull fetchers to run.
@@ -97,12 +85,10 @@ class Settings(pykka.ThreadingActor):
 
         iglen = len(self.settings['ignore_patterns'])
         sl, sm = self.delay_time_range()
-        rsl, rsm = self.pagereq_delay_time_range()
         
         report = str(self.concurrency()) + ' workers, '
         report += str(iglen) + ' ignores, '
-        report += 'delay min/max: [' + str(sl) + ', ' + str(sm) + '] ms, '
-        report += 'pagereq delay min/max: [' + str(rsl) + ', ' + str(rsm) + '] ms'
+        report += 'delay min/max: [' + str(sl) + ', ' + str(sm) + '] ms'
         
         return report
 
