@@ -17,4 +17,20 @@ channels:
   # the job's ident.
   job_prefix: 'archivebot:job:'
 
+irc:
+  # Default URI of the IRC server to connect to.
+  #
+  # Both IRC and IRC-over-SSL are accepted, e.g.
+  #
+  # irc://irc.example.net:6667
+  # ircs://irc.example.net:6669
+  server_uri: irc://irc.efnet.org:6667
+
+  # Default nick to use.
+  nick: ATGoKart
+
+  # Default channels to join.
+  channels:
+    - '#archivebot'
+
 # vim:ts=2:sw=2:et:tw=78

@@ -7,11 +7,14 @@ require File.expand_path('../brain', __FILE__)
 require File.expand_path('../command_patterns', __FILE__)
 require File.expand_path('../finish_notifier', __FILE__)
 require File.expand_path('../../lib/couchdb', __FILE__)
+require File.expand_path('../../lib/shared_config', __FILE__)
 
 opts = Trollop.options do
-  opt :server, 'IRC server, expressed as a URI (irc://SERVER:PORT or ircs://SERVER:PORT for SSL)', :type => String
-  opt :nick, 'Nick to use', :default => 'ArchiveBot'
-  opt :channels, 'Comma-separated list of channels', :type => String
+  opt :server, 'IRC server, expressed as a URI (irc://SERVER:PORT or ircs://SERVER:PORT for SSL)', :type => String,
+    :default => SharedConfig.irc_server_uri
+  opt :nick, 'Nick to use', :default => SharedConfig.irc_nick
+  opt :channels, 'Comma-separated list of channels', :type => String,
+    :default => SharedConfig.irc_channels.join(',')
   opt :schemes, 'Comma-separated list of acceptable URI schemes', :default => 'http,https'
   opt :redis, 'URL of Redis server', :default => ENV['REDIS_URL'] || 'redis://localhost:6379/0'
   opt :db, 'URL of CouchDB database', :default => ENV['COUCHDB_URL'] || 'http://localhost:5984/archivebot'

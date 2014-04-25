@@ -20,4 +20,17 @@ module SharedConfig
   def job_channel_prefix
     config['channels']['job_prefix']
   end
+
+  def irc_server_uri
+    config['irc']['server_uri']
+  end
+
+  def irc_nick
+    config['irc']['nick']
+  end
+
+  def irc_channels
+    puts config['irc'].inspect
+    config['irc']['channels']
+  end
 end
