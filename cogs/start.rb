@@ -10,6 +10,7 @@ require File.expand_path('../../lib/shared_config', __FILE__)
 require File.expand_path('../log_analyzer', __FILE__)
 require File.expand_path('../log_trimmer', __FILE__)
 require File.expand_path('../reaper', __FILE__)
+require File.expand_path('../twitter_concierge', __FILE__)
 require File.expand_path('../twitter_tweeter', __FILE__)
 require File.expand_path('../twitter_listener', __FILE__)
 require File.expand_path('../archive_finder', __FILE__)
@@ -45,8 +46,9 @@ LogTrimmer.supervise_as :log_trimmer, URI(opts[:log_db]),
   opts[:log_db_credentials]
 
 Reaper.supervise_as :reaper, opts[:redis]
+TwitterConcierge.supervise_as :twitter_concierge
 TwitterTweeter.supervise_as :twitter_tweeter, opts[:redis], opts[:twitter_config]
-TwitterListener.supervise_as :twitter_listener, opts[:redis], db_uri,
+TwitterListener.supervise_as :twitter_listener, :twitter_concierge, db_uri,
   opts[:db_credentials], opts[:twitter_config]
 ArchiveFinder.supervise_as :archive_finder, opts[:redis], db_uri,
   opts[:db_credentials]
