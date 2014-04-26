@@ -13,12 +13,6 @@ class History < Webmachine::Resource
     request.query['url']
   end
 
-  def resource_exists?
-    run_query
-
-    @query.length > 0
-  end
-
   def content_types_provided
     [['application/json', :to_json]]
   end
