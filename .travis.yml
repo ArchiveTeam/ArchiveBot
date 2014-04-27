@@ -3,7 +3,11 @@ before_install:
   - sudo apt-get install ircd-hybrid
 before_script:
   - curl -X PUT http://localhost:5984/archivebot
-  - sudo /etc/init.d/ircd-hybrid start
+
+  # If ircd-hybrid is running (which currently happens with Ubuntu packages),
+  # this will restart it.
+  # If ircd-hybrid is not running (could happen in future), this will start it.
+  - sudo /etc/init.d/ircd-hybrid restart
 services:
   - redis-server
   - couchdb
