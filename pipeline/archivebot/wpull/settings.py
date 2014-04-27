@@ -119,6 +119,19 @@ class Listener(object):
                 self.control, self.ident)
         self.thread.start()
 
+    def check(self):
+        '''
+        Checks whether the worker thread is alive.  If it isn't, nils out
+        references to the existing object and starts a new instance.
+
+        This should be called from a loop.
+        '''
+
+        if self.thread and not self.thread.is_alive():
+            print('Settings listener died; restarting.')
+            self.thread = None
+            self.start()
+
     def stop(self):
         if self.thread:
             self.thread.stop()
@@ -151,7 +164,6 @@ class ListenerWorkerThread(threading.Thread):
 
     def run(self):
         while self.running:
-
             try:
                 self.update_settings()
                 self.last_run = time.monotonic()

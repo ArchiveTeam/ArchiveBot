@@ -138,6 +138,9 @@ def handle_result(url_info, record_info, error_info=None, http_info=None):
     clevel = settings.concurrency().get()
     wpull_hook.factory.get('Engine').set_concurrent(clevel)
 
+  # One last thing about settings: make sure the listener is online.
+  settings_listener.check()
+
   # Should we abort?
   if settings.abort_requested().get():
     print("Wget terminating on bot command")
