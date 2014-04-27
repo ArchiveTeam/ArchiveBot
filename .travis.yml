@@ -3,7 +3,7 @@ before_install:
   - sudo apt-get install ircd-hybrid
 before_script:
   - curl -X PUT http://localhost:5984/archivebot
+  - sudo /etc/init.d/ircd-hybrid start
 services:
   - redis-server
   - couchdb
-  - ircd-hybrid
