@@ -27,6 +27,18 @@
       < Use !status 5sid4pgxkiu6zynhbt3q1gi2s for updates, !abort
         5sid4pgxkiu6zynhbt3q1gi2s to abort.
 
+    * --phantomjs: access pages via PhantomJS
+    * --phantomjs-wait: set number of seconds between PhantomJS
+          requests; defaults to 2.0
+    * --phantomjs-scroll: maximum number of times to scroll a page in
+          PhantomJS; defaults to 100
+    * --no-phantomjs-smart-scroll: disable PhantomJS' end-of-page
+          detection and always scroll --phantomjs-scroll number of
+          times; off by default
+
+    PhantomJS mode is enabled if any of the --*phantomjs* options are
+    passed.
+
 
 * !abort IDENT: abort a job
 
@@ -61,6 +73,18 @@
       < Job will run on pipeline pipeline:1234567890abcdef.
       < Use !status 5sid4pgxkiu6zynhbt3q1gi2s for updates, !abort
         5sid4pgxkiu6zynhbt3q1gi2s to abort.
+
+    * --phantomjs: access pages via PhantomJS
+    * --phantomjs-wait: set number of seconds between PhantomJS
+          requests; defaults to 2.0
+    * --phantomjs-scroll: maximum number of times to scroll a page in
+          PhantomJS; defaults to 100
+    * --no-phantomjs-smart-scroll: disable PhantomJS' end-of-page
+          detection and always scroll --phantomjs-scroll number of
+          times; off by default
+
+    PhantomJS mode is enabled if any of the --*phantomjs* options are
+    passed.
 
 
 * !ignore IDENT PATTERN, !ig IDENT PATTERN: add an ignore pattern
