@@ -1,0 +1,9 @@
+before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install ircd-hybrid
+before_script:
+  - curl -X PUT http://localhost:5984/archivebot
+services:
+  - redis-server
+  - couchdb
+  - ircd-hybrid

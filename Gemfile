@@ -34,3 +34,7 @@ group :dashboard do
   gem 'webmachine-sprockets', :git => 'https://github.com/lgierth/webmachine-sprockets.git'
   gem 'erubis'
 end
+
+group :development do
+  gem 'travis-lint'
+end
