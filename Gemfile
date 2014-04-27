@@ -36,5 +36,6 @@ group :dashboard do
 end
 
 group :development do
+  gem 'rake'
   gem 'travis-lint'
 end
