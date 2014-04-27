@@ -21,6 +21,7 @@ platform :rbx do
 end
 
 group :test do
+  gem 'cucumber'
   gem 'rspec'
   gem 'sinatra'
 end
