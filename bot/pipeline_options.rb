@@ -3,7 +3,7 @@ module PipelineOptions
     return unless authorized?(m)
 
     if params[:pipeline]
-      pipeline = h[:pipeline].first
+      pipeline = params[:pipeline].first
       reply m, "Job will run on pipeline #{pipeline}."
     end
 
