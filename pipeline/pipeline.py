@@ -1,9 +1,15 @@
-import os
-import sys
-import redis
 import atexit
+from os import environ as env
+import os
 import subprocess
 import sys
+
+from seesaw.externalprocess import WgetDownload, RsyncUpload
+from seesaw.item import ItemInterpolation
+from seesaw.pipeline import Pipeline
+from seesaw.project import Project
+from seesaw.task import LimitConcurrent
+from seesaw.util import find_executable
 
 # FIXME: This is a bit of a hack.
 #
@@ -12,19 +18,14 @@ import sys
 # nice, though.
 sys.path.append(os.getcwd())
 
-from archivebot import shared_config
 from archivebot import control
-from archivebot.seesaw import monitoring
+from archivebot import shared_config
 from archivebot.seesaw import extensions
-from archivebot.seesaw.tasks import *
+from archivebot.seesaw import monitoring
+from archivebot.seesaw.tasks import GetItemFromQueue, StartHeartbeat, \
+    SetFetchDepth, PreparePaths, WriteInfo, RelabelIfAborted, MoveFiles, \
+    SetWarcFileSizeInRedis, StopHeartbeat, MarkItemAsDone
 
-from os import environ as env
-from seesaw.project import *
-from seesaw.item import *
-from seesaw.task import *
-from seesaw.pipeline import *
-from seesaw.externalprocess import *
-from seesaw.util import find_executable
 
 VERSION = "20140429.01"
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
