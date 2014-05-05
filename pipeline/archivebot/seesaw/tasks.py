@@ -1,14 +1,17 @@
 import datetime
 import functools
+import glob
 import json
 import os
 import shutil
 import time
-import tornado.ioloop
 
 from seesaw.task import Task, SimpleTask
 from tornado.ioloop import IOLoop
+import tornado.ioloop
+
 from archivebot.control import ConnectionError
+
 
 class RetryableTask(Task):
     retry_delay = 5
@@ -121,8 +124,13 @@ class SetFetchDepth(SimpleTask):
 
 class TargetPathMixin(object):
     def set_target_paths(self, item):
-        item['target_warc_file'] = '%(data_dir)s/%(warc_file_base)s.warc.gz' % item
+        item['target_warc_file_prefix'] = '%(data_dir)s/%(warc_file_base)s' % item
         item['target_info_file'] = '%(data_dir)s/%(warc_file_base)s.json' % item
+
+    def get_source_warc_filenames(self, item):
+        return list(sorted(
+            glob.glob('%(source_warc_file_prefix)s*.warc.gz' % item)
+        ))
 
 # ------------------------------------------------------------------------------
 
@@ -141,7 +149,7 @@ class PreparePaths(SimpleTask, TargetPathMixin):
         item['item_dir'] = item_dir
         item['warc_file_base'] = '%s-%s-%s' % (item['slug'],
                 time.strftime("%Y%m%d-%H%M%S"), last_five)
-        item['source_warc_file'] = '%(item_dir)s/%(warc_file_base)s.warc.gz' % item
+        item['source_warc_file_prefix'] = '%(item_dir)s/%(warc_file_base)s' % item
         item['source_info_file'] = '%(item_dir)s/%(warc_file_base)s.json' % item
         item['cookie_jar'] = '%(item_dir)s/cookies.txt' % item
 
@@ -162,7 +170,7 @@ class RelabelIfAborted(RetryableTask, TargetPathMixin):
 
                 self.set_target_paths(item)
 
-                item.log_output('Adjusted target WARC path to %(target_warc_file)s' %
+                item.log_output('Adjusted target WARC path to %(target_warc_file_prefix)s' %
                         item)
 
             self.complete_item(item)
@@ -172,14 +180,31 @@ class RelabelIfAborted(RetryableTask, TargetPathMixin):
 
 # ------------------------------------------------------------------------------
 
-class MoveFiles(SimpleTask):
+class MoveFiles(SimpleTask, TargetPathMixin):
     def __init__(self):
         SimpleTask.__init__(self, "MoveFiles")
 
     def process(self, item):
-        os.rename(item['source_warc_file'], item['target_warc_file'])
+        item['target_warc_files'] = self.rename_warc_files(item)
+        item['all_target_files'] = item['target_warc_files'] + [item['target_info_file']]
+
         os.rename(item['source_info_file'], item['target_info_file'])
         shutil.rmtree("%(item_dir)s" % item)
+
+    def rename_warc_files(self, item):
+        target_filenames = []
+
+        for source_filename in self.get_source_warc_filenames(item):
+            assert source_filename.startswith(item['source_warc_file_prefix'])
+            target_filename = source_filename.replace(
+                item['source_warc_file_prefix'],
+                item['target_warc_file_prefix'],
+                1
+            )
+            os.rename(source_filename, target_filename)
+            target_filenames.append(target_filename)
+
+        return target_filenames
 
 # ------------------------------------------------------------------------------
 
@@ -221,7 +246,7 @@ class SetWarcFileSizeInRedis(RetryableTask):
     def process(self, item):
         try:
             self.control.set_warc_size(item['ident'],
-                    item['target_warc_file'])
+                    *item['target_warc_files'])
             self.complete_item(item)
         except ConnectionError:
             self.notify_connection_error(item)
