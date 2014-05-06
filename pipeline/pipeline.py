@@ -1,11 +1,13 @@
 import atexit
+from distutils.version import StrictVersion
 from os import environ as env
 import os
 import subprocess
 import sys
 
+import seesaw
 from seesaw.externalprocess import WgetDownload, RsyncUpload
-from seesaw.item import ItemInterpolation
+from seesaw.item import ItemInterpolation, ItemValue
 from seesaw.pipeline import Pipeline
 from seesaw.project import Project
 from seesaw.task import LimitConcurrent
@@ -27,7 +29,7 @@ from archivebot.seesaw.tasks import GetItemFromQueue, StartHeartbeat, \
     SetWarcFileSizeInRedis, StopHeartbeat, MarkItemAsDone
 
 
-VERSION = "20140429.01"
+VERSION = "20140505.01"
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
 WPULL_EXE = find_executable('Wpull', None, [ './wpull' ])
 PHANTOMJS = find_executable('PhantomJS', '1.9.0',
@@ -43,6 +45,12 @@ assert WPULL_EXE, 'No usable Wpull found.'
 assert PHANTOMJS, 'PhantomJS 1.9.0 was not found.'
 assert 'RSYNC_URL' in env, 'RSYNC_URL not set.'
 assert 'REDIS_URL' in env, 'REDIS_URL not set.'
+
+if StrictVersion(seesaw.__version__) < StrictVersion("0.1.8b1"):
+    raise Exception(
+        "Needs seesaw@python3/development version 0.1.8b1 or higher. "
+        "You have version {0}".format(seesaw.__version__)
+    )
 
 RSYNC_URL = env['RSYNC_URL']
 REDIS_URL = env['REDIS_URL']
@@ -100,6 +108,7 @@ class WpullArgs(object):
             '--tries', '10',
             '--waitretry', '5',
             '--warc-file', '%(item_dir)s/%(warc_file_base)s' % item,
+            '--warc-max-size', '10737418240',
             '--warc-header', 'operator: Archive Team',
             '--warc-header', 'downloaded-by: ArchiveBot',
             '--warc-header', 'archivebot-job-ident: %(ident)s' % item,
@@ -158,10 +167,7 @@ pipeline = Pipeline(
         RsyncUpload(
             target = RSYNC_URL,
             target_source_path = ItemInterpolation("%(data_dir)s"),
-            files = [
-                ItemInterpolation('%(target_warc_file)s'),
-                ItemInterpolation('%(target_info_file)s')
-            ],
+            files=ItemValue("all_target_files"),
             extra_args = [
                 '--partial',
                 '--partial-dir', '.rsync-tmp'
