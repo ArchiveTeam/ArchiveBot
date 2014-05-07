@@ -39,6 +39,8 @@
     PhantomJS mode is enabled if any of the --*phantomjs* options are
     passed.
 
+  If you're feeling snarky or realist, you can also invoke !archive as
+  !firstworldproblems.
 
 * !abort IDENT: abort a job
 
