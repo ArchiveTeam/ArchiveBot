@@ -12,6 +12,12 @@ describe CommandPatterns do
       md[1].should == 'http://www.example.com/'
     end
 
+    it 'recognizes !firstworldproblems URL' do
+      md = regex.match "!firstworldproblems http://www.example.com/"
+
+      md[1].should == 'http://www.example.com/'
+    end
+
     it 'recognizes !a URL' do
       md = regex.match "!a http://www.example.com/"
 
