@@ -209,7 +209,7 @@ class ListenerWorkerThread(threading.Thread):
     def update_settings(self):
         new_settings = self.control.get_settings(self.job_ident).get()
 
-        self.settings.update_settings(new_settings)
+        self.settings.update_settings(new_settings).get()
 
 # ---------------------------------------------------------------------------
 

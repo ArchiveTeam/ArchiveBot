@@ -34,7 +34,7 @@ def log_ignore(url, pattern):
     type='ignore'
   )
 
-  control.log(packet, ident, log_key)
+  control.log(packet, ident, log_key).get()
 
 def log_result(url, statcode, error):
   packet = dict(
@@ -47,7 +47,7 @@ def log_result(url, statcode, error):
     type='download'
   )
 
-  control.log(packet, ident, log_key)
+  control.log(packet, ident, log_key).get()
 
 def is_error(statcode, err):
     '''
@@ -147,7 +147,7 @@ def handle_result(url_info, record_info, error_info=None, http_info=None):
 
     while True:
       try:
-        control.mark_aborted(ident)
+        control.mark_aborted(ident).get()
         break
       except ConnectionError:
         time.sleep(5)
