@@ -45,7 +45,7 @@ class LogClient
     if pattern == UPDATE_TOPIC
       begin
         @socket << message.to_json
-      rescue Reel::SocketError
+      rescue
         terminate
       end
     end
