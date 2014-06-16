@@ -29,7 +29,7 @@ from archivebot.seesaw.tasks import GetItemFromQueue, StartHeartbeat, \
     SetWarcFileSizeInRedis, StopHeartbeat, MarkItemAsDone
 
 
-VERSION = "20140513.01"
+VERSION = "20140616.01"
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
 WPULL_EXE = find_executable('Wpull', None, [ './wpull' ])
 PHANTOMJS = find_executable('PhantomJS', '1.9.0',
@@ -123,7 +123,6 @@ class WpullArgs(object):
             item.log_output('Telling wpull to use PhantomJS.')
 
             phantomjs_args = [
-                '--no-phantomjs-snapshot',
                 '--phantomjs',
                 '--phantomjs-scroll', item['phantomjs_scroll'],
                 '--phantomjs-wait', item['phantomjs_wait']
