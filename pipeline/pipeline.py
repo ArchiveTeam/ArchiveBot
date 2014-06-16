@@ -106,7 +106,7 @@ class WpullArgs(object):
             '--no-parent',
             '--http-compression',
             '--timeout', '20',
-            '--tries', '10',
+            '--tries', '3',
             '--waitretry', '5',
             '--warc-file', '%(item_dir)s/%(warc_file_base)s' % item,
             '--warc-max-size', '10737418240',
