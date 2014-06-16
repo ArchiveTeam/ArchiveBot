@@ -104,6 +104,7 @@ class WpullArgs(object):
             '--no-robots',
             '--page-requisites',
             '--no-parent',
+            '--http-compression',
             '--timeout', '20',
             '--tries', '10',
             '--waitretry', '5',
