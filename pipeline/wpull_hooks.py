@@ -177,6 +177,7 @@ def finish_statistics(start_time, end_time, num_urls, bytes_downloaded):
 def exit_status(exit_code):
   settings_listener.stop()
   ActorRegistry.stop_all()
+  return exit_code
 
 
 assert 2 in wpull_hook.callbacks.AVAILABLE_VERSIONS
