@@ -256,7 +256,7 @@ class Brain
   private
 
   def authorized?(m)
-    if !m.channel.opped?(m.user) || !m.channel.voiced?(m.user)
+    if !(m.channel.opped?(m.user) || m.channel.voiced?(m.user))
       reply m, "Sorry, only channel operators or voiced users may use that command."
       return false
     end
