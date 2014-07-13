@@ -102,6 +102,7 @@ class WpullArgs(object):
             '--no-check-certificate',
             '--delete-after',
             '--no-robots',
+            '--span-hosts',
             '--page-requisites',
             '--no-parent',
             '--http-compression',
