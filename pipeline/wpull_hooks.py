@@ -3,7 +3,6 @@ import os
 import random
 import time
 
-from archivebot import acceptance_heuristics
 from archivebot import shared_config
 from archivebot.control import Control
 from archivebot.wpull import settings as mod_settings
@@ -83,22 +82,7 @@ def accept_url(url_info, record_info, verdict, reasons):
     log_ignore(url, pattern)
     return False
 
-  # Second-guess wget's host-spanning restrictions.
-  if not verdict and acceptance_heuristics.is_span_host_filter_failed_only(reasons['filters']):
-    # Is the parent a www.example.com and the child an example.com, or vice
-    # versa?
-    if record_info['referrer_info'] and \
-    acceptance_heuristics.is_www_to_bare(record_info['referrer_info'], url_info):
-      # OK, grab it after all.
-      return True
-
-    # Is this a URL of a non-hyperlinked page requisite?
-    if acceptance_heuristics.is_page_requisite(record_info):
-      # Yeah, grab these too.
-      return True
-
-  # If we get here, none of our exceptions apply.  Return the original
-  # verdict.
+  # If we get here, none of our ignores apply.  Return the original verdict.
   return verdict
 
 def handle_result(url_info, record_info, error_info=None, http_info=None):
