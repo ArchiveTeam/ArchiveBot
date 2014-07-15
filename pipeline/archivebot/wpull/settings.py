@@ -202,7 +202,7 @@ class ListenerWorkerThread(threading.Thread):
     def run_update_check(self):
         now = time.monotonic()
 
-        if self.last_run - now > 30:
+        if now - self.last_run > 30:
             self.update_settings()
             self.last_run = now
 
