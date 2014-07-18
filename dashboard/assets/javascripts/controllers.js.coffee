@@ -31,7 +31,7 @@ Dashboard.IndexController = Ember.Controller.extend
         ident = item.get('ident')
 
         url.indexOf(fv) != -1 || ident.indexOf(fv) != -1
-  ).property('filterValue')
+  ).property('filterValue', 'controllers.jobs.arrangedContent.@each')
 
 Dashboard.JobsController = Ember.ArrayController.extend
   itemController: 'job'
