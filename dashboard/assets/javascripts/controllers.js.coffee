@@ -10,6 +10,7 @@ Dashboard.IndexController = Ember.Controller.extend
   dataLoaded: false
 
   messageProcessorBinding: 'controllers.jobs.messageProcessor'
+  selectedSortPropertyBinding: 'controllers.jobs.selectedSortProperty'
 
   startLogSocket: ->
     @ws = new WebSocket('ws://' + window.location.host + '/stream')
@@ -33,11 +34,36 @@ Dashboard.IndexController = Ember.Controller.extend
         url.indexOf(fv) != -1 || ident.indexOf(fv) != -1
   ).property('filterValue', 'controllers.jobs.arrangedContent.@each')
 
+jobSorts = {
+  url: {
+    name: 'URL'
+    properties: ['url']
+    ascending: true
+  },
+  age: {
+    name: 'age'
+    properties: ['started_at']
+    ascending: false
+  }
+}
+
+jobSortCriteria = ({ label: jobSorts[k]['name'], value: k } for own k of jobSorts)
+
 Dashboard.JobsController = Ember.ArrayController.extend
   itemController: 'job'
-  sortProperties: ['url']
 
   modelBinding: 'messageProcessor.jobs'
+
+  availableSortCriteria: jobSortCriteria
+
+  setSort: (->
+    selection = jobSorts[@get('selectedSortProperty')]
+
+    # For some reason, use of @setProperties will give you a sort result whose
+    # order is not the requested order.
+    @set 'sortProperties', selection.properties
+    @set 'sortAscending', selection.ascending
+  ).observes('selectedSortProperty')
 
 Dashboard.JobController = Ember.ObjectController.extend
   # TODO: If/when Ember.js permits links to be generated on more than model

@@ -23,9 +23,16 @@
     <script type="text/x-handlebars" data-template-name="index">
       <h1>
         <a
-        href="http://www.archiveteam.org/index.php?title=ArchiveBot">ArchiveBot</a>
-        dashboard:
+        href="http://www.archiveteam.org/index.php?title=ArchiveBot">ArchiveBot</a>:
+        jobs matching
         {{input type="text" value=filterValue class="filter" placeholder="(all jobs)"}}
+        ordered by
+        {{view Ember.Select
+            content=controllers.jobs.availableSortCriteria
+            class="sort-by"
+            optionLabelPath="content.label"
+            optionValuePath="content.value"
+            value=controllers.jobs.selectedSortProperty}}
       </h1>
       <ul class="dashboard-job-list">
         {{#each job in filteredJobs}}

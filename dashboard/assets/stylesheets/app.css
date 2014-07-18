@@ -79,6 +79,17 @@ h1 {
 input.filter {
   background-color: inherit;
   border: 0;
+  border-bottom: 1px solid hsl(240, 100%, 75%);
+  color: inherit;
+  display: inline;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+select.sort-by {
+  background-color: inherit;
+  border: 0;
+  border-bottom: 1px solid hsl(240, 100%, 75%);
   color: inherit;
   display: inline;
   font-family: inherit;

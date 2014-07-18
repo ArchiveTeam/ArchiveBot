@@ -12,6 +12,9 @@ Dashboard.IndexRoute = Ember.Route.extend
       model.process(log) for log in logs
       controller.set('dataLoaded', true)
 
+    # Set default sort order.
+    controller.set('selectedSortProperty', 'url')
+
   model: (params) ->
     Dashboard.MessageProcessor.create(jobIndex: {}, jobs: [])
 
