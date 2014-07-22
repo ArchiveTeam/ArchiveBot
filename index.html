@@ -1,0 +1,51 @@
+<!doctype html>
+<head>
+<title>ArchiveBot dashboard 2.0</title>
+</head>
+<body>
+<div id="crawls"></div>
+<script>
+
+var byId = function(id) {
+	return document.getElementById(id);
+}
+
+var text = function(s) {
+	return document.createTextNode(s);
+}
+
+var elem = function(elem) {
+	return document.createElement(elem);
+}
+
+var elemWithText = function(tag, s) {
+	var e = elem(tag);
+	e.appendChild(text(s));
+	return e;
+}
+
+var prettyJson = function(obj) {
+	return JSON.stringify(obj, undefined, 2);
+}
+
+Dashboard = window.Dashboard || {};
+
+Dashboard.ws = null;
+Dashboard.messageCount = 0;
+
+Dashboard.setup = function() {
+	Dashboard.ws = new WebSocket("ws://archivebot.at.ninjawedding.org:4567/stream");
+	Dashboard.ws.onmessage = function(ev) {
+		byId('crawls').appendChild(elemWithText("pre", prettyJson(JSON.parse(ev.data))));
+		Dashboard.messageCount += 1;
+		if(Dashboard.messageCount >= 10) {
+			Dashboard.ws.onmessage = null;
+		}
+	}
+}
+
+Dashboard.setup();
+
+</script>
+</body>
+</html>
