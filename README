@@ -29,8 +29,8 @@ LICENSE for details.
 
 4. Acknowledgments
 
-Thanks to Alard (@alard), who added Lua scripting support to GNU Wget.
-Wget+lua was the first web crawler used by ArchiveBot.
+Thanks to Alard (@alard), who added WARC generation and Lua scripting to
+GNU Wget.  Wget+lua was the first web crawler used by ArchiveBot.
 
 Thanks to Christopher Foo (@chfoo) for wpull, ArchiveBot's current web
 crawler.
