@@ -3,7 +3,7 @@
 <title>ArchiveBot dashboard 2.0</title>
 </head>
 <body>
-<div id="crawls"></div>
+<div id="traffic"></div>
 <script>
 
 var assert = function(condition, message) {
@@ -61,6 +61,9 @@ var split = function(s, sep, maxsplit) {
 	return head;
 };
 
+/**
+ * [[1, 2], [3, 4]] -> {1: 2, 3: 4}
+ */
 var intoObject = function(arr) {
 	var obj = {};
 	arr.forEach(function(e) {
@@ -87,12 +90,16 @@ Dashboard.ws = null;
 Dashboard.messageCount = 0;
 
 Dashboard.setup = function() {
+	var args = getQueryArgs();
+	var dumpTraffic = args.dumpMax && Number(args.dumpMax) > 0;
+	if(dumpTraffic) {
+		var dumpMax = Number(args.dumpMax);
+	}
 	Dashboard.ws = new WebSocket("ws://arshboard.at.ninjawedding.org:4567/stream");
 	Dashboard.ws.onmessage = function(ev) {
-		byId('crawls').appendChild(elemWithText("pre", prettyJson(JSON.parse(ev.data))));
 		Dashboard.messageCount += 1;
-		if(Dashboard.messageCount >= 10) {
-			Dashboard.ws.onmessage = null;
+		if(dumpTraffic && Dashboard.messageCount <= dumpMax) {
+			byId('traffic').appendChild(elemWithText("pre", prettyJson(JSON.parse(ev.data))));
 		}
 	}
 }
