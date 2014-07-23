@@ -89,12 +89,13 @@ describe FinishMessageGeneration do
         ]
       end
 
-      it 'returns a message with the job completion count' do
-        vessel.generate_messages(infos).should == {
-          '#quux' => [
-            'foobar: 2 of your jobs have finished.'
-          ]
-        }
+      it 'returns two messages with URLs' do
+        messages_by_channel = vessel.generate_messages(infos)
+
+        messages_by_channel['#quux'].sort.should == [
+          'foobar: Your job for http://www.example.net has finished.',
+          'foobar: Your job for http://www.example.org has finished.'
+        ]
       end
     end
 
@@ -122,13 +123,15 @@ describe FinishMessageGeneration do
         ]
       end
 
-      it 'returns one message with counts' do
-        vessel.generate_messages(infos).should == {
-          '#quux' => [
-            'foobar: 2 of your jobs have finished.',
-            'foobar: 2 of your jobs were aborted.'
-          ]
-        }
+      it 'returns four messages with URLs' do
+        messages_by_channel = vessel.generate_messages(infos)
+
+        messages_by_channel['#quux'].sort.should == [
+          'foobar: Your job for http://www.example.biz was aborted.',
+          'foobar: Your job for http://www.example.com was aborted.',
+          'foobar: Your job for http://www.example.net has finished.',
+          'foobar: Your job for http://www.example.org has finished.'
+        ]
       end
     end
   end
