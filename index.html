@@ -1,9 +1,13 @@
 <!doctype html>
 <head>
+<meta charset="UTF-8">
+<meta name="referrer" content="never">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
 <title>ArchiveBot dashboard 2.0</title>
 </head>
 <body>
 <div id="traffic"></div>
+<div id="logs"></div>
 <script>
 
 var assert = function(condition, message) {
@@ -84,27 +88,51 @@ var getQueryArgs = function() {
 
 
 
-Dashboard = window.Dashboard || {};
+var Jobs = function() {
+	this.known = {};
+	this.sorted = [];
+};
 
-Dashboard.ws = null;
-Dashboard.messageCount = 0;
+Jobs.prototype.resort = function() {
+	this.sorted.sort(function(a, b) { return a["started_at"] > b["started_at"] ? -1 : 1 });
+}
 
-Dashboard.setup = function() {
+Jobs.prototype.handleJobData = function(data) {
+	var ident = data["ident"];
+	var url = data["url"];
+	var started_at = data["started_at"];
+	if(!(ident in this.known)) {
+		this.known[ident] = true;
+		this.sorted.push({"ident": ident, "url": url, "started_at": started_at});
+		this.resort();
+	}
+};
+
+var Dashboard = function() {
+	this.ws = null;
+	this.jobs = new Jobs();
+	this.messageCount = 0;
+}
+
+Dashboard.prototype.setup = function() {
 	var args = getQueryArgs();
 	var dumpTraffic = args.dumpMax && Number(args.dumpMax) > 0;
 	if(dumpTraffic) {
 		var dumpMax = Number(args.dumpMax);
 	}
-	Dashboard.ws = new WebSocket("ws://arshboard.at.ninjawedding.org:4567/stream");
-	Dashboard.ws.onmessage = function(ev) {
-		Dashboard.messageCount += 1;
-		if(dumpTraffic && Dashboard.messageCount <= dumpMax) {
-			byId('traffic').appendChild(elemWithText("pre", prettyJson(JSON.parse(ev.data))));
+	this.ws = new WebSocket("ws://arshboard.at.ninjawedding.org:4567/stream");
+	this.ws.onmessage = function(ev) {
+		var data = JSON.parse(ev["data"]);
+		this.messageCount += 1;
+		if(dumpTraffic && this.messageCount <= dumpMax) {
+			byId('traffic').appendChild(elemWithText("pre", prettyJson(data)));
 		}
-	}
+		this.jobs.handleJobData(data["job_data"]);
+	}.bind(this);
 }
 
-Dashboard.setup();
+var ds = new Dashboard();
+ds.setup();
 
 </script>
 </body>
