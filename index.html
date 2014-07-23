@@ -6,6 +6,12 @@
 <div id="crawls"></div>
 <script>
 
+var assert = function(condition, message) {
+	if(!condition) {
+		throw message || "Assertion failed";
+	}
+}
+
 var byId = function(id) {
 	return document.getElementById(id);
 }
@@ -28,13 +34,60 @@ var prettyJson = function(obj) {
 	return JSON.stringify(obj, undefined, 2);
 }
 
+// Copied from Coreweb/js_coreweb/cw/string.js
+/**
+ * Like Python's s.split(delim, num) and s.split(delim)
+ * This does *NOT* implement Python's no-argument s.split()
+ *
+ * @param {string} s The string to split.
+ * @param {string} sep The separator to split by.
+ * @param {number} maxsplit Maximum number of times to split.
+ *
+ * @return {!Array.<string>} The splitted string, as an array.
+ */
+var split = function(s, sep, maxsplit) {
+	assert(typeof sep == "string",
+		"arguments[1] of split must be a separator string");
+	if(maxsplit === undefined || maxsplit < 0) {
+		return s.split(sep);
+	}
+	var pieces = s.split(sep);
+	var head = pieces.splice(0, maxsplit);
+	// after the splice, pieces is shorter and no longer has the `head` elements.
+	if(pieces.length > 0) {
+		var tail = pieces.join(sep);
+		head.push(tail); // no longer just the head.
+	}
+	return head;
+};
+
+var intoObject = function(arr) {
+	var obj = {};
+	arr.forEach(function(e) {
+		obj[e[0]] = e[1];
+	});
+	return obj;
+};
+
+var getQueryArgs = function() {
+	var pairs = location.search.replace("?", "").split("&");
+	if(pairs == "") {
+		return {};
+	}
+	return intoObject(pairs.map(function(e) { return split(e, "=", 1); }));
+};
+
+/*** End of utility code ***/
+
+
+
 Dashboard = window.Dashboard || {};
 
 Dashboard.ws = null;
 Dashboard.messageCount = 0;
 
 Dashboard.setup = function() {
-	Dashboard.ws = new WebSocket("ws://archivebot.at.ninjawedding.org:4567/stream");
+	Dashboard.ws = new WebSocket("ws://arshboard.at.ninjawedding.org:4567/stream");
 	Dashboard.ws.onmessage = function(ev) {
 		byId('crawls').appendChild(elemWithText("pre", prettyJson(JSON.parse(ev.data))));
 		Dashboard.messageCount += 1;
