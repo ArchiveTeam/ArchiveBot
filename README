@@ -29,11 +29,16 @@ LICENSE for details.
 
 4. Acknowledgments
 
-ArchiveBot uses wpull <https://github.com/chfoo/wpull> as its web
-crawler.  An earlier version of ArchiveBot used a GNU Wget augmented
-with Lua scripting support <https://github.com/alard/wget-lua/>.
+Thanks to Alard (@alard), who added Lua scripting support to GNU Wget.
+Wget+lua was the first web crawler used by ArchiveBot.
 
-Other major ArchiveBot components:
+Thanks to Christopher Foo (@chfoo) for wpull, ArchiveBot's current web
+crawler.
+
+Thanks to Ivan Kozik (@ivan) for maintaining ignore patterns and
+tracking down performance problems at scale.
+
+Other thanks go to the following projects:
 
 * Celluloid <http://celluloid.io/>
 * Cinch <https://github.com/cinchrb/cinch/>
