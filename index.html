@@ -14,28 +14,46 @@ html, body {
 	font-size: 13px;
 }
 
+.padded-page {
+	padding: 20px 27px 0 27px;
+}
+
 .header {
 	font-family: Arial, sans-serif;
 	font-weight: bold;
 	font-size: 18px;
-	margin: 20px 0 0 27px;
+	margin: 0 0 20px 0;
 }
 
 .job-header {
-	margin: 0 0 0 27px;
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-between;
+	flex-flow: row nowrap;
 }
 
 .job-url {
+	font-family: Arial, sans-serif;
+	font-size: 14px;
 	font-weight: bold;
 	text-decoration: none;
+}
+
+.job-ident {
+	margin: 0 1px 0 0;
+	border: 0;
+	background-color: #F4E2AA;
+	color: #666;
+	font-weight: bold;
+	text-align: right;
 }
 
 .log-window {
 	background-color: #FFF7E1;
 	overflow-y: scroll;
-	height: 200px;
+	height: 192px;
 	border: 1px solid #CCC;
-	margin: 0 27px 1em 27px;
+	margin: 0 0 1em 0;
 }
 
 .line {
@@ -50,14 +68,15 @@ a {
 	text-decoration: none;
 }
 </style>
-<div class="header">
-	<a href="http://archiveteam.org/index.php?title=ArchiveBot">ArchiveBot</a>
-	tracking ~<span id="num-crawls">0</span> crawls.<br>
-</div><br>
+<div class="padded-page">
+	<div class="header">
+		<a href="http://archiveteam.org/index.php?title=ArchiveBot">ArchiveBot</a>
+		tracking ~<span id="num-crawls">0</span> crawls.<br>
+	</div>
 
-
-<div id="traffic"></div>
-<div id="logs"></div>
+	<div id="traffic"></div>
+	<div id="logs"></div>
+</div>
 <script>
 
 var assert = function(condition, message) {
@@ -97,7 +116,11 @@ var h = function(elem, attrs, thing) {
 	var e = document.createElement(elem);
 	if(attrs != null) {
 		for(attr in attrs) {
-			e[attr] = attrs[attr];
+			if(attr == "spellcheck") {
+				e.setAttribute(attr, attrs[attr]);
+			} else {
+				e[attr] = attrs[attr];
+			}
 		}
 	}
 	if(thing != null) {
@@ -216,7 +239,14 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 		{"id": "log-container-" + jobData["ident"]}, [
 			h("div", {"className": "job-header"}, [
 				h("a", {"className": "job-url", "href": jobData["url"]}, jobData["url"]),
-				text(" " + jobData["ident"])
+				h("input", {
+					"className": "job-ident",
+					"type": "text",
+					"value": jobData["ident"],
+					"size": "27",
+					"spellcheck": "false",
+					"onclick": function() { this.select(); }
+				})
 			]),
 			h(
 				'div', {
