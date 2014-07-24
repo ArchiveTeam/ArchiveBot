@@ -18,6 +18,10 @@ html, body {
 	border: 1px solid #CCC;
 	margin: 0 0 1em 0;
 }
+
+.line {
+	white-space: nowrap;
+}
 </style>
 <div id="traffic"></div>
 <div id="logs"></div>
@@ -143,6 +147,7 @@ JobsTracker.prototype.handleJobData = function(jobData) {
 var JobsRenderer = function(container) {
 	this.jobs = new JobsTracker();
 	this.container = container;
+	this._classNameLine = {"className": "line"};
 };
 
 JobsRenderer.prototype._getNextJobInSorted = function(ident) {
@@ -176,13 +181,17 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 }
 
 JobsRenderer.prototype._renderDownloadLine = function(data, logWindow) {
-	logWindow.appendChild(text(data["url"]));
+	// TODO: Use cached object for the text(response code + wget code)
+	logWindow.appendChild(h("span", this._classNameLine, [
+		text(data["response_code"] + " " + data["wget_code"] + " "),
+		href(data["url"], data["url"])
+	]));
 	logWindow.appendChild(h("br"));
 	logWindow.scrollTop = logWindow.scrollHeight;
 };
 
 JobsRenderer.prototype._renderStdoutLine = function(data, logWindow) {
-	logWindow.appendChild(text(data["message"]));
+	logWindow.appendChild(h("span", this._classNameLine, [text(data["message"])]));
 	logWindow.appendChild(h("br"));
 	logWindow.scrollTop = logWindow.scrollHeight;
 };
@@ -219,9 +228,9 @@ var Dashboard = function() {
 
 Dashboard.prototype.setup = function() {
 	var args = getQueryArgs();
-	var dumpTraffic = args.dumpMax && Number(args.dumpMax) > 0;
+	var dumpTraffic = args["dumpMax"] && Number(args["dumpMax"]) > 0;
 	if(dumpTraffic) {
-		var dumpMax = Number(args.dumpMax);
+		var dumpMax = Number(args["dumpMax"]);
 	}
 	this.ws = new WebSocket("ws://arshboard.at.ninjawedding.org:4567/stream");
 	// TODO: batch incoming messages, handle them every 100ms or so
