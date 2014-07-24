@@ -49,7 +49,6 @@ var h = function(elem, attrs, children) {
 	}
 	if(children != null) {
 		for(var i=0; i < children.length; i++) {
-			console.log(children[i]);
 			e.appendChild(children[i]);
 		}
 	}
@@ -117,26 +116,24 @@ var getQueryArgs = function() {
 
 
 
-var Jobs = function() {
+var JobsTracker = function() {
 	this.known = {};
 	this.sorted = [];
 };
 
-Jobs.prototype.resort = function() {
+JobsTracker.prototype.resort = function() {
 	this.sorted.sort(function(a, b) { return a["started_at"] > b["started_at"] ? -1 : 1 });
 }
 
 /**
  * Returns true if a new job was added
  */
-Jobs.prototype.handleJobData = function(data) {
-	var ident = data["ident"];
-	var url = data["url"];
-	var started_at = data["started_at"];
+JobsTracker.prototype.handleJobData = function(jobData) {
+	var ident = jobData["ident"];
 	var alreadyKnown = ident in this.known;
 	if(!alreadyKnown) {
 		this.known[ident] = true;
-		this.sorted.push(data);
+		this.sorted.push(jobData);
 		this.resort();
 	}
 	return !alreadyKnown;
@@ -144,7 +141,7 @@ Jobs.prototype.handleJobData = function(data) {
 
 
 var JobsRenderer = function(container) {
-	this.jobs = new Jobs();
+	this.jobs = new JobsTracker();
 	this.container = container;
 };
 
@@ -158,26 +155,58 @@ JobsRenderer.prototype._getNextJobInSorted = function(ident) {
 	return null;
 };
 
-JobsRenderer.prototype.handleJobData = function(data) {
-	var added = this.jobs.handleJobData(data);
-	if(added) {
-		var beforeJob = this._getNextJobInSorted(data["ident"]);
-		var beforeElement = beforeJob == null ? null : byId("log-container-" + beforeJob["ident"]);
+JobsRenderer.prototype._createLogContainer = function(jobData) {
+	var beforeJob = this._getNextJobInSorted(jobData["ident"]);
+	var beforeElement = beforeJob == null ? null : byId("log-container-" + beforeJob["ident"]);
 
-		var div = h(
-			'div',
-			{"id": "log-container-" + data["ident"]}, [
-				href(data["url"], data["url"]),
-				text(" " + data["ident"]),
-				h(
-					'div', {
-						"className": "log-window",
-						"id": "log-window-" + data["ident"]
-					}
-				)
-			]
-		);
-		this.container.insertBefore(div, beforeElement);
+	var div = h(
+		'div',
+		{"id": "log-container-" + jobData["ident"]}, [
+			href(jobData["url"], jobData["url"]),
+			text(" " + jobData["ident"]),
+			h(
+				'div', {
+					"className": "log-window",
+					"id": "log-window-" + jobData["ident"]
+				}
+			)
+		]
+	);
+	this.container.insertBefore(div, beforeElement);
+}
+
+JobsRenderer.prototype._renderDownloadLine = function(data, logWindow) {
+	logWindow.appendChild(text(data["url"]));
+	logWindow.appendChild(h("br"));
+	logWindow.scrollTop = logWindow.scrollHeight;
+};
+
+JobsRenderer.prototype._renderStdoutLine = function(data, logWindow) {
+	logWindow.appendChild(text(data["message"]));
+	logWindow.appendChild(h("br"));
+	logWindow.scrollTop = logWindow.scrollHeight;
+};
+
+JobsRenderer.prototype.handleData = function(data) {
+	var added = this.jobs.handleJobData(data["job_data"]);
+	if(added) {
+		this._createLogContainer(data["job_data"]);
+	}
+	var type = data["type"];
+	if(!(type == "download" || type == "stdout")) {
+		return;
+	}
+
+	var logWindow = byId("log-window-" + data["job_data"]["ident"]);
+	if(!logWindow) {
+		console.warn("Element with id log-window-" + data["job_data"]["ident"] + " does not exist.");
+		return;
+	}
+
+	if(type == "download") {
+		this._renderDownloadLine(data, logWindow);
+	} else if(type == "stdout") {
+		this._renderStdoutLine(data, logWindow);
 	}
 };
 
@@ -186,7 +215,7 @@ var Dashboard = function() {
 	this.ws = null;
 	this.jobsRenderer = new JobsRenderer(byId('logs'));
 	this.messageCount = 0;
-}
+};
 
 Dashboard.prototype.setup = function() {
 	var args = getQueryArgs();
@@ -203,21 +232,7 @@ Dashboard.prototype.setup = function() {
 		if(dumpTraffic && this.messageCount <= dumpMax) {
 			byId('traffic').appendChild(h("pre", null, [text(prettyJson(data))]));
 		}
-		var jobData = data["job_data"];
-		// This creates a new log-container- if necessary
-		this.jobsRenderer.handleJobData(jobData);
-		var type = data["type"];
-		if(type == "download" || type == "stdout") {
-			var logWindow = byId("log-window-" + jobData["ident"]);
-			if(!logWindow) {
-				console.warn("Element with id log-window-" + jobData["ident"] + " does not exist.");
-			} else {
-				var t = type == "download" ? data["url"] : data["message"];
-				logWindow.appendChild(text(t));
-				logWindow.appendChild(h("br"));
-				logWindow.scrollTop = logWindow.scrollHeight;
-			}
-		}
+		this.jobsRenderer.handleData(data);
 	}.bind(this);
 }
 
