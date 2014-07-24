@@ -8,10 +8,24 @@
 <body>
 <style>
 html, body {
-	background-color: #FFF7E1;
+	background-color: #F4E2AA;
+	font-family: Tahoma, Arial, sans-serif;
+	font-size: 13px;
+}
+
+.header {
+	font-family: Arial, sans-serif;
+	font-weight: bold;
+	font-size: 18px;
+}
+
+.job-url {
+	font-weight: bold;
+	text-decoration: none;
 }
 
 .log-window {
+	background-color: #FFF7E1;
 	overflow-y: scroll;
 	height: 200px;
 	width: 100%;
@@ -22,7 +36,17 @@ html, body {
 .line {
 	white-space: nowrap;
 }
+
+.line a {
+	text-decoration: none;
+}
 </style>
+<span class="header">
+	<a href="http://archiveteam.org/index.php?title=ArchiveBot">ArchiveBot</a>
+	tracking ~<span id="num-crawls">0</span> crawls.<br>
+</span><br>
+
+
 <div id="traffic"></div>
 <div id="logs"></div>
 <script>
@@ -31,15 +55,30 @@ var assert = function(condition, message) {
 	if(!condition) {
 		throw message || "Assertion failed";
 	}
-}
+};
 
 var byId = function(id) {
 	return document.getElementById(id);
-}
+};
 
 var text = function(s) {
 	return document.createTextNode(s);
-}
+};
+
+/**
+ * appendChild but accepts strings and arrays of children|strings
+ */
+var appendThing = function(e, thing) {
+	if(Array.isArray(thing)) {
+		for(var i=0; i < thing.length; i++) {
+			appendThing(e, thing[i]);
+		}
+	} else if(typeof thing == "string") {
+		appendThing(e, text(thing));
+	} else {
+
+	}
+};
 
 /**
  * Create DOM element with attributes and children
@@ -57,18 +96,18 @@ var h = function(elem, attrs, children) {
 		}
 	}
 	return e;
-}
+};
 
 var href = function(href, text) {
 	var a = h("a");
 	a.href = href;
 	a.textContent = text;
 	return a;
-}
+};
 
 var prettyJson = function(obj) {
 	return JSON.stringify(obj, undefined, 2);
-}
+};
 
 // Copied from Coreweb/js_coreweb/cw/string.js
 /**
@@ -167,7 +206,7 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 	var div = h(
 		'div',
 		{"id": "log-container-" + jobData["ident"]}, [
-			href(jobData["url"], jobData["url"]),
+			h("a", {"className": "job-url", "href": jobData["url"]}, [text(jobData["url"])]),
 			text(" " + jobData["ident"]),
 			h(
 				'div', {
@@ -200,6 +239,7 @@ JobsRenderer.prototype.handleData = function(data) {
 	var added = this.jobs.handleJobData(data["job_data"]);
 	if(added) {
 		this._createLogContainer(data["job_data"]);
+		byId('num-crawls').textContent = this.jobs.sorted.length;
 	}
 	var type = data["type"];
 	if(!(type == "download" || type == "stdout")) {
