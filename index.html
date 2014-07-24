@@ -68,32 +68,31 @@ var text = function(s) {
 /**
  * appendChild but accepts strings and arrays of children|strings
  */
-var appendThing = function(e, thing) {
+var appendAny = function(e, thing) {
 	if(Array.isArray(thing)) {
 		for(var i=0; i < thing.length; i++) {
-			appendThing(e, thing[i]);
+			appendAny(e, thing[i]);
 		}
 	} else if(typeof thing == "string") {
-		appendThing(e, text(thing));
+		e.appendChild(text(thing));
 	} else {
-
+		// TODO: Check that it's actually a DOM node first
+		e.appendChild(thing);
 	}
 };
 
 /**
- * Create DOM element with attributes and children
+ * Create DOM element with attributes and children from Array<node|string>|node|string
  */
-var h = function(elem, attrs, children) {
+var h = function(elem, attrs, thing) {
 	var e = document.createElement(elem);
 	if(attrs != null) {
 		for(attr in attrs) {
 			e[attr] = attrs[attr];
 		}
 	}
-	if(children != null) {
-		for(var i=0; i < children.length; i++) {
-			e.appendChild(children[i]);
-		}
+	if(thing != null) {
+		appendAny(e, thing);
 	}
 	return e;
 };
@@ -206,7 +205,7 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 	var div = h(
 		'div',
 		{"id": "log-container-" + jobData["ident"]}, [
-			h("a", {"className": "job-url", "href": jobData["url"]}, [text(jobData["url"])]),
+			h("a", {"className": "job-url", "href": jobData["url"]}, jobData["url"]),
 			text(" " + jobData["ident"]),
 			h(
 				'div', {
@@ -230,7 +229,7 @@ JobsRenderer.prototype._renderDownloadLine = function(data, logWindow) {
 };
 
 JobsRenderer.prototype._renderStdoutLine = function(data, logWindow) {
-	logWindow.appendChild(h("span", this._classNameLine, [text(data["message"])]));
+	logWindow.appendChild(h("span", this._classNameLine, data["message"]));
 	logWindow.appendChild(h("br"));
 	logWindow.scrollTop = logWindow.scrollHeight;
 };
@@ -279,7 +278,7 @@ Dashboard.prototype.setup = function() {
 		var data = JSON.parse(ev["data"]);
 		this.messageCount += 1;
 		if(dumpTraffic && this.messageCount <= dumpMax) {
-			byId('traffic').appendChild(h("pre", null, [text(prettyJson(data))]));
+			byId('traffic').appendChild(h("pre", null, prettyJson(data)));
 		}
 		this.jobsRenderer.handleData(data);
 	}.bind(this);
