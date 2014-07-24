@@ -29,9 +29,14 @@ var text = function(s) {
 	return document.createTextNode(s);
 }
 
-var elem = function(elem, children) {
+var h = function(elem, attrs, children) {
 	var e = document.createElement(elem);
-	if(children !== undefined) {
+	if(attrs != null) {
+		for(attr in attrs) {
+			e[attr] = attrs[attr];
+		}
+	}
+	if(children != null) {
 		for(var i=0; i < children.length; i++) {
 			console.log(children[i]);
 			e.appendChild(children[i]);
@@ -41,7 +46,7 @@ var elem = function(elem, children) {
 }
 
 var href = function(href, text) {
-	var a = elem("a");
+	var a = h("a");
 	a.href = href;
 	a.textContent = text;
 	return a;
@@ -148,7 +153,7 @@ JobsRenderer.prototype.handleJobData = function(data) {
 		var beforeJob = this._getNextJobInSorted(data["ident"]);
 		var beforeElement = beforeJob == null ? null : byId("log-" + beforeJob["ident"]);
 
-		var div = elem('div', [text(data["url"] + " " + data["ident"])]);
+		var div = h('div', null, [href(data["url"], data["url"]), text(" " + data["ident"])]);
 		div.id = "log-" + data["ident"];
 		this.container.insertBefore(div, beforeElement);
 	}
@@ -174,7 +179,7 @@ Dashboard.prototype.setup = function() {
 		var data = JSON.parse(ev["data"]);
 		this.messageCount += 1;
 		if(dumpTraffic && this.messageCount <= dumpMax) {
-			byId('traffic').appendChild(elem("pre", [text(prettyJson(data))]));
+			byId('traffic').appendChild(h("pre", null, [text(prettyJson(data))]));
 		}
 		this.jobsRenderer.handleJobData(data["job_data"]);
 	}.bind(this);
