@@ -6,6 +6,11 @@
 <title>ArchiveBot dashboard 2.0</title>
 </head>
 <body>
+<style>
+html, body {
+	background-color: #FFF7E1;
+}
+</style>
 <div id="traffic"></div>
 <div id="logs"></div>
 <script>
@@ -24,14 +29,22 @@ var text = function(s) {
 	return document.createTextNode(s);
 }
 
-var elem = function(elem) {
-	return document.createElement(elem);
+var elem = function(elem, children) {
+	var e = document.createElement(elem);
+	if(children !== undefined) {
+		for(var i=0; i < children.length; i++) {
+			console.log(children[i]);
+			e.appendChild(children[i]);
+		}
+	}
+	return e;
 }
 
-var elemWithText = function(tag, s) {
-	var e = elem(tag);
-	e.appendChild(text(s));
-	return e;
+var href = function(href, text) {
+	var a = elem("a");
+	a.href = href;
+	a.textContent = text;
+	return a;
 }
 
 var prettyJson = function(obj) {
@@ -97,20 +110,54 @@ Jobs.prototype.resort = function() {
 	this.sorted.sort(function(a, b) { return a["started_at"] > b["started_at"] ? -1 : 1 });
 }
 
+/**
+ * Returns true if a new job was added
+ */
 Jobs.prototype.handleJobData = function(data) {
 	var ident = data["ident"];
 	var url = data["url"];
 	var started_at = data["started_at"];
-	if(!(ident in this.known)) {
+	var alreadyKnown = ident in this.known;
+	if(!alreadyKnown) {
 		this.known[ident] = true;
-		this.sorted.push({"ident": ident, "url": url, "started_at": started_at});
+		this.sorted.push(data);
 		this.resort();
+	}
+	return !alreadyKnown;
+};
+
+
+var JobsRenderer = function(container) {
+	this.jobs = new Jobs();
+	this.container = container;
+};
+
+JobsRenderer.prototype._getNextJobInSorted = function(ident) {
+	for(var i=0; i < this.jobs.sorted.length; i++) {
+		var e = this.jobs.sorted[i];
+		if(e["ident"] == ident) {
+			return this.jobs.sorted[i+1];
+		}
+	}
+	return null;
+};
+
+JobsRenderer.prototype.handleJobData = function(data) {
+	var added = this.jobs.handleJobData(data);
+	if(added) {
+		var beforeJob = this._getNextJobInSorted(data["ident"]);
+		var beforeElement = beforeJob == null ? null : byId("log-" + beforeJob["ident"]);
+
+		var div = elem('div', [text(data["url"] + " " + data["ident"])]);
+		div.id = "log-" + data["ident"];
+		this.container.insertBefore(div, beforeElement);
 	}
 };
 
+
 var Dashboard = function() {
 	this.ws = null;
-	this.jobs = new Jobs();
+	this.jobsRenderer = new JobsRenderer(byId('logs'));
 	this.messageCount = 0;
 }
 
@@ -121,13 +168,15 @@ Dashboard.prototype.setup = function() {
 		var dumpMax = Number(args.dumpMax);
 	}
 	this.ws = new WebSocket("ws://arshboard.at.ninjawedding.org:4567/stream");
+	// TODO: batch incoming messages, handle them every 100ms or so
+	// If we batch here, we probably don't even need to batch DOM updates
 	this.ws.onmessage = function(ev) {
 		var data = JSON.parse(ev["data"]);
 		this.messageCount += 1;
 		if(dumpTraffic && this.messageCount <= dumpMax) {
-			byId('traffic').appendChild(elemWithText("pre", prettyJson(data)));
+			byId('traffic').appendChild(elem("pre", [text(prettyJson(data))]));
 		}
-		this.jobs.handleJobData(data["job_data"]);
+		this.jobsRenderer.handleJobData(data["job_data"]);
 	}.bind(this);
 }
 
