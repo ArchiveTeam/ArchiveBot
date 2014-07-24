@@ -203,7 +203,20 @@ Dashboard.prototype.setup = function() {
 		if(dumpTraffic && this.messageCount <= dumpMax) {
 			byId('traffic').appendChild(h("pre", null, [text(prettyJson(data))]));
 		}
-		this.jobsRenderer.handleJobData(data["job_data"]);
+		var jobData = data["job_data"];
+		// Create a new log-container- if necessary
+		this.jobsRenderer.handleJobData(jobData);
+		var type = data["type"];
+		if(type == "download" || type == "stdout") {
+			var logWindow = byId("log-window-" + jobData["ident"]);
+			if(!logWindow) {
+				console.warn("Element with id log-window-" + jobData["ident"] + " does not exist.");
+			} else {
+				var t = type == "download" ? data["url"] : data["message"];
+				logWindow.appendChild(text(t));
+				logWindow.appendChild(h("br"));
+			}
+		}
 	}.bind(this);
 }
 
