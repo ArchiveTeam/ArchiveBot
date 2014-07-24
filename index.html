@@ -10,6 +10,14 @@
 html, body {
 	background-color: #FFF7E1;
 }
+
+.log-window {
+	overflow: hidden;
+	height: 200px;
+	width: 100%;
+	border: 1px solid #CCC;
+	margin: 0 0 1em 0;
+}
 </style>
 <div id="traffic"></div>
 <div id="logs"></div>
@@ -29,6 +37,9 @@ var text = function(s) {
 	return document.createTextNode(s);
 }
 
+/**
+ * Create DOM element with attributes and children
+ */
 var h = function(elem, attrs, children) {
 	var e = document.createElement(elem);
 	if(attrs != null) {
@@ -151,10 +162,21 @@ JobsRenderer.prototype.handleJobData = function(data) {
 	var added = this.jobs.handleJobData(data);
 	if(added) {
 		var beforeJob = this._getNextJobInSorted(data["ident"]);
-		var beforeElement = beforeJob == null ? null : byId("log-" + beforeJob["ident"]);
+		var beforeElement = beforeJob == null ? null : byId("log-container-" + beforeJob["ident"]);
 
-		var div = h('div', null, [href(data["url"], data["url"]), text(" " + data["ident"])]);
-		div.id = "log-" + data["ident"];
+		var div = h(
+			'div',
+			{"id": "log-container-" + data["ident"]}, [
+				href(data["url"], data["url"]),
+				text(" " + data["ident"]),
+				h(
+					'div', {
+						"className": "log-window",
+						"id": "log-window-" + data["ident"]
+					}
+				)
+			]
+		);
 		this.container.insertBefore(div, beforeElement);
 	}
 };
