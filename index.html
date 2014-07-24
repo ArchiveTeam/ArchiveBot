@@ -12,7 +12,7 @@ html, body {
 }
 
 .log-window {
-	overflow: hidden;
+	overflow-y: scroll;
 	height: 200px;
 	width: 100%;
 	border: 1px solid #CCC;
@@ -204,7 +204,7 @@ Dashboard.prototype.setup = function() {
 			byId('traffic').appendChild(h("pre", null, [text(prettyJson(data))]));
 		}
 		var jobData = data["job_data"];
-		// Create a new log-container- if necessary
+		// This creates a new log-container- if necessary
 		this.jobsRenderer.handleJobData(jobData);
 		var type = data["type"];
 		if(type == "download" || type == "stdout") {
@@ -215,6 +215,7 @@ Dashboard.prototype.setup = function() {
 				var t = type == "download" ? data["url"] : data["message"];
 				logWindow.appendChild(text(t));
 				logWindow.appendChild(h("br"));
+				logWindow.scrollTop = logWindow.scrollHeight;
 			}
 		}
 	}.bind(this);
