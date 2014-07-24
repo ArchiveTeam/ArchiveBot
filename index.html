@@ -116,7 +116,7 @@ var h = function(elem, attrs, thing) {
 	var e = document.createElement(elem);
 	if(attrs != null) {
 		for(attr in attrs) {
-			if(attr == "spellcheck") {
+			if(attr == "spellcheck" || attr == "readonly") {
 				e.setAttribute(attr, attrs[attr]);
 			} else {
 				e[attr] = attrs[attr];
@@ -245,6 +245,7 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 					"value": jobData["ident"],
 					"size": "27",
 					"spellcheck": "false",
+					"readonly": "",
 					"onclick": function() { this.select(); }
 				})
 			]),
