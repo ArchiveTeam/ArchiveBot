@@ -22,6 +22,7 @@ class Recent < Webmachine::Resource
   end
 
   def to_json
+    response.headers['Access-Control-Allow-Origin'] = '*'
     run_query.to_json
   end
 end
