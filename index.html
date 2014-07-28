@@ -384,6 +384,7 @@ BatchingQueue.prototype._runCallable = function() {
 BatchingQueue.prototype.callNow = function() {
 	if(this._timeout !== null) {
 		clearTimeout(this._timeout);
+		this._timeout = null;
 	}
 	this._runCallable();
 };
@@ -413,7 +414,7 @@ var Dashboard = function() {
 	var batchTimeWhenVisible = 125;
 
 	this.queue = new BatchingQueue(function(queue) {
-		console.log("Queue has ", queue.length, "items");
+		//console.log("Queue has ", queue.length, "items");
 		for(var i=0; i < queue.length; i++) {
 			var data = JSON.parse(queue[i]);
 			this.messageCount += 1;
@@ -431,10 +432,10 @@ var Dashboard = function() {
 
 	document.addEventListener("visibilitychange", function() {
 		if(document.hidden) {
-			console.log("Page has become hidden");
+			//console.log("Page has become hidden");
 			this.queue.setMinInterval(batchTimeWhenHidden);
 		} else {
-			console.log("Page has become visible");
+			//console.log("Page has become visible");
 			this.queue.setMinInterval(batchTimeWhenVisible);
 			this.queue.callNow();
 		}
