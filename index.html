@@ -469,13 +469,16 @@ var Dashboard = function() {
 
 Dashboard.prototype.connectWebSocket = function() {
 	this.ws = new WebSocket("ws://arshboard.at.ninjawedding.org:4567/stream");
+
 	this.ws.onmessage = function(ev) {
 		this.queue.push(ev["data"]);
 	}.bind(this);
+
 	this.ws.onopen = function(ev) {
 		console.log("WebSocket opened:", ev);
 		this.decayer.reset();
 	}.bind(this);
+
 	this.ws.onclose = function(ev) {
 		console.log("WebSocket closed:", ev);
 		var delay = this.decayer.decay();
