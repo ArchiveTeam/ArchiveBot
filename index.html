@@ -362,6 +362,30 @@ JobsRenderer.prototype.handleData = function(data) {
 
 
 
+var BatchingQueue = function(callable, minInterval) {
+	this.callable = callable;
+	this.minInterval = minInterval;
+	this.queue = [];
+	this.timeout = null;
+	this.boundRunCallable = this.runCallable.bind(this);
+};
+
+BatchingQueue.prototype.runCallable = function() {
+	this.timeout = null;
+	var queue = this.queue;
+	this.queue = [];
+	this.callable(queue);
+};
+
+BatchingQueue.prototype.push = function(v) {
+	this.queue.push(v);
+	if(this.timeout === null) {
+		this.timeout = setTimeout(this.boundRunCallable, this.minInterval);
+	}
+};
+
+
+
 var Dashboard = function() {
 	this.messageCount = 0;
 
@@ -374,15 +398,19 @@ var Dashboard = function() {
 	}
 	this.jobsRenderer = new JobsRenderer(byId('logs'), historyLines);
 	this.ws = new WebSocket("ws://arshboard.at.ninjawedding.org:4567/stream");
-	// TODO: batch incoming messages, handle them every 100ms or so
-	// If we batch here, we probably don't even need to batch DOM updates
-	this.ws.onmessage = function(ev) {
-		var data = JSON.parse(ev["data"]);
-		this.messageCount += 1;
-		if(dumpTraffic && this.messageCount <= dumpMax) {
-			byId('traffic').appendChild(h("pre", null, prettyJson(data)));
+	this.queue = new BatchingQueue(function(queue) {
+		console.log("Queue has ", queue.length, "items");
+		for(var i=0; i < queue.length; i++) {
+			var data = JSON.parse(queue[i]);
+			this.messageCount += 1;
+			if(dumpTraffic && this.messageCount <= dumpMax) {
+				byId('traffic').appendChild(h("pre", null, prettyJson(data)));
+			}
+			this.jobsRenderer.handleData(data);
 		}
-		this.jobsRenderer.handleData(data);
+	}.bind(this), 125);
+	this.ws.onmessage = function(ev) {
+		this.queue.push(ev["data"]);
 	}.bind(this);
 }
 
