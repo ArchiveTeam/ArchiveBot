@@ -222,6 +222,8 @@ var JobsRenderer = function(container) {
 	this.visibleLineCounts = {};
 	// ident -> div into which to insert new lines
 	this.logSegmentCache = {};
+	// ident -> div which needs to be scrolled down
+	this.logWindowCache = {};
 	this.container = container;
 	this._classNameLine = {"className": "line"};
 };
@@ -242,6 +244,13 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 	var beforeElement = beforeJob == null ? null : byId("log-container-" + beforeJob["ident"]);
 
 	var logSegment = h('div');
+	var logWindow = h(
+		'div', {
+			"className": "log-window",
+			"id": "log-window-" + ident
+		},
+		logSegment
+	);
 	var div = h(
 		'div',
 		{"id": "log-container-" + ident}, [
@@ -257,17 +266,12 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 					"onclick": function() { this.select(); }
 				})
 			]),
-			h(
-				'div', {
-					"className": "log-window",
-					"id": "log-window-" + ident
-				},
-				logSegment
-			)
+			logWindow
 		]
 	);
-	this.visibleLineCounts[ident] = 0;
+	this.logWindowCache[ident] = logWindow;
 	this.logSegmentCache[ident] = logSegment;
+	this.visibleLineCounts[ident] = 0;
 	this.container.insertBefore(div, beforeElement);
 }
 
@@ -278,13 +282,11 @@ JobsRenderer.prototype._renderDownloadLine = function(data, logSegment) {
 		href(data["url"], data["url"])
 	]));
 	logSegment.appendChild(h("br"));
-	logSegment.scrollTop = logSegment.scrollHeight;
 };
 
 JobsRenderer.prototype._renderStdoutLine = function(data, logSegment) {
 	logSegment.appendChild(h("span", this._classNameLine, data["message"]));
 	logSegment.appendChild(h("br"));
-	logSegment.scrollTop = logSegment.scrollHeight;
 };
 
 JobsRenderer.prototype.handleData = function(data) {
@@ -298,9 +300,17 @@ JobsRenderer.prototype.handleData = function(data) {
 		return;
 	}
 
-	var logSegment = this.logSegmentCache[data["job_data"]["ident"]];
+	var ident = data["job_data"]["ident"];
+
+	var logSegment = this.logSegmentCache[ident];
 	if(!logSegment) {
-		console.warn("No log segment for " + data["job_data"]["ident"]);
+		console.warn("No log segment for " + ident);
+		return;
+	}
+
+	var logWindow = this.logWindowCache[ident];
+	if(!logWindow) {
+		console.warn("No log window for " + ident);
 		return;
 	}
 
@@ -309,6 +319,9 @@ JobsRenderer.prototype.handleData = function(data) {
 	} else if(type == "stdout") {
 		this._renderStdoutLine(data, logSegment);
 	}
+
+	// Scroll to the bottom
+	logWindow.scrollTop = logWindow.scrollHeight;
 };
 
 
