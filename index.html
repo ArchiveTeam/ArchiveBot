@@ -224,6 +224,12 @@ var JobRenderInfo = function(logWindow, logSegment, lineCountWindow, lineCountSe
 
 
 
+var Reusable = {
+	obj_className_line: {"className": "line"}
+};
+
+
+
 var JobsRenderer = function(container, historyLines) {
 	this.container = container;
 	this.historyLines = historyLines;
@@ -231,7 +237,6 @@ var JobsRenderer = function(container, historyLines) {
 	this.jobs = new JobsTracker();
 	// ident -> JobRenderInfo
 	this.renderInfo = {};
-	this._classNameLine = {"className": "line"};
 };
 
 JobsRenderer.prototype._getNextJobInSorted = function(ident) {
@@ -285,16 +290,21 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 
 JobsRenderer.prototype._renderDownloadLine = function(data, logSegment) {
 	// TODO: Use cached object for the text(response code + wget code)
-	logSegment.appendChild(h("span", this._classNameLine, [
+	logSegment.appendChild(h("span", Reusable.obj_className_line, [
 		text(data["response_code"] + " " + data["wget_code"] + " "),
 		href(data["url"], data["url"])
 	]));
-	logSegment.appendChild(h("br"));
+	logSegment.appendChild(h('br'));
+	return true;
 };
 
 JobsRenderer.prototype._renderStdoutLine = function(data, logSegment) {
-	logSegment.appendChild(h("span", this._classNameLine, data["message"]));
-	logSegment.appendChild(h("br"));
+	if(data["message"] == "") {
+		return false;
+	}
+	logSegment.appendChild(h("span", Reusable.obj_className_line, data["message"]));
+	logSegment.appendChild(h('br'));
+	return true;
 };
 
 JobsRenderer.prototype.handleData = function(data) {
@@ -317,10 +327,17 @@ JobsRenderer.prototype.handleData = function(data) {
 	}
 
 	if(type == "download") {
-		this._renderDownloadLine(data, info.logSegment);
+		var rendered = this._renderDownloadLine(data, info.logSegment);
 	} else if(type == "stdout") {
-		this._renderStdoutLine(data, info.logSegment);
+		var rendered = this._renderStdoutLine(data, info.logSegment);
+	} else {
+		assert(false, "line should not be reached");
 	}
+
+	if(!rendered) {
+		return;
+	}
+
 	info.lineCountWindow += 1;
 	info.lineCountSegment += 1;
 
