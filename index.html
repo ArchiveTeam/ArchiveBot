@@ -193,8 +193,6 @@ var getQueryArgs = function() {
 var JobsTracker = function() {
 	this.known = {};
 	this.sorted = [];
-	this.historyLines = 1000;
-	this.linesPerSegment = 100;
 };
 
 JobsTracker.prototype.resort = function() {
@@ -217,10 +215,11 @@ JobsTracker.prototype.handleJobData = function(jobData) {
 
 
 
-var JobRenderInfo = function(logWindow, logSegment, lineCount) {
+var JobRenderInfo = function(logWindow, logSegment, lineCountWindow, lineCountSegment) {
 	this.logWindow = logWindow;
 	this.logSegment = logSegment;
-	this.lineCount = lineCount;
+	this.lineCountWindow = lineCountWindow;
+	this.lineCountSegment = lineCountSegment;
 };
 
 
@@ -230,6 +229,8 @@ var JobsRenderer = function(container) {
 	this.jobs = new JobsTracker();
 	// ident -> JobRenderInfo
 	this.renderInfo = {};
+	this.historyLines = 9;
+	this.linesPerSegment = 3;
 	this._classNameLine = {"className": "line"};
 };
 
@@ -243,12 +244,16 @@ JobsRenderer.prototype._getNextJobInSorted = function(ident) {
 	return null;
 };
 
+JobsRenderer.prototype._createLogSegment = function() {
+	return h('div');
+};
+
 JobsRenderer.prototype._createLogContainer = function(jobData) {
 	var ident = jobData["ident"];
 	var beforeJob = this._getNextJobInSorted(ident);
 	var beforeElement = beforeJob == null ? null : byId("log-container-" + beforeJob["ident"]);
 
-	var logSegment = h('div');
+	var logSegment = this._createLogSegment();
 	var logWindow = h(
 		'div', {
 			"className": "log-window",
@@ -274,7 +279,7 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 			logWindow
 		]
 	);
-	this.renderInfo[ident] = new JobRenderInfo(logWindow, logSegment, 0);
+	this.renderInfo[ident] = new JobRenderInfo(logWindow, logSegment, 0, 0);
 	this.container.insertBefore(div, beforeElement);
 }
 
@@ -315,6 +320,23 @@ JobsRenderer.prototype.handleData = function(data) {
 		this._renderDownloadLine(data, info.logSegment);
 	} else if(type == "stdout") {
 		this._renderStdoutLine(data, info.logSegment);
+	}
+	info.lineCountWindow += 1;
+	info.lineCountSegment += 1;
+
+	if(info.lineCountSegment >= this.linesPerSegment) {
+		console.log("Created new segment", info);
+		var newSegment = this._createLogSegment();
+		info.logWindow.appendChild(newSegment);
+		info.logSegment = newSegment;
+		info.lineCountSegment = 0;
+	}
+
+	if(info.lineCountWindow > this.historyLines) {
+		// Remove first segment
+		// TODO: optimize by avoiding .firstChild?
+		info.logWindow.removeChild(info.logWindow.firstChild);
+		info.lineCountWindow -= this.linesPerSegment;
 	}
 
 	// Scroll to the bottom
