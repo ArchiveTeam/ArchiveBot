@@ -224,13 +224,13 @@ var JobRenderInfo = function(logWindow, logSegment, lineCountWindow, lineCountSe
 
 
 
-var JobsRenderer = function(container) {
+var JobsRenderer = function(container, historyLines) {
 	this.container = container;
+	this.historyLines = historyLines;
+	this.linesPerSegment = Math.max(1, Math.round(this.historyLines / 10));
 	this.jobs = new JobsTracker();
 	// ident -> JobRenderInfo
 	this.renderInfo = {};
-	this.historyLines = 1000;
-	this.linesPerSegment = 100;
 	this._classNameLine = {"className": "line"};
 };
 
@@ -325,7 +325,7 @@ JobsRenderer.prototype.handleData = function(data) {
 	info.lineCountSegment += 1;
 
 	if(info.lineCountSegment >= this.linesPerSegment) {
-		console.log("Created new segment", info);
+		//console.log("Created new segment", info);
 		var newSegment = this._createLogSegment();
 		info.logWindow.appendChild(newSegment);
 		info.logSegment = newSegment;
@@ -346,17 +346,16 @@ JobsRenderer.prototype.handleData = function(data) {
 
 
 var Dashboard = function() {
-	this.ws = null;
-	this.jobsRenderer = new JobsRenderer(byId('logs'));
 	this.messageCount = 0;
-};
 
-Dashboard.prototype.setup = function() {
 	var args = getQueryArgs();
+
+	var historyLines = args["historyLines"] ? Number(args["historyLines"]) : 1000;
 	var dumpTraffic = args["dumpMax"] && Number(args["dumpMax"]) > 0;
 	if(dumpTraffic) {
 		var dumpMax = Number(args["dumpMax"]);
 	}
+	this.jobsRenderer = new JobsRenderer(byId('logs'), historyLines);
 	this.ws = new WebSocket("ws://arshboard.at.ninjawedding.org:4567/stream");
 	// TODO: batch incoming messages, handle them every 100ms or so
 	// If we batch here, we probably don't even need to batch DOM updates
@@ -371,7 +370,6 @@ Dashboard.prototype.setup = function() {
 }
 
 var ds = new Dashboard();
-ds.setup();
 
 </script>
 </body>
