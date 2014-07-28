@@ -1,0 +1,19 @@
+{
+    "agents": [
+        {
+            "aliases": [
+                "firefox",
+                "firefox-windows"
+            ],
+            "name": "Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0"
+        },
+        {
+            "aliases": [
+                "firefox-linux",
+                "firefox-ubuntu"
+            ],
+            "name": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:31.0) Gecko/20100101 Firefox/31.0"
+        }
+    ],
+    "type": "user_agents"
+}

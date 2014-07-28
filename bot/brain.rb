@@ -79,14 +79,33 @@ class Brain
       return
     end
 
+    # Did we want a custom user-agent?  If so, check that the requested
+    # user-agent alias is known.  If it is, set it on the job; if it isn't,
+    # raise an error.
+    user_agent = nil
+
+    if h[:user_agent_alias]
+      ua_alias = h[:user_agent_alias]
+      user_agent = couchdb.user_agent_for_alias(ua_alias)
+
+      if !user_agent
+        reply m, %Q{Sorry, I don't know what the user agent "#{ua_alias}" is.}
+        return
+      end
+    end
+
     # OK, add the job.
     batch_reply(m) do
-      job.register(depth, m.user.nick, m.channel.name)
+      job.register(depth, m.user.nick, m.channel.name, user_agent)
 
       if depth == :shallow
         reply m, "Queued #{uri.to_s} for archival without recursion."
       else
         reply m, "Queued #{uri.to_s}."
+      end
+
+      if user_agent
+        reply m, "Using user-agent #{user_agent}."
       end
 
       reply m, "Use !status #{job.ident} for updates, !abort #{job.ident} to abort."

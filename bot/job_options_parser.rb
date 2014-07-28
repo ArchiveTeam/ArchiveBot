@@ -9,6 +9,7 @@ class JobOptionsParser
       opt :no_phantomjs_smart_scroll, 'Always scroll the page to the specified scroll count'
       opt :ignore_sets, 'Ignore sets to apply', :type => :string
       opt :pipeline, 'Run job on this pipeline', :type => :string
+      opt :user_agent_alias, 'Use this user agent for the job', :type => :string
     end
   end
 

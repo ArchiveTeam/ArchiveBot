@@ -284,11 +284,12 @@ class Job < Struct.new(:uri, :redis)
     redis.hset(ident, 'queued_at', t.to_i)
   end
 
-  def register(depth, started_by, started_in)
+  def register(depth, started_by, started_in, user_agent)
     redis.pipelined do
       redis.hmset(ident, 'url', url,
                          'fetch_depth', depth,
                          'log_key', log_key,
+                         'user_agent', user_agent,
                          'ignore_patterns_set_key', ignore_patterns_set_key,
                          'slug', "#{uri.host}-#{depth}",
                          'started_by', started_by,

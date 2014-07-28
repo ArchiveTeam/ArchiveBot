@@ -84,6 +84,12 @@ class Couchdb
     resp.rows.map { |r| r['value'] }
   end
 
+  def user_agent_for_alias(ua_alias)
+    resp = @db.view!('user_agents/by_alias', { key: ua_alias }, @credentials)
+
+    resp.rows.map { |r| r['value'] }.first
+  end
+
   private
 
   def endkey(url, prefix)

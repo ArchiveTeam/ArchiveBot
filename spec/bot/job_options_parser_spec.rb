@@ -29,6 +29,10 @@ describe JobOptionsParser do
     parser.parse('--pipeline=ID')[:pipeline].should == 'ID'
   end
 
+  it 'recognizes --user-agent-alias=firefox' do
+    parser.parse('--user-agent-alias=firefox')[:user_agent_alias].should == 'firefox'
+  end
+
   describe 'when unknown options are present' do
     it 'raises UnknownOptionError' do
       lambda { parser.parse('--foo=bar') }.should raise_error(JobOptionsParser::UnknownOptionError)

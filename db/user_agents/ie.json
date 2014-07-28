@@ -1,0 +1,12 @@
+{
+    "agents": [
+        {
+            "aliases": [
+                "ie",
+                "ie10"
+            ],
+            "name": "Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; WOW64; Trident/6.0)"
+        }
+    ],
+    "type": "user_agents"
+}

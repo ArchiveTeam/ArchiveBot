@@ -1,0 +1,10 @@
+{
+   "_id": "_design/user_agents",
+   "_rev": "2-a1eb3c90bf9a14c3ab68db40130ad2a4",
+   "language": "javascript",
+   "views": {
+       "by_alias": {
+           "map": "function(doc) {\n  var i, obj, j, alias;\n\n  if (doc['type'] === 'user_agents') {\n    for (i = 0; i < doc['agents'].length; ++i) {\n      obj = doc['agents'][i];\n\n      for (j = 0; j < obj['aliases'].length; ++j) {\n        alias = obj['aliases'][j];\n\n        emit(alias, obj['name']);\n      }\n    }\n  }\n}\n"
+       }
+   }
+}
