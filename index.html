@@ -364,23 +364,34 @@ JobsRenderer.prototype.handleData = function(data) {
 
 var BatchingQueue = function(callable, minInterval) {
 	this.callable = callable;
-	this.minInterval = minInterval;
+	this._minInterval = minInterval;
 	this.queue = [];
-	this.timeout = null;
-	this.boundRunCallable = this.runCallable.bind(this);
+	this._timeout = null;
+	this._boundRunCallable = this._runCallable.bind(this);
 };
 
-BatchingQueue.prototype.runCallable = function() {
-	this.timeout = null;
+BatchingQueue.prototype.setMinInterval = function(minInterval) {
+	this._minInterval = minInterval;
+};
+
+BatchingQueue.prototype._runCallable = function() {
+	this._timeout = null;
 	var queue = this.queue;
 	this.queue = [];
 	this.callable(queue);
 };
 
+BatchingQueue.prototype.callNow = function() {
+	if(this._timeout !== null) {
+		clearTimeout(this._timeout);
+	}
+	this._runCallable();
+};
+
 BatchingQueue.prototype.push = function(v) {
 	this.queue.push(v);
-	if(this.timeout === null) {
-		this.timeout = setTimeout(this.boundRunCallable, this.minInterval);
+	if(this._timeout === null) {
+		this._timeout = setTimeout(this._boundRunCallable, this._minInterval);
 	}
 };
 
@@ -397,7 +408,10 @@ var Dashboard = function() {
 		var dumpMax = Number(args["dumpMax"]);
 	}
 	this.jobsRenderer = new JobsRenderer(byId('logs'), historyLines);
-	this.ws = new WebSocket("ws://arshboard.at.ninjawedding.org:4567/stream");
+
+	var batchTimeWhenHidden = 5000;
+	var batchTimeWhenVisible = 125;
+
 	this.queue = new BatchingQueue(function(queue) {
 		console.log("Queue has ", queue.length, "items");
 		for(var i=0; i < queue.length; i++) {
@@ -408,10 +422,23 @@ var Dashboard = function() {
 			}
 			this.jobsRenderer.handleData(data);
 		}
-	}.bind(this), 125);
+	}.bind(this), batchTimeWhenVisible);
+
+	this.ws = new WebSocket("ws://arshboard.at.ninjawedding.org:4567/stream");
 	this.ws.onmessage = function(ev) {
 		this.queue.push(ev["data"]);
 	}.bind(this);
+
+	document.addEventListener("visibilitychange", function() {
+		if(document.hidden) {
+			console.log("Page has become hidden");
+			this.queue.setMinInterval(batchTimeWhenHidden);
+		} else {
+			console.log("Page has become visible");
+			this.queue.setMinInterval(batchTimeWhenVisible);
+			this.queue.callNow();
+		}
+	}.bind(this), false);
 }
 
 var ds = new Dashboard();
