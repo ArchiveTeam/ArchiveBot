@@ -472,13 +472,13 @@ Dashboard.prototype.connectWebSocket = function() {
 		this.queue.push(ev["data"]);
 	}.bind(this);
 	this.ws.onopen = function(ev) {
-		console.log("WebSocket opened: ", ev);
+		console.log("WebSocket opened:", ev);
 		this.decayer.reset();
 	}.bind(this);
 	this.ws.onclose = function(ev) {
-		console.log("WebSocket closed: ", ev);
+		console.log("WebSocket closed:", ev);
 		var delay = this.decayer.decay();
-		console.log("Reconnecting in ", delay, "ms");
+		console.log("Reconnecting in", delay, "ms");
 		setTimeout(this.connectWebSocket.bind(this), delay);
 	}.bind(this);
 };
