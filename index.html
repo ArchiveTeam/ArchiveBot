@@ -83,6 +83,7 @@ a {
 	<div id="logs"></div>
 </div>
 <script>
+"use strict";
 
 var assert = function(condition, message) {
 	if(!condition) {
@@ -120,7 +121,7 @@ var appendAny = function(e, thing) {
 var h = function(elem, attrs, thing) {
 	var e = document.createElement(elem);
 	if(attrs != null) {
-		for(attr in attrs) {
+		for(var attr in attrs) {
 			if(attr == "spellcheck" || attr == "readonly") {
 				e.setAttribute(attr, attrs[attr]);
 			} else {
@@ -132,6 +133,10 @@ var h = function(elem, attrs, thing) {
 		appendAny(e, thing);
 	}
 	return e;
+};
+
+var br = function() {
+	return document.createElement("br");
 };
 
 var href = function(href, text) {
@@ -299,7 +304,7 @@ JobsRenderer.prototype._renderDownloadLine = function(data, logSegment) {
 		text(data["response_code"] + " " + data["wget_code"] + " "),
 		href(data["url"], data["url"])
 	]));
-	logSegment.appendChild(h('br'));
+	logSegment.appendChild(br());
 	return true;
 };
 
@@ -309,7 +314,7 @@ JobsRenderer.prototype._renderStdoutLine = function(data, logSegment) {
 		return false;
 	}
 	logSegment.appendChild(h("span", Reusable.obj_className_line, cleanedMessage));
-	logSegment.appendChild(h('br'));
+	logSegment.appendChild(br());
 	return true;
 };
 
@@ -413,7 +418,7 @@ var Decayer = function(initial, multiplier, max) {
 
 Decayer.prototype.reset = function() {
 	// First call to .decay() will multiply, but we want to get the `intitial`
-	// value on the first call to .decay().
+	// value on the first call to .decay(), so divide.
 	this.current = this.initial / this.multiplier;
 	return this.current;
 };
