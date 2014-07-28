@@ -304,10 +304,11 @@ JobsRenderer.prototype._renderDownloadLine = function(data, logSegment) {
 };
 
 JobsRenderer.prototype._renderStdoutLine = function(data, logSegment) {
-	if(data["message"] == "") {
+	var cleanedMessage = data["message"].replace(/[\r\n]+$/, "").replace(' \\u2018', ' \u2018').replace('\\u2019 ', '\u2019 ');
+	if(!cleanedMessage) {
 		return false;
 	}
-	logSegment.appendChild(h("span", Reusable.obj_className_line, data["message"]));
+	logSegment.appendChild(h("span", Reusable.obj_className_line, cleanedMessage));
 	logSegment.appendChild(h('br'));
 	return true;
 };
