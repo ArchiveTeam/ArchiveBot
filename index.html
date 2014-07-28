@@ -229,8 +229,8 @@ var JobsRenderer = function(container) {
 	this.jobs = new JobsTracker();
 	// ident -> JobRenderInfo
 	this.renderInfo = {};
-	this.historyLines = 9;
-	this.linesPerSegment = 3;
+	this.historyLines = 1000;
+	this.linesPerSegment = 100;
 	this._classNameLine = {"className": "line"};
 };
 
@@ -332,7 +332,7 @@ JobsRenderer.prototype.handleData = function(data) {
 		info.lineCountSegment = 0;
 	}
 
-	if(info.lineCountWindow > this.historyLines) {
+	if(info.lineCountWindow >= this.historyLines + this.linesPerSegment) {
 		// Remove first segment
 		// TODO: optimize by avoiding .firstChild?
 		info.logWindow.removeChild(info.logWindow.firstChild);
