@@ -29,7 +29,7 @@ from archivebot.seesaw.tasks import GetItemFromQueue, StartHeartbeat, \
     SetWarcFileSizeInRedis, StopHeartbeat, MarkItemAsDone
 
 
-VERSION = "20140728.03"
+VERSION = "20140729.01"
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
 WPULL_EXE = find_executable('Wpull', None, [ './wpull' ])
 PHANTOMJS = find_executable('PhantomJS', '1.9.7',
@@ -96,7 +96,6 @@ class WpullArgs(object):
                   '(Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) '
                   'Chrome/36.0.1985.125 Safari/537.36' % (VERSION, wpull_version()),
             '--quiet',
-            '--ascii-print',
             '-o', '%(item_dir)s/wpull.log' % item,
             '--database', '%(item_dir)s/wpull.db' % item,
             '--save-cookies', '%(cookie_jar)s' % item,
