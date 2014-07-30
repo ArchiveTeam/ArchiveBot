@@ -18,6 +18,20 @@
       < Use !status 5sid4pgxkiu6zynhbt3q1gi2s for updates, !abort
         5sid4pgxkiu6zynhbt3q1gi2s to abort.
 
+    * --user-agent-alias ALIAS: specify a user-agent to use
+
+      > !archive http://artscene.textfiles.com/litpacks/
+          --user-agent-alias=firefox
+      < Archiving http://artscene.textfiles.com/litpacks/.
+      < Using user-agent Mozilla/5.0 (Windows NT 5.1; rv:31.0)
+        Gecko/20100101 Firefox/31.0.
+      < Use !status 43z7a11vo6of3a7i173441dtc for updates, !abort
+        43z7a11vo6of3a7i173441dtc to abort.
+
+      This option makes the job present the given user-agent.  It can be
+      useful for archiving sites that (still) do user-agent detection.
+      See db/user_agents for a list of recognized aliases.
+
     * --pipeline PIPELINE_ID: specify pipeline to use
 
       > !archive http://example.blogspot.com/ncr
@@ -66,6 +80,21 @@
       < 14 ignore patterns loaded.
       < Use !status 5sid4pgxkiu6zynhbt3q1gi2s for updates, !abort
         5sid4pgxkiu6zynhbt3q1gi2s to abort.
+
+    * --user-agent-alias ALIAS: specify a user-agent to use
+
+      > !archiveonly http://artscene.textfiles.com/litpacks/
+          --user-agent-alias=firefox
+      < Archiving http://artscene.textfiles.com/litpacks/ without
+        recursion.
+      < Using user-agent Mozilla/5.0 (Windows NT 5.1; rv:31.0)
+        Gecko/20100101 Firefox/31.0.
+      < Use !status 43z7a11vo6of3a7i173441dtc for updates, !abort
+        43z7a11vo6of3a7i173441dtc to abort.
+
+      This option makes the job present the given user-agent.  It can be
+      useful for archiving sites that (still) do user-agent detection.
+      See db/user_agents for a list of recognized aliases.
 
     * --pipeline PIPELINE_ID: specify pipeline to use
 
