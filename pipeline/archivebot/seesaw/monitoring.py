@@ -37,10 +37,10 @@ def start(pipeline, control, version):
             'ts': int(time.time())
         }
 
-        control.pipeline_report(pipe_id, process_report)
+        control.pipeline_report(pipe_id, process_report).get()
 
     def unregister():
-        control.unregister_pipeline(pipe_id)
+        control.unregister_pipeline(pipe_id).get()
 
     atexit.register(unregister)
 

@@ -99,7 +99,7 @@ class StartHeartbeat(SimpleTask):
         cb.start()
 
     def send_heartbeat(self, item):
-        self.control.heartbeat(item['ident'])
+        self.control.heartbeat(item['ident']).get()
 
 # ------------------------------------------------------------------------------
 
@@ -247,7 +247,7 @@ class SetWarcFileSizeInRedis(RetryableTask):
     def process(self, item):
         try:
             self.control.set_warc_size(item['ident'],
-                    *item['target_warc_files'])
+                    *item['target_warc_files']).get()
             self.complete_item(item)
         except ConnectionError:
             self.notify_connection_error(item)
@@ -276,7 +276,7 @@ class MarkItemAsDone(RetryableTask):
 
     def process(self, item):
         try:
-            self.control.mark_done(item, self.expire_time)
+            self.control.mark_done(item, self.expire_time).get()
             self.complete_item(item)
         except ConnectionError:
             self.notify_connection_error(item)

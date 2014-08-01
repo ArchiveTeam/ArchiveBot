@@ -90,7 +90,7 @@ def handle_result(url_info, record_info, error_info=None, http_info=None):
 
   if http_info:
     # Update the traffic counters.
-    control.update_bytes_downloaded(ident, http_info['body']['content_size'])
+    control.update_bytes_downloaded(ident, http_info['body']['content_size']).get()
 
   statcode = 0
   error = 'OK'
