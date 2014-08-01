@@ -383,15 +383,15 @@ JobsRenderer.prototype.handleData = function(data) {
 		info.lineCountSegment = 0;
 	}
 
-	if(info.lineCountWindow >= this.historyLines + this.linesPerSegment) {
-		// Remove first segment
-		// TODO: optimize by avoiding .firstChild?
-		info.logWindow.removeChild(info.logWindow.firstChild);
-		info.lineCountWindow -= this.linesPerSegment;
-	}
-
-	// Scroll to the bottom, unless user has mouse inside this log window
 	if(this.mouseInside != ident) {
+		// We may have to remove more than one segment, if the user
+		// has paused the log window for a while.
+		while(info.lineCountWindow >= this.historyLines + this.linesPerSegment) {
+			info.logWindow.removeChild(info.logWindow.firstChild);
+			info.lineCountWindow -= this.linesPerSegment;
+		}
+
+		// Scroll to the bottom
 		info.logWindow.scrollTop = info.logWindow.scrollHeight;
 	}
 };
