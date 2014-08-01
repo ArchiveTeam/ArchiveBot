@@ -57,7 +57,7 @@ html, body {
 }
 
 .line {
-	white-space: nowrap;
+	white-space: pre;
 }
 
 a {
@@ -305,17 +305,20 @@ JobsRenderer.prototype._renderDownloadLine = function(data, logSegment) {
 		href(data["url"], data["url"])
 	]));
 	logSegment.appendChild(br());
-	return true;
+	return 1;
 };
 
 JobsRenderer.prototype._renderStdoutLine = function(data, logSegment) {
 	var cleanedMessage = data["message"].replace(/[\r\n]+$/, "").replace(' \\u2018', ' \u2018').replace('\\u2019 ', '\u2019 ');
 	if(!cleanedMessage) {
-		return false;
+		return 0;
 	}
-	logSegment.appendChild(h("span", Reusable.obj_className_line, cleanedMessage));
-	logSegment.appendChild(br());
-	return true;
+	var lines = cleanedMessage.split("\n");
+	for(var i=0; i < lines.length; i++) {
+		logSegment.appendChild(h("span", Reusable.obj_className_line, lines[i]));
+		logSegment.appendChild(br());
+	}
+	return lines.length;
 };
 
 JobsRenderer.prototype.handleData = function(data) {
@@ -338,19 +341,19 @@ JobsRenderer.prototype.handleData = function(data) {
 	}
 
 	if(type == "download") {
-		var rendered = this._renderDownloadLine(data, info.logSegment);
+		var linesRendered = this._renderDownloadLine(data, info.logSegment);
 	} else if(type == "stdout") {
-		var rendered = this._renderStdoutLine(data, info.logSegment);
+		var linesRendered = this._renderStdoutLine(data, info.logSegment);
 	} else {
 		assert(false, "line should not be reached");
 	}
 
-	if(!rendered) {
+	if(!linesRendered) {
 		return;
 	}
 
-	info.lineCountWindow += 1;
-	info.lineCountSegment += 1;
+	info.lineCountWindow += linesRendered;
+	info.lineCountSegment += linesRendered;
 
 	if(info.lineCountSegment >= this.linesPerSegment) {
 		//console.log("Created new segment", info);
