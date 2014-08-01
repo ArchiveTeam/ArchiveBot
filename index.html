@@ -379,9 +379,8 @@ JobsRenderer.prototype._renderDownloadLine = function(data, logSegment) {
 	} else {
 		var attrs = Reusable.obj_className_line_normal;
 	}
-	// TODO: Use cached object for the text(response code + wget code)
 	logSegment.appendChild(h("div", attrs, [
-		text(" " + data["response_code"] + " " + data["wget_code"] + " "),
+		" " + data["response_code"] + " " + data["wget_code"] + " ",
 		href(data["url"], data["url"])
 	]));
 	return 1;
