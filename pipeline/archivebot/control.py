@@ -34,11 +34,11 @@ class Control(pykka.ThreadingActor):
     is also raised.
     '''
 
-    def __init__(self, redis_url, log_channel, control_channel):
+    def __init__(self, redis_url, log_channel, pipeline_channel):
         super(Control, self).__init__()
 
         self.log_channel = log_channel
-        self.control_channel = control_channel
+        self.pipeline_channel = pipeline_channel
         self.bytes_outstanding = 0
         self.redis_url = redis_url
 
