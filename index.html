@@ -503,40 +503,53 @@ var Dashboard = function() {
 	var args = getQueryArgs();
 
 	var historyLines = args["historyLines"] ? Number(args["historyLines"]) : 1000;
-	var dumpTraffic = args["dumpMax"] && Number(args["dumpMax"]) > 0;
-	if(dumpTraffic) {
-		var dumpMax = Number(args["dumpMax"]);
+	this.dumpTraffic = args["dumpMax"] && Number(args["dumpMax"]) > 0;
+	if(this.dumpTraffic) {
+		this.dumpMax = Number(args["dumpMax"]);
 	}
 	this.jobsRenderer = new JobsRenderer(byId('logs'), historyLines);
 
 	var batchTimeWhenHidden = 5000;
 	var batchTimeWhenVisible = 125;
 
-	this.queue = new BatchingQueue(function(queue) {
-		//console.log("Queue has ", queue.length, "items");
-		for(var i=0; i < queue.length; i++) {
-			var data = JSON.parse(queue[i]);
-			this.messageCount += 1;
-			if(dumpTraffic && this.messageCount <= dumpMax) {
-				byId('traffic').appendChild(h("pre", null, prettyJson(data)));
+	var xhr = new XMLHttpRequest();
+	xhr.onload = function() {
+		var recentLines = JSON.parse(xhr.responseText);
+		for(var i=0; i < recentLines.length; i++) {
+			this.handleData(recentLines[i]);
+		}
+
+		this.queue = new BatchingQueue(function(queue) {
+			//console.log("Queue has ", queue.length, "items");
+			for(var i=0; i < queue.length; i++) {
+				this.handleData(JSON.parse(queue[i]));
 			}
-			this.jobsRenderer.handleData(data);
-		}
-	}.bind(this), batchTimeWhenVisible);
+		}.bind(this), batchTimeWhenVisible);
 
-	this.decayer = new Decayer(1000, 1.5, 60000);
-	this.connectWebSocket();
+		this.decayer = new Decayer(1000, 1.5, 60000);
+		this.connectWebSocket();
 
-	document.addEventListener("visibilitychange", function() {
-		if(document.hidden) {
-			//console.log("Page has become hidden");
-			this.queue.setMinInterval(batchTimeWhenHidden);
-		} else {
-			//console.log("Page has become visible");
-			this.queue.setMinInterval(batchTimeWhenVisible);
-			this.queue.callNow();
-		}
-	}.bind(this), false);
+		document.addEventListener("visibilitychange", function() {
+			if(document.hidden) {
+				//console.log("Page has become hidden");
+				this.queue.setMinInterval(batchTimeWhenHidden);
+			} else {
+				//console.log("Page has become visible");
+				this.queue.setMinInterval(batchTimeWhenVisible);
+				this.queue.callNow();
+			}
+		}.bind(this), false);
+	}.bind(this);
+	xhr.open("GET", "http://arshboard.at.ninjawedding.org:4567/logs/recent");
+	xhr.send("");
+};
+
+Dashboard.prototype.handleData = function(data) {
+	this.messageCount += 1;
+	if(this.dumpTraffic && this.messageCount <= this.dumpMax) {
+		byId('traffic').appendChild(h("pre", null, prettyJson(data)));
+	}
+	this.jobsRenderer.handleData(data);
 };
 
 Dashboard.prototype.connectWebSocket = function() {
