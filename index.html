@@ -9,7 +9,7 @@
 <body>
 <style>
 html, body {
-	background-color: #F4E2AA;
+	background-color: #D0C0AE;
 	font-family: Tahoma, Arial, sans-serif;
 	font-size: 13px;
 }
@@ -42,8 +42,8 @@ html, body {
 .job-ident {
 	margin: 0 1px 0 0;
 	border: 0;
-	background-color: #F4E2AA;
-	color: #666;
+	background-color: #D0C0AE;
+	color: #786552;
 	font-weight: bold;
 	text-align: right;
 }
@@ -52,13 +52,15 @@ html, body {
 	background-color: #FFF7E1;
 	overflow-y: scroll;
 	height: 192px;
-	border: 1px solid #CCC;
+	border: 1px solid #999;
 	margin: 0 0 1em 0;
 	border-radius: 3px;
 }
 
 .log-window-stopped {
-	border: 1px solid #444;
+	border: 1px solid #222;
+	box-shadow: 2px 2px 4px #888;
+
 }
 
 .line-normal {
@@ -383,7 +385,7 @@ JobsRenderer.prototype._renderDownloadLine = function(data, logSegment) {
 	}
 	// TODO: Use cached object for the text(response code + wget code)
 	logSegment.appendChild(h("div", attrs, [
-		text(data["response_code"] + " " + data["wget_code"] + " "),
+		text(" " + data["response_code"] + " " + data["wget_code"] + " "),
 		href(data["url"], data["url"])
 	]));
 	return 1;
@@ -401,7 +403,7 @@ JobsRenderer.prototype._renderStdoutLine = function(data, logSegment) {
 		if(!line) {
 			continue;
 		}
-		logSegment.appendChild(h("div", Reusable.obj_className_line_stdout, line));
+		logSegment.appendChild(h("div", Reusable.obj_className_line_stdout, " " + line));
 		renderedLines += 1;
 	}
 	return renderedLines;
