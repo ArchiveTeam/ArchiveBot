@@ -286,6 +286,20 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 			"onmouseleave": function(ev) {
 				this.mouseInside = null;
 				ev.target.classList.remove('log-window-stopped');
+			}.bind(this),
+			"onwheel": function(ev) {
+				// If you reach the end of a log window, the browser annoyingly
+				// starts to scroll the page instead.  We prevent this behavior here.
+				// If the user wants to scroll the page, they need to move their
+				// mouse outside a log window first.
+
+				// Note: offsetHeight is "wrong" by 2px but it doesn't matter
+				//console.log(logWindow.scrollTop, (logWindow.scrollHeight - logWindow.offsetHeight));
+				if(ev.deltaY < 0 && logWindow.scrollTop == 0) {
+					ev.preventDefault();
+				} else if(ev.deltaY > 0 && logWindow.scrollTop >= (logWindow.scrollHeight - logWindow.offsetHeight)) {
+					ev.preventDefault();
+				}
 			}.bind(this)
 		},
 		logSegment
