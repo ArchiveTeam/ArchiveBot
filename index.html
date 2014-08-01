@@ -54,6 +54,11 @@ html, body {
 	height: 192px;
 	border: 1px solid #CCC;
 	margin: 0 0 1em 0;
+	border-radius: 3px;
+}
+
+.log-window-stopped {
+	border: 1px solid #444;
 }
 
 .line {
@@ -247,6 +252,7 @@ var JobsRenderer = function(container, historyLines) {
 	this.jobs = new JobsTracker();
 	// ident -> JobRenderInfo
 	this.renderInfo = {};
+	this.mouseInside = null;
 };
 
 JobsRenderer.prototype._getNextJobInSorted = function(ident) {
@@ -272,7 +278,15 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 	var logWindow = h(
 		'div', {
 			"className": "log-window",
-			"id": "log-window-" + ident
+			"id": "log-window-" + ident,
+			"onmouseenter": function(ev) {
+				this.mouseInside = ident;
+				ev.target.classList.add('log-window-stopped');
+			}.bind(this),
+			"onmouseleave": function(ev) {
+				this.mouseInside = null;
+				ev.target.classList.remove('log-window-stopped');
+			}.bind(this)
 		},
 		logSegment
 	);
@@ -310,15 +324,21 @@ JobsRenderer.prototype._renderDownloadLine = function(data, logSegment) {
 
 JobsRenderer.prototype._renderStdoutLine = function(data, logSegment) {
 	var cleanedMessage = data["message"].replace(/[\r\n]+$/, "").replace(' \\u2018', ' \u2018').replace('\\u2019 ', '\u2019 ');
+	var renderedLines = 0;
 	if(!cleanedMessage) {
-		return 0;
+		return renderedLines;
 	}
 	var lines = cleanedMessage.split("\n");
 	for(var i=0; i < lines.length; i++) {
-		logSegment.appendChild(h("span", Reusable.obj_className_line, lines[i]));
+		var line = lines[i];
+		if(!line) {
+			continue;
+		}
+		logSegment.appendChild(h("span", Reusable.obj_className_line, line));
 		logSegment.appendChild(br());
+		renderedLines += 1;
 	}
-	return lines.length;
+	return renderedLines;
 };
 
 JobsRenderer.prototype.handleData = function(data) {
@@ -370,8 +390,10 @@ JobsRenderer.prototype.handleData = function(data) {
 		info.lineCountWindow -= this.linesPerSegment;
 	}
 
-	// Scroll to the bottom
-	info.logWindow.scrollTop = info.logWindow.scrollHeight;
+	// Scroll to the bottom, unless user has mouse inside this log window
+	if(this.mouseInside != ident) {
+		info.logWindow.scrollTop = info.logWindow.scrollHeight;
+	}
 };
 
 
