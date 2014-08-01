@@ -61,21 +61,41 @@ html, body {
 	border: 1px solid #444;
 }
 
-.line {
+.line-normal {
 	white-space: pre;
+	width: 100%;
+}
+
+.line-error {
+	white-space: pre;
+	width: 100%;
+	background-color: #FFB9B9;
+}
+
+.line-warning {
+	white-space: pre;
+	width: 100%;
+	background-color: #E9D896;
+}
+
+.line-stdout {
+	white-space: pre;
+	width: 100%;
+	background-color: #DCD8CB;
 }
 
 a {
 	color: #000;
+	text-decoration: none;
 }
 
-.line a {
-	text-decoration: none;
+.underlined-a {
+	text-decoration: underline;
 }
 </style>
 <div class="padded-page">
 	<div class="header">
-		<a href="http://archiveteam.org/index.php?title=ArchiveBot">ArchiveBot</a>
+		<a href="http://archiveteam.org/index.php?title=ArchiveBot" class="underlined-a">ArchiveBot</a>
 		tracking ~<span id="num-crawls">0</span> crawls.<br>
 	</div>
 
@@ -240,7 +260,10 @@ var JobRenderInfo = function(logWindow, logSegment, lineCountWindow, lineCountSe
 
 
 var Reusable = {
-	obj_className_line: {"className": "line"}
+	obj_className_line_normal: {"className": "line-normal"},
+	obj_className_line_error: {"className": "line-error"},
+	obj_className_line_warning: {"className": "line-warning"},
+	obj_className_line_stdout: {"className": "line-stdout"}
 };
 
 
@@ -327,12 +350,18 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 }
 
 JobsRenderer.prototype._renderDownloadLine = function(data, logSegment) {
+	if(data["is_warning"]) {
+		var attrs = Reusable.obj_className_line_warning;
+	} else if(data["is_error"]) {
+		var attrs = Reusable.obj_className_line_error;
+	} else {
+		var attrs = Reusable.obj_className_line_normal;
+	}
 	// TODO: Use cached object for the text(response code + wget code)
-	logSegment.appendChild(h("span", Reusable.obj_className_line, [
+	logSegment.appendChild(h("div", attrs, [
 		text(data["response_code"] + " " + data["wget_code"] + " "),
 		href(data["url"], data["url"])
 	]));
-	logSegment.appendChild(br());
 	return 1;
 };
 
@@ -348,8 +377,7 @@ JobsRenderer.prototype._renderStdoutLine = function(data, logSegment) {
 		if(!line) {
 			continue;
 		}
-		logSegment.appendChild(h("span", Reusable.obj_className_line, line));
-		logSegment.appendChild(br());
+		logSegment.appendChild(h("div", Reusable.obj_className_line_stdout, line));
 		renderedLines += 1;
 	}
 	return renderedLines;
