@@ -41,7 +41,7 @@ class ArchiveUrl
   # The size of the archive, in bytes.  Optional.
   attr_accessor :file_size
 
-  def initialize(url: nil, queued_at: nil, archive_url: nil, ident: nil, file_size: nil)
+  def initialize(url, queued_at, archive_url, ident, file_size)
     self.url = url
     self.queued_at = queued_at
     self.archive_url = archive_url

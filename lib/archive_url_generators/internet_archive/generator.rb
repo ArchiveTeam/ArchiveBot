@@ -92,11 +92,11 @@ module ArchiveUrlGenerators::InternetArchive
           json = url_set.json
 
           record = ArchiveUrl.new(
-            url: json['url'],
-            queued_at: json['queued_at'],
-            ident: json['ident'],
-            file_size: warc_size,
-            archive_url: url_set.warc_url
+            json['url'],
+            json['queued_at'],
+            json['ident'],
+            warc_size,
+            url_set.warc_url
           )
 
           if record.valid?
