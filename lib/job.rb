@@ -297,7 +297,7 @@ class Job < Struct.new(:uri, :redis)
 
       silently do
         set_delay(250, 375)
-        set_concurrency(1)
+        set_concurrency(3)
       end
     end
 
