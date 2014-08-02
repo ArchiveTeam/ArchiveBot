@@ -1,0 +1,52 @@
+#!/usr/bin/env ruby
+
+require 'redis'
+
+r = Redis.new(:driver => :hiredis, :url => ARGV[0])
+trim_threshold = 500
+
+def flush_logs(r, log_key, job_key, last_trimmed, min_last)
+  r.zrangebyscore(log_key, last_trimmed, min_last).each do |l|
+    $stdout.puts "#{log_key} #{l}"
+  end
+
+  $stdout.flush
+
+  r.zremrangebyscore(log_key, last_trimmed, min_last)
+  r.hset(job_key, 'last_trimmed_log_entry', min_last)
+end
+
+$stdin.each_line do |line|
+  job_key = line.chomp
+
+  data = r.hmget(job_key,
+                 'log_key',
+                 'finished_at',
+                 'last_analyzed_log_entry',
+                 'last_broadcasted_log_entry',
+                 'last_trimmed_log_entry')
+
+  log_key = data.shift
+  finished_at = data.shift
+
+  # NB: Redis zset scores are technically floats, not ints, so might as well
+  # play along
+  data.map!(&:to_f)
+
+  # Find the longest run of messages outstanding.
+  min_last = [data[0], data[1]].min
+  last_trimmed = data[2]
+
+  # If this job is marked as finished, then we want to trim the whole log -- no
+  # point in keep everything around.
+  #
+  # Otherwise, is the last time we trimmed greater than our threshold?  If so,
+  # spool out the log to a file and trim it from Redis.
+  if finished_at
+    flush_logs(r, log_key, job_key, last_trimmed, '+inf')
+  else
+    if min_last - last_trimmed >= trim_threshold
+      flush_logs(r, log_key, job_key, last_trimmed, min_last)
+    end
+  end
+end
