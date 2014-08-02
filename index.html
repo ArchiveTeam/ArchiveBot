@@ -524,6 +524,7 @@ var Dashboard = function() {
 	var args = getQueryArgs();
 
 	var historyLines = args["historyLines"] ? Number(args["historyLines"]) : 1000;
+	var batchTimeWhenVisible = args["batchTimeWhenVisible"] ? Number(args["batchTimeWhenVisible"]) : 125;
 	this.dumpTraffic = args["dumpMax"] && Number(args["dumpMax"]) > 0;
 	if(this.dumpTraffic) {
 		this.dumpMax = Number(args["dumpMax"]);
@@ -531,7 +532,6 @@ var Dashboard = function() {
 	this.jobsRenderer = new JobsRenderer(byId('logs'), historyLines);
 
 	var batchTimeWhenHidden = 5000;
-	var batchTimeWhenVisible = 125;
 
 	var xhr = new XMLHttpRequest();
 	xhr.onload = function() {
