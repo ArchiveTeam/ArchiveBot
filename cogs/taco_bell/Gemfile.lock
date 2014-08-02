@@ -1,0 +1,14 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    hiredis (0.5.2)
+    redis (3.1.0)
+    yajl-ruby (1.2.1)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  hiredis
+  redis
+  yajl-ruby

@@ -1,0 +1,4 @@
+#!/bin/bash
+
+MYDIR=$(dirname $(readlink -f "$0"))
+tcpserver -RH $1 $2 $MYDIR/updates-listener $3 $4

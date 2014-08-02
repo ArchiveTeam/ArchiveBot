@@ -1,0 +1,97 @@
+#!/usr/bin/env ruby
+
+require 'redis'
+require 'yajl'
+require 'stringio'
+
+class Categorizer
+  attr_accessor :ident
+  attr_accessor :error_count
+  attr_accessor :r1xx
+  attr_accessor :r2xx
+  attr_accessor :r3xx
+  attr_accessor :r4xx
+  attr_accessor :r5xx
+  attr_accessor :runk
+
+  def reset
+    self.r1xx = 0
+    self.r2xx = 0
+    self.r3xx = 0
+    self.r4xx = 0
+    self.r5xx = 0
+    self.runk = 0
+    self.error_count = 0
+  end
+
+  def categorize(obj)
+    return unless obj['type'] == 'download'
+
+    if obj['is_error']
+      self.error_count += 1
+    end
+
+    case obj['response_code'].to_i
+    when (100...200)
+      self.r1xx += 1
+    when (200...300)
+      self.r2xx += 1
+    when (300...400)
+      self.r3xx += 1
+    when (400...500)
+      self.r4xx += 1
+    when (500...600)
+      self.r5xx += 1
+    else
+      self.runk += 1
+    end
+  end
+end
+
+categorizer = Categorizer.new
+
+r = Redis.new(:driver => :hiredis, :url => ARGV[0])
+parser = Yajl::Parser.new
+parser.on_parse_complete = categorizer.method(:categorize)
+
+$stdin.each_line do |line|
+  job_key = line.chomp
+
+  categorizer.ident = job_key
+  categorizer.reset
+
+  # Get our data.
+  data = r.hmget(job_key, 'log_key', 'last_analyzed_log_entry')
+
+  log_key = data[0]
+
+  # Get the score of the last processed log entry.
+  start = data[1]
+
+  resps = r.zrangebyscore(log_key, "(#{start}", '+inf', :with_scores => true)
+
+  # If there are no responses to process, keep going.
+  next unless resps.length > 0
+
+  # Store the score of the most recent unprocessed entry.
+  most_recent = resps.last.last
+  
+  # Classify each response.
+  resps.each do |resp, score|
+    parser << resp
+  end
+
+  # Add the counts to the Redis state.
+  r.pipelined do
+    r.hincrby(job_key, 'r1xx', categorizer.r1xx)
+    r.hincrby(job_key, 'r2xx', categorizer.r2xx)
+    r.hincrby(job_key, 'r3xx', categorizer.r3xx)
+    r.hincrby(job_key, 'r4xx', categorizer.r4xx)
+    r.hincrby(job_key, 'r5xx', categorizer.r5xx)
+    r.hincrby(job_key, 'runk', categorizer.runk)
+    r.hincrby(job_key, 'error_count', categorizer.error_count)
+  end
+
+  # Update the entry marker.
+  r.hset(job_key, 'last_analyzed_log_entry', most_recent)
+end

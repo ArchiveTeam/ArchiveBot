@@ -1,0 +1,23 @@
+#!/usr/bin/env ruby
+
+require 'redis'
+
+url = ARGV[0] or abort 'url required'
+updates_channel = ARGV[1] or abort 'updates channel required'
+
+r1 = Redis.new(:url => url)
+r2 = Redis.new(:url => url)
+
+trap(:TERM) { exit }
+trap(:INT) { exit }
+
+begin
+  r1.subscribe(updates_channel) do |on|
+    on.message do |chan, msg|
+      $stdout.puts msg
+      $stdout.flush
+    end
+  end
+rescue Errno::ECONNRESET, Errno::EPIPE
+  # whatever, just exit
+end
