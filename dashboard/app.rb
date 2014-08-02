@@ -26,7 +26,7 @@ end
 bind_uri = URI.parse(opts[:url])
 
 DB = Couchdb.new(URI(opts[:db]), opts[:db_credentials])
-R = Redis.new(:url => opts[:redis])
+R = Redis.new(:url => opts[:redis], :driver => :hiredis)
 
 History.db = DB
 Pipeline.redis = R

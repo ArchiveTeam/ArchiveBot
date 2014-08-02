@@ -12,6 +12,7 @@ gem 'net-http-persistent'
 gem 'psych', '~> 2.0', '>= 2.0.1'
 
 gem 'redis'
+gem 'hiredis'
 gem 'trollop'
 gem 'uuidtools'
 gem 'twitter', '~> 5.5.1'
