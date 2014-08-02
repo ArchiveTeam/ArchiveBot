@@ -111,6 +111,7 @@ class Brain
       reply m, "Use !status #{job.ident} for updates, !abort #{job.ident} to abort."
 
       run_post_registration_hooks(m, job, h)
+      add_ignore_sets(m, job, ['global'])
 
       pipeline = h[:pipeline]
 
