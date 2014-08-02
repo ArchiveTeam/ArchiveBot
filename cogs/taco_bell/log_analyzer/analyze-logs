@@ -2,7 +2,6 @@
 
 require 'redis'
 require 'yajl'
-require 'stringio'
 
 class Categorizer
   attr_accessor :ident
