@@ -256,11 +256,11 @@ JobsTracker.prototype.handleJobData = function(jobData) {
 
 
 
-var JobRenderInfo = function(logWindow, logSegment, lineCountWindow, lineCountSegment) {
+var JobRenderInfo = function(logWindow, logSegment, lineCountWindow, lineCountSegments) {
 	this.logWindow = logWindow;
 	this.logSegment = logSegment;
 	this.lineCountWindow = lineCountWindow;
-	this.lineCountSegment = lineCountSegment;
+	this.lineCountSegments = lineCountSegments;
 };
 
 
@@ -365,7 +365,7 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 			logWindow
 		]
 	);
-	this.renderInfo[ident] = new JobRenderInfo(logWindow, logSegment, 0, 0);
+	this.renderInfo[ident] = new JobRenderInfo(logWindow, logSegment, 0, [0]);
 	this.container.insertBefore(div, beforeElement);
 }
 
@@ -436,22 +436,28 @@ JobsRenderer.prototype.handleData = function(data) {
 	}
 
 	info.lineCountWindow += linesRendered;
-	info.lineCountSegment += linesRendered;
+	info.lineCountSegments[info.lineCountSegments.length - 1] += linesRendered;
 
-	if(info.lineCountSegment >= this.linesPerSegment) {
+	if(info.lineCountSegments[info.lineCountSegments.length - 1] >= this.linesPerSegment) {
 		//console.log("Created new segment", info);
 		var newSegment = this._createLogSegment();
 		info.logWindow.appendChild(newSegment);
 		info.logSegment = newSegment;
-		info.lineCountSegment = 0;
+		info.lineCountSegments.push(0);
 	}
 
 	if(this.mouseInside != ident) {
 		// We may have to remove more than one segment, if the user
 		// has paused the log window for a while.
 		while(info.lineCountWindow >= this.historyLines + this.linesPerSegment) {
-			info.logWindow.removeChild(info.logWindow.firstChild);
-			info.lineCountWindow -= this.linesPerSegment;
+			var firstLogSegment = info.logWindow.firstChild;
+			assert(firstLogSegment != null, "info.logWindow.firstChild is null; " +
+				JSON.stringify({
+					"lineCountWindow": info.lineCountWindow,
+					"lineCountSegments": info.lineCountSegments}));
+			info.logWindow.removeChild(firstLogSegment);
+			info.lineCountWindow -= info.lineCountSegments[0];
+			info.lineCountSegments.shift();
 		}
 
 		// Scroll to the bottom
