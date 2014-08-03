@@ -211,7 +211,11 @@ class Brain
 
     job.add_ignore_patterns(patterns) unless patterns.empty?
 
-    reply m, "Added #{patterns.length} ignore patterns to job #{job.ident}."
+    if resolved.length > 1
+      reply m, %Q{Added #{patterns.length} patterns from ignore sets {#{resolved.join(', ')}} to job #{job.ident}.}
+    else
+      reply m, %Q{Added #{patterns.length} patterns from ignore set #{resolved.first} to job #{job.ident}.}
+    end
 
     unknown = names - resolved
 
