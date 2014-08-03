@@ -8,9 +8,6 @@ updates_channel = ARGV[1] or abort 'updates channel required'
 r1 = Redis.new(:url => url)
 r2 = Redis.new(:url => url)
 
-trap(:TERM) { exit }
-trap(:INT) { exit }
-
 begin
   r1.subscribe(updates_channel) do |on|
     on.message do |chan, msg|
