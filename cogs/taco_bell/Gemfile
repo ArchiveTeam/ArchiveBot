@@ -1,5 +1,6 @@
 source 'https://rubygems.org'
 
+gem 'analysand', '~> 3.0.1'
 gem 'yajl-ruby'
 gem 'redis'
 gem 'hiredis'
