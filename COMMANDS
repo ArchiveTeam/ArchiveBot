@@ -209,6 +209,18 @@
     > !status
     < Job status: 0 completed, 0 aborted, 0 in progress, 0 pending
 
+* !pending: send pending queue in private message
+
+    > !pending
+    < [privmsg] 2 pending jobs:
+    < [privmsg] 1. http://artscene.textfiles.com/litpacks/
+                   (43z7a11vo6of3a7i173441dtc)
+    < [privmsg] 2. http://example.blogspot.com/ncr
+                   (5sid4pgxkiu6zynhbt3q1gi2s)
+
+  Jobs are listed in the order that they'll be worked on.
+  This command lists only the global queue; it doesn't yet show the
+  status of any pipeline-specific queues.
 
 * !status IDENT, !status URL: print information about a job or URL
 
