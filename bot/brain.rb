@@ -181,6 +181,21 @@ class Brain
     reply m, *job.to_status
   end
 
+  def show_pending(m)
+    idents = redis.lrange('pending', 0, -1)
+
+    urls = redis.pipelined do
+      idents.each { |ident| redis.hget(ident, 'url') }
+    end
+
+    privmsg m, "#{urls.length} pending jobs:"
+    idents.zip(urls).each.with_index do |(ident, url), i|
+      msg = "#{i+1}. #{url} (#{ident})"
+
+      privmsg(m, msg)
+    end
+  end
+
   def initiate_abort(m, job)
     return unless authorized?(m)
 
@@ -328,5 +343,11 @@ class Brain
     else
       args.each { |msg| m.safe_reply(msg, true) }
     end
+  end
+
+  # TODO: privmsg should probably have a batch mode; doesn't really matter for
+  # now, though
+  def privmsg(m, *args)
+    args.each { |msg| m.user.safe_send(msg) }
   end
 end

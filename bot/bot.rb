@@ -98,6 +98,10 @@ bot = Cinch::Bot.new do
   on :message, /\A!abort (#{CommandPatterns::IDENT})\Z/ do |m, ident|
     brain.find_job(ident, m) { |j| brain.initiate_abort(m, j) }
   end
+
+  on :message, /\A!pending\Z/ do |m|
+    brain.show_pending(m)
+  end
 end
 
 bot.start
