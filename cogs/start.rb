@@ -4,7 +4,6 @@ require 'uri'
 
 require File.expand_path('../ignore_pattern_updater', __FILE__)
 require File.expand_path('../user_agent_updater', __FILE__)
-require File.expand_path('../job_recorder', __FILE__)
 require File.expand_path('../../lib/job', __FILE__)
 require File.expand_path('../../lib/redis_subscriber', __FILE__)
 require File.expand_path('../../lib/shared_config', __FILE__)
@@ -28,14 +27,11 @@ class Broadcaster < RedisSubscriber
 
     job.freeze
 
-    Celluloid::Actor[:job_recorder].async.process(job)
     Celluloid::Actor[:twitter_tweeter].async.process(job)
   end
 end
 
 db_uri = URI(opts[:db])
-
-JobRecorder.supervise_as :job_recorder, db_uri, opts[:db_credentials]
 
 Reaper.supervise_as :reaper, opts[:redis]
 TwitterTweeter.supervise_as :twitter_tweeter, opts[:redis], opts[:twitter_config]
