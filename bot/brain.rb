@@ -182,7 +182,7 @@ class Brain
   end
 
   def show_pending(m)
-    idents = redis.lrange('pending', 0, -1)
+    idents = redis.lrange('pending', 0, -1).reverse
 
     urls = redis.pipelined do
       idents.each { |ident| redis.hget(ident, 'url') }
