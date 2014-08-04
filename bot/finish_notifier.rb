@@ -1,5 +1,5 @@
 require 'cinch'
-require 'json'
+require 'yajl'
 
 require File.expand_path('../finish_message_generation', __FILE__)
 
@@ -62,7 +62,7 @@ class FinishNotifier
       data = redis.lpop('finish_notifications')
       break unless data
 
-      infos << JSON.parse(data)
+      infos << Yajl::Parser.parse(data)
     end
 
     generate_messages(infos)

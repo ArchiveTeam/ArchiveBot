@@ -1,5 +1,5 @@
 require 'twitter'
-require 'json'
+require 'yajl'
 
 # Updates a Twitter timeline. It uses Redis as the persistent store to keep
 # track of posted Tweets. The queue is a ordered set that simply holds the
@@ -22,7 +22,7 @@ class TwitterTweeter
     return if !twitter_config_filename
 
     @redis = ::Redis.new(:url => redis)
-    twitter_config = JSON.load(File.open(twitter_config_filename))
+    twitter_config = Yajl::Parser.parse(File.read(twitter_config_filename))
 
     authenticate_account(twitter_config)
 

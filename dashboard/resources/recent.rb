@@ -1,4 +1,4 @@
-require 'json'
+require 'yajl'
 require 'webmachine'
 
 require File.expand_path('../../../lib/job', __FILE__)
@@ -13,7 +13,7 @@ class Recent < Webmachine::Resource
     jobs = Job.working(self.class.redis)
 
     jobs.each_with_object([]) do |j, a|
-      a << j.most_recent_log_entries(10).map { |le| LogMessage.new(j, JSON.parse(le)) }
+      a << j.most_recent_log_entries(10).map { |le| LogMessage.new(j, Yajl::Parser.parse(le)) }
     end.flatten
   end
 

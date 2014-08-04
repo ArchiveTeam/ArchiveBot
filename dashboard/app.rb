@@ -1,7 +1,6 @@
 require 'coffee-script'
 require 'ember/source'
 require 'handlebars/source'
-require 'json'
 require 'trollop'
 require 'uri'
 require 'webmachine'

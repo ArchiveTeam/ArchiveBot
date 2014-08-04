@@ -1,5 +1,5 @@
 require 'celluloid'
-require 'json'
+require 'yajl'
 require 'logger'
 require 'net/http'
 
@@ -143,8 +143,8 @@ module ArchiveUrlGenerators::InternetArchive
       json_resp = @json_future.value
 
       begin
-        @json = JSON.parse(json_resp.body)
-      rescue JSON::ParserError
+        @json = Yajl::Parser.parse(json_resp.body)
+      rescue Yajl::ParseError
         logger.error "#{json_url} contains invalid JSON"
         nil
       end
