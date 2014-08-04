@@ -1,4 +1,0 @@
-#!/bin/bash
-
-MYDIR=$(dirname $(readlink -f "$0"))
-tcpclient $1 $2 socat FD:6 STDOUT | $MYDIR/record-jobs $3 $4
