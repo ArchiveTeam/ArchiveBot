@@ -1,5 +1,5 @@
 require 'celluloid'
-require 'yajl'
+require 'json'
 require 'logger'
 require 'net/http'
 require 'time'
@@ -46,7 +46,7 @@ module ArchiveUrlGenerators::InternetArchive
           resp = f.value
 
           if Net::HTTPSuccess === resp
-            json = Yajl::Parser.parse(resp.body)
+            json = JSON.parse(resp.body)
 
             yield pu, resp, true, latest_addeddate(json), urls_in_json(json)
           else

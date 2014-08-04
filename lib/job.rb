@@ -1,5 +1,6 @@
 require 'uri'
 require 'uuidtools'
+require 'json'
 
 require File.expand_path('../job_analysis', __FILE__)
 require File.expand_path('../phantomjs_job', __FILE__)

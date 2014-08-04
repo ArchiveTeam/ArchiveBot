@@ -1,4 +1,4 @@
-require 'yajl'
+require 'json'
 
 module Message
   attr_reader :job
@@ -8,7 +8,7 @@ module Message
   end
 
   def to_json(*)
-    Yajl::Encoder.encode(as_json)
+    as_json.to_json
   end
 end
 

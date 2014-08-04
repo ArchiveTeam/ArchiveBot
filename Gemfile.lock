@@ -359,6 +359,7 @@ DEPENDENCIES
   erubis
   handlebars-source
   hiredis
+  json
   listen (~> 2.0)
   net-http-persistent
   psych (~> 2.0, >= 2.0.1)
@@ -374,4 +375,3 @@ DEPENDENCIES
   uuidtools
   webmachine!
   webmachine-sprockets!
-  yajl-ruby

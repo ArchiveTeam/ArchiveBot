@@ -1,4 +1,4 @@
-require 'yajl'
+require 'json'
 require 'logger'
 require 'net/http'
 require 'rack'
@@ -40,7 +40,7 @@ module ArchiveUrlGenerators::InternetArchive
         raise "Expected 2xx from IA advanced search, got #{resp.code} instead"
       end
 
-      json = Yajl::Parser.parse(resp.body)
+      json = JSON.parse(resp.body)
       docs = json['response']['docs']
 
       docs.each do |d|
