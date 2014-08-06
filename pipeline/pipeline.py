@@ -29,10 +29,10 @@ from archivebot.seesaw.tasks import GetItemFromQueue, StartHeartbeat, \
     SetWarcFileSizeInRedis, StopHeartbeat, MarkItemAsDone
 
 
-VERSION = "20140805.01"
+VERSION = "20140805.02"
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
 WPULL_EXE = find_executable('Wpull', None, [ './wpull' ])
-PHANTOMJS = find_executable('PhantomJS', '1.9.0',
+PHANTOMJS = find_executable('PhantomJS', '1.9.7',
         ['phantomjs', './phantomjs'], '-v')
 
 version_integer = (sys.version_info.major * 10) + sys.version_info.minor
