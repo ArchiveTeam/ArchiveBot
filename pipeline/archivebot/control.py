@@ -64,17 +64,29 @@ class Control(pykka.ThreadingActor):
         self.mark_aborted_script = self.redis.register_script(MARK_ABORTED_SCRIPT)
         self.log_script = self.redis.register_script(LOGGER_SCRIPT)
 
-    def reserve_job(self, pipeline_id):
+    def reserve_job(self, pipeline_id, ao_only):
+        candidates = [
+            'pending:%s' % pipeline_id,
+            'pending-ao'
+        ]
+
+        if not ao_only:
+            candidates.append('pending')
+
+        for queue in candidates:
+            ident = self.dequeue_item(queue)
+
+            if ident:
+                return self.complete_reservation(ident, pipeline_id)
+
+        return None, None
+
+    def dequeue_item(self, queue):
         with conn(self):
-            pipeline_queue = "pending:%s" % pipeline_id
-            ident = self.redis.rpoplpush(pipeline_queue, 'working')
+            return self.redis.rpoplpush(queue, 'working')
 
-            if ident == None:
-                ident = self.redis.rpoplpush('pending', 'working')
-
-            if ident == None:
-                return None, None
-
+    def complete_reservation(self, ident, pipeline_id):
+        with conn(self):
             self.redis.hmset(ident, dict(
                 started_at=time.time(),
                 pipeline_id=pipeline_id

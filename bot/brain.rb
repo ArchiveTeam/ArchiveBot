@@ -114,15 +114,7 @@ class Brain
       add_ignore_sets(m, job, ['global'])
 
       pipeline = h[:pipeline]
-
-      if depth == :shallow
-        # If this is a shallow depth job, it gets priority over jobs that go
-        # deeper.
-        job.queue(pipeline, :front)
-      else
-        # If this job goes deeper, shove it at the back of the queue.
-        job.queue(pipeline)
-      end
+      job.queue(pipeline)
     end
   end
 

@@ -44,17 +44,19 @@ class RetryableTask(Task):
 # ------------------------------------------------------------------------------
 
 class GetItemFromQueue(RetryableTask):
-    def __init__(self, control, pipeline_id, retry_delay=5):
+    def __init__(self, control, pipeline_id, retry_delay=5, ao_only=False):
         RetryableTask.__init__(self, 'GetItemFromQueue')
         self.control = control
         self.pipeline_id = pipeline_id
         self.retry_delay = retry_delay
         self.cancelable = True
         self.pipeline_queue = 'pending:%s' % self.pipeline_id
+        self.ao_only = ao_only
 
     def process(self, item):
         try: 
-            ident, job_data = self.control.reserve_job(self.pipeline_id).get()
+            ident, job_data = self.control.reserve_job(self.pipeline_id,
+                    self.ao_only).get()
 
             if ident == None:
                 self.schedule_retry(item)

@@ -108,6 +108,18 @@ As user archivebot, in second screen session:
 
 Adjust --concurrent as needed.
 
+If you want your pipeline to only handle !ao/!archiveonly jobs, run it
+with the AO_ONLY environment variable set:
+
+    AO_ONLY=1 ~/.local/bin/run-pipeline3 pipeline.py \
+      --disable-web-server --concurrent 2 ignorednick
+
+or
+
+    export AO_ONLY=1
+    ~/.local/bin/run-pipeline3 pipeline.py --disable-web-server \
+      --concurrent 2 ignorednick
+
 To gracefully stop:
 
     touch ~/ArchiveBot/pipeline/STOP

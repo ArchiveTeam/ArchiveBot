@@ -263,28 +263,22 @@ class Job < Struct.new(:uri, :redis)
     redis.expire(ignore_patterns_set_key, 5)
   end
 
-  def queue(destination = nil, direction = :back)
-    t = Time.now
-
+  def queue(destination = nil)
     queue = if destination
               "pending:#{destination}"
+            elsif depth == :shallow
+              'pending-ao'
             else
               'pending'
             end
 
-    case direction
-    when :back
-      redis.lpush(queue, ident)
-    when :front
-      redis.rpush(queue, ident)
-    else
-      raise 'Unknown queue end (known: :back, :front)'
-    end
-
-    redis.hset(ident, 'queued_at', t.to_i)
+    redis.lpush(queue, ident)
+    redis.hset(ident, 'queued_at', Time.now.to_i)
   end
 
   def register(depth, started_by, started_in, user_agent)
+    @depth = depth
+
     redis.pipelined do
       redis.hmset(ident, 'url', url,
                          'fetch_depth', depth,

@@ -29,10 +29,10 @@ from archivebot.seesaw.tasks import GetItemFromQueue, StartHeartbeat, \
     SetWarcFileSizeInRedis, StopHeartbeat, MarkItemAsDone
 
 
-VERSION = "20140804.01"
+VERSION = "20140805.01"
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
 WPULL_EXE = find_executable('Wpull', None, [ './wpull' ])
-PHANTOMJS = find_executable('PhantomJS', '1.9.7',
+PHANTOMJS = find_executable('PhantomJS', '1.9.0',
         ['phantomjs', './phantomjs'], '-v')
 
 version_integer = (sys.version_info.major * 10) + sys.version_info.minor
@@ -153,7 +153,7 @@ class WpullArgs(object):
 _, _, _, pipeline_id = monitoring.pipeline_id()
 
 pipeline = Pipeline(
-    GetItemFromQueue(control, pipeline_id),
+    GetItemFromQueue(control, pipeline_id, ao_only=env.get('AO_ONLY')),
     StartHeartbeat(control),
     SetFetchDepth(),
     PreparePaths(),
@@ -196,6 +196,10 @@ monitoring.start(pipeline, control, VERSION)
 
 print('*' * 60)
 print('Pipeline ID: %s' % pipeline_id)
+
+if env.get('AO_ONLY'):
+    print('!ao-only mode enabled')
+
 print('*' * 60)
 print()
 
