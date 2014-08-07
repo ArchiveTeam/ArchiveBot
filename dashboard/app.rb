@@ -72,10 +72,27 @@ App = Webmachine::Application.new do |app|
   end
 end
 
-LogReceiver.supervise_as :log_receiver, opts[:redis], SharedConfig.log_channel
-
 at_exit do
   Celluloid::Actor[:log_receiver].stop
 end
 
-App.run
+class Broadcaster
+  include Celluloid
+  include Celluloid::Notifications
+
+  def initialize(channel)
+    @channel = channel
+  end
+
+  def broadcast(msg)
+    publish(@channel, msg)
+  end
+end
+
+Broadcaster.supervise_as :broadcaster, SharedConfig.log_channel
+
+Thread.new { App.run }
+
+$stdin.each_line do |line|
+  Celluloid::Actor[:broadcaster].broadcast line.chomp
+end

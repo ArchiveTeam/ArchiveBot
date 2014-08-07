@@ -20,7 +20,7 @@ Calculations = Ember.Mixin.create
   ).property('r1xx', 'r2xx', 'r3xx', 'r4xx', 'r5xx', 'runk')
 
   bucketCount: (bucket) ->
-    @get(bucket) || 0
+    parseInt(@get(bucket), 10) || 0
 
 Dashboard.Job = Ember.Object.extend Calculations,
   idBinding: 'ident'

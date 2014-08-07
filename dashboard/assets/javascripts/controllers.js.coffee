@@ -81,7 +81,7 @@ Dashboard.JobController = Ember.ObjectController.extend
   messageProcessorBinding: 'parentController.messageProcessor'
 
   elapsedTimeAsMoment: (->
-    started = moment.unix @get('content.started_at')
+    started = moment.unix parseInt(@get('content.started_at'), 10)
     current = @get('currentTime')
 
     moment.duration(current - started)
