@@ -164,6 +164,7 @@ class Control(pykka.ThreadingActor):
                     'concurrency',
                     'settings_age',
                     'abort_requested',
+                    'suppress_ignore_reports',
                     'ignore_patterns_set_key')
 
             result = dict(
@@ -171,11 +172,12 @@ class Control(pykka.ThreadingActor):
                     delay_max=data[1],
                     concurrency=data[2],
                     age=data[3],
-                    abort_requested=data[4]
+                    abort_requested=data[4],
+                    suppress_ignore_reports=data[5]
                     )
 
-            if data[5]:
-                result['ignore_patterns'] = self.redis.smembers(data[5])
+            if data[6]:
+                result['ignore_patterns'] = self.redis.smembers(data[6])
             else:
                 result['ignore_patterns'] = []
 

@@ -79,7 +79,8 @@ def accept_url(url_info, record_info, verdict, reasons):
   pattern = settings.ignore_url_p(url).get()
 
   if pattern:
-    log_ignore(url, pattern)
+    if not settings.suppress_ignore_reports().get():
+      log_ignore(url, pattern)
     return False
 
   # If we get here, none of our ignores apply.  Return the original verdict.

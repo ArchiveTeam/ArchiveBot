@@ -34,6 +34,7 @@ class Settings(pykka.ThreadingActor):
         self.settings['age'] = int_or_none(new_settings['age'])
         self.settings['concurrency'] = int_or_none(new_settings['concurrency'])
         self.settings['abort_requested'] = new_settings['abort_requested']
+        self.settings['suppress_ignore_reports'] = new_settings['suppress_ignore_reports']
 
     def age(self):
         return self.settings['age'] or 0
@@ -78,6 +79,13 @@ class Settings(pykka.ThreadingActor):
 
         return self.settings['concurrency'] or 1
 
+    def suppress_ignore_reports(self):
+        '''
+        Whether ignore reports should be suppressed.
+        '''
+
+        return self.settings['suppress_ignore_reports']
+
     def inspect(self):
         '''
         Returns a string describing the current settings.
@@ -88,8 +96,13 @@ class Settings(pykka.ThreadingActor):
         
         report = str(self.concurrency()) + ' workers, '
         report += str(iglen) + ' ignores, '
-        report += 'delay min/max: [' + str(sl) + ', ' + str(sm) + '] ms'
-        
+        report += 'delay min/max: [' + str(sl) + ', ' + str(sm) + '] ms, '
+
+        if self.settings['suppress_ignore_reports']:
+            report += 'suppressing ignore reports'
+        else:
+            report += 'showing ignore reports'
+
         return report
 
 # ---------------------------------------------------------------------------

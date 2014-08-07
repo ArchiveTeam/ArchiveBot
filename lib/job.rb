@@ -124,6 +124,9 @@ class Job < Struct.new(:uri, :redis)
   # The score of the last trimmed log entry.
   attr_reader :last_trimmed_log_entry
 
+  # Whether ignore pattern reports should be reported or suppressed.
+  attr_reader :suppress_ignore_reports
+
   # A bucket for HTTP responses that aren't in the (100..599) range.
   class UnknownResponseCode
     def include?(resp_code)
@@ -236,6 +239,7 @@ class Job < Struct.new(:uri, :redis)
     @last_analyzed_log_entry = h['last_analyzed_log_entry'].to_f
     @last_broadcasted_log_entry = h['last_broadcasted_log_entry'].to_f
     @last_trimmed_log_entry = h['last_trimmed_log_entry'].to_f
+    @suppress_ignore_reports = h['suppress_ignore_reports']
 
     response_buckets.each do |_, bucket, attr|
       instance_variable_set("@#{attr}", h[bucket.to_s].to_i)
@@ -305,6 +309,16 @@ class Job < Struct.new(:uri, :redis)
 
   def set_concurrency(level)
     redis.hset(ident, 'concurrency', level)
+    job_parameters_changed
+  end
+
+  def toggle_ignores(enabled)
+    if enabled
+      redis.hdel(ident, 'suppress_ignore_reports')
+    else
+      redis.hset(ident, 'suppress_ignore_reports', true)
+    end
+
     job_parameters_changed
   end
 

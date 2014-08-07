@@ -202,6 +202,18 @@ class Brain
     reply m, "Added ignore pattern #{pattern} to job #{job.ident}."
   end
 
+  def toggle_ignores(m, job, enabled)
+    return unless authorized?(m)
+
+    job.toggle_ignores(enabled)
+
+    if enabled
+      reply m, "Showing ignore pattern reports for job #{job.ident}."
+    else
+      reply m, "Suppressing ignore pattern reports for job #{job.ident}."
+    end
+  end
+
   def add_ignore_sets(m, job, names)
     return unless authorized?(m)
 

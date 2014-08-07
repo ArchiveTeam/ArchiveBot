@@ -99,6 +99,12 @@ bot = Cinch::Bot.new do
     brain.find_job(ident, m) { |j| brain.initiate_abort(m, j) }
   end
 
+  on :message, /\A(?:!igrep|!ignorereports) (#{CommandPatterns::IDENT}) (on|off)\Z/ do |m, ident, mode|
+    brain.find_job(ident, m) do |j|
+      brain.toggle_ignores(m, j, mode == 'on' ? true : false)
+    end
+  end
+
   on :message, /\A!pending\Z/ do |m|
     brain.show_pending(m)
   end
