@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby
+
+require 'redis'
+require 'yajl'
+
+r = Redis.new(:driver => :hiredis, :url => ARGV[0])
+
+puts r.lrange('working', 0, -1)
