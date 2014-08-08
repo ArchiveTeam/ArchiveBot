@@ -190,13 +190,9 @@ select.sort-by {
   color: hsl(0, 100%, 50%);
 }
 
-.log-view.show-ignores .ignored {
+.log-view .ignored {
   display: block;
   color: hsl(0, 0%, 50%);
-}
-
-.log-view .ignored {
-  display: none;
 }
 
 .log-view a {

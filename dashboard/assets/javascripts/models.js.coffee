@@ -86,7 +86,7 @@ Dashboard.UnfreezeUpdateEntry = Ember.Object.extend
 
 Dashboard.MessageProcessor = Ember.Object.extend
   registerJob: (ident) ->
-    job = Dashboard.Job.create frozen: false, showIgnores: true, messageProcessor: this
+    job = Dashboard.Job.create frozen: false, messageProcessor: this
 
     @get('jobIndex')[ident] = job
     @get('jobs').unshiftObject job

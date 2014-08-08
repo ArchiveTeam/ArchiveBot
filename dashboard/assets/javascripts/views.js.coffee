@@ -37,7 +37,6 @@ Dashboard.ResponseDistributionView = Ember.View.extend
 
 Dashboard.LogView = Ember.View.extend
   classNames: ['terminal', 'log-view']
-  classNameBindings: ['showIgnores']
 
   templateName: 'log-view'
 
@@ -46,7 +45,6 @@ Dashboard.LogView = Ember.View.extend
   maxSize: 256
 
   frozenBinding: 'job.frozen'
-  showIgnoresBinding: 'job.showIgnores'
 
   onLatestEntriesChange: (->
     if @get('frozen')
