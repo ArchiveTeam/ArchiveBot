@@ -4,6 +4,10 @@ module JobStatusGeneration
 
     rep << "Job #{ident} (#{url}):"
 
+    if started_by
+      rep << "Started by #{started_by}."
+    end
+
     if aborted?
       rep << "Job aborted."
     elsif finished?
