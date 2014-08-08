@@ -365,7 +365,8 @@ class Job < Struct.new(:uri, :redis)
       'started_by' => started_by,
       'started_in' => started_in,
       'url' => url,
-      'warc_size' => warc_size
+      'warc_size' => warc_size,
+      'suppress_ignore_reports' => suppress_ignore_reports
     }.tap do |h|
       response_buckets.each do |_, bucket, attr|
         h[bucket.to_s] = send(attr)

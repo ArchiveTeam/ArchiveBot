@@ -172,8 +172,12 @@ select.sort-by {
   margin-right: 1em;
 }
 
-.job .response-rate {
+.job .response-rate, .job .response-count {
   margin-right: 1em;
+}
+
+.job .response-count {
+  display: inline;
 }
 
 .job .controls {

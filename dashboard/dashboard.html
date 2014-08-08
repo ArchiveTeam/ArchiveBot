@@ -163,12 +163,14 @@
     </script>
 
     <script type="text/x-handlebars" data-template-name="_response-count">
-      <span>1xx: {{r1xx}}</span>
-      <span>2xx: {{r2xx}}</span>
-      <span>3xx: {{r3xx}}</span>
-      <span>4xx: {{r4xx}}</span>
-      <span>5xx: {{r5xx}}</span>
-      <span>Unknown: {{runk}}</span>
+      <div class="response-count">
+        <span>1xx: {{r1xx}}</span>
+        <span>2xx: {{r2xx}}</span>
+        <span>3xx: {{r3xx}}</span>
+        <span>4xx: {{r4xx}}</span>
+        <span>5xx: {{r5xx}}</span>
+        <span>Unknown: {{runk}}</span>
+      </div>
     </script>
 
     <script type="text/x-handlebars" data-template-name="_job">
@@ -193,6 +195,12 @@
           {{#with job}}
             {{partial 'response-count'}}
           {{/with}}
+
+          {{#if job.suppress_ignore_reports}}
+            <span class="ignore-report-status">
+              Ignore reports suppressed
+            </span>
+          {{/if}}
           <div class="controls">
             {{view Dashboard.ToggleFreezeView jobBinding="job"}}
           </div>
