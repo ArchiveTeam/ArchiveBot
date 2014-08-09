@@ -260,15 +260,21 @@ class DownloadUrlFile(RetryableTask):
             return
 
         try:
-            r = requests.get(item['url_file'])
+            r = requests.get(item['url_file'], stream=True)
+
             item['source_url_file'] = \
                 '%(source_warc_file_prefix)s-urls.txt' % item
             item['target_url_file'] = \
                 '%(target_warc_file_prefix)s-urls.txt' % item
 
-            with open(item['source_url_file'], 'w') as f:
-                f.write(r.text)
+            # Files could be huge, and we do not care about their contents or
+            # encoding.  (We leave parsing the file to the crawler.)
+            with open(item['source_url_file'], 'wb') as f:
+                for chunk in r.iter_content(4096):
+                    f.write(chunk)
 
+            size = os.stat(item['source_url_file']).st_size
+            item.log_output('Downloaded {0} bytes from {1}'.format(size, item['url_file']))
             self.complete_item(item)
         except requests.exceptions.RequestException as e:
             item.log_output('Exception raised in DownloadUrlFile: {}'.format(e))
