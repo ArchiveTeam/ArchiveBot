@@ -79,6 +79,34 @@ describe CommandPatterns do
       md[1].should == 'http://www.example.com/'
       md[2].should == '--ignores=blogs --someother=param'
     end
+
+    it 'does not recognize !ao < URL' do
+      md = regex.match '!ao < http://www.example.com/urls.txt'
+
+      md.should be_nil
+    end
+
+    it 'does not recognize !archiveonly < URL' do
+      md = regex.match '!archiveonly < http://www.example.com/urls.txt'
+
+      md.should be_nil
+    end
+  end
+
+  describe '!ao < command' do
+    let(:regex) { CommandPatterns::ARCHIVEONLY_FILE }
+
+    it 'recognizes !archiveonly < http://www.example.com/urls.txt' do
+      md = regex.match '!archiveonly < http://www.example.com/urls.txt'
+
+      md[1].should == 'http://www.example.com/urls.txt'
+    end
+
+    it 'recognizes !ao < http://www.example.com/urls.txt' do
+      md = regex.match '!ao < http://www.example.com/urls.txt'
+
+      md[1].should == 'http://www.example.com/urls.txt'
+    end
   end
 
   shared_examples_for 'a set delay command' do |cmd|
