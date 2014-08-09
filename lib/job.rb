@@ -280,7 +280,7 @@ class Job < Struct.new(:uri, :redis)
     redis.hset(ident, 'queued_at', Time.now.to_i)
   end
 
-  def register(depth, started_by, started_in, user_agent)
+  def register(depth, started_by, started_in, user_agent, url_file)
     @depth = depth
 
     redis.pipelined do
@@ -292,6 +292,10 @@ class Job < Struct.new(:uri, :redis)
                          'slug', "#{uri.host}-#{depth}",
                          'started_by', started_by,
                          'started_in', started_in)
+
+      if url_file
+        redis.hset(ident, 'url_file', url)
+      end
 
       silently do
         set_delay(250, 375)

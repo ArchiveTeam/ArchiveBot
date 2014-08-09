@@ -37,7 +37,7 @@ class Brain
     end
   end
 
-  def request_archive(m, target, params, depth='inf')
+  def request_archive(m, target, params, depth='inf', url_file=false)
     # Is the user authorized?
     return unless authorized?(m)
 
@@ -96,12 +96,13 @@ class Brain
 
     # OK, add the job.
     batch_reply(m) do
-      job.register(depth, m.user.nick, m.channel.name, user_agent)
+      job.register(depth, m.user.nick, m.channel.name, user_agent, url_file)
+      urls_in = 'URLs in' if url_file
 
       if depth == :shallow
-        reply m, "Queued #{uri.to_s} for archival without recursion."
+        reply m, "Queued #{urls_in} #{uri.to_s} for archival without recursion."
       else
-        reply m, "Queued #{uri.to_s}."
+        reply m, "Queued #{urls_in} #{uri.to_s}."
       end
 
       if user_agent
