@@ -5,6 +5,7 @@ import json
 import os
 import shutil
 import time
+import requests
 
 from seesaw.task import Task, SimpleTask
 from tornado.ioloop import IOLoop
@@ -70,6 +71,7 @@ class GetItemFromQueue(RetryableTask):
                 item['started_by'] = job_data.get('started_by')
                 item['started_in'] = job_data.get('started_in')
                 item['url'] = job_data.get('url')
+                item['url_file'] = job_data.get('url_file')
                 item['grabber'] = job_data.get('grabber')
                 item['user_agent'] = job_data.get('user_agent')
                 item['phantomjs_wait'] = job_data.get('phantomjs_wait')
@@ -191,6 +193,10 @@ class MoveFiles(SimpleTask, TargetPathMixin):
         item['target_warc_files'] = self.rename_warc_files(item)
         item['all_target_files'] = item['target_warc_files'] + [item['target_info_file']]
 
+        if 'target_url_file' in item:
+            item['all_target_files'].append(item['target_url_file'])
+            os.rename(item['source_url_file'], item['target_url_file'])
+
         os.rename(item['source_info_file'], item['target_info_file'])
         shutil.rmtree("%(item_dir)s" % item)
 
@@ -233,11 +239,51 @@ class WriteInfo(SimpleTask):
                 'queued_at': item['queued_at'],
                 'started_by': item['started_by'],
                 'started_in': item['started_in'],
-                'url': item['url']
+                'url': item['url'],
+                'url_file': item['url_file']
         }
 
         with open(item['source_info_file'], 'w') as f:
             f.write(json.dumps(item['info'], indent=True))
+
+# ------------------------------------------------------------------------------
+
+class DownloadUrlFile(RetryableTask):
+    def __init__(self, control):
+        RetryableTask.__init__(self, 'DownloadUrlFile')
+
+        self.control = control
+
+    def process(self, item):
+        if not item['url_file']:
+            self.complete_item(item)
+            return
+
+        try:
+            r = requests.get(item['url_file'])
+            item['source_url_file'] = \
+                '%(source_warc_file_prefix)s-urls.txt' % item
+            item['target_url_file'] = \
+                '%(target_warc_file_prefix)s-urls.txt' % item
+
+            with open(item['source_url_file'], 'w') as f:
+                f.write(r.text)
+
+            self.complete_item(item)
+        except requests.exceptions.RequestException as e:
+            item.log_output('Exception raised in DownloadUrlFile: {}'.format(e))
+
+            # It's possible that the URL that was originally provided has gone
+            # bad in some way.  We re-read the URL to allow the job submitter
+            # to make changes.  If a URL is present, we replace the existing
+            # URL in the item.  If a URL is not present, we keep what we have.
+            item.log_output('Refreshing file URL from ArchiveBot')
+            new_url_file = self.control.get_url_file(item['ident']).get()
+
+            if new_url_file:
+                item['url_file'] = new_url_file
+
+            self.schedule_retry(item)
 
 # ------------------------------------------------------------------------------
 
