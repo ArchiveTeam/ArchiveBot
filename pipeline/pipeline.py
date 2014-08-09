@@ -25,8 +25,9 @@ from archivebot import shared_config
 from archivebot.seesaw import extensions
 from archivebot.seesaw import monitoring
 from archivebot.seesaw.tasks import GetItemFromQueue, StartHeartbeat, \
-    SetFetchDepth, PreparePaths, WriteInfo, RelabelIfAborted, MoveFiles, \
-    SetWarcFileSizeInRedis, StopHeartbeat, MarkItemAsDone
+    SetFetchDepth, PreparePaths, WriteInfo, DownloadUrlFile, \
+    RelabelIfAborted, MoveFiles, SetWarcFileSizeInRedis, StopHeartbeat, \
+    MarkItemAsDone
 
 
 VERSION = "20140807.01"
@@ -120,9 +121,13 @@ class WpullArgs(object):
             '--warc-header', 'operator: Archive Team',
             '--warc-header', 'downloaded-by: ArchiveBot',
             '--warc-header', 'archivebot-job-ident: %(ident)s' % item,
-            '--python-script', 'wpull_hooks.py',
-            '%(url)s' % item
+            '--python-script', 'wpull_hooks.py'
         ]
+
+        if 'source_url_file' in item:
+            self.add_args(args, ['-i', '%(source_url_file)s'], item)
+        else:
+            self.add_args(args, ['%(url)s'], item)
 
         self.add_args(args, ['%(recursive)s', '%(level)s', '%(depth)s'], item)
 
@@ -158,6 +163,7 @@ pipeline = Pipeline(
     SetFetchDepth(),
     PreparePaths(),
     WriteInfo(),
+    DownloadUrlFile(control),
     WgetDownload(WpullArgs(),
     accept_on_exit_code=AcceptAny(),
     env={
