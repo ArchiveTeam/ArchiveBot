@@ -29,7 +29,7 @@ from archivebot.seesaw.tasks import GetItemFromQueue, StartHeartbeat, \
     SetWarcFileSizeInRedis, StopHeartbeat, MarkItemAsDone
 
 
-VERSION = "20140807.01"
+VERSION = "20140810.01"
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
 WPULL_EXE = find_executable('Wpull', None, [ './wpull' ])
 PHANTOMJS = find_executable('PhantomJS', '1.9.7',
@@ -188,7 +188,6 @@ pipeline = Pipeline(
 def stop_control():
     control_ref.stop()
 
-atexit.register(stop_control)
 pipeline.on_cleanup += stop_control
 
 # Activate system monitoring.
