@@ -276,8 +276,10 @@ class Job < Struct.new(:uri, :redis)
               'pending'
             end
 
-    redis.lpush(queue, ident)
-    redis.hset(ident, 'queued_at', Time.now.to_i)
+    redis.multi do
+      redis.lpush(queue, ident)
+      redis.hset(ident, 'queued_at', Time.now.to_i)
+    end
   end
 
   def register(depth, started_by, started_in, user_agent)
