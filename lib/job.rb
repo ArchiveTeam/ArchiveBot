@@ -283,13 +283,19 @@ class Job < Struct.new(:uri, :redis)
   def register(depth, started_by, started_in, user_agent, url_file)
     @depth = depth
 
+    slug = if url_file
+             "urls-#{uri.host}-#{uri.path.split('/').last}-#{depth}"
+           else
+             "#{uri.host}-#{depth}"
+           end
+
     redis.pipelined do
       redis.hmset(ident, 'url', url,
                          'fetch_depth', depth,
                          'log_key', log_key,
                          'user_agent', user_agent,
                          'ignore_patterns_set_key', ignore_patterns_set_key,
-                         'slug', "#{uri.host}-#{depth}",
+                         'slug', slug,
                          'started_by', started_by,
                          'started_in', started_in)
 
