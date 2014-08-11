@@ -256,9 +256,10 @@ JobsTracker.prototype.handleJobData = function(jobData) {
 
 
 
-var JobRenderInfo = function(logWindow, logSegment, lineCountWindow, lineCountSegments) {
+var JobRenderInfo = function(logWindow, logSegment, statsElements, lineCountWindow, lineCountSegments) {
 	this.logWindow = logWindow;
 	this.logSegment = logSegment;
+	this.statsElements = statsElements;
 	this.lineCountWindow = lineCountWindow;
 	this.lineCountSegments = lineCountSegments;
 };
@@ -273,6 +274,20 @@ var Reusable = {
 	obj_className_line_stdout: {"className": "line-stdout"}
 };
 
+
+
+// http://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript
+var numberWithCommas = function(s) {
+	return s.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+};
+
+var formatMB = function(bytes) {
+	var s = "" + (Math.round(10 * bytes / (1024 * 1024)) / 10);
+	if(s.indexOf(".") == -1) {
+		s += ".0";
+	}
+	return numberWithCommas(s);
+};
 
 
 var JobsRenderer = function(container, historyLines) {
@@ -346,12 +361,21 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 		}
 	}
 
+	var statsElements = {
+		mb: h("span", {"id": "log-container-stats-mb-" + ident}, "?")
+	};
+
 	var logWindow = h('div', logWindowAttrs, logSegment);
 	var div = h(
 		'div',
 		{"id": "log-container-" + ident}, [
 			h("div", {"className": "job-header"}, [
-				h("a", {"className": "job-url", "href": jobData["url"]}, jobData["url"]),
+				h("span", null, [
+					h("a", {"className": "job-url", "href": jobData["url"]}, jobData["url"]),
+					text(" on " + new Date(jobData["started_at"] * 1000).toISOString().split("T")[0] + "; "),
+					statsElements.mb,
+					h("span", null, " MB")
+				]),
 				h("input", {
 					"className": "job-ident",
 					"type": "text",
@@ -365,7 +389,7 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 			logWindow
 		]
 	);
-	this.renderInfo[ident] = new JobRenderInfo(logWindow, logSegment, 0, [0]);
+	this.renderInfo[ident] = new JobRenderInfo(logWindow, logSegment, statsElements, 0, [0]);
 	this.container.insertBefore(div, beforeElement);
 }
 
@@ -463,6 +487,9 @@ JobsRenderer.prototype.handleData = function(data) {
 		// Scroll to the bottom
 		info.logWindow.scrollTop = info.logWindow.scrollHeight;
 	}
+
+	// Round off after one decimal point and add commas
+	info.statsElements.mb.textContent = formatMB(data["job_data"]["bytes_downloaded"]);
 };
 
 
