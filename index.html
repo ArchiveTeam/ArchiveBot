@@ -278,18 +278,16 @@ var Reusable = {
 
 // http://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript
 var numberWithCommas = function(s) {
+	assert(typeof s == "string", "pass string to numberWithCommas");
 	return s.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 };
 
-/**
- * Round off after one decimal point and add commas
- */
-var formatMB = function(bytes) {
-	var s = "" + (Math.round(10 * bytes / (1024 * 1024)) / 10);
+var toStringTenths = function(n) {
+	var s = "" + (Math.round(10 * n) / 10);
 	if(s.indexOf(".") == -1) {
 		s += ".0";
 	}
-	return numberWithCommas(s);
+	return s;
 };
 
 var getTotalResponses = function(jobData) {
@@ -377,7 +375,8 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 
 	var statsElements = {
 		mb: h("span", null, "?"),
-		responses: h("span", null, "?")
+		responses: h("span", null, "?"),
+		responsesPerSecond: h("span", null, "?")
 	};
 
 	var logWindow = h('div', logWindowAttrs, logSegment);
@@ -393,7 +392,9 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 					statsElements.mb,
 					h("span", null, " MB in "),
 					statsElements.responses,
-					" resp."
+					" resp. at ",
+					statsElements.responsesPerSecond,
+					"/s"
 				]),
 				h("input", {
 					"className": "job-ident",
@@ -507,8 +508,11 @@ JobsRenderer.prototype.handleData = function(data) {
 		info.logWindow.scrollTop = info.logWindow.scrollHeight;
 	}
 
-	info.statsElements.mb.textContent = formatMB(data["job_data"]["bytes_downloaded"]);
-	info.statsElements.responses.textContent = numberWithCommas(getTotalResponses(data["job_data"]).toString());
+	info.statsElements.mb.textContent = numberWithCommas(toStringTenths((parseInt(data["job_data"]["bytes_downloaded"]) / (1024 * 1024)).toString()));
+	var totalResponses = parseInt(getTotalResponses(data["job_data"]));
+	var duration = Date.now()/1000 - parseFloat(data["job_data"]["started_at"]);
+	info.statsElements.responses.textContent = numberWithCommas(totalResponses.toString());
+	info.statsElements.responsesPerSecond.textContent = toStringTenths(totalResponses/duration);
 };
 
 
