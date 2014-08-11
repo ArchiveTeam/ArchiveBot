@@ -281,6 +281,9 @@ var numberWithCommas = function(s) {
 	return s.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 };
 
+/**
+ * Round off after one decimal point and add commas
+ */
 var formatMB = function(bytes) {
 	var s = "" + (Math.round(10 * bytes / (1024 * 1024)) / 10);
 	if(s.indexOf(".") == -1) {
@@ -289,10 +292,21 @@ var formatMB = function(bytes) {
 	return numberWithCommas(s);
 };
 
+var getTotalResponses = function(jobData) {
+	return (
+		parseInt(jobData["r1xx"]) +
+		parseInt(jobData["r2xx"]) +
+		parseInt(jobData["r3xx"]) +
+		parseInt(jobData["r4xx"]) +
+		parseInt(jobData["r5xx"]) +
+		parseInt(jobData["runk"]));
+};
 
-var JobsRenderer = function(container, historyLines) {
+
+var JobsRenderer = function(container, historyLines, showNicks) {
 	this.container = container;
 	this.historyLines = historyLines;
+	this.showNicks = showNicks;
 	this.linesPerSegment = Math.max(1, Math.round(this.historyLines / 10));
 	this.jobs = new JobsTracker();
 	// ident -> JobRenderInfo
@@ -362,7 +376,8 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 	}
 
 	var statsElements = {
-		mb: h("span", {"id": "log-container-stats-mb-" + ident}, "?")
+		mb: h("span", null, "?"),
+		responses: h("span", null, "?")
 	};
 
 	var logWindow = h('div', logWindowAttrs, logSegment);
@@ -372,9 +387,13 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 			h("div", {"className": "job-header"}, [
 				h("span", null, [
 					h("a", {"className": "job-url", "href": jobData["url"]}, jobData["url"]),
-					text(" on " + new Date(jobData["started_at"] * 1000).toISOString().split("T")[0] + "; "),
+					text(
+						" on " + new Date(parseFloat(jobData["started_at"]) * 1000).toISOString().split("T")[0] +
+						(this.showNicks ? " by " + jobData["started_by"] : "") + "; "),
 					statsElements.mb,
-					h("span", null, " MB")
+					h("span", null, " MB in "),
+					statsElements.responses,
+					" resp."
 				]),
 				h("input", {
 					"className": "job-ident",
@@ -488,8 +507,8 @@ JobsRenderer.prototype.handleData = function(data) {
 		info.logWindow.scrollTop = info.logWindow.scrollHeight;
 	}
 
-	// Round off after one decimal point and add commas
 	info.statsElements.mb.textContent = formatMB(data["job_data"]["bytes_downloaded"]);
+	info.statsElements.responses.textContent = numberWithCommas(getTotalResponses(data["job_data"]).toString());
 };
 
 
@@ -558,11 +577,12 @@ var Dashboard = function() {
 
 	var historyLines = args["historyLines"] ? Number(args["historyLines"]) : 1000;
 	var batchTimeWhenVisible = args["batchTimeWhenVisible"] ? Number(args["batchTimeWhenVisible"]) : 125;
+	var showNicks = args["showNicks"] ? Number(args["showNicks"]) : false;
 	this.dumpTraffic = args["dumpMax"] && Number(args["dumpMax"]) > 0;
 	if(this.dumpTraffic) {
 		this.dumpMax = Number(args["dumpMax"]);
 	}
-	this.jobsRenderer = new JobsRenderer(byId('logs'), historyLines);
+	this.jobsRenderer = new JobsRenderer(byId('logs'), historyLines, showNicks);
 
 	var batchTimeWhenHidden = 5000;
 
