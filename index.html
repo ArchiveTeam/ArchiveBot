@@ -469,6 +469,14 @@ JobsRenderer.prototype.handleData = function(data) {
 
 	if(type == "download") {
 		var linesRendered = this._renderDownloadLine(data, info.logSegment);
+
+		// Update stats
+		info.statsElements.mb.textContent =
+			numberWithCommas(toStringTenths((parseInt(data["job_data"]["bytes_downloaded"]) / (1024 * 1024)).toString()));
+		var totalResponses = parseInt(getTotalResponses(data["job_data"]));
+		var duration = Date.now()/1000 - parseFloat(data["job_data"]["started_at"]);
+		info.statsElements.responses.textContent = numberWithCommas(totalResponses.toString());
+		info.statsElements.responsesPerSecond.textContent = toStringTenths(totalResponses/duration);
 	} else if(type == "stdout") {
 		var linesRendered = this._renderStdoutLine(data, info.logSegment);
 	} else {
@@ -507,12 +515,6 @@ JobsRenderer.prototype.handleData = function(data) {
 		// Scroll to the bottom
 		info.logWindow.scrollTop = info.logWindow.scrollHeight;
 	}
-
-	info.statsElements.mb.textContent = numberWithCommas(toStringTenths((parseInt(data["job_data"]["bytes_downloaded"]) / (1024 * 1024)).toString()));
-	var totalResponses = parseInt(getTotalResponses(data["job_data"]));
-	var duration = Date.now()/1000 - parseFloat(data["job_data"]["started_at"]);
-	info.statsElements.responses.textContent = numberWithCommas(totalResponses.toString());
-	info.statsElements.responsesPerSecond.textContent = toStringTenths(totalResponses/duration);
 };
 
 
