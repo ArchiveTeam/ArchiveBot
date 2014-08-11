@@ -386,9 +386,8 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 			h("div", {"className": "job-header"}, [
 				h("span", null, [
 					h("a", {"className": "job-url", "href": jobData["url"]}, jobData["url"]),
-					text(
-						" on " + new Date(parseFloat(jobData["started_at"]) * 1000).toISOString().split("T")[0] +
-						(this.showNicks ? " by " + jobData["started_by"] : "") + "; "),
+					" on " + new Date(parseFloat(jobData["started_at"]) * 1000).toISOString().split("T")[0] +
+						(this.showNicks ? " by " + jobData["started_by"] : "") + "; ",
 					statsElements.mb,
 					h("span", null, " MB in "),
 					statsElements.responses,
