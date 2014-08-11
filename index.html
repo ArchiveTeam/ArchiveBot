@@ -431,7 +431,7 @@ JobsRenderer.prototype._renderDownloadLine = function(data, logSegment) {
 };
 
 JobsRenderer.prototype._renderStdoutLine = function(data, logSegment) {
-	var cleanedMessage = data["message"].replace(/[\r\n]+$/, "").replace(/ \\u2018/g, ' \u2018').replace(/\\u2019 /g, '\u2019 ');
+	var cleanedMessage = data["message"].replace(/[\r\n]+$/, "");
 	var renderedLines = 0;
 	if(!cleanedMessage) {
 		return renderedLines;
