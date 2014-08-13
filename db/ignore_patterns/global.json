@@ -2,6 +2,7 @@
     "name": "global",
     "patterns": [
         "/(.*)/(\\1/){3,}",
+        "%25252525",
         "/App_Themes/.+/App_Themes/",
         "/bxSlider/.+/bxSlider/",
         "/bxSlider/bxSlider/",
@@ -33,9 +34,9 @@
         "/%27%20\\+[^/]+\\+%20%27",
         "/%22%20\\+[^/]+\\+%20%22",
         "^https?://www\\.google\\.com/recaptcha/api",
-        "^https?://((s-)?static\\.ak\\.fbcdn\\.net|(connect\\.)?facebook\\.com)/connect\\.php/js/rsrc\\.php",
+        "^https?://((s-)?static\\.ak\\.fbcdn\\.net|(connect\\.|www\\.)?facebook\\.com)/connect\\.php/js/.*rsrc\\.php",
         "^https?://www\\.flickr\\.com/change_language\\.gne",
-        "^https?://((www|web|wayback)\\.)?archive\\.org/",
+        "^https?://((www|web|web-beta|wayback)\\.)?archive\\.org/",
         "^http://b\\.scorecardresearch\\.com/",
         "^http://i\\.dev\\.cdn\\.turner\\.com/",
         "^http://video-subtitle\\.tedcdn\\.com/",
@@ -91,7 +92,11 @@
         "^http://b\\.scorecardresearch\\.com/",
         "^https?://(\\d|secure)\\.gravatar\\.com/avatar/ad516503a11cd5ca435acc9bb6523536",
         "^https?://.+/js-agent\\.newrelic\\.com/nr-411\\.min\\.js$",
-        "^https?://.+/stats\\.g\\.doubleclick\\.net/dc\\.js$"
+        "^https?://.+/stats\\.g\\.doubleclick\\.net/dc\\.js$",
+        "^http://www\\.khaleejtimes\\.com/.+/kt_.+/kt_",
+        "^http://www\\.khaleejtimes\\.com/.+/images/.+/images/",
+        "^http://www\\.khaleejtimes\\.com/.+/imgactv/.+/imgactv/",
+        "^http://photobucket\\.com/.+/albums/.+/albums/"
     ],
     "type": "ignore_patterns"
 }
