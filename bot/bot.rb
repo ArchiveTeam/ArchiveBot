@@ -55,6 +55,10 @@ bot = Cinch::Bot.new do
     brain.request_archive(m, target, params, :shallow)
   end
 
+  on :message, CommandPatterns::ARCHIVEONLY_FILE do |m, target, params|
+    brain.request_archive(m, target, params, :shallow, true)
+  end
+
   on :message, /\A\!status\Z/ do |m|
     brain.request_summary(m)
   end

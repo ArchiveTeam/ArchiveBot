@@ -158,6 +158,13 @@ class Control(pykka.ThreadingActor):
         except ConnectionError:
             pass
 
+    def get_url_file(self, ident):
+        try:
+            with conn(self):
+                return self.redis.hget(ident, 'url_file')
+        except ConnectionError:
+            pass
+
     def get_settings(self, ident):
         with conn(self):
             data = self.redis.hmget(ident, 'delay_min', 'delay_max',
