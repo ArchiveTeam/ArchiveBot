@@ -24,6 +24,7 @@ GEM
     rack (1.5.2)
     redis (3.1.0)
     timers (1.1.0)
+    trollop (2.0)
     yajl-ruby (1.2.1)
 
 PLATFORMS
@@ -31,6 +32,8 @@ PLATFORMS
 
 DEPENDENCIES
   analysand (~> 3.0.1)
+  celluloid
   hiredis
   redis
+  trollop
   yajl-ruby
