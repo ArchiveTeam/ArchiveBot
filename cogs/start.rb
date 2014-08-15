@@ -9,7 +9,6 @@ require File.expand_path('../../lib/redis_subscriber', __FILE__)
 require File.expand_path('../../lib/shared_config', __FILE__)
 require File.expand_path('../reaper', __FILE__)
 require File.expand_path('../twitter_tweeter', __FILE__)
-require File.expand_path('../archive_finder', __FILE__)
 
 opts = Trollop.options do
   opt :redis, 'URL of Redis server', :default => ENV['REDIS_URL'] || 'redis://localhost:6379/0'
@@ -35,8 +34,6 @@ db_uri = URI(opts[:db])
 
 Reaper.supervise_as :reaper, opts[:redis]
 TwitterTweeter.supervise_as :twitter_tweeter, opts[:redis], opts[:twitter_config]
-ArchiveFinder.supervise_as :archive_finder, opts[:redis], db_uri,
-  opts[:db_credentials]
 
 ignore_patterns_path = File.expand_path('../../db/ignore_patterns', __FILE__)
 
@@ -56,7 +53,6 @@ at_exit do
   Celluloid::Actor[:broadcaster].stop
   Celluloid::Actor[:ignore_pattern_updater].stop
   Celluloid::Actor[:user_agent_updater].stop
-  Celluloid::Actor[:archive_finder].stop
 end
 
 trap('INT') do
