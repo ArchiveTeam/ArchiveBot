@@ -97,12 +97,12 @@ class Brain
     # OK, add the job.
     batch_reply(m) do
       job.register(depth, m.user.nick, m.channel.name, user_agent, url_file)
-      urls_in = 'URLs in' if url_file
+      urls_in = 'URLs in ' if url_file
 
       if depth == :shallow
-        reply m, "Queued #{urls_in} #{uri.to_s} for archival without recursion."
+        reply m, "Queued #{urls_in}#{uri.to_s} for archival without recursion."
       else
-        reply m, "Queued #{urls_in} #{uri.to_s}."
+        reply m, "Queued #{urls_in}#{uri.to_s}."
       end
 
       if user_agent
