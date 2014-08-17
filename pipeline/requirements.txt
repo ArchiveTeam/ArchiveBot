@@ -1,4 +1,4 @@
-git+https://github.com/ArchiveTeam/seesaw-kit@python3/development#egg=seesaw
+seesaw>=0.3
 psutil
 pykka
 pyyaml
