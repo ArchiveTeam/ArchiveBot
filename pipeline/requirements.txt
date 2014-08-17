@@ -1,4 +1,4 @@
-seesaw>=0.3
+seesaw>=0.3.1
 psutil
 pykka
 pyyaml
