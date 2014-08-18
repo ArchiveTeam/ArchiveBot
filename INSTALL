@@ -11,6 +11,8 @@ To run the bot, you will need:
 - a CouchDB server
 - a Ruby 1.9 installation
 - Bundler
+- ExecJS supported runtime (for the dashboard)
+  (see https://github.com/sstephenson/execjs)
 
 (Little known fact: ArchiveBot is made to be as hard as possible to set
 up.)
