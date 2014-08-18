@@ -34,17 +34,19 @@ CURL or go to http://localhost:5984/_utils/index.html.)
 Once that's all in place, run the following:
 
     redis-server   # ensure it has no password
-    export REDIS_URL='redis://localhost:6379/0' # or whatever you need
-    export RSYNC_URL='rsync://yourupload.example.com/some-module/'
-    bundle exec ruby bot.rb -s 'irc://server.example.org:6667' \
-      -c '#archivebot'
+    bundle exec ruby bot.rb \
+      -s 'irc://your-irc-host:6667' \
+      -r 'redis://your-redis-host:6379/0' \
+      -c '#archivebot' -n 'YourBot'
 
 The bot should join the IRC channel.
 
 You can run the dashboard webapp on the same machine, or a different
 machine:
 
-    bundle exec ruby dashboard/app.rb --redis 'redis://10.0.0.1:6379/0'
+    bundle exec ruby dashboard/app.rb \
+      --redis 'redis://your-redis-host:6379/0' \
+      --url 'http://your-dashboard-host:8080'
 
 Configure twitter_conf.json if you want to post Twitter Tweets.
 
