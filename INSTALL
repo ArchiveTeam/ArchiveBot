@@ -50,11 +50,11 @@ Configure twitter_conf.json if you want to post Twitter Tweets.
 
 Run the cogs:
 
-    bundle exec ruby cogs/app.rb
+    bundle exec ruby cogs/start.rb
 
 To upgrade, run `git pull` and restart.
 
-bot.rb, dashboard/app.rb, and cogs/app.rb accept a --help option. Run
+bot.rb, dashboard/app.rb, and cogs/start.rb accept a --help option. Run
 them with --help to see accepted options.
 
 
