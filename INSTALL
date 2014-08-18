@@ -31,7 +31,8 @@ http://redis.io); version 2.8 or higher is recommended.
 
 Set up CouchDB by creating the "archivebot" and "archivebot_logs"
 databases. Upload the design documents from db/design_docs. (You can use
-CURL or go to http://localhost:5984/_utils/index.html.)
+CURL or go to http://localhost:5984/_utils/index.html and copy & paste
+the content of the JSON files into new documents manually.)
 
 Once that's all in place, run the following:
 
