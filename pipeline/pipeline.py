@@ -30,7 +30,7 @@ from archivebot.seesaw.tasks import GetItemFromQueue, StartHeartbeat, \
     MarkItemAsDone
 
 
-VERSION = "20140807.01"
+VERSION = "20140819.01"
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
 WPULL_EXE = find_executable('Wpull', None, [ './wpull' ])
 PHANTOMJS = find_executable('PhantomJS', '1.9.7',
@@ -192,6 +192,7 @@ pipeline = Pipeline(
 )
 
 def stop_control():
+    control.unregister_pipeline(pipe_id).get()
     control_ref.stop()
 
 atexit.register(stop_control)

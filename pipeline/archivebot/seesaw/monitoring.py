@@ -1,4 +1,3 @@
-import atexit
 import functools
 import hashlib
 import os
@@ -38,11 +37,6 @@ def start(pipeline, control, version):
         }
 
         control.pipeline_report(pipe_id, process_report).get()
-
-    def unregister():
-        control.unregister_pipeline(pipe_id).get()
-
-    atexit.register(unregister)
 
     cb = tornado.ioloop.PeriodicCallback(report, 1000)
     cb.start()
