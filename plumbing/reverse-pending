@@ -1,0 +1,17 @@
+#!/usr/bin/env ruby
+
+require 'redis'
+
+r = Redis.new(:driver => :hiredis, :url => ARGV[0])
+
+all = r.lrange('pending', 0, -1)
+
+r.watch('pending')
+
+res = r.multi do
+  all.each { |ident| r.lpush('pending-new', ident) }
+  r.del('pending')
+  r.rename('pending-new', 'pending')
+end
+
+exit res ? 0 : 1
