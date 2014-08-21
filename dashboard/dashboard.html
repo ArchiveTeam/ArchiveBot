@@ -192,6 +192,10 @@
             <i class="fa fa-flash"></i>
             {{job.responseRate}} resps/sec
           </span>
+          <span class="item-count" title="Number of items in queue">
+            <i class="fa fa-link"></i>
+            {{job.itemCount}}
+          </span>
           {{#with job}}
             {{partial 'response-count'}}
           {{/with}}

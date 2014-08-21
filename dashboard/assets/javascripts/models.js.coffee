@@ -6,6 +6,10 @@ Calculations = Ember.Mixin.create
     (@get('bytes_downloaded') / (1000 * 1000)).toFixed(2)
   ).property('bytes_downloaded')
 
+  itemCount: (->
+    (@get('items_queued') - @get('items_downloaded'))
+  ).property('items_downloaded', 'items_queued')
+
   # Sadly, there doesn't seem to be a way to reuse RESPONSE_BUCKETS in the
   # property path set.
   responseCountsByBucket: (->
@@ -34,7 +38,8 @@ Dashboard.Job = Ember.Object.extend Calculations,
   # Properties directly copied from a JSON representation of this job.
   directCopiedProperties: [
     'url', 'ident', 'aborted', 'finished', 'started_at',
-    'error_count', 'bytes_downloaded', 'suppress_ignore_reports'
+    'error_count', 'bytes_downloaded', 'suppress_ignore_reports',
+    'items_downloaded', 'items_queued'
   ].pushObjects(RESPONSE_BUCKETS)
 
   amplify: (json) ->

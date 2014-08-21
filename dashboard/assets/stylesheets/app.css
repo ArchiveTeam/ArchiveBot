@@ -168,7 +168,7 @@ select.sort-by {
   margin-top: 0;
 }
 
-.job .downloaded, .job .elapsed {
+.job .downloaded, .job .elapsed, .job .item-count {
   margin-right: 1em;
 }
 
