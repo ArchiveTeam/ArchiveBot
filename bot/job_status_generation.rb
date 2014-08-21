@@ -15,7 +15,7 @@ module JobStatusGeneration
     elsif pending?
       rep << "In queue."
     elsif in_progress?
-      rep << "In progress.  Downloaded #{mb_downloaded.round(2)} MB, #{error_count.to_i} errors encountered."
+      rep << "In progress.  Downloaded #{mb_downloaded.round(2)} MB, #{error_count.to_i} errors encountered, #{item_count} items queued."
       rep << "See the ArchiveBot dashboard for more information."
     end
 
@@ -30,6 +30,10 @@ module JobStatusGeneration
 
   def mb_downloaded
     bytes_downloaded.to_f / (1000 * 1000)
+  end
+
+  def item_count
+    items_queued.to_i - items_downloaded.to_i
   end
 
   def formatted_ttl(ttl)
