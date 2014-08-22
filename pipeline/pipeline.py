@@ -24,6 +24,7 @@ from archivebot import control
 from archivebot import shared_config
 from archivebot.seesaw import extensions
 from archivebot.seesaw import monitoring
+from archivebot.seesaw.wpull import WpullArgs
 from archivebot.seesaw.tasks import GetItemFromQueue, StartHeartbeat, \
     SetFetchDepth, PreparePaths, WriteInfo, DownloadUrlFile, \
     RelabelIfAborted, MoveFiles, SetWarcFileSizeInRedis, StopHeartbeat, \
@@ -92,68 +93,7 @@ class AcceptAny:
 DEFAULT_USER_AGENT = \
     'ArchiveTeam ArchiveBot/%s (wpull %s) and not Mozilla/5.0 ' \
     '(Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) ' \
-    'Chrome/36.0.1985.125 Safari/537.36'
-
-class WpullArgs(object):
-    def realize(self, item):
-        user_agent = item['user_agent'] or (DEFAULT_USER_AGENT % (VERSION,
-            wpull_version()))
-
-        args = [WPULL_EXE,
-            '-U', user_agent,
-            '--header', 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            '--quiet',
-            '-o', '%(item_dir)s/wpull.log' % item,
-            '--database', '%(item_dir)s/wpull.db' % item,
-            '--save-cookies', '%(cookie_jar)s' % item,
-            '--no-check-certificate',
-            '--delete-after',
-            '--no-robots',
-            '--span-hosts-allow=page-requisites,linked-pages',
-            '--page-requisites',
-            '--no-parent',
-            '--inet4-only',
-            '--timeout', '20',
-            '--tries', '3',
-            '--waitretry', '5',
-            '--warc-file', '%(item_dir)s/%(warc_file_base)s' % item,
-            '--warc-max-size', '10737418240',
-            '--warc-header', 'operator: Archive Team',
-            '--warc-header', 'downloaded-by: ArchiveBot',
-            '--warc-header', 'archivebot-job-ident: %(ident)s' % item,
-            '--python-script', 'wpull_hooks.py'
-        ]
-
-        if 'source_url_file' in item:
-            self.add_args(args, ['-i', '%(source_url_file)s'], item)
-        else:
-            self.add_args(args, ['%(url)s'], item)
-
-        self.add_args(args, ['%(recursive)s', '%(level)s', '%(depth)s'], item)
-
-        if item['grabber'] == 'phantomjs':
-            item.log_output('Telling wpull to use PhantomJS.')
-
-            phantomjs_args = [
-                '--phantomjs',
-                '--phantomjs-scroll', item['phantomjs_scroll'],
-                '--phantomjs-wait', item['phantomjs_wait']
-            ]
-
-            if item['no_phantomjs_smart_scroll']:
-                phantomjs_args.append('--no-phantomjs-smart-scroll')
-
-            item.log_output('Setting PhantomJS args: %s' % phantomjs_args)
-            args.extend(phantomjs_args)
-
-        return args
-
-    @classmethod
-    def add_args(cls, args, names, item):
-        for name in names:
-            value = name % item
-            if value:
-                args.append(value)
+    'Chrome/36.0.1985.125 Safari/537.36' % (VERSION, wpull_version())
 
 _, _, _, pipeline_id = monitoring.pipeline_id()
 
@@ -164,7 +104,8 @@ pipeline = Pipeline(
     PreparePaths(),
     WriteInfo(),
     DownloadUrlFile(control),
-    WgetDownload(WpullArgs(),
+    WgetDownload(
+    WpullArgs(default_user_agent=DEFAULT_USER_AGENT, wpull_exe=WPULL_EXE),
     accept_on_exit_code=AcceptAny(),
     env={
         'ITEM_IDENT': ItemInterpolation('%(ident)s'),

@@ -1,4 +1,4 @@
-seesaw>=0.3.1
+git+https://github.com/ArchiveTeam/seesaw-kit.git@f55422c9046b4b16454161e5f81ab320ad9cd9a3#egg=seesaw
 psutil
 pykka
 pyyaml
