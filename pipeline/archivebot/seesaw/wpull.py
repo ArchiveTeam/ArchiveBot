@@ -49,11 +49,6 @@ def make_args(item, default_user_agent, wpull_exe):
     # -----------------------------------------------------------------------
     if item.get('recursive'):
         add_args(args, ['--recursive', '--level', '%(depth)s'], item)
-        args.append('--span-hosts-allow')
-        args.append('page-requisites')
-    else:
-        args.append('--span-hosts-allow')
-        args.append('page-requisites')
 
     args.append('--span-hosts-allow')
 
