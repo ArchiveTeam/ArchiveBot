@@ -127,6 +127,15 @@ class Job < Struct.new(:uri, :redis)
   # Whether ignore pattern reports should be reported or suppressed.
   attr_reader :suppress_ignore_reports
 
+  # Current concurrency level.
+  attr_reader :concurrency
+
+  # Minimum inter-request delay in milliseconds.
+  attr_reader :delay_min
+
+  # Maximum inter-request delay in milliseconds.
+  attr_reader :delay_max
+
   # A bucket for HTTP responses that aren't in the (100..599) range.
   class UnknownResponseCode
     def include?(resp_code)
@@ -240,6 +249,9 @@ class Job < Struct.new(:uri, :redis)
     @last_broadcasted_log_entry = h['last_broadcasted_log_entry'].to_f
     @last_trimmed_log_entry = h['last_trimmed_log_entry'].to_f
     @suppress_ignore_reports = h['suppress_ignore_reports']
+    @concurrency = h['concurrency'].to_i
+    @delay_min = h['delay_min'].to_f
+    @delay_max = h['delay_max'].to_f
 
     response_buckets.each do |_, bucket, attr|
       instance_variable_set("@#{attr}", h[bucket.to_s].to_i)
@@ -378,7 +390,10 @@ class Job < Struct.new(:uri, :redis)
       'started_in' => started_in,
       'url' => url,
       'warc_size' => warc_size,
-      'suppress_ignore_reports' => suppress_ignore_reports
+      'suppress_ignore_reports' => suppress_ignore_reports,
+      'concurrency' => concurrency,
+      'delay_min' => delay_min,
+      'delay_max' => delay_max
     }.tap do |h|
       response_buckets.each do |_, bucket, attr|
         h[bucket.to_s] = send(attr)
