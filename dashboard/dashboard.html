@@ -179,7 +179,7 @@
           {{view Dashboard.ResponseDistributionView itemBinding="job"}}
         </header>
         {{view Dashboard.LogView jobBinding="job"}}
-        <section>
+        <section class="job-info">
           <span class="downloaded" title="Data transferred from target">
             <i class="fa fa-cloud-download"></i>
             {{job.mbDownloaded}} MB
@@ -190,7 +190,9 @@
           </span>
           <span class="response-rate" title="Response rate">
             <i class="fa fa-flash"></i>
-            {{job.responseRate}} resps/sec
+            {{job.responseRate}} r/s,
+            {{concurrency}} workers,
+            delay: [{{delay_min}}, {{delay_max}}] ms
           </span>
           {{#with job}}
             {{partial 'response-count'}}
