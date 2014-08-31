@@ -489,7 +489,8 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 		responses: h("span", null, "?"),
 		responsesPerSecond: h("span", null, "?"),
 		connections: h("span", null, "?"),
-		delay: h("span", null, "?")
+		delay: h("span", null, "?"),
+		ignores: h("span", null, "?")
 	};
 
 	var logWindow = h('div', logWindowAttrs, logSegment);
@@ -512,7 +513,8 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 					statsElements.connections,
 					" con. w/ ",
 					statsElements.delay,
-					" ms delay"
+					" ms delay; ",
+					statsElements.ignores
 				]),
 				h("input", {
 					"className": "job-ident",
@@ -597,31 +599,36 @@ JobsRenderer.prototype.handleData = function(data) {
 		return;
 	}
 
+	var totalResponses = parseInt(getTotalResponses(jobData));
 	if(type == "download") {
 		var linesRendered = this._renderDownloadLine(data, info.logSegment);
-
-		// Update stats
-		info.statsElements.mb.textContent =
-			numberWithCommas(toStringTenths((parseInt(jobData["bytes_downloaded"]) / (1024 * 1024)).toString()));
-		var totalResponses = parseInt(getTotalResponses(jobData));
-		var duration = Date.now()/1000 - parseFloat(jobData["started_at"]);
-		info.statsElements.responses.textContent = numberWithCommas(totalResponses.toString()) + " resp.";
-		info.statsElements.responses.title = getSummaryResponses(jobData);
-		info.statsElements.responsesPerSecond.textContent = toStringTenths(totalResponses/duration);
-		info.statsElements.connections.textContent = jobData["concurrency"];
-		var delayMin = parseInt(jobData["delay_min"]);
-		var delayMax = parseInt(jobData["delay_max"]);
-		if(delayMin == delayMax) {
-			info.statsElements.delay.textContent = delayMin;
-		} else {
-			info.statsElements.delay.textContent = delayMin + "-" + delayMax;
-		}
 	} else if(type == "stdout") {
 		var linesRendered = this._renderStdoutLine(data, info.logSegment);
 	} else if(type == "ignore") {
 		var linesRendered = this._renderIgnoreLine(data, info.logSegment);
 	} else {
 		assert(false, "line should not be reached");
+	}
+
+	// Update stats
+	info.statsElements.mb.textContent =
+		numberWithCommas(toStringTenths((parseInt(jobData["bytes_downloaded"]) / (1024 * 1024)).toString()));
+	info.statsElements.responses.textContent = numberWithCommas(totalResponses.toString()) + " resp.";
+	info.statsElements.responses.title = getSummaryResponses(jobData);
+	var duration = Date.now()/1000 - parseFloat(jobData["started_at"]);
+	info.statsElements.responsesPerSecond.textContent = toStringTenths(totalResponses/duration);
+	info.statsElements.connections.textContent = jobData["concurrency"];
+	var delayMin = parseInt(jobData["delay_min"]);
+	var delayMax = parseInt(jobData["delay_max"]);
+	if(delayMin == delayMax) {
+		info.statsElements.delay.textContent = delayMin;
+	} else {
+		info.statsElements.delay.textContent = delayMin + "-" + delayMax;
+	}
+	if(jobData["suppress_ignore_reports"]) {
+		info.statsElements.ignores.textContent = 'hiding ignores';
+	} else {
+		info.statsElements.ignores.textContent = 'showing ignores';
 	}
 
 	if(!linesRendered) {
