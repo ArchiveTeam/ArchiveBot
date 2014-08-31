@@ -609,11 +609,15 @@ JobsRenderer.prototype.handleData = function(data) {
 
 	// Update stats
 	info.statsElements.mb.textContent =
-		numberWithCommas(toStringTenths((parseInt(jobData["bytes_downloaded"]) / (1024 * 1024)).toString()));
-	info.statsElements.responses.textContent = numberWithCommas(totalResponses.toString()) + " resp.";
+		numberWithCommas(
+			toStringTenths(
+				(parseInt(jobData["bytes_downloaded"]) / (1024 * 1024)).toString()));
+	info.statsElements.responses.textContent =
+		numberWithCommas(totalResponses.toString()) + " resp.";
 	info.statsElements.responses.title = getSummaryResponses(jobData);
 	var duration = Date.now()/1000 - parseFloat(jobData["started_at"]);
-	info.statsElements.responsesPerSecond.textContent = toStringTenths(totalResponses/duration);
+	info.statsElements.responsesPerSecond.textContent =
+		toStringTenths(totalResponses/duration);
 	info.statsElements.connections.textContent = jobData["concurrency"];
 	var delayMin = parseInt(jobData["delay_min"]);
 	var delayMax = parseInt(jobData["delay_max"]);
@@ -724,8 +728,14 @@ var Dashboard = function() {
 		args["historyLines"] ?
 			Number(args["historyLines"]) :
 			navigator.userAgent.match(/Mobi/) ? 250 : 1000;
-	var batchTimeWhenVisible = args["batchTimeWhenVisible"] ? Number(args["batchTimeWhenVisible"]) : 125;
-	var showNicks = args["showNicks"] ? Number(args["showNicks"]) : false;
+	var batchTimeWhenVisible =
+		args["batchTimeWhenVisible"] ?
+			Number(args["batchTimeWhenVisible"]) :
+			125;
+	var showNicks =
+		args["showNicks"] ?
+			Number(args["showNicks"]) :
+			false;
 	this.dumpTraffic = args["dumpMax"] && Number(args["dumpMax"]) > 0;
 	if(this.dumpTraffic) {
 		this.dumpMax = Number(args["dumpMax"]);
