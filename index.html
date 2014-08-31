@@ -183,6 +183,9 @@ a.ignore {
 				To clear all finished jobs, reload the page.
 			</p>
 			<p>
+				Mouse over the job start date or the response count for additional information.
+			</p>
+			<p>
 				If your adblocker is enabled for this domain, you will see slower performance, and some URLs will not be displayed.
 			</p>
 			<p>
@@ -396,6 +399,17 @@ var getTotalResponses = function(jobData) {
 		parseInt(jobData["runk"]));
 };
 
+var getSummaryResponses = function(jobData) {
+	return (
+		"1xx: " + numberWithCommas(String(jobData["r1xx"])) + "\n" +
+		"2xx: " + numberWithCommas(String(jobData["r2xx"])) + "\n" +
+		"3xx: " + numberWithCommas(String(jobData["r3xx"])) + "\n" +
+		"4xx: " + numberWithCommas(String(jobData["r4xx"])) + "\n" +
+		"5xx: " + numberWithCommas(String(jobData["r5xx"])) + "\n" +
+		"Unknown: " + numberWithCommas(String(jobData["runk"])));
+};
+
+
 
 var JobsRenderer = function(container, historyLines, showNicks) {
 	this.container = container;
@@ -479,14 +493,16 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 	};
 
 	var logWindow = h('div', logWindowAttrs, logSegment);
+	var startedISOString = new Date(parseFloat(jobData["started_at"]) * 1000).toISOString();
 	var div = h(
 		'div',
 		{"id": "log-container-" + ident}, [
 			h("div", {"className": "job-header"}, [
 				h("span", {"className": "job-info"}, [
 					h("a", {"className": "job-url", "href": jobData["url"]}, jobData["url"]),
-					" on " + new Date(parseFloat(jobData["started_at"]) * 1000).toISOString().split("T")[0] +
-						(this.showNicks ? " by " + jobData["started_by"] : "") + "; ",
+					" on ",
+					h("span", {"title": startedISOString}, startedISOString.split("T")[0]),
+					(this.showNicks ? " by " + jobData["started_by"] : "") + "; ",
 					statsElements.mb,
 					h("span", null, " MB in "),
 					statsElements.responses,
@@ -562,17 +578,18 @@ JobsRenderer.prototype._renderStdoutLine = function(data, logSegment) {
 };
 
 JobsRenderer.prototype.handleData = function(data) {
-	var added = this.jobs.handleJobData(data["job_data"]);
+	var jobData = data["job_data"];
+	var added = this.jobs.handleJobData(jobData);
 	this.numCrawls.textContent = this.jobs.countActive();
 	if(added) {
-		this._createLogContainer(data["job_data"]);
+		this._createLogContainer(jobData);
 	}
 	var type = data["type"];
 	if(!(type == "download" || type == "stdout" || type == "ignore")) {
 		return;
 	}
 
-	var ident = data["job_data"]["ident"];
+	var ident = jobData["ident"];
 
 	var info = this.renderInfo[ident];
 	if(!info) {
@@ -585,14 +602,15 @@ JobsRenderer.prototype.handleData = function(data) {
 
 		// Update stats
 		info.statsElements.mb.textContent =
-			numberWithCommas(toStringTenths((parseInt(data["job_data"]["bytes_downloaded"]) / (1024 * 1024)).toString()));
-		var totalResponses = parseInt(getTotalResponses(data["job_data"]));
-		var duration = Date.now()/1000 - parseFloat(data["job_data"]["started_at"]);
+			numberWithCommas(toStringTenths((parseInt(jobData["bytes_downloaded"]) / (1024 * 1024)).toString()));
+		var totalResponses = parseInt(getTotalResponses(jobData));
+		var duration = Date.now()/1000 - parseFloat(jobData["started_at"]);
 		info.statsElements.responses.textContent = numberWithCommas(totalResponses.toString());
+		info.statsElements.responses.title = getSummaryResponses(jobData);
 		info.statsElements.responsesPerSecond.textContent = toStringTenths(totalResponses/duration);
-		info.statsElements.connections.textContent = data["job_data"]["concurrency"];
-		var delayMin = parseInt(data["job_data"]["delay_min"]);
-		var delayMax = parseInt(data["job_data"]["delay_max"]);
+		info.statsElements.connections.textContent = jobData["concurrency"];
+		var delayMin = parseInt(jobData["delay_min"]);
+		var delayMax = parseInt(jobData["delay_max"]);
 		if(delayMin == delayMax) {
 			info.statsElements.delay.textContent = delayMin;
 		} else {
