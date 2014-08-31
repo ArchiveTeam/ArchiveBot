@@ -66,36 +66,42 @@ html, body {
 .line-normal {
 	white-space: pre;
 	width: 100%;
+	padding: 0 0 0 4px;
 }
 
 .line-error {
 	white-space: pre;
 	width: 100%;
 	background-color: #FFB9B9;
+	padding: 0 0 0 4px;
 }
 
 .line-warning {
 	white-space: pre;
 	width: 100%;
 	background-color: #F7DB7D;
+	padding: 0 0 0 4px;
 }
 
 .line-redirect {
 	white-space: pre;
 	width: 100%;
 	background-color: #E7CEEA;
+	padding: 0 0 0 4px;
 }
 
 .line-ignore {
 	white-space: pre;
 	width: 100%;
 	color: #999;
+	padding: 0 0 0 4px;
 }
 
 .line-stdout {
 	white-space: pre;
 	width: 100%;
 	background-color: #DCD8CB;
+	padding: 0 0 0 4px;
 }
 
 a {
@@ -439,7 +445,7 @@ JobsRenderer.prototype._renderDownloadLine = function(data, logSegment) {
 		var attrs = Reusable.obj_className_line_normal;
 	}
 	logSegment.appendChild(h("div", attrs, [
-		" " + data["response_code"] + " " + data["wget_code"] + " ",
+		data["response_code"] + " " + data["wget_code"] + " ",
 		href(data["url"], data["url"])
 	]));
 	return 1;
@@ -448,7 +454,7 @@ JobsRenderer.prototype._renderDownloadLine = function(data, logSegment) {
 JobsRenderer.prototype._renderIgnoreLine = function(data, logSegment) {
 	var attrs = Reusable.obj_className_line_ignore;
 	logSegment.appendChild(h("div", attrs, [
-		h('span', null, "  IGNOR "),
+		h('span', null, " IGNOR "),
 		h('a', {"href": data["url"], "className": "ignore"}, data["url"]),
 		h('span', Reusable.obj_className_bold, " by "),
 		data["pattern"]
@@ -468,7 +474,7 @@ JobsRenderer.prototype._renderStdoutLine = function(data, logSegment) {
 		if(!line) {
 			continue;
 		}
-		logSegment.appendChild(h("div", Reusable.obj_className_line_stdout, " " + line));
+		logSegment.appendChild(h("div", Reusable.obj_className_line_stdout, line));
 		renderedLines += 1;
 	}
 	return renderedLines;
