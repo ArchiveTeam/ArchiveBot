@@ -411,8 +411,7 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 		responses: h("span", null, "?"),
 		responsesPerSecond: h("span", null, "?"),
 		connections: h("span", null, "?"),
-		delayMin: h("span", null, "?"),
-		delayMax: h("span", null, "?")
+		delay: h("span", null, "?")
 	};
 
 	var logWindow = h('div', logWindowAttrs, logSegment);
@@ -432,9 +431,7 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 					"/s; ",
 					statsElements.connections,
 					" con. w/ ",
-					statsElements.delayMin,
-					"-",
-					statsElements.delayMax,
+					statsElements.delay,
 					" ms delay"
 				]),
 				h("input", {
@@ -530,8 +527,13 @@ JobsRenderer.prototype.handleData = function(data) {
 		info.statsElements.responses.textContent = numberWithCommas(totalResponses.toString());
 		info.statsElements.responsesPerSecond.textContent = toStringTenths(totalResponses/duration);
 		info.statsElements.connections.textContent = data["job_data"]["concurrency"];
-		info.statsElements.delayMin.textContent = data["job_data"]["delay_min"];
-		info.statsElements.delayMax.textContent = data["job_data"]["delay_max"];
+		var delayMin = parseInt(data["job_data"]["delay_min"]);
+		var delayMax = parseInt(data["job_data"]["delay_max"]);
+		if(delayMin == delayMax) {
+			info.statsElements.delay.textContent = delayMin;
+		} else {
+			info.statsElements.delay.textContent = delayMin + "-" + delayMax;
+		}
 	} else if(type == "stdout") {
 		var linesRendered = this._renderStdoutLine(data, info.logSegment);
 	} else if(type == "ignore") {
