@@ -720,7 +720,10 @@ var Dashboard = function() {
 
 	var args = getQueryArgs();
 
-	var historyLines = args["historyLines"] ? Number(args["historyLines"]) : 1000;
+	var historyLines =
+		args["historyLines"] ?
+			Number(args["historyLines"]) :
+			navigator.userAgent.match(/Mobi/) ? 250 : 1000;
 	var batchTimeWhenVisible = args["batchTimeWhenVisible"] ? Number(args["batchTimeWhenVisible"]) : 125;
 	var showNicks = args["showNicks"] ? Number(args["showNicks"]) : false;
 	this.dumpTraffic = args["dumpMax"] && Number(args["dumpMax"]) > 0;
