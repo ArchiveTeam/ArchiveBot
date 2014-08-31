@@ -86,6 +86,12 @@ html, body {
 	background-color: #E7CEEA;
 }
 
+.line-ignore {
+	white-space: pre;
+	width: 100%;
+	color: #999;
+}
+
 .line-stdout {
 	white-space: pre;
 	width: 100%;
@@ -97,8 +103,16 @@ a {
 	text-decoration: none;
 }
 
+a.ignore {
+	color: #999 !important;
+}
+
 .underlined-a {
 	text-decoration: underline;
+}
+
+.bold {
+	font-weight: bold;
 }
 </style>
 <div class="padded-page">
@@ -271,7 +285,9 @@ var Reusable = {
 	obj_className_line_error: {"className": "line-error"},
 	obj_className_line_warning: {"className": "line-warning"},
 	obj_className_line_redirect: {"className": "line-redirect"},
-	obj_className_line_stdout: {"className": "line-stdout"}
+	obj_className_line_ignore: {"className": "line-ignore"},
+	obj_className_line_stdout: {"className": "line-stdout"},
+	obj_className_bold: {"className": "bold"}
 };
 
 
@@ -429,6 +445,17 @@ JobsRenderer.prototype._renderDownloadLine = function(data, logSegment) {
 	return 1;
 };
 
+JobsRenderer.prototype._renderIgnoreLine = function(data, logSegment) {
+	var attrs = Reusable.obj_className_line_ignore;
+	logSegment.appendChild(h("div", attrs, [
+		h('span', null, "  IGNOR "),
+		h('a', {"href": data["url"], "className": "ignore"}, data["url"]),
+		h('span', Reusable.obj_className_bold, " by "),
+		data["pattern"]
+	]));
+	return 1;
+};
+
 JobsRenderer.prototype._renderStdoutLine = function(data, logSegment) {
 	var cleanedMessage = data["message"].replace(/[\r\n]+$/, "");
 	var renderedLines = 0;
@@ -454,7 +481,7 @@ JobsRenderer.prototype.handleData = function(data) {
 		byId('num-crawls').textContent = this.jobs.sorted.length;
 	}
 	var type = data["type"];
-	if(!(type == "download" || type == "stdout")) {
+	if(!(type == "download" || type == "stdout" || type == "ignore")) {
 		return;
 	}
 
@@ -478,6 +505,8 @@ JobsRenderer.prototype.handleData = function(data) {
 		info.statsElements.responsesPerSecond.textContent = toStringTenths(totalResponses/duration);
 	} else if(type == "stdout") {
 		var linesRendered = this._renderStdoutLine(data, info.logSegment);
+	} else if(type == "ignore") {
+		var linesRendered = this._renderIgnoreLine(data, info.logSegment);
 	} else {
 		assert(false, "line should not be reached");
 	}
