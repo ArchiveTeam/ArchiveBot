@@ -620,16 +620,14 @@ JobsRenderer.prototype.handleData = function(data) {
 	info.statsElements.connections.textContent = jobData["concurrency"];
 	var delayMin = parseInt(jobData["delay_min"]);
 	var delayMax = parseInt(jobData["delay_max"]);
-	if(delayMin == delayMax) {
-		info.statsElements.delay.textContent = delayMin;
-	} else {
-		info.statsElements.delay.textContent = delayMin + "-" + delayMax;
-	}
-	if(jobData["suppress_ignore_reports"]) {
-		info.statsElements.ignores.textContent = 'hiding ignores';
-	} else {
-		info.statsElements.ignores.textContent = 'showing ignores';
-	}
+	info.statsElements.delay.textContent =
+		delayMin == delayMax ?
+			delayMin :
+			delayMin + "-" + delayMax;
+	info.statsElements.ignores.textContent =
+		jobData["suppress_ignore_reports"] ?
+			'hiding ignores' :
+			'showing ignores';
 
 	if(!linesRendered) {
 		return;
