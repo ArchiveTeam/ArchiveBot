@@ -265,11 +265,17 @@ var isSafari = navigator.userAgent.indexOf("Safari") != -1;
 var JobsTracker = function() {
 	this.known = {};
 	this.sorted = [];
+	this.finishedArray = [];
+	this.finishedSet = {};
+};
+
+JobsTracker.prototype.countActive = function() {
+	return this.sorted.length - this.finishedArray.length;
 };
 
 JobsTracker.prototype.resort = function() {
 	this.sorted.sort(function(a, b) { return a["started_at"] > b["started_at"] ? -1 : 1 });
-}
+};
 
 /**
  * Returns true if a new job was added
@@ -281,6 +287,10 @@ JobsTracker.prototype.handleJobData = function(jobData) {
 		this.known[ident] = true;
 		this.sorted.push(jobData);
 		this.resort();
+	}
+	if(jobData["finished"] && !(ident in this.finishedSet)) {
+		this.finishedSet[ident] = true;
+		this.finishedArray.push(ident);
 	}
 	return !alreadyKnown;
 };
@@ -343,6 +353,7 @@ var JobsRenderer = function(container, historyLines, showNicks) {
 	// ident -> JobRenderInfo
 	this.renderInfo = {};
 	this.mouseInside = null;
+	this.numCrawls = byId('num-crawls');
 };
 
 JobsRenderer.prototype._getNextJobInSorted = function(ident) {
@@ -499,9 +510,9 @@ JobsRenderer.prototype._renderStdoutLine = function(data, logSegment) {
 
 JobsRenderer.prototype.handleData = function(data) {
 	var added = this.jobs.handleJobData(data["job_data"]);
+	this.numCrawls.textContent = this.jobs.countActive();
 	if(added) {
 		this._createLogContainer(data["job_data"]);
-		byId('num-crawls').textContent = this.jobs.sorted.length;
 	}
 	var type = data["type"];
 	if(!(type == "download" || type == "stdout" || type == "ignore")) {
