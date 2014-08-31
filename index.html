@@ -506,7 +506,7 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 					statsElements.mb,
 					h("span", null, " MB in "),
 					statsElements.responses,
-					" resp. at ",
+					" at ",
 					statsElements.responsesPerSecond,
 					"/s; ",
 					statsElements.connections,
@@ -605,7 +605,7 @@ JobsRenderer.prototype.handleData = function(data) {
 			numberWithCommas(toStringTenths((parseInt(jobData["bytes_downloaded"]) / (1024 * 1024)).toString()));
 		var totalResponses = parseInt(getTotalResponses(jobData));
 		var duration = Date.now()/1000 - parseFloat(jobData["started_at"]);
-		info.statsElements.responses.textContent = numberWithCommas(totalResponses.toString());
+		info.statsElements.responses.textContent = numberWithCommas(totalResponses.toString()) + " resp.";
 		info.statsElements.responses.title = getSummaryResponses(jobData);
 		info.statsElements.responsesPerSecond.textContent = toStringTenths(totalResponses/duration);
 		info.statsElements.connections.textContent = jobData["concurrency"];
