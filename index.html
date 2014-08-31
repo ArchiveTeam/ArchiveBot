@@ -679,7 +679,7 @@ var Dashboard = function() {
 			}
 		}.bind(this), false);
 	}.bind(this);
-	xhr.open("GET", "http://arshboard.at.ninjawedding.org:4567/logs/recent");
+	xhr.open("GET", "http://arshboard.at.ninjawedding.org:4567/logs/recent?cb=" + Date.now() + Math.random());
 	xhr.send("");
 };
 
