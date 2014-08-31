@@ -32,6 +32,11 @@ html, body {
 	flex-flow: row nowrap;
 }
 
+.job-info {
+	white-space: nowrap;
+	overflow: hidden;
+}
+
 .job-url {
 	font-family: Arial, sans-serif;
 	font-size: 14px;
@@ -404,7 +409,10 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 	var statsElements = {
 		mb: h("span", null, "?"),
 		responses: h("span", null, "?"),
-		responsesPerSecond: h("span", null, "?")
+		responsesPerSecond: h("span", null, "?"),
+		connections: h("span", null, "?"),
+		delayMin: h("span", null, "?"),
+		delayMax: h("span", null, "?")
 	};
 
 	var logWindow = h('div', logWindowAttrs, logSegment);
@@ -412,7 +420,7 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 		'div',
 		{"id": "log-container-" + ident}, [
 			h("div", {"className": "job-header"}, [
-				h("span", null, [
+				h("span", {"className": "job-info"}, [
 					h("a", {"className": "job-url", "href": jobData["url"]}, jobData["url"]),
 					" on " + new Date(parseFloat(jobData["started_at"]) * 1000).toISOString().split("T")[0] +
 						(this.showNicks ? " by " + jobData["started_by"] : "") + "; ",
@@ -421,7 +429,13 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 					statsElements.responses,
 					" resp. at ",
 					statsElements.responsesPerSecond,
-					"/s"
+					"/s; ",
+					statsElements.connections,
+					" con. w/ ",
+					statsElements.delayMin,
+					"-",
+					statsElements.delayMax,
+					" ms delay"
 				]),
 				h("input", {
 					"className": "job-ident",
@@ -515,6 +529,9 @@ JobsRenderer.prototype.handleData = function(data) {
 		var duration = Date.now()/1000 - parseFloat(data["job_data"]["started_at"]);
 		info.statsElements.responses.textContent = numberWithCommas(totalResponses.toString());
 		info.statsElements.responsesPerSecond.textContent = toStringTenths(totalResponses/duration);
+		info.statsElements.connections.textContent = data["job_data"]["concurrency"];
+		info.statsElements.delayMin.textContent = data["job_data"]["delay_min"];
+		info.statsElements.delayMax.textContent = data["job_data"]["delay_max"];
 	} else if(type == "stdout") {
 		var linesRendered = this._renderStdoutLine(data, info.logSegment);
 	} else if(type == "ignore") {
