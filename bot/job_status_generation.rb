@@ -16,6 +16,7 @@ module JobStatusGeneration
       rep << "In queue."
     elsif in_progress?
       rep << "In progress.  Downloaded #{mb_downloaded.round(2)} MB, #{error_count.to_i} errors encountered."
+      rep << "#{concurrency.to_i} workers, delay: [#{delay_min.to_f}, #{delay_max.to_f}] ms."
       rep << "See the ArchiveBot dashboard for more information."
     end
 
