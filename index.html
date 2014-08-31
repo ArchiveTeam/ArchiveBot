@@ -23,6 +23,10 @@ html, body {
 	font-weight: bold;
 	font-size: 18px;
 	margin: 0 0 20px 0;
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-between;
+	flex-flow: row nowrap;
 }
 
 .job-header {
@@ -131,17 +135,60 @@ a.ignore {
 .bold {
 	font-weight: bold;
 }
+
+#help {
+	background-color: #FFF7E1;
+	font-family: Arial, sans-serif;
+	font-size: 14px;
+	border-radius: 5px;
+	padding: 0.01em 1em 0.01em 1em;
+	margin-bottom: 1em;
+}
+
+#help p {
+	padding: 0.20em 0 0.20em 0;
+}
+
+#help p a {
+	text-decoration: underline;
+}
+
+.undisplayed {
+	display: none;
+}
 </style>
 <div class="padded-page">
 	<div class="header">
-		<a href="http://archiveteam.org/index.php?title=ArchiveBot" class="underlined-a">ArchiveBot</a>
-		tracking ~<span id="num-crawls">0</span> crawls.<br>
+		<div>
+			<a href="http://archiveteam.org/index.php?title=ArchiveBot" class="underlined-a">ArchiveBot</a>
+			tracking ~<span id="num-crawls">0</span> crawls.<br>
+		</div>
+		<div>
+			<a href="javascript:ds.toggleHelp();" class="underlined-a">Help!</a>
+		</div>
 	</div>
 
 	<div id="critical-info">
 		<noscript>
 			Need JavaScript (ES5+) and WebSocket -&gt; TCP:4567
 		</noscript>
+		<div id="help" class="undisplayed">
+			<p>
+				This page shows all of the crawls that <a href="http://archiveteam.org/index.php?title=ArchiveBot">ArchiveBot</a> is currently running.
+			</p>
+			<p>
+				To pause scrolling, move your mouse inside a log window.
+			</p>
+			<p>
+				To clear all finished jobs, reload the page.
+			</p>
+			<p>
+				If your adblocker is enabled for this domain, you will see slower performance, and some URLs will not be displayed.
+			</p>
+			<p>
+				To use ArchiveBot, drop by <a href="http://chat.efnet.org:9090/?nick=&channels=%23archivebot&Login=Login">#archivebot</a> on EFNet.  <a href="https://raw2.github.com/ArchiveTeam/ArchiveBot/master/COMMANDS">Issue commands</a> by typing them into the channel.  You will need channel operator (@) or voice (+) status to issue archiving jobs; just ask for help or leave a message with the website you want to archive.
+			</p>
+		</div>
 	</div>
 	<div id="traffic"></div>
 	<div id="logs"></div>
@@ -720,6 +767,15 @@ Dashboard.prototype.connectWebSocket = function() {
 		console.log("Reconnecting in", delay, "ms");
 		setTimeout(this.connectWebSocket.bind(this), delay);
 	}.bind(this);
+};
+
+Dashboard.prototype.toggleHelp = function() {
+	var help = byId('help');
+	if(help.classList.contains('undisplayed')) {
+		help.classList.remove('undisplayed');
+	} else {
+		help.classList.add('undisplayed');
+	}
 };
 
 var ds = new Dashboard();
