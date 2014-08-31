@@ -587,10 +587,6 @@ JobsRenderer.prototype.handleData = function(data) {
 		this._createLogContainer(jobData);
 	}
 	var type = data["type"];
-	if(!(type == "download" || type == "stdout" || type == "ignore")) {
-		return;
-	}
-
 	var ident = jobData["ident"];
 
 	var info = this.renderInfo[ident];
@@ -607,7 +603,7 @@ JobsRenderer.prototype.handleData = function(data) {
 	} else if(type == "ignore") {
 		var linesRendered = this._renderIgnoreLine(data, info.logSegment);
 	} else {
-		assert(false, "line should not be reached");
+		assert(false, "Unexpected message type " + type);
 	}
 
 	// Update stats
@@ -628,10 +624,6 @@ JobsRenderer.prototype.handleData = function(data) {
 		jobData["suppress_ignore_reports"] ?
 			'hiding ignores' :
 			'showing ignores';
-
-	if(!linesRendered) {
-		return;
-	}
 
 	info.lineCountWindow += linesRendered;
 	info.lineCountSegments[info.lineCountSegments.length - 1] += linesRendered;
