@@ -166,6 +166,9 @@
   turning off ignore pattern reports may improve both the usefulness of
   the dashboard job log and the speed of the job.
 
+  This command is aliased as !igoff IDENT and !igon IDENT.  !igoff
+  suppresses reports; !igon shows reports.
+
 
 * !delay IDENT MIN MAX, !d IDENT MIN MAX: set inter-request delay
 
