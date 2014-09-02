@@ -1,14 +1,14 @@
 {
     "name": "reddit",
     "patterns": [
-        "^https?://www\\.reddit\\.com/gold\\?goldtype=",
-        "^https?://www\\.reddit\\.com/r/[^/]+/comments/[a-z0-9]+/[^/]+/[a-z0-9]+",
-        "^https?://www\\.reddit\\.com/r/[^/]+/comments/[a-z0-9]+/[^/]+/\\?sort=",
-        "^https?://www\\.reddit\\.com/r/[^/]+/(top|new|rising|controversial|gilded|ads)/.+[\\?&]after=",
-        "^https?://www\\.reddit\\.com/r/[^/]+/related/",
-        "^https?://www\\.reddit\\.com/r/[^/]+/search/?\\?",
-        "^https?://www\\.reddit\\.com/r/[^/]+/wiki/(revisions|discussions)/user/.+",
-        "^https?://www\\.reddit\\.com/.+/\\.rss$",
+        "^https?://(www|np)\\.reddit\\.com/gold\\?goldtype=",
+        "^https?://(www|np)\\.reddit\\.com/r/[^/]+/comments/[a-z0-9]+/[^/]+/[a-z0-9]+",
+        "^https?://(www|np)\\.reddit\\.com/r/[^/]+/comments/[a-z0-9]+/[^/]+/\\?sort=",
+        "^https?://(www|np)\\.reddit\\.com/r/[^/]+/(top|new|rising|controversial|gilded|ads)/.+[\\?&]after=",
+        "^https?://(www|np)\\.reddit\\.com/r/[^/]+/related/",
+        "^https?://(www|np)\\.reddit\\.com/r/[^/]+/search/?\\?",
+        "^https?://(www|np)\\.reddit\\.com/r/[^/]+/wiki/(revisions|discussions)/user/.+",
+        "^https?://(www|np)\\.reddit\\.com/.+/\\.rss$",
         "^https?://pixel\\.redditmedia\\.com/pixel/",
         "\\.reddit\\.com/message/compose/?\\?"
     ],
