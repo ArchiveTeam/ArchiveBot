@@ -22,6 +22,12 @@ module PipelineOptions
       reply m, "PhantomJS settings: #{job.phantomjs_info}"
     end
 
+    if params[:no_offsite_links]
+      job.no_offsite_links!
+
+      reply m, 'Offsite links will not be grabbed.'
+    end
+
     super
   end
 end
