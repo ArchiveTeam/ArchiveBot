@@ -18,6 +18,27 @@
       < Use !status 5sid4pgxkiu6zynhbt3q1gi2s for updates, !abort
         5sid4pgxkiu6zynhbt3q1gi2s to abort.
 
+    * --no-offsite-links: do not download links to offsite pages
+
+      > !archive http://example.blogspot.com/ncr
+      >    --no-offsite-links
+      < Archiving http://example.blogspot.com/ncr.
+      < Offsite links will not be grabbed.
+      < Use !status 5sid4pgxkiu6zynhbt3q1gi2s for updates, !abort
+        5sid4pgxkiu6zynhbt3q1gi2s to abort.
+
+      ArchiveBot's default behavior with !archive is to recursively
+      fetch all pages that are descendants of the starting URL, as well
+      as all linked pages and their requisites.  This is often useful
+      for preserving a page's context in time.  However, this can
+      sometimes result in an undesirably large archive.  Specifying
+      --no-offsite-links preserves recursive retrieval but does not
+      follow links to offsite hosts.
+
+      Please note that ArchiveBot considers www.example.com and
+      example.com to be different hosts, so if you have a website that
+      uses both, you should not specify --no-offsite-links.
+
     * --user-agent-alias ALIAS: specify a user-agent to use
 
       > !archive http://artscene.textfiles.com/litpacks/
