@@ -21,6 +21,10 @@ describe JobOptionsParser do
     parser.parse('--no-phantomjs-smart-scroll')[:no_phantomjs_smart_scroll].should be_true
   end
 
+  it 'recognizes --no-offsite-links' do
+    parser.parse('--no-offsite-links')[:no_offsite_links].should be_true
+  end
+
   it 'parses --ignore-sets=A,B to an array' do
     parser.parse('--ignore-sets=A,B')[:ignore_sets].should == ['A', 'B']
   end

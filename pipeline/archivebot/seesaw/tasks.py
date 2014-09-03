@@ -74,6 +74,7 @@ class GetItemFromQueue(RetryableTask):
                 item['url_file'] = job_data.get('url_file')
                 item['grabber'] = job_data.get('grabber')
                 item['user_agent'] = job_data.get('user_agent')
+                item['no_offsite_links'] = job_data.get('no_offsite_links')
                 item['phantomjs_wait'] = job_data.get('phantomjs_wait')
                 item['phantomjs_scroll'] = job_data.get('phantomjs_scroll')
                 item['no_phantomjs_smart_scroll'] = \
@@ -114,15 +115,10 @@ class SetFetchDepth(SimpleTask):
     def process(self, item):
         depth = item['fetch_depth']
 
-        # Unfortunately, depth zero means the same thing as infinite depth to
-        # wget, so we need to special-case it
         if depth == 'shallow':
-            item['recursive'] = ''
-            item['level'] = ''
-            item['depth'] = ''
+            item['recursive'] = False
         else:
-            item['recursive'] = '--recursive'
-            item['level'] = '--level'
+            item['recursive'] = True
             item['depth'] = depth
 
 # ------------------------------------------------------------------------------

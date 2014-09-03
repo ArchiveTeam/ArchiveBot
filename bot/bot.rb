@@ -109,6 +109,14 @@ bot = Cinch::Bot.new do
     end
   end
 
+  on :message, /\A!igoff (#{CommandPatterns::IDENT})\Z/ do |m, ident|
+    brain.find_job(ident, m) { |j| brain.toggle_ignores(m, j, false) }
+  end
+
+  on :message, /\A!igon (#{CommandPatterns::IDENT})\Z/ do |m, ident|
+    brain.find_job(ident, m) { |j| brain.toggle_ignores(m, j, true) }
+  end
+
   on :message, /\A!pending\Z/ do |m|
     brain.show_pending(m)
   end

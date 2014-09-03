@@ -346,6 +346,10 @@ class Job < Struct.new(:uri, :redis)
     job_parameters_changed
   end
 
+  def no_offsite_links!
+    redis.hset(ident, 'no_offsite_links', true)
+  end
+
   def yahoo
     silently do
       set_delay(0, 0)

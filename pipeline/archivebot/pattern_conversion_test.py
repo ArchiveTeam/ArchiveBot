@@ -1,7 +1,7 @@
 import re
 import unittest
 
-from pattern_conversion import lua_pattern_to_regex
+from .pattern_conversion import lua_pattern_to_regex
 
 
 class Test(unittest.TestCase):
