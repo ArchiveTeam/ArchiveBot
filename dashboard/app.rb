@@ -1,6 +1,3 @@
-require 'coffee-script'
-require 'ember/source'
-require 'handlebars/source'
 require 'json'
 require 'trollop'
 require 'uri'
@@ -12,7 +9,6 @@ require File.expand_path('../../lib/shared_config', __FILE__)
 require File.expand_path('../log_actors', __FILE__)
 require File.expand_path('../resources/dashboard', __FILE__)
 require File.expand_path('../resources/feed', __FILE__)
-require File.expand_path('../resources/history', __FILE__)
 require File.expand_path('../resources/pipeline', __FILE__)
 require File.expand_path('../resources/recent', __FILE__)
 
@@ -28,22 +24,13 @@ bind_uri = URI.parse(opts[:url])
 DB = Couchdb.new(URI(opts[:db]), opts[:db_credentials])
 R = Redis.new(:url => opts[:redis], :driver => :hiredis)
 
-History.db = DB
 Pipeline.redis = R
 Recent.redis = R
 Feed.redis = R
 
 App = Webmachine::Application.new do |app|
   sprockets = Sprockets::Environment.new
-  sprockets.append_path(File.expand_path('../assets/stylesheets', __FILE__))
-  sprockets.append_path(File.expand_path('../assets/javascripts', __FILE__))
-  sprockets.append_path(File.expand_path('../assets/fonts', __FILE__))
   sprockets.append_path(File.expand_path('../assets/images', __FILE__))
-  sprockets.append_path(File.expand_path('../vendor/assets/fonts', __FILE__))
-  sprockets.append_path(File.expand_path('../vendor/assets/javascripts', __FILE__))
-  sprockets.append_path(File.expand_path('../vendor/assets/stylesheets', __FILE__))
-  sprockets.append_path(File.dirname(Ember::Source.bundled_path_for('ember.js')))
-  sprockets.append_path(File.dirname(Handlebars::Source.bundled_path))
 
   resource = Webmachine::Sprockets.resource_for(sprockets)
 
@@ -63,7 +50,6 @@ App = Webmachine::Application.new do |app|
   app.routes do
     add [], Dashboard
     add ['logs', 'recent'], Recent
-    add ['histories'], History
     add ['pipelines'], Pipeline
     add ['assets', '*'], resource
     add ['feed', 'archivebot.rss'], RssFeed
