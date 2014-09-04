@@ -1,5 +1,4 @@
 import os
-import pykka
 import re
 import redis
 import threading
@@ -10,7 +9,7 @@ from .. import shared_config
 from ..control import ConnectionError
 from redis.exceptions import ConnectionError as RedisConnectionError
 
-class Settings(pykka.ThreadingActor):
+class Settings(object):
     '''
     Synchronizes access to job settings.
     '''
@@ -206,7 +205,7 @@ class ListenerWorkerThread(threading.Thread):
         msg = p.get_message(ignore_subscribe_messages=True)
 
         if msg:
-            old_age = self.settings.age().get()
+            old_age = self.settings.age()
             new_age = int(msg['data'])
 
             if old_age < new_age:
@@ -220,9 +219,9 @@ class ListenerWorkerThread(threading.Thread):
             self.last_run = now
 
     def update_settings(self):
-        new_settings = self.control.get_settings(self.job_ident).get()
+        new_settings = self.control.get_settings(self.job_ident)
 
-        self.settings.update_settings(new_settings).get()
+        self.settings.update_settings(new_settings)
 
 # ---------------------------------------------------------------------------
 

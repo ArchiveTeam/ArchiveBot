@@ -65,8 +65,7 @@ PIPELINE_CHANNEL = shared_config.pipeline_channel()
 # CONTROL CONNECTION
 # ------------------------------------------------------------------------------
 
-control_ref = control.Control.start(REDIS_URL, LOG_CHANNEL, PIPELINE_CHANNEL)
-control = control_ref.proxy()
+control = control.Control(REDIS_URL, LOG_CHANNEL, PIPELINE_CHANNEL)
 
 # ------------------------------------------------------------------------------
 # SEESAW EXTENSIONS
@@ -137,8 +136,7 @@ pipeline = Pipeline(
 )
 
 def stop_control():
-    control.unregister_pipeline(pipeline_id).get()
-    control_ref.stop()
+    control.unregister_pipeline(pipeline_id)
 
 pipeline.on_cleanup += stop_control
 
