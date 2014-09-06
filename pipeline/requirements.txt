@@ -3,7 +3,7 @@ psutil
 pykka
 pyyaml
 git+https://github.com/andymccurdy/redis-py.git@f96e46b971a5bb66ab5f94ba87ab3e092e5f01ac#egg=redis
-wpull>=0.33.1
+git+https://github.com/ludios/wpull.git@hax-6#egg=wpull
 sqlalchemy
 hiredis
 requests
