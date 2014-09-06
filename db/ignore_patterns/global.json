@@ -106,6 +106,7 @@
         "^http://iwiw\\.hu/pages/share/share\\.jsp\\?",
         "^http://memori(\\.qip)?\\.ru/link/\\?",
         "^http://wow\\.ya\\.ru/posts_add_link\\.xml\\?",
+        "^https?://connect\\.mail\\.ru/share\\?",
         "^http://zakladki\\.yandex\\.ru/newlink\\.xml\\?",
         "^https?://www\\.google\\.com/(reader/link\\?|buzz/post\\?)",
         "^https?://mail\\.google\\.com/mail/",
@@ -114,13 +115,14 @@
         "^http://b\\.scorecardresearch\\.com/",
         "^https?://(www|ssl)\\.google-analytics\\.com/__utm\\.gif",
         "^https?://p\\.opt\\.fimserve\\.com/",
-        "^https?://(\\d|secure)\\.gravatar\\.com/avatar/ad516503a11cd5ca435acc9bb6523536",
+        "^https?://(\\d|www|secure)\\.gravatar\\.com/avatar/ad516503a11cd5ca435acc9bb6523536",
         "^https?://.+/js-agent\\.newrelic\\.com/nr-\\d{3}(\\.min)?\\.js$",
         "^https?://.+/stats\\.g\\.doubleclick\\.net/dc\\.js$",
         "^http://www\\.khaleejtimes\\.com/.+/kt_.+/kt_",
         "^http://www\\.khaleejtimes\\.com/.+/images/.+/images/",
         "^http://www\\.khaleejtimes\\.com/.+/imgactv/.+/imgactv/",
-        "^http://photobucket\\.com/.+/albums/.+/albums/"
+        "^http://photobucket\\.com/.+/albums/.+/albums/",
+        "^https://static\\.licdn\\.com/sc/p/com\\.linkedin\\.nux:nux-static-content\\+[\\d\\.]+/f//nux-frontend/"
     ],
     "type": "ignore_patterns"
 }
