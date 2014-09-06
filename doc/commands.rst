@@ -226,7 +226,7 @@ are, well, ignored::
 Ignore set definitions can be found under db/ignore_patterns/.
 
 
-ingorereports
+ignorereports
 =============
 
 ``!ignorereports IDENT on|off``, ``!igrep IDENT on|off``
