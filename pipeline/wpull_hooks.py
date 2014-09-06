@@ -74,6 +74,10 @@ def is_warning(statcode, err):
 
 def accept_url(url_info, record_info, verdict, reasons):
   url = url_info['url']
+  if url.startswith('data:'):
+    # data: URLs aren't something you can grab, so drop them to avoid ignore
+    # checking and ignore logging.
+    return False
 
   # Does the URL match any of the ignore patterns?
   pattern = settings.ignore_url_p(url).get()
