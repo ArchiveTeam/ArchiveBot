@@ -35,7 +35,7 @@ VERSION = "20140907.01"
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
 WPULL_EXE = find_executable('Wpull', None, [ './wpull' ])
 PHANTOMJS = find_executable('PhantomJS', '1.9.7',
-        ['phantomjs', './phantomjs'], '-v')
+        ['phantomjs', './phantomjs', '../phantomjs'], '-v')
 
 version_integer = (sys.version_info.major * 10) + sys.version_info.minor
 
@@ -107,14 +107,16 @@ pipeline = Pipeline(
     WriteInfo(),
     DownloadUrlFile(control),
     WgetDownload(
-    WpullArgs(default_user_agent=DEFAULT_USER_AGENT, wpull_exe=WPULL_EXE),
-    accept_on_exit_code=AcceptAny(),
-    env={
-        'ITEM_IDENT': ItemInterpolation('%(ident)s'),
-        'LOG_KEY': ItemInterpolation('%(log_key)s'),
-        'REDIS_URL': REDIS_URL,
-        'PATH': os.environ['PATH']
-    }),
+        WpullArgs(default_user_agent=DEFAULT_USER_AGENT, wpull_exe=WPULL_EXE,
+                  phantomjs_exe=PHANTOMJS),
+        accept_on_exit_code=AcceptAny(),
+        env={
+            'ITEM_IDENT': ItemInterpolation('%(ident)s'),
+            'LOG_KEY': ItemInterpolation('%(log_key)s'),
+            'REDIS_URL': REDIS_URL,
+            'PATH': os.environ['PATH']
+        }
+    ),
     RelabelIfAborted(control),
     WriteInfo(),
     MoveFiles(),
