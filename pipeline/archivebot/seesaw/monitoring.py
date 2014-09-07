@@ -1,10 +1,13 @@
 import functools
 import hashlib
 import os
-import psutil
 import socket
+import sys
 import time
+
+import psutil
 import tornado.ioloop
+
 
 def pipeline_id():
     hostname = socket.gethostname()
@@ -16,7 +19,8 @@ def pipeline_id():
     m.update(pipeline_id_input.encode('ascii'))
     return (pid, hostname, fqdn, 'pipeline:%s' % m.hexdigest())
 
-def start(pipeline, control, version):
+
+def start(pipeline, control, version, nickname):
     pid, hostname, fqdn, pipe_id = pipeline_id()
 
     def report():
@@ -26,6 +30,7 @@ def start(pipeline, control, version):
         process_report = {
             'id': pipe_id,
             'hostname': hostname,
+            'nickname': nickname,
             'fqdn': fqdn,
             'pid': pid,
             'version': version,
@@ -33,7 +38,8 @@ def start(pipeline, control, version):
             'mem_available': mu.available,
             'disk_usage': du.percent,
             'disk_available': du.free,
-            'ts': int(time.time())
+            'ts': int(time.time()),
+            'python': sys.version,
         }
 
         control.pipeline_report(pipe_id, process_report).get()
