@@ -288,7 +288,7 @@ Some jobs generate ignore patterns at high speed.  For these jobs,
 turning off ignore pattern reports may improve both the usefulness of
 the dashboard job log and the speed of the job.
 
-This command is aliased as !igoff IDENT and !igon IDENT.  !igoff
+This command is aliased as ``!igoff IDENT`` and ``!igon IDENT``.  !igoff
 suppresses reports; !igon shows reports.
 
 
