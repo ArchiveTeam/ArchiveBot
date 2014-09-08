@@ -108,7 +108,7 @@ pipeline = Pipeline(
     DownloadUrlFile(control),
     WgetDownload(
         WpullArgs(default_user_agent=DEFAULT_USER_AGENT, wpull_exe=WPULL_EXE,
-                  phantomjs_exe=PHANTOMJS),
+                  phantomjs_exe=PHANTOMJS, finished_warcs_dir=os.environ["FINISHED_WARCS_DIR"]),
         accept_on_exit_code=AcceptAny(),
         env={
             'ITEM_IDENT': ItemInterpolation('%(ident)s'),
