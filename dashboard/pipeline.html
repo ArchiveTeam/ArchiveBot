@@ -48,30 +48,28 @@ html, body {
 		var timestampThreshold = 60 * 5 * 1000;
 
 		/**
-		 * Formats a byte quantity in TB, GB, or MB.  Uses SI
-		 * interpretation of T, G, and M prefixes, i.e. 10^12, 10^9, and
-		 * 10^6.
+		 * Formats a byte quantity in TiB, GiB, or MiB.
 		 *
-		 * If the quantity is >= 1 TB, we format as TB.
-		 * If the quantity is >= 1 GB, we format as GB.
-		 * Otherwise, we format as MB.
+		 * If the quantity is >= 1 TiB, we format as TiB.
+		 * If the quantity is >= 1 GiB, we format as GiB.
+		 * Otherwise, we format as MiB.
 		 *
 		 * Returns [quantity, suffix], where quantity is a number and
 		 * suffix is a string.
 		 */
 
 		var formatBytes = (function () {
-			var terabyte = Math.pow(10, 12);
-			var gigabyte = Math.pow(10, 9);
-			var megabyte = Math.pow(10, 6);
+			var tebibyte = Math.pow(2, 40);
+			var gibibyte = Math.pow(2, 30);
+			var mebibyte = Math.pow(2, 20);
 
 			return function(bytes) {
-				if (bytes >= terabyte) {
-					return [bytes / terabyte, 'TB'];
-				} else if (bytes >= gigabyte) {
-					return [bytes / gigabyte, 'GB'];
+				if (bytes >= tebibyte) {
+					return [bytes / tebibyte, 'TiB'];
+				} else if (bytes >= gibibyte) {
+					return [bytes / gibibyte, 'GiB'];
 				} else {
-					return [bytes / megabyte, 'MB'];
+					return [bytes / mebibyte, 'MiB'];
 				}
 			}
 		})();
