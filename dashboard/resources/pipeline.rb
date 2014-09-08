@@ -1,25 +1,5 @@
 require 'webmachine'
 
-##
-# A PublicPipelineRecord differs from a plain pipeline record in that it throws
-# away potentially confidential information.
-class PublicPipelineRecord
-  attr_reader :hash
-  def initialize(hash)
-    @hash = hash
-  end
-
-  def to_json(*)
-    {
-      'mem_usage' => hash['mem_usage'],
-      'disk_usage' => hash['disk_usage'],
-      'pipeline_id' => hash['id'],
-      'version' => hash['version'],
-      'timestamp' => hash['ts'],
-    }.to_json
-  end
-end
-
 class Pipeline < Webmachine::Resource
   class << self
     attr_accessor :redis
@@ -33,21 +13,43 @@ class Pipeline < Webmachine::Resource
   end
 
   def to_json
-    run_query.to_json
+    { 'pipelines' => PipelineCollection.new(self.class.redis).to_a }.to_json
   end
 
   def to_html
     File.read(File.expand_path('../../pipeline.html', __FILE__))
   end
+end
 
-  def run_query
-    r = self.class.redis
+##
+# SCANs for pipeline keys.  When it finds one it hasn't yet seen, performs an
+# HGETALL on that key and yields the resulting hash.
+class PipelineCollection
+  include Enumerable
 
-    pipeline_ids = r.smembers('pipelines')
-    pipeline_data = r.pipelined do
-      pipeline_ids.map { |p_id| r.hgetall(p_id) }
+  attr_reader :redis
+
+  def initialize(redis)
+   @redis = redis
+  end
+
+  def each
+    return to_enum unless block_given?
+
+    cursor = 0
+    seen = {}
+
+    loop do
+      cursor, keys = redis.scan(cursor, match: 'pipeline:*')
+
+      keys.each do |k|
+        next if seen[k]
+
+        seen[k] = true
+        yield redis.hgetall(k)
+      end
+
+      break if cursor.to_i == 0
     end
-
-    { 'pipelines' => pipeline_data.map { |pd| PublicPipelineRecord.new(pd) } }
   end
 end

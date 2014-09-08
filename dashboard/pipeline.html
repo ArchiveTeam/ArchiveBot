@@ -52,7 +52,7 @@ html, body {
 					"dataSrc" : "pipelines"
 				},
 				"columns" : [ {
-					"data" : "pipeline_id"
+					"data" : "id"
 				}, {
 					"data" : "version"
 				}, {
@@ -70,9 +70,10 @@ html, body {
 						}
 					}
 				}, {
-					"data" : "timestamp",
+					"data" : "ts",
 					"createdCell" : function(td, cellData, rowData, row, col) {
-						var cellDate = new Date(cellData * 1000);
+						var timestamp = parseInt(cellData, 10);
+						var cellDate = new Date(timestamp * 1000);
 						var dateNow = new Date();
 						
 						$(td).attr('title', cellDate.toLocaleString());
