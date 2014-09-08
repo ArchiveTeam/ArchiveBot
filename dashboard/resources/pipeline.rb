@@ -5,7 +5,6 @@ require 'webmachine'
 # away potentially confidential information.
 class PublicPipelineRecord
   attr_reader :hash
-
   def initialize(hash)
     @hash = hash
   end
@@ -15,7 +14,8 @@ class PublicPipelineRecord
       'mem_usage' => hash['mem_usage'],
       'disk_usage' => hash['disk_usage'],
       'pipeline_id' => hash['id'],
-      'version' => hash['version']
+      'version' => hash['version'],
+      'timestamp' => hash['ts'],
     }.to_json
   end
 end
@@ -26,11 +26,18 @@ class Pipeline < Webmachine::Resource
   end
 
   def content_types_provided
-    [['application/json', :to_json]]
+    [
+      ['application/json', :to_json],
+      ['text/html', :to_html]
+    ]
   end
 
   def to_json
     run_query.to_json
+  end
+
+  def to_html
+    File.read(File.expand_path('../../pipeline.html', __FILE__))
   end
 
   def run_query
