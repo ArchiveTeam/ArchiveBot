@@ -6,7 +6,7 @@ def add_args(args, names, item):
         if value:
             args.append(value)
 
-def make_args(item, default_user_agent, wpull_exe):
+def make_args(item, default_user_agent, wpull_exe, phantomjs_exe):
     # -----------------------------------------------------------------------
     # BASE ARGUMENTS
     # -----------------------------------------------------------------------
@@ -33,7 +33,8 @@ def make_args(item, default_user_agent, wpull_exe):
         '--warc-header', 'operator: Archive Team',
         '--warc-header', 'downloaded-by: ArchiveBot',
         '--warc-header', 'archivebot-job-ident: %(ident)s' % item,
-        '--python-script', 'wpull_hooks.py'
+        '--python-script', 'wpull_hooks.py',
+        '--phantomjs-exe', phantomjs_exe,
     ]
 
     if item['url'].startswith("http://www.reddit.com/") or \
@@ -84,11 +85,13 @@ def make_args(item, default_user_agent, wpull_exe):
 # ---------------------------------------------------------------------------
 
 class WpullArgs(object):
-    def __init__(self, *, default_user_agent, wpull_exe):
+    def __init__(self, *, default_user_agent, wpull_exe, phantomjs_exe):
         self.default_user_agent = default_user_agent
         self.wpull_exe = wpull_exe
+        self.phantomjs_exe = phantomjs_exe
 
     def realize(self, item):
-        return make_args(item, self.default_user_agent, self.wpull_exe)
+        return make_args(item, self.default_user_agent, self.wpull_exe,
+                         self.phantomjs_exe)
 
 # vim:ts=4:sw=4:et:tw=78

@@ -1,0 +1,103 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>ArchiveBot Pipeline Monitor Station</title>
+<link rel="stylesheet" type="text/css"
+	href="//cdn.datatables.net/1.10.2/css/jquery.dataTables.css">
+<style>
+html, body {
+	background-color: #D4E9E7;
+	color: black;
+}
+
+.cell_warn_higlight {
+	background-color: #FFC2E3 !important;
+	font-weight: bold;
+}
+</style>
+</head>
+<body>
+	<noscript>Please enable JavaScript or request this resource
+		as application/json for raw data.</noscript>
+	<table id="pipeline_table" class="display">
+		<thead>
+			<tr>
+				<th>Pipeline</th>
+				<th>Version</th>
+				<th>Memory %</th>
+				<th>Disk %</th>
+				<th>Timestamp</th>
+			</tr>
+		</thead>
+		<tbody>
+		</tbody>
+	</table>
+	<script
+		src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+	<script type="text/javascript" charset="utf8"
+		src="//cdn.datatables.net/1.10.2/js/jquery.dataTables.js"></script>
+	<script type="text/javascript" src="/assets/jquery.timeago.js"></script>
+	<script>
+		var table;
+		var reloadInterval = 60 * 1000;
+		var memThreshold = 90;
+		var diskThreshold = 90;
+		var timestampThreshold = 60 * 5 * 1000;
+		function initTable() {
+			table = $('#pipeline_table').DataTable({
+				"paging" : false,
+				"ajax" : {
+					"url" : "/pipelines",
+					"dataSrc" : "pipelines"
+				},
+				"columns" : [ {
+					"data" : "pipeline_id"
+				}, {
+					"data" : "version"
+				}, {
+					"data" : "mem_usage",
+					"createdCell" : function(td, cellData, rowData, row, col) {
+						if (cellData > memThreshold) {
+							$(td).addClass('cell_warn_higlight');
+						}
+					}
+				}, {
+					"data" : "disk_usage",
+					"createdCell" : function(td, cellData, rowData, row, col) {
+						if (cellData > diskThreshold) {
+							$(td).addClass('cell_warn_higlight');
+						}
+					}
+				}, {
+					"data" : "timestamp",
+					"createdCell" : function(td, cellData, rowData, row, col) {
+						var cellDate = new Date(cellData * 1000);
+						var dateNow = new Date();
+						
+						$(td).attr('title', cellDate.toLocaleString());
+						$(td).text(jQuery.timeago(cellDate));
+						
+						if (dateNow.getTime() - cellDate.getTime() > timestampThreshold) {
+							$(td).addClass('cell_warn_higlight');
+						}
+					},
+					"className" : "dateFormatable"
+				}, ]
+			});
+
+			setTimeout(reloadTable, reloadInterval);
+
+			$('.dateFormatable').timeago();
+		}
+
+		function reloadTable() {
+			table.ajax.reload(function() {
+				setTimeout(reloadTable, reloadInterval);
+			})
+		}
+
+		$(document).ready(initTable);
+	</script>
+</body>
+</head>
