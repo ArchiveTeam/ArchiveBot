@@ -240,6 +240,9 @@ information, see:
 http://docs.python.org/3/howto/regex.html#regex-howto
 http://docs.python.org/3/library/re.html#regular-expression-syntax
 
+To ignore everything except URLs on domain1.com or domain2.com,
+use pattern ``^(?!https?://(domain1\.com|domain2\.com)/).*``
+
 
 unignore
 ========
