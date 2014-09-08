@@ -31,6 +31,7 @@ Feed.redis = R
 App = Webmachine::Application.new do |app|
   sprockets = Sprockets::Environment.new
   sprockets.append_path(File.expand_path('../assets/images', __FILE__))
+  sprockets.append_path(File.expand_path('../assets/scripts', __FILE__))
 
   resource = Webmachine::Sprockets.resource_for(sprockets)
 
