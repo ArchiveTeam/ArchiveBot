@@ -17,7 +17,7 @@ class TestWpullArgs(unittest.TestCase):
         }
 
         self.args = WpullArgs(default_user_agent='Default/1',
-                wpull_exe='/bin/wpull')
+                wpull_exe='/bin/wpull', phantomjs_exe='/usr/bin/phantomjs')
 
     def test_user_agent_can_be_set(self):
         self.item['user_agent'] = 'Frobinator/20.1'

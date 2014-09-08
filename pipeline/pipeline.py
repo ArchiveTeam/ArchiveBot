@@ -31,11 +31,11 @@ from archivebot.seesaw.tasks import GetItemFromQueue, StartHeartbeat, \
     MarkItemAsDone
 
 
-VERSION = "20140902.01"
+VERSION = "20140907.02"
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
 WPULL_EXE = find_executable('Wpull', None, [ './wpull' ])
 PHANTOMJS = find_executable('PhantomJS', '1.9.7',
-        ['phantomjs', './phantomjs'], '-v')
+        ['phantomjs', './phantomjs', '../phantomjs'], '-v')
 
 version_integer = (sys.version_info.major * 10) + sys.version_info.minor
 
@@ -53,6 +53,8 @@ if StrictVersion(seesaw.__version__) < StrictVersion("0.1.8b1"):
         "Needs seesaw@python3/development version 0.1.8b1 or higher. "
         "You have version {0}".format(seesaw.__version__)
     )
+
+assert downloader not in ('ignorednick', 'YOURNICKHERE'), 'please use a real nickname'
 
 RSYNC_URL = env['RSYNC_URL']
 REDIS_URL = env['REDIS_URL']
@@ -105,14 +107,16 @@ pipeline = Pipeline(
     WriteInfo(),
     DownloadUrlFile(control),
     WgetDownload(
-    WpullArgs(default_user_agent=DEFAULT_USER_AGENT, wpull_exe=WPULL_EXE),
-    accept_on_exit_code=AcceptAny(),
-    env={
-        'ITEM_IDENT': ItemInterpolation('%(ident)s'),
-        'LOG_KEY': ItemInterpolation('%(log_key)s'),
-        'REDIS_URL': REDIS_URL,
-        'PATH': os.environ['PATH']
-    }),
+        WpullArgs(default_user_agent=DEFAULT_USER_AGENT, wpull_exe=WPULL_EXE,
+                  phantomjs_exe=PHANTOMJS),
+        accept_on_exit_code=AcceptAny(),
+        env={
+            'ITEM_IDENT': ItemInterpolation('%(ident)s'),
+            'LOG_KEY': ItemInterpolation('%(log_key)s'),
+            'REDIS_URL': REDIS_URL,
+            'PATH': os.environ['PATH']
+        }
+    ),
     RelabelIfAborted(control),
     WriteInfo(),
     MoveFiles(),
@@ -139,7 +143,7 @@ def stop_control():
 pipeline.on_cleanup += stop_control
 
 # Activate system monitoring.
-monitoring.start(pipeline, control, VERSION)
+monitoring.start(pipeline, control, VERSION, downloader)
 
 print('*' * 60)
 print('Pipeline ID: %s' % pipeline_id)
