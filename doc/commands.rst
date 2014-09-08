@@ -179,6 +179,51 @@ PhantomJS mode is enabled if any of the --*phantomjs* options are
 passed.
 
 
+archiveonly < FILE
+==================
+
+``!archiveonly < URL``, ``!ao < URL``
+   archive each URL in the text file at URL::
+
+        > !archiveonly < https://www.example.com/some-file.txt
+        < Archiving URLs in https://www.example.com/some-file.txt without
+          recursion.
+        > Use !status byu50bzfdbnlyl6mrgn6dd24h for updates, !abort
+          byu50bzfdbnlyl6mrgn6dd24h to abort.
+
+   The text file should list one URL per line.  Both UNIX and Windows line
+   endings are accepted.
+
+
+Accepted parameters
++++++++++++++++++++
+
+``!archiveonly < URL`` accepts the same parameters as ``!archive`` and
+``!archiveonly``.  A quick reference:
+
+``--ignore-sets SET1,...,SETN``
+    specify sets of URL patterns to ignore
+
+``--user-agent-alias ALIAS``
+    specify a user-agent to use
+
+``--pipeline PIPELINE_ID``
+    specify pipeline to use
+
+``--phantomjs``
+    access pages via PhantomJS
+
+``--phantomjs-wait``
+    set number of seconds between PhantomJS requests; defaults to 2.0
+
+``--phantomjs-scroll``
+    maximum number of times to scroll a page in PhantomJS; defaults to 100
+
+``--no-phantomjs-smart-scroll``
+    disable PhantomJS' end-of-page
+    detection and always scroll --phantomjs-scroll number of
+    times; off by default
+
 ignore
 ======
 
@@ -243,7 +288,7 @@ Some jobs generate ignore patterns at high speed.  For these jobs,
 turning off ignore pattern reports may improve both the usefulness of
 the dashboard job log and the speed of the job.
 
-This command is aliased as !igoff IDENT and !igon IDENT.  !igoff
+This command is aliased as ``!igoff IDENT`` and ``!igon IDENT``.  !igoff
 suppresses reports; !igon shows reports.
 
 
