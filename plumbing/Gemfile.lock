@@ -32,7 +32,6 @@ PLATFORMS
 
 DEPENDENCIES
   analysand (~> 3.0.1)
-  celluloid
   hiredis
   redis
   trollop

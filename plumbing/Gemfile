@@ -5,7 +5,3 @@ gem 'yajl-ruby'
 gem 'redis'
 gem 'hiredis'
 gem 'trollop'
-
-group :legacy do
-  gem 'celluloid'
-end
