@@ -18,9 +18,14 @@
 
 2. More info
 
-For the user's guide, read the COMMANDS file.
-For a half-assed installation and operation guide, read INSTALL.
-For a polished installation guide, submit a pull request.
+ArchiveBot has two major backend components: the control node, which
+runs the IRC interface and bookkeeping programs, and the crawlers, which
+do all the Web crawling.  ArchiveBot users communicate with ArchiveBot
+by issuing commands in an IRC channel.
+
+User's guide: http://archivebot.readthedocs.org/en/latest/
+Control node installation guide: INSTALL.backend
+Crawler installation guide: INSTALL.pipeline
 
 3. License
 
