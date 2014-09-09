@@ -57,7 +57,7 @@ class GetItemFromQueue(RetryableTask):
     def process(self, item):
         try: 
             ident, job_data = self.control.reserve_job(self.pipeline_id,
-                    self.ao_only).get()
+                    self.ao_only)
 
             if ident == None:
                 self.schedule_retry(item)
@@ -104,7 +104,7 @@ class StartHeartbeat(SimpleTask):
         cb.start()
 
     def send_heartbeat(self, item):
-        self.control.heartbeat(item['ident']).get()
+        self.control.heartbeat(item['ident'])
 
 # ------------------------------------------------------------------------------
 
@@ -165,7 +165,7 @@ class RelabelIfAborted(RetryableTask, TargetPathMixin):
 
     def process(self, item):
         try:
-            if self.control.is_aborted(item['ident']).get():
+            if self.control.is_aborted(item['ident']):
                 item['aborted'] = True
                 item['warc_file_base'] = '%(warc_file_base)s-aborted' % item
 
@@ -280,7 +280,7 @@ class DownloadUrlFile(RetryableTask):
             # to make changes.  If a URL is present, we replace the existing
             # URL in the item.  If a URL is not present, we keep what we have.
             item.log_output('Refreshing file URL from ArchiveBot')
-            new_url_file = self.control.get_url_file(item['ident']).get()
+            new_url_file = self.control.get_url_file(item['ident'])
 
             if new_url_file:
                 item['url_file'] = new_url_file
@@ -297,7 +297,7 @@ class SetWarcFileSizeInRedis(RetryableTask):
     def process(self, item):
         try:
             self.control.set_warc_size(item['ident'],
-                    *item['target_warc_files']).get()
+                    *item['target_warc_files'])
             self.complete_item(item)
         except ConnectionError:
             self.notify_connection_error(item)
@@ -326,7 +326,7 @@ class MarkItemAsDone(RetryableTask):
 
     def process(self, item):
         try:
-            self.control.mark_done(item, self.expire_time).get()
+            self.control.mark_done(item, self.expire_time)
             self.complete_item(item)
         except ConnectionError:
             self.notify_connection_error(item)

@@ -1,5 +1,4 @@
 import os
-import pykka
 import re
 import redis
 import threading
@@ -10,10 +9,12 @@ from .. import shared_config
 from ..control import ConnectionError
 from redis.exceptions import ConnectionError as RedisConnectionError
 
-class Settings(pykka.ThreadingActor):
+class Settings(object):
     '''
     Synchronizes access to job settings.
     '''
+
+    settings_lock = threading.RLock()
 
     settings = dict(
             age=None,
@@ -28,82 +29,88 @@ class Settings(pykka.ThreadingActor):
         '''
         Replaces existing settings with new data.
         '''
-        self.settings['delay_min'] = int_or_none(new_settings['delay_min'])
-        self.settings['delay_max'] = int_or_none(new_settings['delay_max'])
-        self.settings['ignore_patterns'] = build_patterns(new_settings['ignore_patterns'])
-        self.settings['age'] = int_or_none(new_settings['age'])
-        self.settings['concurrency'] = int_or_none(new_settings['concurrency'])
-        self.settings['abort_requested'] = new_settings['abort_requested']
-        self.settings['suppress_ignore_reports'] = new_settings['suppress_ignore_reports']
+        with self.settings_lock:
+            self.settings['delay_min'] = int_or_none(new_settings['delay_min'])
+            self.settings['delay_max'] = int_or_none(new_settings['delay_max'])
+            self.settings['ignore_patterns'] = build_patterns(new_settings['ignore_patterns'])
+            self.settings['age'] = int_or_none(new_settings['age'])
+            self.settings['concurrency'] = int_or_none(new_settings['concurrency'])
+            self.settings['abort_requested'] = new_settings['abort_requested']
+            self.settings['suppress_ignore_reports'] = new_settings['suppress_ignore_reports']
 
     def age(self):
-        return self.settings['age'] or 0
+        with self.settings_lock:
+            return self.settings['age'] or 0
 
     def ignore_url_p(self, url):
         '''
         If a URL matches an ignore pattern, returns the string representation
         of the matching pattern.  Otherwise, returns false.
         '''
+        with self.settings_lock:
+            for pattern in self.settings['ignore_patterns']:
+                try:
+                    match = pattern.search(url)
+                except re.error as error:
+                    # XXX: We might not want to ignore this error
+                    print('Regular expression error:' + str(error) + ' on ' + pattern)
+                    return False
 
-        for pattern in self.settings['ignore_patterns']:
-            try:
-                match = pattern.search(url)
-            except re.error as error:
-                # XXX: We might not want to ignore this error
-                print('Regular expression error:' + str(error) + ' on ' + pattern)
-                return False
-    
-            if match:
-                return pattern.pattern
-    
-        return False
+                if match:
+                    return pattern.pattern
+
+            return False
 
     def abort_requested(self):
         '''
         Returns True if job abort was requested, False otherwise.
         '''
 
-        return self.settings['abort_requested']
+        with self.settings_lock:
+            return self.settings['abort_requested']
 
     def delay_time_range(self):
         '''
         Returns a range of valid sleep times.  Sleep times are in milliseconds.
         '''
 
-        return self.settings['delay_min'] or 0, self.settings['delay_max'] or 0
+        with self.settings_lock:
+            return self.settings['delay_min'] or 0, self.settings['delay_max'] or 0
 
     def concurrency(self):
         '''
         Number of wpull fetchers to run.
         '''
 
-        return self.settings['concurrency'] or 1
+        with self.settings_lock:
+            return self.settings['concurrency'] or 1
 
     def suppress_ignore_reports(self):
         '''
         Whether ignore reports should be suppressed.
         '''
 
-        return self.settings['suppress_ignore_reports']
+        with self.settings_lock:
+            return self.settings['suppress_ignore_reports']
 
     def inspect(self):
         '''
         Returns a string describing the current settings.
         '''
-
-        iglen = len(self.settings['ignore_patterns'])
-        sl, sm = self.delay_time_range()
+        with self.settings_lock:
+            iglen = len(self.settings['ignore_patterns'])
+            sl, sm = self.delay_time_range()
         
-        report = str(self.concurrency()) + ' workers, '
-        report += str(iglen) + ' ignores, '
-        report += 'delay min/max: [' + str(sl) + ', ' + str(sm) + '] ms, '
+            report = str(self.concurrency()) + ' workers, '
+            report += str(iglen) + ' ignores, '
+            report += 'delay min/max: [' + str(sl) + ', ' + str(sm) + '] ms, '
 
-        if self.settings['suppress_ignore_reports']:
-            report += 'suppressing ignore reports'
-        else:
-            report += 'showing ignore reports'
+            if self.settings['suppress_ignore_reports']:
+                report += 'suppressing ignore reports'
+            else:
+                report += 'showing ignore reports'
 
-        return report
+            return report
 
 # ---------------------------------------------------------------------------
 
@@ -206,7 +213,7 @@ class ListenerWorkerThread(threading.Thread):
         msg = p.get_message(ignore_subscribe_messages=True)
 
         if msg:
-            old_age = self.settings.age().get()
+            old_age = self.settings.age()
             new_age = int(msg['data'])
 
             if old_age < new_age:
@@ -220,9 +227,9 @@ class ListenerWorkerThread(threading.Thread):
             self.last_run = now
 
     def update_settings(self):
-        new_settings = self.control.get_settings(self.job_ident).get()
+        new_settings = self.control.get_settings(self.job_ident)
 
-        self.settings.update_settings(new_settings).get()
+        self.settings.update_settings(new_settings)
 
 # ---------------------------------------------------------------------------
 
