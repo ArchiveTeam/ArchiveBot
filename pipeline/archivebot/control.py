@@ -37,6 +37,8 @@ class Control(object):
         self.log_channel = log_channel
         self.pipeline_channel = pipeline_channel
         self.bytes_outstanding = 0
+        self.items_downloaded = 0
+        self.items_queued = 0
         self.redis_url = redis_url
 
         self.connect()
@@ -126,6 +128,26 @@ class Control(object):
                 self.redis.hincrby(ident, 'bytes_downloaded',
                         self.bytes_outstanding)
                 self.bytes_outstanding = 0
+        except ConnectionError:
+            pass
+
+    def update_items_downloaded(self, ident, count):
+        try:
+            with conn(self):
+                self.items_downloaded += count
+                self.redis.hincrby(ident, 'items_downloaded',
+                        self.items_downloaded)
+                self.items_downloaded = 0
+        except ConnectionError:
+            pass
+
+    def update_items_queued(self, ident, count):
+        try:
+            with conn(self):
+                self.items_queued += count
+                self.redis.hincrby(ident, 'items_queued',
+                        self.items_queued)
+                self.items_queued = 0
         except ConnectionError:
             pass
 
