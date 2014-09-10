@@ -73,6 +73,18 @@ class Job < Struct.new(:uri, :redis)
   # restricted to that of a 64-bit signed integer.  (It's a Redis limitation.)
   attr_reader :bytes_downloaded
 
+  # How many items have been downloaded for the target.
+  #
+  # Returns a Bignum, though the actual range of the returned value is
+  # restricted to that of a 64-bit signed integer.  (It's a Redis limitation.)
+  attr_reader :items_downloaded
+
+  # How many items have been queued for the target.
+  #
+  # Returns a Bignum, though the actual range of the returned value is
+  # restricted to that of a 64-bit signed integer.  (It's a Redis limitation.)
+  attr_reader :items_queued
+
   # The ID of the pipeline that this job is running on.
   attr_reader :pipeline_id
 
@@ -237,6 +249,8 @@ class Job < Struct.new(:uri, :redis)
     @abort_requested = h['abort_requested']
     @depth = h['fetch_depth']
     @bytes_downloaded = h['bytes_downloaded'].to_i
+    @items_downloaded = h['items_downloaded'].to_i
+    @items_queued = h['items_queued'].to_i
     @pipeline_id = h['pipeline_id']
     @warc_size = h['warc_size'].to_i
     @error_count = h['error_count'].to_i
@@ -382,6 +396,8 @@ class Job < Struct.new(:uri, :redis)
   def as_json
     { 'aborted' => aborted?,
       'bytes_downloaded' => bytes_downloaded,
+      'items_downloaded' => items_downloaded,
+      'items_queued' => items_queued,
       'pipeline_id' => pipeline_id,
       'depth' => depth,
       'error_count' => error_count,
