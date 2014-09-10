@@ -124,6 +124,10 @@ bot = Cinch::Bot.new do
   on :message, /\A!stanbush (.+)\Z/ do |m, nick|
     m.channel.send "#{nick}: http://youtu.be/AZKpByV5764?t=3s"
   end
+
+  on :message, /\A!ex(?:plain)? (#{CommandPatterns::IDENT}) (.+)\Z/ do |m, ident, note|
+    brain.find_job(ident, m) { |j| brain.add_note(m, j, note) }
+  end
 end
 
 bot.start

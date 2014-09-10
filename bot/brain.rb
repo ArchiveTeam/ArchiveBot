@@ -189,6 +189,19 @@ class Brain
     end
   end
 
+  def add_note(m, job, note)
+    return unless authorized?(m)
+
+    if note.length > 32
+      reply m, %Q{Sorry, your notes must be less than 32 characters.}
+      return
+    end
+
+    job.add_note(note)
+
+    reply m, %Q{Added note "#{note}" to job #{job.ident}.}
+  end
+
   def initiate_abort(m, job)
     return unless authorized?(m)
 
