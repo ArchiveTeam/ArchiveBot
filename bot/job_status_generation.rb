@@ -5,7 +5,11 @@ module JobStatusGeneration
     rep << "Job #{ident} (#{url}):"
 
     if started_by
-      rep << "Started by #{started_by}."
+      if note
+        rep << "Started by #{started_by}; reason: #{note}."
+      else
+        rep << "Started by #{started_by}."
+      end
     end
 
     if aborted?
