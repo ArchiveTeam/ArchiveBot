@@ -90,11 +90,22 @@ def accept_url(url_info, record_info, verdict, reasons):
   # If we get here, none of our ignores apply.  Return the original verdict.
   return verdict
 
+
+def queued_url(url_info):
+  # Increment the items queued counter.
+  control.update_items_queued(ident, 1).get()
+
+
+def dequeued_url(url_info, record_info):
+  # Increment the items downloaded counter.
+  control.update_items_downloaded(ident, 1).get()
+
+
 def handle_result(url_info, record_info, error_info=None, http_info=None):
   global last_age
 
   if http_info:
-    # Update the traffic counters.
+    # Update the traffic downloaded counter.
     control.update_bytes_downloaded(ident, http_info['body']['content_size']).get()
 
   statcode = 0
@@ -173,6 +184,8 @@ assert 2 in wpull_hook.callbacks.AVAILABLE_VERSIONS
 
 wpull_hook.callbacks.version = 2
 wpull_hook.callbacks.accept_url = accept_url
+wpull_hook.callbacks.queued_url = queued_url
+wpull_hook.callbacks.dequeued_url = dequeued_url
 wpull_hook.callbacks.handle_response = handle_response
 wpull_hook.callbacks.handle_error = handle_error
 wpull_hook.callbacks.finish_statistics = finish_statistics

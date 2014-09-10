@@ -73,6 +73,18 @@ class Job < Struct.new(:uri, :redis)
   # restricted to that of a 64-bit signed integer.  (It's a Redis limitation.)
   attr_reader :bytes_downloaded
 
+  # How many items have been downloaded for the target.
+  #
+  # Returns a Bignum, though the actual range of the returned value is
+  # restricted to that of a 64-bit signed integer.  (It's a Redis limitation.)
+  attr_reader :items_downloaded
+
+  # How many items have been queued for the target.
+  #
+  # Returns a Bignum, though the actual range of the returned value is
+  # restricted to that of a 64-bit signed integer.  (It's a Redis limitation.)
+  attr_reader :items_queued
+
   # The ID of the pipeline that this job is running on.
   attr_reader :pipeline_id
 
@@ -135,6 +147,9 @@ class Job < Struct.new(:uri, :redis)
 
   # Maximum inter-request delay in milliseconds.
   attr_reader :delay_max
+
+  # The rationale for this job; typically <= 32 characters.
+  attr_reader :note
 
   # A bucket for HTTP responses that aren't in the (100..599) range.
   class UnknownResponseCode
@@ -237,6 +252,8 @@ class Job < Struct.new(:uri, :redis)
     @abort_requested = h['abort_requested']
     @depth = h['fetch_depth']
     @bytes_downloaded = h['bytes_downloaded'].to_i
+    @items_downloaded = h['items_downloaded'].to_i
+    @items_queued = h['items_queued'].to_i
     @pipeline_id = h['pipeline_id']
     @warc_size = h['warc_size'].to_i
     @error_count = h['error_count'].to_i
@@ -252,6 +269,7 @@ class Job < Struct.new(:uri, :redis)
     @concurrency = h['concurrency'].to_i
     @delay_min = h['delay_min'].to_f
     @delay_max = h['delay_max'].to_f
+    @note = h['note']
 
     response_buckets.each do |_, bucket, attr|
       instance_variable_set("@#{attr}", h[bucket.to_s].to_i)
@@ -346,6 +364,10 @@ class Job < Struct.new(:uri, :redis)
     job_parameters_changed
   end
 
+  def add_note(note)
+    redis.hset(ident, 'note', note)
+  end
+
   def no_offsite_links!
     redis.hset(ident, 'no_offsite_links', true)
   end
@@ -382,6 +404,8 @@ class Job < Struct.new(:uri, :redis)
   def as_json
     { 'aborted' => aborted?,
       'bytes_downloaded' => bytes_downloaded,
+      'items_downloaded' => items_downloaded,
+      'items_queued' => items_queued,
       'pipeline_id' => pipeline_id,
       'depth' => depth,
       'error_count' => error_count,
@@ -397,7 +421,8 @@ class Job < Struct.new(:uri, :redis)
       'suppress_ignore_reports' => suppress_ignore_reports,
       'concurrency' => concurrency,
       'delay_min' => delay_min,
-      'delay_max' => delay_max
+      'delay_max' => delay_max,
+      'note' => note
     }.tap do |h|
       response_buckets.each do |_, bucket, attr|
         h[bucket.to_s] = send(attr)
