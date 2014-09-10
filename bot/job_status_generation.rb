@@ -6,7 +6,7 @@ module JobStatusGeneration
 
     if started_by
       if note
-        rep << "Started by #{started_by} (#{note})."
+        rep << "Started by #{started_by}; reason: #{note}."
       else
         rep << "Started by #{started_by}."
       end
