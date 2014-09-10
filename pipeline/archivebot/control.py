@@ -40,8 +40,8 @@ class Control(pykka.ThreadingActor):
         self.log_channel = log_channel
         self.pipeline_channel = pipeline_channel
         self.bytes_outstanding = 0
-        self.items_downloaded = 0
-        self.items_queued = 0
+        self.items_downloaded_outstanding = 0
+        self.items_queued_outstanding = 0
         self.redis_url = redis_url
 
         self.connect()
@@ -134,23 +134,22 @@ class Control(pykka.ThreadingActor):
         except ConnectionError:
             pass
 
-    def update_items_downloaded(self, ident, count):
-        try:
-            with conn(self):
-                self.items_downloaded += count
-                self.redis.hincrby(ident, 'items_downloaded',
-                        self.items_downloaded)
-                self.items_downloaded = 0
-        except ConnectionError:
-            pass
+    def update_items_downloaded(self, count):
+        self.items_downloaded_outstanding += count
 
-    def update_items_queued(self, ident, count):
+    def update_items_queued(self, count):
+        self.items_queued_outstanding += count
+
+    def flush_item_counts(self, ident):
         try:
             with conn(self):
-                self.items_queued += count
+                self.redis.hincrby(ident, 'items_downloaded',
+                        self.items_downloaded_outstanding)
+                self.items_downloaded_outstanding = 0
+
                 self.redis.hincrby(ident, 'items_queued',
-                        self.items_queued)
-                self.items_queued = 0
+                        self.items_queued_outstanding)
+                self.items_queued_outstanding = 0
         except ConnectionError:
             pass
 

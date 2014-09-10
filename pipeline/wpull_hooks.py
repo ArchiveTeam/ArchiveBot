@@ -93,12 +93,12 @@ def accept_url(url_info, record_info, verdict, reasons):
 
 def queued_url(url_info):
   # Increment the items queued counter.
-  control.update_items_queued(ident, 1).get()
+  control.update_items_queued(1).get()
 
 
 def dequeued_url(url_info, record_info):
   # Increment the items downloaded counter.
-  control.update_items_downloaded(ident, 1).get()
+  control.update_items_downloaded(1).get()
 
 
 def handle_result(url_info, record_info, error_info=None, http_info=None):
@@ -140,6 +140,9 @@ def handle_result(url_info, record_info, error_info=None, http_info=None):
 
   # One last thing about settings: make sure the listener is online.
   settings_listener.check()
+
+  # Flush queued/downloaded updates.
+  control.flush_item_counts(ident).get()
 
   # Should we abort?
   if settings.abort_requested().get():
