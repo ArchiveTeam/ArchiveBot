@@ -179,6 +179,24 @@ PhantomJS mode is enabled if any of the --*phantomjs* options are
 passed.
 
 
+explain
+=======
+
+``!explain IDENT NOTE``, ``!ex IDENT NOTE``
+   add a short note to explain why this site is being archived::
+
+        > !explain byu50bzfdbnlyl6mrgn6dd24h shutting down 7/31
+        > Added note "shutting down 7/31" to job byu50bzfdbnlyl6mrgn6dd24h.
+
+   Pipeline operators (really, anyone) may want to know why a job is running.
+   This becomes particularly important when a job grows very large (hundreds of
+   gigabytes).  While this can be done via IRC, IRC communication is
+   asynchronous, people can be impatient, and a rationale can usually be summed
+   up very concisely.
+
+   Your note must be 32 characters or less.
+
+
 archiveonly < FILE
 ==================
 

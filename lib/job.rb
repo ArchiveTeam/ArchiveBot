@@ -148,6 +148,9 @@ class Job < Struct.new(:uri, :redis)
   # Maximum inter-request delay in milliseconds.
   attr_reader :delay_max
 
+  # The rationale for this job; typically <= 32 characters.
+  attr_reader :note
+
   # A bucket for HTTP responses that aren't in the (100..599) range.
   class UnknownResponseCode
     def include?(resp_code)
@@ -266,6 +269,7 @@ class Job < Struct.new(:uri, :redis)
     @concurrency = h['concurrency'].to_i
     @delay_min = h['delay_min'].to_f
     @delay_max = h['delay_max'].to_f
+    @note = h['note']
 
     response_buckets.each do |_, bucket, attr|
       instance_variable_set("@#{attr}", h[bucket.to_s].to_i)
@@ -360,6 +364,10 @@ class Job < Struct.new(:uri, :redis)
     job_parameters_changed
   end
 
+  def add_note(note)
+    redis.hset(ident, 'note', note)
+  end
+
   def no_offsite_links!
     redis.hset(ident, 'no_offsite_links', true)
   end
@@ -413,7 +421,8 @@ class Job < Struct.new(:uri, :redis)
       'suppress_ignore_reports' => suppress_ignore_reports,
       'concurrency' => concurrency,
       'delay_min' => delay_min,
-      'delay_max' => delay_max
+      'delay_max' => delay_max,
+      'note' => note
     }.tap do |h|
       response_buckets.each do |_, bucket, attr|
         h[bucket.to_s] = send(attr)
