@@ -120,6 +120,10 @@ bot = Cinch::Bot.new do
   on :message, /\A!pending\Z/ do |m|
     brain.show_pending(m)
   end
+
+  on :message, /\A!stanbush (.+)\Z/ do |m, nick|
+    m.channel.send "#{nick}: http://youtu.be/AZKpByV5764?t=3s"
+  end
 end
 
 bot.start
