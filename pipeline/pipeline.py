@@ -47,6 +47,7 @@ assert WPULL_EXE, 'No usable Wpull found.'
 assert PHANTOMJS, 'PhantomJS 1.9.0 was not found.'
 assert 'RSYNC_URL' in env, 'RSYNC_URL not set.'
 assert 'REDIS_URL' in env, 'REDIS_URL not set.'
+assert 'FINISHED_WARCS_DIR' in env, 'FINISHED_WARCS_DIR not set.'
 
 if StrictVersion(seesaw.__version__) < StrictVersion("0.1.8b1"):
     raise Exception(
