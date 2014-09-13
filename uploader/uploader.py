@@ -13,7 +13,7 @@ def main():
     directory = sys.argv[1]
     url = os.environ['RSYNC_URL']
     while True:
-        fnames = sorted(list(f for f in os.listdir(directory) if not f.startswith('.') and f.endswith('.warc.gz')))
+        fnames = sorted(list(f for f in os.listdir(directory) if not f.startswith('.') and (f.endswith('.warc.gz') or f.endswith('.json'))))
         if len(fnames):
             fname = os.path.join(directory, fnames[0])
             print("Uploading %r" % (fname,))
