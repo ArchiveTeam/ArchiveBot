@@ -1,7 +1,7 @@
 seesaw>=0.4.0,<1.0
 psutil
 pyyaml
-git+https://github.com/andymccurdy/redis-py.git@f96e46b971a5bb66ab5f94ba87ab3e092e5f01ac#egg=redis
+redis==2.10.3
 hg+https://bitbucket.org/enovance/trollius@505d8e0c46f8d91bd3550a2dca1488a594499727#egg=trollius
 wpull>=0.1000
 sqlalchemy
