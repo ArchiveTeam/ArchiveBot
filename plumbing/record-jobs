@@ -1,11 +1,14 @@
 #!/usr/bin/env ruby
 
-require 'redis'
+require File.expand_path('../lib/archive_bot', __FILE__)
+
 require 'yajl'
 require 'analysand'
 require 'uri'
 
-r = Redis.new(:driver => :hiredis, :url => ARGV[0])
+include ArchiveBot::Redis
+
+r = make_redis
 uri = URI(ARGV[1])
 db = Analysand::Database.new(uri)
 

@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 
-require 'redis'
-require 'yajl'
+require File.expand_path('../lib/archive_bot', __FILE__)
 
-r = Redis.new(:driver => :hiredis, :url => ARGV[0])
+include ArchiveBot::Redis
 
+r = make_redis
 puts r.lrange('working', 0, -1)

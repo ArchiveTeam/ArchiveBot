@@ -1,7 +1,10 @@
 #!/usr/bin/env ruby
 
-require 'redis'
+require File.expand_path('../lib/archive_bot', __FILE__)
+
 require 'yajl'
+
+include ArchiveBot::Redis
 
 class Categorizer
   attr_accessor :ident
@@ -49,7 +52,7 @@ end
 
 categorizer = Categorizer.new
 
-r = Redis.new(:driver => :hiredis, :url => ARGV[0])
+r = make_redis
 parser = Yajl::Parser.new
 parser.on_parse_complete = categorizer.method(:categorize)
 

@@ -1,12 +1,11 @@
 #!/usr/bin/env ruby
 
-require 'redis'
+require File.expand_path('../lib/archive_bot', __FILE__)
 
-url = ARGV[0] or abort 'url required'
-updates_channel = ARGV[1] or abort 'updates channel required'
+include ArchiveBot::Redis
 
-r1 = Redis.new(:url => url)
-r2 = Redis.new(:url => url)
+r1 = make_redis
+r2 = make_redis
 
 begin
   r1.subscribe(updates_channel) do |on|

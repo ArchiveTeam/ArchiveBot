@@ -1,8 +1,11 @@
 #!/usr/bin/env ruby
 
-require 'redis'
+require File.expand_path('../lib/archive_bot', __FILE__)
 
-r = Redis.new(:driver => :hiredis, :url => ARGV[0])
+include ArchiveBot::Redis
+
+r = make_redis
+
 trim_threshold = 500
 
 def flush_logs(r, log_key, job_key, last_trimmed, min_last)

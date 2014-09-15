@@ -3,4 +3,4 @@
 # This is evidently the simplest way to get a bash script's directory.  Yikes.
 MYDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-$MYDIR/working-jobs $1 | $MYDIR/log-firehose $2 $1
+$MYDIR/working-jobs | $MYDIR/log-firehose

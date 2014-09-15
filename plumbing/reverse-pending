@@ -1,8 +1,10 @@
 #!/usr/bin/env ruby
 
-require 'redis'
+require File.expand_path('../lib/archive_bot', __FILE__)
 
-r = Redis.new(:driver => :hiredis, :url => ARGV[0])
+include ArchiveBot::Redis
+
+r = make_redis
 
 all = r.lrange('pending', 0, -1)
 

@@ -1,12 +1,14 @@
 #!/usr/bin/env ruby
 
-require 'redis'
+require File.expand_path('../lib/archive_bot', __FILE__)
 require 'yajl'
+
+include ArchiveBot::Redis
 
 max = ARGV[0] ? ARGV[0].to_i : nil
 broadcasting = !max
 
-r = Redis.new(:driver => :hiredis, :url => ARGV[1] || ENV['REDIS_URL'])
+r = make_redis
 
 class Aggregator
   attr_accessor :job
