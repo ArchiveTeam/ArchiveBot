@@ -26,6 +26,7 @@ def start(pipeline, control, version, nickname):
     def report():
         du = psutil.disk_usage(pipeline.data_dir)
         mu = psutil.virtual_memory()
+        load_avg = os.getloadavg()
 
         process_report = {
             'id': pipe_id,
@@ -38,6 +39,9 @@ def start(pipeline, control, version, nickname):
             'mem_available': mu.available,
             'disk_usage': du.percent,
             'disk_available': du.free,
+            'load_average_1m': load_avg[0],
+            'load_average_5m': load_avg[1],
+            'load_average_15m': load_avg[2],
             'ts': int(time.time()),
             'python': sys.version,
         }
