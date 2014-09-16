@@ -29,6 +29,7 @@ html, body {
 				<th>Memory %</th>
 				<th>Free Disk Space</th>
 				<th>Disk %</th>
+				<th>Load Averages</th>
 				<th>Last Checkin</th>
 			</tr>
 		</thead>
@@ -74,6 +75,16 @@ html, body {
 			}
 		})();
 
+		/**
+		 * Adaptation of ActiveSupport's #blank?.
+		 *
+		 * Returns true if the object is undefined, null, or is a string whose
+		 * post-trim length is zero.  Otherwise, returns false.
+		 */
+		var isBlank = function(o) {
+			return !o || o.trim().length === 0;
+		}
+
 		function initTable() {
 			table = $('#pipeline_table').DataTable({
 				"paging" : false,
@@ -107,6 +118,20 @@ html, body {
 					"createdCell" : function(td, cellData, rowData, row, col) {
 						if (cellData > diskThreshold) {
 							$(td).addClass('cell_warn_higlight');
+						}
+					}
+				}, {
+					"data": "load_average_1m",
+					"defaultContent": "(unknown)",
+					"createdCell": function(td, cellData, rowData, row, col) {
+						var a1m, a5m, a15m;
+
+						a1m = rowData['load_average_1m'];
+						a5m = rowData['load_average_5m'];
+						a15m = rowData['load_average_15m'];
+
+						if (!(isBlank(a1m) || isBlank(a5m) || isBlank(a15m))) {
+							$(td).text("" + a1m + ", " + a5m + ", " + a15m);
 						}
 					}
 				}, {
