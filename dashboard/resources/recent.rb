@@ -9,20 +9,28 @@ class Recent < Webmachine::Resource
     attr_accessor :redis
   end
 
-  def run_query
+  def run_query(count=10)
     jobs = Job.working(self.class.redis)
 
     jobs.each_with_object([]) do |j, a|
-      a << j.most_recent_log_entries(10).map { |le| LogMessage.new(j, JSON.parse(le)) }
+      a << j.most_recent_log_entries(count).map { |le| LogMessage.new(j, JSON.parse(le)) }
     end.flatten
   end
 
   def content_types_provided
-    [['application/json', :to_json]]
+    [
+      ['application/json', :to_json],
+      ['text/html', :to_html]
+    ]
   end
 
   def to_json
     response.headers['Access-Control-Allow-Origin'] = '*'
-    run_query.to_json
+    count = [request.query['count'].to_i || 10, 10].min
+    run_query(count).to_json
+  end
+
+  def to_html
+    File.read(File.expand_path('../../recent.html', __FILE__))
   end
 end
