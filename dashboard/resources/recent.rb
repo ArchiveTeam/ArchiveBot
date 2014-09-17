@@ -26,7 +26,7 @@ class Recent < Webmachine::Resource
 
   def to_json
     response.headers['Access-Control-Allow-Origin'] = '*'
-    count = [request.query['count'].to_i || 10, 10].min
+    count = [request.query['count'] ? request.query['count'].to_i : 10, 10].min
     run_query(count).to_json
   end
 
