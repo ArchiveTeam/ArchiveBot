@@ -29,7 +29,7 @@ def acquire_lock(fname):
     except OSError as e:
         if e.errno not in (errno.EACCES, errno.EAGAIN):
             # Error was not locking-related, so re-raise.
-            # See http://docs.python.org/library/fcntl.html#fcntl.lockf
+            # See https://docs.python.org/3/library/fcntl.html#fcntl.lockf
             raise
         raise CannotLock(fname)
     return f
