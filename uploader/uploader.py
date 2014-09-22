@@ -35,13 +35,20 @@ def acquire_lock(fname):
     return f
 
 
+def should_upload(basename):
+    assert not '/' in basename, basename
+    return not basename.startswith('.') and \
+        (basename.endswith('.warc.gz') or basename.endswith('.json'))
+
+
 def main():
     if len(sys.argv) > 1:
         directory = sys.argv[1]
     elif os.environ.get('FINISHED_WARCS_DIR') != None:
         directory = os.environ['FINISHED_WARCS_DIR']
     else:
-        raise RuntimeError('No directory specified (set FINISHED_WARCS_DIR or specify directory on command line)')
+        raise RuntimeError('No directory specified (set FINISHED_WARCS_DIR '
+            'or specify directory on command line)')
 
     url = os.environ.get('RSYNC_URL')
     if url == None:
@@ -54,7 +61,7 @@ def main():
         raise RuntimeError("Another uploader is uploading from %s" % (directory,))
 
     while True:
-        fnames = sorted(list(f for f in os.listdir(directory) if not f.startswith('.') and (f.endswith('.warc.gz') or f.endswith('.json'))))
+        fnames = sorted(list(f for f in os.listdir(directory) if should_upload(f)))
         if len(fnames):
             fname = os.path.join(directory, fnames[0])
             print("Uploading %r" % (fname,))
