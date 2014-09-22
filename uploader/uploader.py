@@ -65,7 +65,7 @@ def main():
         if len(fnames):
             fname = os.path.join(directory, fnames[0])
             print("Uploading %r" % (fname,))
-            exit = subprocess.call(["ionice", "-c", "2", "-n", "0", "rsync", "-av", "--timeout=300", "--contimeout=300", "--progress", fname, url])
+            exit = subprocess.call(["rsync", "-av", "--timeout=300", "--contimeout=300", "--progress", fname, url])
             if exit == 0:
                 print("Removing %r" % (fname,))
                 os.remove(fname)
