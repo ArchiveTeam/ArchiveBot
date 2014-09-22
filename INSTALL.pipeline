@@ -45,7 +45,7 @@ As user archivebot, in second screen session:
     export REDIS_URL=redis://127.0.0.1:16379/0
     export FINISHED_WARCS_DIR=$HOME/warcs4fos
     ~/.local/bin/run-pipeline3 pipeline.py --disable-web-server \
-      --concurrent 2 ignorednick
+      --concurrent 2 NAME
 
 Adjust --concurrent as needed.
 
@@ -53,13 +53,13 @@ If you want your pipeline to only handle !ao/!archiveonly jobs, run it
 with the AO_ONLY environment variable set:
 
     AO_ONLY=1 ~/.local/bin/run-pipeline3 pipeline.py \
-      --disable-web-server --concurrent 2 ignorednick
+      --disable-web-server --concurrent 2 NAME
 
 or
 
     export AO_ONLY=1
     ~/.local/bin/run-pipeline3 pipeline.py --disable-web-server \
-      --concurrent 2 ignorednick
+      --concurrent 2 NAME
 
 As user archivebot, in third screen session:
 
