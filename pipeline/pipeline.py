@@ -48,6 +48,7 @@ assert WPULL_EXE, 'No usable Wpull found.'
 assert PHANTOMJS, 'PhantomJS %s was not found.' % PHANTOMJS_VERSION
 assert 'RSYNC_URL' in env, 'RSYNC_URL not set.'
 assert 'REDIS_URL' in env, 'REDIS_URL not set.'
+assert 'FINISHED_WARCS_DIR' in env, 'FINISHED_WARCS_DIR not set.'
 
 if StrictVersion(seesaw.__version__) < StrictVersion("0.1.8b1"):
     raise Exception(
@@ -108,7 +109,7 @@ pipeline = Pipeline(
     DownloadUrlFile(control),
     WgetDownload(
         WpullArgs(default_user_agent=DEFAULT_USER_AGENT, wpull_exe=WPULL_EXE,
-                  phantomjs_exe=PHANTOMJS),
+                  phantomjs_exe=PHANTOMJS, finished_warcs_dir=os.environ["FINISHED_WARCS_DIR"]),
         accept_on_exit_code=AcceptAny(),
         env={
             'ITEM_IDENT': ItemInterpolation('%(ident)s'),
