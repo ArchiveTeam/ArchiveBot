@@ -45,7 +45,8 @@ As user archivebot, in second screen session:
     export REDIS_URL=redis://127.0.0.1:16379/0
     export FINISHED_WARCS_DIR=$HOME/warcs4fos
     ~/.local/bin/run-pipeline3 pipeline.py --disable-web-server \
-      --concurrent 2 NAME
+      --concurrent 2 NAME 2>&1 | \
+      tee "pipeline-$(date -u +"%Y-%m-%dT%H_%M_%SZ").log"
 
 Adjust --concurrent as needed.
 
