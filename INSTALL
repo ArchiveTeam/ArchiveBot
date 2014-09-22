@@ -108,10 +108,17 @@ As user archivebot, in first screen session:
 As user archivebot, in second screen session:
 
     cd ~/ArchiveBot/pipeline
+    mkdir -p ~/warcs4fos
     export RSYNC_URL=rsync://fos.textfiles.com/archivebot/
     export REDIS_URL=redis://127.0.0.1:16379/0
+    export FINISHED_WARCS_DIR=$HOME/warcs4fos
     ~/.local/bin/run-pipeline3 pipeline.py --disable-web-server \
       --concurrent 2 ignorednick
+
+As user archivebot, in third screen session:
+
+    export RSYNC_URL=rsync://fos.textfiles.com/archivebot/
+    ~/ArchiveBot/uploader/uploader.py $HOME/warcs4fos
 
 Adjust --concurrent as needed.
 
