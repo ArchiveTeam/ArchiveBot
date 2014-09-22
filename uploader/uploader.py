@@ -10,8 +10,17 @@ import sys
 WAIT = 30
 
 def main():
-    directory = sys.argv[1]
-    url = os.environ['RSYNC_URL']
+    if len(sys.argv) > 1:
+        directory = sys.argv[1]
+    elif os.environ.get('FINISHED_WARCS_DIR') != None:
+        directory = os.environ['FINISHED_WARCS_DIR']
+    else:
+        raise RuntimeError('No directory specified (set FINISHED_WARCS_DIR or specify directory on command line)')
+
+    url = os.environ.get('RSYNC_URL')
+    if url == None:
+        raise RuntimeError('RSYNC_URL not set')
+
     while True:
         fnames = sorted(list(f for f in os.listdir(directory) if not f.startswith('.') and (f.endswith('.warc.gz') or f.endswith('.json'))))
         if len(fnames):
