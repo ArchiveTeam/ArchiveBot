@@ -1,0 +1,4 @@
+#!/bin/bash
+
+MYDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+$MYDIR/updates-listener | $MYDIR/record-jobs $COUCHDB_URL
