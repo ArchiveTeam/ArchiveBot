@@ -1,30 +1,15 @@
 #!/usr/bin/env ruby
 
-require File.expand_path('../lib/archive_bot', __FILE__)
+require File.expand_path('../lib/archive_bot/redis', __FILE__)
+require File.expand_path('../lib/archive_bot/log_aggregator', __FILE__)
+
 require 'yajl'
 
 include ArchiveBot::Redis
 
-max = ARGV[0] ? ARGV[0].to_i : nil
-broadcasting = !max
-
 r = make_redis
 
-class Aggregator
-  attr_accessor :job
-  attr_accessor :job_ident
-
-  def output(obj)
-    $stdout.puts Yajl::Encoder.encode(obj.merge('job_data' => job_for_output))
-    $stdout.flush
-  end
-
-  def job_for_output
-    job.merge('ident' => job_ident)
-  end
-end
-
-agg = Aggregator.new
+agg = ArchiveBot::LogAggregator.new($stdout)
 p = Yajl::Parser.new
 p.on_parse_complete = agg.method(:output)
 
@@ -35,33 +20,21 @@ def unbroadcasted_log_entries(job, r)
   r.zrangebyscore(log_key, "(#{start}", '+inf', with_scores: true)
 end
 
-def latest_log_entries(job, max, r)
-  log_key = job['log_key']
-  start = job['last_broadcasted_log_entry']
-
-  r.zrevrangebyscore(log_key, '+inf', '-inf', limit: [0, max]).reverse
-end
-
 $stdin.each_line do |line|
   job_key = line.chomp
   job = r.hgetall(job_key)
 
   agg.job = job
-  agg.job_ident = job_key
+  agg.ident = job_key
 
-  log_entries = if max
-                  latest_log_entries(job, max, r)
-                else
-                  unbroadcasted_log_entries(job, r)
-                end
-
+  log_entries = unbroadcasted_log_entries(job, r)
   next if log_entries.empty?
 
-  log_entries.each do |entry, _|
-    p << entry
+  begin
+    log_entries.each { |entry, _| p << entry }
+  rescue Errno::EPIPE
+    break
   end
 
-  if broadcasting
-    r.hset(job_key, 'last_broadcasted_log_entry', log_entries.last.last)
-  end
+  r.hset(job_key, 'last_broadcasted_log_entry', log_entries.last.last)
 end

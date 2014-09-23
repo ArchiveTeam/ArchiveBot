@@ -1,6 +1,31 @@
-#!/bin/bash
+#!/usr/bin/env ruby
 
-# This is evidently the simplest way to get a bash script's directory.  Yikes.
-MYDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+require File.expand_path('../lib/archive_bot/redis', __FILE__)
+require File.expand_path('../lib/archive_bot/log_aggregator', __FILE__)
 
-$MYDIR/working-jobs | $MYDIR/log-firehose
+require 'yajl'
+
+include ArchiveBot::Redis
+
+max = (ARGV[0] || 10).to_i
+r = make_redis
+
+agg = ArchiveBot::LogAggregator.new($stdout)
+p = Yajl::Parser.new
+p.on_parse_complete = agg.method(:output)
+
+$stdin.each_line do |line|
+  job_key = line.chomp
+  job = r.hgetall(job_key)
+
+  agg.job = job
+  agg.ident = job_key
+
+  begin
+    r.zrange(job['log_key'], -max, -1).each do |entry|
+      p << entry
+    end
+  rescue Errno::EPIPE
+    break
+  end
+end
