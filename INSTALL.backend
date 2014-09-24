@@ -44,13 +44,25 @@ machine:
       --redis 'redis://your-redis-host:6379/0' \
       --url 'http://your-dashboard-host:8080'
 
-Configure twitter_conf.json if you want to post Twitter Tweets.
+The last part of ArchiveBot is a set of maintenance tasks.  They are
+currently split between the cogs and plumbing directories; eventually, they
+will all move to plumbing.
 
-Run the cogs:
+In cogs:
 
-    bundle exec ruby cogs/start.rb
+1. Configure twitter_conf.json if you want to post Twitter Tweets.
+2. Run the cogs with bundle exec ruby cogs/start.rb.
 
-To upgrade, run `git pull` and restart.
+In plumbing:
+
+1. bundle install (yes, again -- the plumbing currently has its own Gemfile)
+2. export REDIS_URL=redis://your-redis-host:6379/0
+3. In separate terminals, tmux panes, or screen sessions, run
+   a. ./analyzer
+   b. ./trimmer
+   c. COUCHDB_URL=http://your-couchdb-url:5984/db-name ./recorder
+
+To upgrade, run `git pull` and restart all programs.
 
 bot.rb, dashboard/app.rb, and cogs/start.rb accept a --help option. Run
 them with --help to see accepted options.
