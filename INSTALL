@@ -78,7 +78,8 @@ Finally, you're going to need to install an IRC server (until such time as the A
 
 Once that's all in place, run the following:
 
-    redis-server   # ensure it has no password
+    redis-server   (unless it's already running -- and make sure that it does not have a password)
+    cd /home/archivebot/ArchiveBot/bot
     bundle exec ruby bot.rb \
       -s 'irc://your-irc-host:6667' \
       -r 'redis://your-redis-host:6379/0' \
