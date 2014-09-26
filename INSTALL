@@ -47,7 +47,28 @@ That way, if you need to stop or start Redis in the future, you can just do:
 (or)
     sudo service redis_6379 start
 
-Next, set up CouchDB by creating the "archivebot" and "archivebot_logs" databases. Upload the design documents from db/design_docs. (You can use CURL or go to http://localhost:5984/_utils/index.html and copy & paste the content of the JSON files into new documents manually.)
+Next we need to configure CouchDB.  But first, check to make sure it installed correctly and is currently running on your machine:
+
+    curl http://127.0.0.1:5984/
+
+If it's running, you should get back something like this:
+{"couchdb":"Welcome","uuid":"610e43c2778c3be750ad5fff8cadd108","version":"1.5.0","vendor":{"version":"14.04","name":"Ubuntu"}}
+
+Now we need to load up CouchDB with the "archivebot" and "archivebot_logs" databases.  You can do this from the command line with CURL:
+
+    curl -X PUT http://127.0.0.1:5984/archivebot
+    curl -X PUT http://127.0.0.1:5984/archivebot_logs\
+
+If that works, you should get this back as a response each time:
+    {"ok":true}
+
+Now, go to the db/design_docs folder in ArchiveBot (full link: https://github.com/ArchiveTeam/ArchiveBot/tree/master/db/design_docs ).  You might have installed it somewhere like /home/archivebot/ArchiveBot/db/design_docs .  The four design documents in there need to be uploaded to the new archivebot database you just created. You can use CURL or you can use the Futon web interface at http://localhost:5984/_utils/index.html where you can copy and paste the content of the JSON files into new documents manually.  If you want to use CURL instead, do this:
+
+    cd /home/archivebot/ArchiveBot/db/design_docs   (or wherever you put your files)
+    curl -X PUT http://127.0.0.1:5984/archivebot/_design/archive_urls -d @archive_urls.json
+    curl -X PUT http://127.0.0.1:5984/archivebot/_design/ignore_patterns -d @ignore_patterns.json
+    curl -X PUT http://127.0.0.1:5984/archivebot/_design/jobs -d @jobs.json
+    curl -X PUT http://127.0.0.1:5984/archivebot/_design/user_agents -d @user_agents.json
 
 Once that's all in place, run the following:
 
