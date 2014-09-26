@@ -70,6 +70,12 @@ Now, go to the db/design_docs folder in ArchiveBot (full link: https://github.co
     curl -X PUT http://127.0.0.1:5984/archivebot/_design/jobs -d @jobs.json
     curl -X PUT http://127.0.0.1:5984/archivebot/_design/user_agents -d @user_agents.json
 
+Finally, you're going to need to install an IRC server (until such time as the ArchiveBot code is changed to allow for alternate ways of sending it instructions, such as Twitter).  On Debian/Ubuntu, do this:
+
+    apt-get install ircd-hybrid
+    pico /etc/ircd-hybrid/ircd.conf   (or use nano or vim, or whatever -- edit this file to add passwords and such)
+    sudo /etc/init.d/ircd-hybrid restart
+
 Once that's all in place, run the following:
 
     redis-server   # ensure it has no password
