@@ -559,10 +559,6 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 		{"id": "log-container-" + ident, "className": "job-container"}, [
 			h("table", {"className": "job-info"}, [
 				h("tr", null, [
-					h("th", null, "By"),
-					h("td", null, this.showNicks ? jobData["started_by"] : "")
-				]),
-				h("tr", null, [
 					h("th", null, "Remark"),
 					h("td", null, jobNote),
 				]),
@@ -589,6 +585,10 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 				h("tr", null, [
 					h("th", null, "Ignores"),
 					h("td", null, statsElements.ignores),
+				]),
+				h("tr", null, [
+					h("th", null, "By"),
+					h("td", null, this.showNicks ? jobData["started_by"] : "")
 				]),
 				h("tr", null, [
 					h("th", null, "Pipeline"),
