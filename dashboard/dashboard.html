@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="referrer" content="never">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width">
 <base target="_blank">
 <link rel="alternate" type="application/rss+xml" title="RSS Feed" href="/feed/archivebot.rss">
 <link rel="alternate" type="application/atom+xml" title="Atom Feed" href="/feed/archivebot.atom">
@@ -41,7 +42,6 @@ html, body {
 	align-items: stretch;
 	justify-content: flex-start;
 	flex-flow: row nowrap;
-	width: 50em;
 }
 
 .job-info {
@@ -81,6 +81,7 @@ html, body {
 	border-radius: 3px;
 	align-self: stretch;
 	flex: 0 1 100%;
+	width: 40em;
 }
 
 .log-window-stopped {
@@ -588,6 +589,10 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 				h("tr", null, [
 					h("th", null, "Ignores"),
 					h("td", null, statsElements.ignores),
+				]),
+				h("tr", null, [
+					h("th", null, "Pipeline"),
+					h("td", null, jobData["pipeline_id"]),
 				]),
 			]),
 			logWindow
