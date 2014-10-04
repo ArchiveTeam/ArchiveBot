@@ -36,16 +36,21 @@ html, body {
 	flex-flow: row nowrap;
 }
 
-.job-header {
+.job-container {
 	display: flex;
-	align-items: flex-end;
-	justify-content: space-between;
+	align-items: stretch;
+	justify-content: flex-start;
 	flex-flow: row nowrap;
+	width: 50em;
 }
 
 .job-info {
+	display: block;
 	white-space: nowrap;
-	overflow: hidden;
+	overflow: auto;
+	align-self: stretch;
+	width: 20em;
+	height: 192px;
 }
 
 .job-url {
@@ -53,6 +58,9 @@ html, body {
 	font-size: 14px;
 	font-weight: bold;
 	text-decoration: none;
+	max-width: 20em;
+	text-overflow: ellipsis;
+	overflow: hidden;
 }
 
 .job-ident {
@@ -71,6 +79,8 @@ html, body {
 	border: 1px solid #999;
 	margin: 0 0 1em 0;
 	border-radius: 3px;
+	align-self: stretch;
+	flex: 0 1 100%;
 }
 
 .log-window-stopped {
@@ -545,27 +555,39 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 	var startedISOString = new Date(parseFloat(jobData["started_at"]) * 1000).toISOString();
 	var div = h(
 		'div',
-		{"id": "log-container-" + ident}, [
-			h("div", {"className": "job-header"}, [
-				h("span", {"className": "job-info"}, [
-					" on ",
-					h("span", {"title": startedISOString}, startedISOString.split("T")[0].substr(5)),
-					(this.showNicks ? " by " + jobData["started_by"] : ""),
-					jobNote,
-					"; ",
-					statsElements.mb,
-					h("span", null, " MB in "),
-					statsElements.responses,
-					" at ",
-					statsElements.responsesPerSecond,
-					"/s, ",
-					statsElements.queueLength,
-					"; ",
-					statsElements.connections,
-					" con. w/ ",
-					statsElements.delay,
-					" ms delay; ",
-					statsElements.ignores
+		{"id": "log-container-" + ident, "className": "job-container"}, [
+			h("table", {"className": "job-info"}, [
+				h("tr", null, [
+					h("th", null, "By"),
+					h("td", null, this.showNicks ? jobData["started_by"] : "")
+				]),
+				h("tr", null, [
+					h("th", null, "Remark"),
+					h("td", null, jobNote),
+				]),
+				h("tr", null, [
+					h("th", null, "Resp."),
+					h("td", null, statsElements.responses),
+				]),
+				h("tr", null, [
+					h("th", null, "Speed"),
+					h("td", null, [statsElements.responsesPerSecond, "/s"]),
+				]),
+				h("tr", null, [
+					h("th", null, "Queued"),
+					h("td", null, statsElements.queueLength),
+				]),
+				h("tr", null, [
+					h("th", null, "Conn"),
+					h("td", null, statsElements.connections),
+				]),
+				h("tr", null, [
+					h("th", null, "Delay"),
+					h("td", null, statsElements.delay),
+				]),
+				h("tr", null, [
+					h("th", null, "Ignores"),
+					h("td", null, statsElements.ignores),
 				]),
 			]),
 			logWindow
@@ -575,7 +597,7 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 	this.renderInfo[ident] = new JobRenderInfo(tableRow, logWindow, logSegment, statsElements, jobNote, 0, [0]);
 	this.table.row(tableRow).child(div).show();
 	//this.container.insertBefore(div, beforeElement);
-	this.table.draw();
+	this.table.row(tableRow).draw();
 }
 
 JobsRenderer.prototype._renderDownloadLine = function(data, logSegment) {
@@ -626,6 +648,7 @@ JobsRenderer.prototype._renderStdoutLine = function(data, logSegment) {
 
 JobsRenderer.prototype.handleData = function(data) {
 	var jobData = data["job_data"];
+	jobData["ts"] = data["ts"];
 	var added = this.jobs.handleJobData(jobData);
 	this.numCrawls.textContent = this.jobs.countActive();
 	if(added) {
@@ -657,7 +680,7 @@ JobsRenderer.prototype.handleData = function(data) {
 			toStringTenths(
 				(parseInt(jobData["bytes_downloaded"]) / (1024 * 1024)).toString()));
 	info.statsElements.responses.textContent =
-		numberWithCommas(totalResponses) + " resp.";
+		numberWithCommas(totalResponses);
 	info.statsElements.responses.title = getSummaryResponses(jobData);
 	var duration = Date.now()/1000 - parseFloat(jobData["started_at"]);
 	info.statsElements.responsesPerSecond.textContent =
@@ -667,7 +690,7 @@ JobsRenderer.prototype.handleData = function(data) {
 		var totalQueued = parseInt(jobData["items_queued"], 10);
 		var totalDownloaded = parseInt(jobData["items_downloaded"], 10);
 		info.statsElements.queueLength.textContent =
-			numberWithCommas((totalQueued - totalDownloaded) + " in q.");
+			numberWithCommas((totalQueued - totalDownloaded));
 		info.statsElements.queueLength.title =
 			numberWithCommas(totalQueued) + " queued\n" +
 			numberWithCommas(totalDownloaded) + " downloaded";
@@ -682,8 +705,8 @@ JobsRenderer.prototype.handleData = function(data) {
 			delayMin + "-" + delayMax;
 	info.statsElements.ignores.textContent =
 		jobData["suppress_ignore_reports"] ?
-			'igoff' :
-			'igon';
+			'off' :
+			'on';
 
 	// Update note
 	info.jobNote.textContent =
