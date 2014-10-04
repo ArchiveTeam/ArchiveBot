@@ -58,9 +58,10 @@ html, body {
 	font-size: 14px;
 	font-weight: bold;
 	text-decoration: none;
-	max-width: 20em;
+	max-width: 25vw;
 	text-overflow: ellipsis;
 	overflow: hidden;
+	white-space: nowrap;
 }
 
 .job-ident {
@@ -843,6 +844,7 @@ var Dashboard = function() {
 	}
 	this.table = $('#jobs_table').DataTable({
 		"paging" : false,
+		"order": [2, 'desc'],
 		"columns": [
 			{
 				"data": "url",
