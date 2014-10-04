@@ -66,10 +66,8 @@ html, body {
 .job-ident {
 	margin: 0 1px 0 0;
 	border: 0;
-	background-color: #D0C0AE;
-	color: #786552;
+	background-color: transparent;
 	font-weight: bold;
-	text-align: right;
 }
 
 .log-window {
@@ -230,11 +228,11 @@ a.ignore {
 		<thead>
 			<tr>
 				<th>URL</th>
-				<th>Ident</th>
 				<th>Queued</th>
 				<th>Started</th>
 				<th>Size</th>
 				<th>Ping</th>
+				<th>Ident</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -863,23 +861,6 @@ var Dashboard = function() {
 				}
 			},
 			{
-				"data": "ident",
-				"render": function(cellData, type, row, meta) {
-					if (type !== 'display') {
-						return cellData;
-					}
-					return $('<input>', {
-						"className": "job-ident",
-						"type": "text",
-						"value": cellData,
-						"size": "28",
-						"spellcheck": "false",
-						"readonly": "",
-						"onclick": function() { this.select(); }
-					})[0].outerHTML;
-				},
-			},
-			{
 				"data": "queued_at",
 				"render": function(cellData, type, row, meta) {
 					if (type !== 'display') {
@@ -943,6 +924,23 @@ var Dashboard = function() {
 					}
 
 					return span[0].outerHTML;
+				},
+			},
+			{
+				"data": "ident",
+				"render": function(cellData, type, row, meta) {
+					if (type !== 'display') {
+						return cellData;
+					}
+					return $('<input>', {
+						"class": "job-ident",
+						"type": "text",
+						"value": cellData,
+						"size": "28",
+						"spellcheck": "false",
+						"readonly": "",
+						"onclick": "this.select();",
+					})[0].outerHTML;
 				},
 			},
 		]
