@@ -895,6 +895,8 @@ var Dashboard = function() {
 			{
 				"data": "bytes_downloaded",
 				"render" : function(cellData, type, row, meta) {
+					cellData = cellData || 0
+
 					if (type !== 'display') {
 						return cellData;
 					}
@@ -910,6 +912,8 @@ var Dashboard = function() {
 			{
 				"data": "ts",
 				"render" : function(cellData, type, row, meta) {
+					cellData = cellData || 0
+
 					if (type !== 'display') {
 						return cellData;
 					}
