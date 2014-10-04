@@ -432,7 +432,7 @@ var JobRenderInfo = function(tableRow, logWindow, logSegment, statsElements, job
 	this.jobNote = jobNote;
 	this.lineCountWindow = lineCountWindow;
 	this.lineCountSegments = lineCountSegments;
-	this.tableRowDrawDate = new Date();
+	this.tableRowDataDate = new Date();
 };
 
 
@@ -749,9 +749,9 @@ JobsRenderer.prototype.handleData = function(data) {
 	}
 
 	var nowDate = new Date();
-	if (nowDate - info.tableRowDrawDate > 60000) {
-		info.tableRowDrawDate = nowDate;
-		this.table.row(info.tableRow).data(jobData).draw();
+	if (nowDate - info.tableRowDataDate > 5000) {
+		info.tableRowDataDate = nowDate;
+		this.table.row(info.tableRow).data(jobData);
 	}
 
 	if(this.mouseInside != ident) {
@@ -1002,6 +1002,7 @@ var Dashboard = function() {
 	xhr.send("");
 
 	$('#details_toggle').click($.proxy(this.toggleDetails, this));
+	setInterval($.proxy(this.drawTable, this), 60000);
 };
 
 Dashboard.prototype.handleData = function(data) {
@@ -1051,6 +1052,22 @@ Dashboard.prototype.toggleDetails = function() {
 		$.each(table.rows().indexes(), function(row) { table.row(row).child.hide() });
 	}
 };
+
+Dashboard.prototype.drawTable = function() {
+	// Preserve the scrollbar positions while Datatables draw() causes 
+	// DOM updates
+	$('.log-window').each(function() {
+		$(this).attr('data-scrollTop', $(this).scrollTop());
+		$(this).attr('data-scrollLeft', $(this).scrollLeft());
+	});
+
+	this.table.draw();
+
+	$('.log-window').each(function() {
+		$(this).scrollTop($(this).attr('data-scrollTop'));
+		$(this).scrollLeft($(this).attr('data-scrollLeft'));
+	});
+}
 
 var ds = new Dashboard();
 
