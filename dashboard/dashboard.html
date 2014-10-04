@@ -224,7 +224,8 @@ a.ignore {
 		</div>
 	</div>
 	<div id="traffic"></div>
-	<div id="logs"></div>
+	<input id="details_toggle" type="checkbox" checked>
+	<label for="details_toggle">Show details</label>
 	<table id="jobs_table" class="display">
 		<thead>
 			<tr>
@@ -500,9 +501,6 @@ JobsRenderer.prototype._createLogSegment = function() {
 
 JobsRenderer.prototype._createLogContainer = function(jobData) {
 	var ident = jobData["ident"];
-	var beforeJob = this._getNextJobInSorted(ident);
-	var beforeElement = beforeJob == null ? null : byId("log-container-" + beforeJob["ident"]);
-
 	var logSegment = this._createLogSegment();
 
 	var logWindowAttrs = {
@@ -605,8 +603,11 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 	);
 	var tableRow = this.table.row.add(jobData).node();
 	this.renderInfo[ident] = new JobRenderInfo(tableRow, logWindow, logSegment, statsElements, jobNote, 0, [0]);
-	this.table.row(tableRow).child(div).show();
-	//this.container.insertBefore(div, beforeElement);
+	var child = this.table.row(tableRow).child(div);
+
+	if ($('#details_toggle').is(':checked')) {
+		child.show();
+	}
 	this.table.row(tableRow).draw();
 }
 
@@ -734,7 +735,7 @@ JobsRenderer.prototype.handleData = function(data) {
 		info.logSegment = newSegment;
 		info.lineCountSegments.push(0);
 	}
-	
+
 	var nowDate = new Date();
 	if (nowDate - info.tableRowDrawDate > 60000) {
 		info.tableRowDrawDate = nowDate;
@@ -886,7 +887,7 @@ var Dashboard = function() {
 					}
 					var cellDate = new Date(cellData * 1000);
 					var dateNow = new Date();
-					
+
 					var span = $('<span>');
 					span.attr('title', cellDate.toLocaleString());
 					span.text(jQuery.timeago(cellDate));
@@ -901,7 +902,7 @@ var Dashboard = function() {
 					}
 					var cellDate = new Date(cellData * 1000);
 					var dateNow = new Date();
-					
+
 					var span = $('<span>');
 					span.attr('title', cellDate.toLocaleString());
 					span.text(jQuery.timeago(cellDate));
@@ -914,7 +915,7 @@ var Dashboard = function() {
 					if (type !== 'display') {
 						return cellData;
 					}
-					
+
 					var span = $('<span>');
 					span.attr('title', cellData);
 					span.text(numberWithCommas(
@@ -929,18 +930,18 @@ var Dashboard = function() {
 					if (type !== 'display') {
 						return cellData;
 					}
-					
+
 					var cellDate = new Date(cellData * 1000);
 					var dateNow = new Date();
-					
+
 					var span = $('<span>');
 					span.attr('title', cellDate.toLocaleString());
 					span.text(jQuery.timeago(cellDate));
-					
+
 					if (dateNow.getTime() - cellDate.getTime() > timestampThreshold) {
 						span.addClass('cell_warn_higlight');
 					}
-					
+
 					return span[0].outerHTML;
 				},
 			},
@@ -949,7 +950,7 @@ var Dashboard = function() {
 	this.jobsRenderer = new JobsRenderer(this.table, byId('logs'), historyLines, showNicks);
 
 	var batchTimeWhenHidden = 5000;
-	
+
 
 	var xhr = new XMLHttpRequest();
 	xhr.onload = function() {
@@ -982,6 +983,8 @@ var Dashboard = function() {
 	xhr.open("GET", "http://" + this.host + "/logs/recent?cb=" + Date.now() + Math.random());
 	xhr.setRequestHeader('Accept', 'application/json');
 	xhr.send("");
+
+	$('#details_toggle').click($.proxy(this.toggleDetails, this));
 };
 
 Dashboard.prototype.handleData = function(data) {
@@ -1018,6 +1021,17 @@ Dashboard.prototype.toggleHelp = function() {
 		help.classList.remove('undisplayed');
 	} else {
 		help.classList.add('undisplayed');
+	}
+};
+
+Dashboard.prototype.toggleDetails = function() {
+	var checkbox = $('#details_toggle');
+	var table = this.table;
+
+	if (checkbox.is(':checked')) {
+		$.each(table.rows().indexes(), function(row) { table.row(row).child.show() });
+	} else {
+		$.each(table.rows().indexes(), function(row) { table.row(row).child.hide() });
 	}
 };
 
