@@ -178,6 +178,19 @@ a.ignore {
 .undisplayed {
 	display: none;
 }
+
+table.dataTable.supercompact thead th,
+table.dataTable.supercompact thead td {
+  padding: 1px 2px;
+}
+table.dataTable.supercompact tfoot th,
+table.dataTable.supercompact tfoot td {
+  padding: 5px 9px 3px 9px;
+}
+table.dataTable.supercompact tbody th,
+table.dataTable.supercompact tbody td {
+  padding: 1px 2px;
+}
 </style>
 <div class="padded-page">
 	<div class="header">
@@ -225,7 +238,7 @@ a.ignore {
 	<div id="traffic"></div>
 	<input id="details_toggle" type="checkbox" checked>
 	<label for="details_toggle">Show details</label>
-	<table id="jobs_table" class="display">
+	<table id="jobs_table" class="display supercompact">
 		<thead>
 			<tr>
 				<th>URL</th>
