@@ -8,7 +8,9 @@
 <link rel="alternate" type="application/rss+xml" title="RSS Feed" href="/feed/archivebot.rss">
 <link rel="alternate" type="application/atom+xml" title="Atom Feed" href="/feed/archivebot.atom">
 <link rel="icon" type="image/png" href="/assets/favicon.png">
-<title>ArchiveBot dashboard 2.0</title>
+<title>ArchiveBot dashboard 2.5</title>
+<link rel="stylesheet" type="text/css"
+	href="//cdn.datatables.net/1.10.2/css/jquery.dataTables.css">
 </head>
 <body>
 <style>
@@ -16,6 +18,7 @@ html, body {
 	background-color: #D0C0AE;
 	font-family: Tahoma, Arial, sans-serif;
 	font-size: 13px;
+	color: black;
 }
 
 .padded-page {
@@ -140,6 +143,11 @@ a.ignore {
 	font-weight: bold;
 }
 
+.cell_warn_higlight {
+	background-color: #FFC2E3 !important;
+	font-weight: bold;
+}
+
 #help {
 	background-color: #FFF7E1;
 	font-family: Arial, sans-serif;
@@ -206,7 +214,27 @@ a.ignore {
 	</div>
 	<div id="traffic"></div>
 	<div id="logs"></div>
+	<table id="jobs_table" class="display">
+		<thead>
+			<tr>
+				<th>URL</th>
+				<th>Ident</th>
+				<th>Queued</th>
+				<th>Started</th>
+				<th>Size</th>
+				<th>Ping</th>
+			</tr>
+		</thead>
+		<tbody>
+		</tbody>
+	</table>
 </div>
+<script
+	src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script type="text/javascript" charset="utf8"
+	src="//cdn.datatables.net/1.10.2/js/jquery.dataTables.js"></script>
+<script type="text/javascript" src="/assets/scripts/jquery.timeago.js"></script>
+<script type="text/javascript" src="/assets/jquery.timeago.js"></script>
 <script>
 "use strict";
 
@@ -368,7 +396,8 @@ JobsTracker.prototype.handleJobData = function(jobData) {
 
 
 
-var JobRenderInfo = function(logWindow, logSegment, statsElements, jobNote, lineCountWindow, lineCountSegments) {
+var JobRenderInfo = function(tableRow, logWindow, logSegment, statsElements, jobNote, lineCountWindow, lineCountSegments) {
+	this.tableRow = tableRow;
 	this.logWindow = logWindow;
 	this.logSegment = logSegment;
 	this.statsElements = statsElements;
@@ -426,7 +455,8 @@ var getSummaryResponses = function(jobData) {
 
 
 
-var JobsRenderer = function(container, historyLines, showNicks) {
+var JobsRenderer = function(table, container, historyLines, showNicks) {
+	this.table = table;
 	this.container = container;
 	this.historyLines = historyLines;
 	this.showNicks = showNicks;
@@ -518,7 +548,6 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 		{"id": "log-container-" + ident}, [
 			h("div", {"className": "job-header"}, [
 				h("span", {"className": "job-info"}, [
-					h("a", {"className": "job-url", "href": jobData["url"]}, jobData["url"]),
 					" on ",
 					h("span", {"title": startedISOString}, startedISOString.split("T")[0].substr(5)),
 					(this.showNicks ? " by " + jobData["started_by"] : ""),
@@ -538,21 +567,15 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 					" ms delay; ",
 					statsElements.ignores
 				]),
-				h("input", {
-					"className": "job-ident",
-					"type": "text",
-					"value": ident,
-					"size": "28",
-					"spellcheck": "false",
-					"readonly": "",
-					"onclick": function() { this.select(); }
-				})
 			]),
 			logWindow
 		]
 	);
-	this.renderInfo[ident] = new JobRenderInfo(logWindow, logSegment, statsElements, jobNote, 0, [0]);
-	this.container.insertBefore(div, beforeElement);
+	var tableRow = this.table.row.add(jobData).node();
+	this.renderInfo[ident] = new JobRenderInfo(tableRow, logWindow, logSegment, statsElements, jobNote, 0, [0]);
+	this.table.row(tableRow).child(div).show();
+	//this.container.insertBefore(div, beforeElement);
+	this.table.draw();
 }
 
 JobsRenderer.prototype._renderDownloadLine = function(data, logSegment) {
@@ -759,6 +782,7 @@ Decayer.prototype.decay = function() {
 
 var Dashboard = function() {
 	this.messageCount = 0;
+	var timestampThreshold = 60 * 5 * 1000;
 
 	var args = getQueryArgs();
 
@@ -779,9 +803,79 @@ var Dashboard = function() {
 	if(this.dumpTraffic) {
 		this.dumpMax = Number(args["dumpMax"]);
 	}
-	this.jobsRenderer = new JobsRenderer(byId('logs'), historyLines, showNicks);
+	this.table = $('#jobs_table').DataTable({
+		"paging" : false,
+		"columns": [
+			{
+				"data": "url",
+				"className": "job-url",
+				"createdCell": function(td, cellData, rowData, row, col) {
+					$(td).html($('<a>', {href: cellData, text: cellData}));
+				}
+			},
+			{
+				"data": "ident",
+				"createdCell": function(td, cellData, rowData, row, col) {
+					$(td).html($('<input>', {
+						"className": "job-ident",
+						"type": "text",
+						"value": cellData,
+						"size": "28",
+						"spellcheck": "false",
+						"readonly": "",
+						"onclick": function() { this.select(); }
+					}));
+				},
+			},
+			{
+				"data": "queued_at",
+				"createdCell" : function(td, cellData, rowData, row, col) {
+					var cellDate = new Date(cellData * 1000);
+					var dateNow = new Date();
+					
+					$(td).attr('title', cellDate.toLocaleString());
+					$(td).text(jQuery.timeago(cellDate));
+				},
+			},
+			{
+				"data": "started_at",
+				"createdCell" : function(td, cellData, rowData, row, col) {
+					var cellDate = new Date(cellData * 1000);
+					var dateNow = new Date();
+					
+					$(td).attr('title', cellDate.toLocaleString());
+					$(td).text(jQuery.timeago(cellDate));
+				},
+			},
+			{
+				"data": "bytes_downloaded",
+				"createdCell" : function(td, cellData, rowData, row, col) {
+					$(td).attr('title', cellData);
+					$(td).text(numberWithCommas(
+							toStringTenths(
+									(parseInt(cellData) / (1024 * 1024)).toString())) + ' MB');
+				},
+			},
+			{
+				"data": "ts",
+				"createdCell" : function(td, cellData, rowData, row, col) {
+					var cellDate = new Date(cellData * 1000);
+					var dateNow = new Date();
+					
+					$(td).attr('title', cellDate.toLocaleString());
+					$(td).text(jQuery.timeago(cellDate));
+					
+					if (dateNow.getTime() - cellDate.getTime() > timestampThreshold) {
+						$(td).addClass('cell_warn_higlight');
+					}
+				},
+			},
+		]
+	});
+	this.jobsRenderer = new JobsRenderer(this.table, byId('logs'), historyLines, showNicks);
 
 	var batchTimeWhenHidden = 5000;
+	
 
 	var xhr = new XMLHttpRequest();
 	xhr.onload = function() {
