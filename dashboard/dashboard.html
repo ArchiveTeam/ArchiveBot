@@ -368,6 +368,10 @@ var getQueryArgs = function() {
 
 var isSafari = navigator.userAgent.indexOf("Safari") != -1;
 
+function stripUrlScheme(text) {
+	return text.replace(/^.*?\/\//, "");
+}
+
 /*** End of utility code ***/
 
 
@@ -415,6 +419,7 @@ var JobRenderInfo = function(tableRow, logWindow, logSegment, statsElements, job
 	this.jobNote = jobNote;
 	this.lineCountWindow = lineCountWindow;
 	this.lineCountSegments = lineCountSegments;
+	this.tableRowDrawDate = new Date();
 };
 
 
@@ -544,7 +549,7 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 		mb: h("span", null, "?"),
 		responses: h("span", null, "?"),
 		responsesPerSecond: h("span", null, "?"),
-		queueLength: h("span", null, "? in q."),
+		queueLength: h("span", null, "?"),
 		connections: h("span", null, "?"),
 		delay: h("span", null, "?"),
 		ignores: h("span", null, "?")
@@ -729,6 +734,12 @@ JobsRenderer.prototype.handleData = function(data) {
 		info.logSegment = newSegment;
 		info.lineCountSegments.push(0);
 	}
+	
+	var nowDate = new Date();
+	if (nowDate - info.tableRowDrawDate > 60000) {
+		info.tableRowDrawDate = nowDate;
+		this.table.row(info.tableRow).data(jobData).draw();
+	}
 
 	if(this.mouseInside != ident) {
 		// We may have to remove more than one segment, if the user
@@ -837,14 +848,26 @@ var Dashboard = function() {
 			{
 				"data": "url",
 				"className": "job-url",
-				"createdCell": function(td, cellData, rowData, row, col) {
-					$(td).html($('<a>', {href: cellData, text: cellData}));
+				"render": function(cellData, type, row, meta) {
+					if (type === 'sort') {
+						return stripUrlScheme(cellData).replace(/^www\./, '');
+					}
+					if (type !== 'display') {
+						return cellData;
+					}
+					return $('<a>', {
+						href: cellData, 
+						text: stripUrlScheme(cellData)
+					})[0].outerHTML;
 				}
 			},
 			{
 				"data": "ident",
-				"createdCell": function(td, cellData, rowData, row, col) {
-					$(td).html($('<input>', {
+				"render": function(cellData, type, row, meta) {
+					if (type !== 'display') {
+						return cellData;
+					}
+					return $('<input>', {
 						"className": "job-ident",
 						"type": "text",
 						"value": cellData,
@@ -852,50 +875,73 @@ var Dashboard = function() {
 						"spellcheck": "false",
 						"readonly": "",
 						"onclick": function() { this.select(); }
-					}));
+					})[0].outerHTML;
 				},
 			},
 			{
 				"data": "queued_at",
-				"createdCell" : function(td, cellData, rowData, row, col) {
+				"render": function(cellData, type, row, meta) {
+					if (type !== 'display') {
+						return cellData;
+					}
 					var cellDate = new Date(cellData * 1000);
 					var dateNow = new Date();
 					
-					$(td).attr('title', cellDate.toLocaleString());
-					$(td).text(jQuery.timeago(cellDate));
+					var span = $('<span>');
+					span.attr('title', cellDate.toLocaleString());
+					span.text(jQuery.timeago(cellDate));
+					return span[0].outerHTML;
 				},
 			},
 			{
 				"data": "started_at",
-				"createdCell" : function(td, cellData, rowData, row, col) {
+				"render": function(cellData, type, row, meta) {
+					if (type !== 'display') {
+						return cellData;
+					}
 					var cellDate = new Date(cellData * 1000);
 					var dateNow = new Date();
 					
-					$(td).attr('title', cellDate.toLocaleString());
-					$(td).text(jQuery.timeago(cellDate));
+					var span = $('<span>');
+					span.attr('title', cellDate.toLocaleString());
+					span.text(jQuery.timeago(cellDate));
+					return span[0].outerHTML;
 				},
 			},
 			{
 				"data": "bytes_downloaded",
-				"createdCell" : function(td, cellData, rowData, row, col) {
-					$(td).attr('title', cellData);
-					$(td).text(numberWithCommas(
+				"render" : function(cellData, type, row, meta) {
+					if (type !== 'display') {
+						return cellData;
+					}
+					
+					var span = $('<span>');
+					span.attr('title', cellData);
+					span.text(numberWithCommas(
 							toStringTenths(
 									(parseInt(cellData) / (1024 * 1024)).toString())) + ' MB');
+					return span[0].outerHTML;
 				},
 			},
 			{
 				"data": "ts",
-				"createdCell" : function(td, cellData, rowData, row, col) {
+				"render" : function(cellData, type, row, meta) {
+					if (type !== 'display') {
+						return cellData;
+					}
+					
 					var cellDate = new Date(cellData * 1000);
 					var dateNow = new Date();
 					
-					$(td).attr('title', cellDate.toLocaleString());
-					$(td).text(jQuery.timeago(cellDate));
+					var span = $('<span>');
+					span.attr('title', cellDate.toLocaleString());
+					span.text(jQuery.timeago(cellDate));
 					
 					if (dateNow.getTime() - cellDate.getTime() > timestampThreshold) {
-						$(td).addClass('cell_warn_higlight');
+						span.addClass('cell_warn_higlight');
 					}
+					
+					return span[0].outerHTML;
 				},
 			},
 		]
