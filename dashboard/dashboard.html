@@ -238,6 +238,8 @@ table.dataTable.supercompact tbody td {
 	<div id="traffic"></div>
 	<input id="details_toggle" type="checkbox" checked>
 	<label for="details_toggle">Show details</label>
+	<input id="expert_details_toggle" type="checkbox">
+	<label for="expert_details_toggle">Show expert details</label>
 	<table id="jobs_table" class="display supercompact">
 		<thead>
 			<tr>
@@ -877,6 +879,7 @@ var Dashboard = function() {
 			},
 			{
 				"data": "queued_at",
+				"visible": false,
 				"render": function(cellData, type, row, meta) {
 					if (type !== 'display') {
 						return cellData;
@@ -924,6 +927,7 @@ var Dashboard = function() {
 			},
 			{
 				"data": "ts",
+				"visible": false,
 				"render" : function(cellData, type, row, meta) {
 					cellData = cellData || 0
 
@@ -1002,6 +1006,7 @@ var Dashboard = function() {
 	xhr.send("");
 
 	$('#details_toggle').click($.proxy(this.toggleDetails, this));
+	$('#expert_details_toggle').click($.proxy(this.toggleExpertDetails, this));
 	setInterval($.proxy(this.drawTable, this), 60000);
 };
 
@@ -1050,6 +1055,19 @@ Dashboard.prototype.toggleDetails = function() {
 		$.each(table.rows().indexes(), function(row) { table.row(row).child.show() });
 	} else {
 		$.each(table.rows().indexes(), function(row) { table.row(row).child.hide() });
+	}
+};
+
+Dashboard.prototype.toggleExpertDetails = function() {
+	var checkbox = $('#expert_details_toggle');
+	var table = this.table;
+
+	if (checkbox.is(':checked')) {
+		this.table.column(1).visible(true);
+		this.table.column(4).visible(true);
+	} else {
+		this.table.column(1).visible(false);
+		this.table.column(4).visible(false);
 	}
 };
 
