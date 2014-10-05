@@ -744,9 +744,7 @@ JobsRenderer.prototype.handleData = function(data) {
 
 	// Update note
 	info.jobNote.textContent =
-		isBlank(jobData["note"]) ?
-			"" :
-			" (" + jobData["note"] + ")";
+		isBlank(jobData["note"]) ? "" : jobData["note"];
 
 	info.lineCountWindow += linesRendered;
 	info.lineCountSegments[info.lineCountSegments.length - 1] += linesRendered;
