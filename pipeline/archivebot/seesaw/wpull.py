@@ -38,6 +38,7 @@ def make_args(item, default_user_agent, wpull_exe, phantomjs_exe, finished_warcs
         '--warc-move', finished_warcs_dir,
         '--python-script', 'wpull_hooks.py',
         '--phantomjs-exe', phantomjs_exe,
+        '--debug-manhole',
     ]
 
     # -----------------------------------------------------------------------
