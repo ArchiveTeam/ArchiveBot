@@ -387,6 +387,15 @@ function stripUrlScheme(text) {
 	return text.replace(/^.*?\/\//, "");
 }
 
+function dateToFriendlyString(date) {
+	var dateNow = new Date();
+	if (dateNow - date < 2419200000) {
+		return jQuery.timeago(date);
+	} else {
+		return date.toLocaleDateString();
+	}
+}
+
 /*** End of utility code ***/
 
 
@@ -885,11 +894,10 @@ var Dashboard = function() {
 						return cellData;
 					}
 					var cellDate = new Date(cellData * 1000);
-					var dateNow = new Date();
 
 					var span = $('<span>');
 					span.attr('title', cellDate.toLocaleString());
-					span.text(jQuery.timeago(cellDate));
+					span.text(dateToFriendlyString(cellDate));
 					return span[0].outerHTML;
 				},
 			},
@@ -900,11 +908,10 @@ var Dashboard = function() {
 						return cellData;
 					}
 					var cellDate = new Date(cellData * 1000);
-					var dateNow = new Date();
 
 					var span = $('<span>');
 					span.attr('title', cellDate.toLocaleString());
-					span.text(jQuery.timeago(cellDate));
+					span.text(dateToFriendlyString(cellDate));
 					return span[0].outerHTML;
 				},
 			},
@@ -940,7 +947,7 @@ var Dashboard = function() {
 
 					var span = $('<span>');
 					span.attr('title', cellDate.toLocaleString());
-					span.text(jQuery.timeago(cellDate));
+					span.text(dateToFriendlyString(cellDate));
 
 					if (dateNow.getTime() - cellDate.getTime() > timestampThreshold) {
 						span.addClass('cell_warn_higlight');
