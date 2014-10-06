@@ -57,6 +57,12 @@ html, body {
 	display: none;
 }
 
+.job-info th {
+	text-align: right;
+	color: #404040;
+	font-weight: normal;
+}
+
 .job-url {
 	font-family: Arial, sans-serif;
 	font-size: 14px;
@@ -194,6 +200,11 @@ table.dataTable.supercompact tfoot td {
 table.dataTable.supercompact tbody th,
 table.dataTable.supercompact tbody td {
   padding: 1px 2px;
+}
+
+td.numeric-cell {
+	text-align: right;
+	padding-right: 1em !important;
 }
 </style>
 <div class="padded-page">
@@ -920,6 +931,7 @@ var Dashboard = function() {
 			},
 			{
 				"data": "bytes_downloaded",
+				"className": "numeric-cell",
 				"render" : function(cellData, type, row, meta) {
 					cellData = cellData || 0
 
