@@ -631,7 +631,7 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 	if ($('#details_toggle').is(':checked')) {
 		child.show();
 	}
-	this.table.row(tableRow).draw();
+	ds.drawTable();
 }
 
 JobsRenderer.prototype._renderDownloadLine = function(data, logSegment) {
@@ -844,6 +844,7 @@ Decayer.prototype.decay = function() {
 var Dashboard = function() {
 	this.messageCount = 0;
 	var timestampThreshold = 60 * 5 * 1000;
+	this.drawTableTimer = null;
 
 	var args = getQueryArgs();
 
@@ -1077,19 +1078,26 @@ Dashboard.prototype.toggleExpertDetails = function() {
 };
 
 Dashboard.prototype.drawTable = function() {
-	// Preserve the scrollbar positions while Datatables draw() causes 
-	// DOM updates
-	$('.log-window').each(function() {
-		$(this).attr('data-scrollTop', $(this).scrollTop());
-		$(this).attr('data-scrollLeft', $(this).scrollLeft());
-	});
+	if (this.drawTableTimer) {
+		clearTimeout(this.drawTableTimer);
+		this.drawTableTimer = null;
+	}
 
-	this.table.draw();
-
-	$('.log-window').each(function() {
-		$(this).scrollTop($(this).attr('data-scrollTop'));
-		$(this).scrollLeft($(this).attr('data-scrollLeft'));
-	});
+	this.drawTableTimer = setTimeout($.proxy(function() {
+		// Preserve the scrollbar positions while Datatables draw() causes 
+		// DOM updates
+		$('.log-window').each(function() {
+			$(this).attr('data-scrollTop', $(this).scrollTop());
+			$(this).attr('data-scrollLeft', $(this).scrollLeft());
+		});
+	
+		this.table.draw();
+	
+		$('.log-window').each(function() {
+			$(this).scrollTop($(this).attr('data-scrollTop'));
+			$(this).scrollLeft($(this).attr('data-scrollLeft'));
+		});
+	}, this), 1000);
 }
 
 var ds = new Dashboard();
