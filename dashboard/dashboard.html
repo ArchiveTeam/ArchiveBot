@@ -53,6 +53,10 @@ html, body {
 	height: 192px;
 }
 
+.job-info-expert {
+	display: none;
+}
+
 .job-url {
 	font-family: Arial, sans-serif;
 	font-size: 14px;
@@ -616,7 +620,7 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 					h("th", null, "By"),
 					h("td", null, this.showNicks ? jobData["started_by"] : "")
 				]),
-				h("tr", null, [
+				h("tr", {"className": "job-info-expert"}, [
 					h("th", null, "Pipeline"),
 					h("td", null, jobData["pipeline_id"]),
 				]),
@@ -1071,9 +1075,11 @@ Dashboard.prototype.toggleExpertDetails = function() {
 	if (checkbox.is(':checked')) {
 		this.table.column(1).visible(true);
 		this.table.column(4).visible(true);
+		$('.job-info-expert').show();
 	} else {
 		this.table.column(1).visible(false);
 		this.table.column(4).visible(false);
+		$('.job-info-expert').hide();
 	}
 };
 
