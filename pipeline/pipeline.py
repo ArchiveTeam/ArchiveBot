@@ -50,6 +50,9 @@ assert 'RSYNC_URL' in env, 'RSYNC_URL not set.'
 assert 'REDIS_URL' in env, 'REDIS_URL not set.'
 assert 'FINISHED_WARCS_DIR' in env, 'FINISHED_WARCS_DIR not set.'
 
+assert 'TMUX' in env or 'STY' in env or env.get('NO_SCREEN') == "1", \
+        "Refusing to start outside of screen or tmux, set NO_SCREEN=1 to override"
+
 if StrictVersion(seesaw.__version__) < StrictVersion("0.1.8b1"):
     raise Exception(
         "Needs seesaw@python3/development version 0.1.8b1 or higher. "
