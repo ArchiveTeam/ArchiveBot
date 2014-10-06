@@ -146,6 +146,10 @@ html, body {
 	box-sizing: border-box;
 }
 
+.line-wget-code {
+	color: #404040;
+}
+
 a {
 	color: #000;
 	text-decoration: none;
@@ -470,7 +474,11 @@ var Reusable = {
 	obj_className_line_redirect: {"className": "line-redirect"},
 	obj_className_line_ignore: {"className": "line-ignore"},
 	obj_className_line_stdout: {"className": "line-stdout"},
-	obj_className_bold: {"className": "bold"}
+	obj_className_bold: {"className": "bold"},
+	obj_className_line_wget_code: {"className": "line-wget-code"},
+	obj_className_job_info: {"className": "job-info"},
+	obj_className_job_info_expert: {"className": "job-info-expert"},
+	
 };
 
 
@@ -598,7 +606,7 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 	var div = h(
 		'div',
 		{"id": "log-container-" + ident, "className": "job-container"}, [
-			h("table", {"className": "job-info"}, [
+			h("table", Reusable.obj_className_job_info, [
 				h("tr", null, [
 					h("th", null, "Remark"),
 					h("td", null, jobNote),
@@ -631,7 +639,7 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 					h("th", null, "By"),
 					h("td", null, this.showNicks ? jobData["started_by"] : "")
 				]),
-				h("tr", {"className": "job-info-expert"}, [
+				h("tr", Reusable.obj_className_job_info_expert, [
 					h("th", null, "Pipeline"),
 					h("td", null, jobData["pipeline_id"]),
 				]),
@@ -660,7 +668,9 @@ JobsRenderer.prototype._renderDownloadLine = function(data, logSegment) {
 		var attrs = Reusable.obj_className_line_normal;
 	}
 	logSegment.appendChild(h("div", attrs, [
-		data["response_code"] + " " + data["wget_code"] + " ",
+		data["response_code"] + "  ",
+		h("span", Reusable.obj_className_line_wget_code, data["wget_code"]), 
+		"  ",
 		href(data["url"], data["url"])
 	]));
 	return 1;
@@ -669,7 +679,7 @@ JobsRenderer.prototype._renderDownloadLine = function(data, logSegment) {
 JobsRenderer.prototype._renderIgnoreLine = function(data, logSegment) {
 	var attrs = Reusable.obj_className_line_ignore;
 	logSegment.appendChild(h("div", attrs, [
-		h('span', null, " IGNOR "),
+		h('span', null, "  IGNOR  "),
 		h('a', {"href": data["url"], "className": "ignore"}, data["url"]),
 		h('span', Reusable.obj_className_bold, " by "),
 		data["pattern"]
