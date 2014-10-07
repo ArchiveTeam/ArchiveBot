@@ -466,7 +466,6 @@ var JobRenderInfo = function(tableRow, logWindow, logSegment, statsElements, job
 	this.jobNote = jobNote;
 	this.lineCountWindow = lineCountWindow;
 	this.lineCountSegments = lineCountSegments;
-	this.tableRowDataDate = new Date();
 };
 
 
@@ -786,11 +785,7 @@ JobsRenderer.prototype.handleData = function(data) {
 		info.lineCountSegments.push(0);
 	}
 
-	var nowDate = new Date();
-	if (nowDate - info.tableRowDataDate > 5000) {
-		info.tableRowDataDate = nowDate;
-		this.table.row(info.tableRow).data(jobData);
-	}
+	this.table.row(info.tableRow).data(jobData);
 
 	if(this.mouseInside != ident) {
 		// We may have to remove more than one segment, if the user
