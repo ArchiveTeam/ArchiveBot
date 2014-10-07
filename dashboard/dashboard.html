@@ -79,6 +79,10 @@ html, body {
 	font-weight: bold;
 }
 
+.job-finished {
+	opacity: 0.5;
+}
+
 .log-window {
 	background-color: #FFF7E1;
 	overflow-y: scroll;
@@ -916,8 +920,9 @@ var Dashboard = function() {
 						return cellData;
 					}
 					return $('<a>', {
-						href: cellData, 
-						text: stripUrlScheme(cellData)
+						href: cellData,
+						text: stripUrlScheme(cellData),
+						className: row.finished ? 'job-finished' : null,
 					})[0].outerHTML;
 				}
 			},
