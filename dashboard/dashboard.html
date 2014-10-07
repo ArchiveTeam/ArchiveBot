@@ -1106,6 +1106,10 @@ Dashboard.prototype.toggleExpertDetails = function() {
 };
 
 Dashboard.prototype.drawTable = function() {
+	if (document.hidden) {
+		return;
+	}
+
 	if (this.drawTableTimer) {
 		clearTimeout(this.drawTableTimer);
 		this.drawTableTimer = null;
