@@ -239,6 +239,9 @@ td.numeric-cell {
 				To pause scrolling, move your mouse inside a log window.
 			</p>
 			<p>
+				To clear all finished jobs, reload the page.
+			</p>
+			<p>
 				Mouse over the job start date or the response count for additional information.
 			</p>
 			<p>
@@ -260,7 +263,6 @@ td.numeric-cell {
 	<label for="details_toggle">Show details</label>
 	<input id="expert_details_toggle" type="checkbox">
 	<label for="expert_details_toggle">Show expert details</label>
-	<button id="clear_finished_button">Clear finished</button>
 	<table id="jobs_table" class="display supercompact">
 		<thead>
 			<tr>
@@ -809,19 +811,6 @@ JobsRenderer.prototype.handleData = function(data) {
 	}
 };
 
-JobsRenderer.prototype.clearFinished = function () {
-	while (true) {
-		var ident = this.jobs.finishedArray.pop();
-
-		if (!ident) {
-			break;
-		}
-
-		this.table.row(this.renderInfo[ident].tableRow).remove();
-		delete this.renderInfo[ident];
-		delete this.jobs.finishedSet[ident];
-	}
-};
 
 
 var BatchingQueue = function(callable, minInterval) {
@@ -1055,7 +1044,6 @@ var Dashboard = function() {
 
 	$('#details_toggle').click($.proxy(this.toggleDetails, this));
 	$('#expert_details_toggle').click($.proxy(this.toggleExpertDetails, this));
-	$('#clear_finished_button').click($.proxy(this.clearFinished, this));
 	setInterval($.proxy(this.drawTable, this), 60000);
 };
 
@@ -1147,11 +1135,6 @@ Dashboard.prototype.drawTable = function() {
 			$(this).scrollLeft($(this).attr('data-scrollLeft'));
 		});
 	}, this), 1000);
-}
-
-Dashboard.prototype.clearFinished = function() {
-	this.jobsRenderer.clearFinished();
-	this.drawTable();
 }
 
 var ds = new Dashboard();
