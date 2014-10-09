@@ -5,14 +5,14 @@
                 "firefox",
                 "firefox-windows"
             ],
-            "name": "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:31.0) Gecko/20100101 Firefox/31.0"
+            "name": "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:32.0) Gecko/20100101 Firefox/32.0"
         },
         {
             "aliases": [
                 "firefox-linux",
                 "firefox-ubuntu"
             ],
-            "name": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:31.0) Gecko/20100101 Firefox/31.0"
+            "name": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:32.0) Gecko/20100101 Firefox/32.0"
         }
     ],
     "type": "user_agents"
