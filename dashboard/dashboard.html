@@ -4,22 +4,24 @@
 <meta charset="UTF-8">
 <meta name="referrer" content="never">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width">
 <base target="_blank">
 <link rel="alternate" type="application/rss+xml" title="RSS Feed" href="/feed/archivebot.rss">
 <link rel="alternate" type="application/atom+xml" title="Atom Feed" href="/feed/archivebot.atom">
 <link rel="icon" type="image/png" href="/assets/favicon.png">
-<title>ArchiveBot dashboard 2.0</title>
-</head>
-<body>
+<title>ArchiveBot dashboard 2.5</title>
+<link rel="stylesheet" type="text/css"
+	href="https://cdn.datatables.net/1.10.2/css/jquery.dataTables.css">
 <style>
 html, body {
 	background-color: #D0C0AE;
-	font-family: Tahoma, Arial, sans-serif;
+	font-family: 'Source Sans Pro', 'Segoe UI', 'Lucida Grande', Ubuntu, Tahoma, Arial, sans-serif;
 	font-size: 13px;
+	color: black;
 }
 
 .padded-page {
-	padding: 20px 27px 20px 27px;
+	padding: 0.5em 2vw 0.5em 2vw;
 }
 
 .header {
@@ -33,16 +35,30 @@ html, body {
 	flex-flow: row nowrap;
 }
 
-.job-header {
+.job-container {
 	display: flex;
-	align-items: flex-end;
-	justify-content: space-between;
+	align-items: stretch;
+	justify-content: flex-start;
 	flex-flow: row nowrap;
 }
 
 .job-info {
+	display: block;
 	white-space: nowrap;
-	overflow: hidden;
+	overflow: auto;
+	align-self: stretch;
+	width: 20em;
+	height: 192px;
+}
+
+.job-info-expert {
+	display: none;
+}
+
+.job-info th {
+	text-align: right;
+	color: #404040;
+	font-weight: normal;
 }
 
 .job-url {
@@ -50,15 +66,21 @@ html, body {
 	font-size: 14px;
 	font-weight: bold;
 	text-decoration: none;
+	max-width: 33vw;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
 }
 
 .job-ident {
 	margin: 0 1px 0 0;
 	border: 0;
-	background-color: #D0C0AE;
-	color: #786552;
+	background-color: transparent;
 	font-weight: bold;
-	text-align: right;
+}
+
+.job-finished {
+	opacity: 0.5;
 }
 
 .log-window {
@@ -68,6 +90,9 @@ html, body {
 	border: 1px solid #999;
 	margin: 0 0 1em 0;
 	border-radius: 3px;
+	align-self: stretch;
+	flex: 0 1 100%;
+	width: 40em;
 }
 
 .log-window-stopped {
@@ -123,6 +148,10 @@ html, body {
 	box-sizing: border-box;
 }
 
+.line-wget-code {
+	color: #404040;
+}
+
 a {
 	color: #000;
 	text-decoration: none;
@@ -137,6 +166,11 @@ a.ignore {
 }
 
 .bold {
+	font-weight: bold;
+}
+
+.cell_warn_higlight {
+	background-color: #FFC2E3 !important;
 	font-weight: bold;
 }
 
@@ -160,7 +194,27 @@ a.ignore {
 .undisplayed {
 	display: none;
 }
+
+table.dataTable.supercompact thead th,
+table.dataTable.supercompact thead td {
+  padding: 1px 2px;
+}
+table.dataTable.supercompact tfoot th,
+table.dataTable.supercompact tfoot td {
+  padding: 5px 9px 3px 9px;
+}
+table.dataTable.supercompact tbody th,
+table.dataTable.supercompact tbody td {
+  padding: 1px 2px;
+}
+
+td.numeric-cell {
+	text-align: right;
+	padding-right: 1em !important;
+}
 </style>
+</head>
+<body>
 <div class="padded-page">
 	<div class="header">
 		<div>
@@ -205,8 +259,31 @@ a.ignore {
 		</div>
 	</div>
 	<div id="traffic"></div>
-	<div id="logs"></div>
+	<input id="details_toggle" type="checkbox" checked>
+	<label for="details_toggle">Show details</label>
+	<input id="expert_details_toggle" type="checkbox">
+	<label for="expert_details_toggle">Show expert details</label>
+	<table id="jobs_table" class="display supercompact">
+		<thead>
+			<tr>
+				<th>URL</th>
+				<th>Queued</th>
+				<th>Started</th>
+				<th>Size</th>
+				<th>Ping</th>
+				<th>Ident</th>
+			</tr>
+		</thead>
+		<tbody>
+		</tbody>
+	</table>
 </div>
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script type="text/javascript" charset="utf8"
+	src="https://cdn.datatables.net/1.10.2/js/jquery.dataTables.js"></script>
+<script type="text/javascript" src="assets/scripts/jquery.timeago.js"></script>
+<script type="text/javascript" src="assets/jquery.timeago.js"></script>
 <script>
 "use strict";
 
@@ -329,6 +406,19 @@ var getQueryArgs = function() {
 
 var isSafari = navigator.userAgent.indexOf("Safari") != -1;
 
+function stripUrlScheme(text) {
+	return text.replace(/^.*?\/\//, "");
+}
+
+function dateToFriendlyString(date) {
+	var dateNow = new Date();
+	if (dateNow - date < 2419200000) {
+		return jQuery.timeago(date);
+	} else {
+		return date.toLocaleDateString();
+	}
+}
+
 /*** End of utility code ***/
 
 
@@ -368,13 +458,15 @@ JobsTracker.prototype.handleJobData = function(jobData) {
 
 
 
-var JobRenderInfo = function(logWindow, logSegment, statsElements, jobNote, lineCountWindow, lineCountSegments) {
+var JobRenderInfo = function(tableRow, logWindow, logSegment, statsElements, jobNote, lineCountWindow, lineCountSegments) {
+	this.tableRow = tableRow;
 	this.logWindow = logWindow;
 	this.logSegment = logSegment;
 	this.statsElements = statsElements;
 	this.jobNote = jobNote;
 	this.lineCountWindow = lineCountWindow;
 	this.lineCountSegments = lineCountSegments;
+	this.tableRowDataDate = new Date();
 };
 
 
@@ -386,7 +478,11 @@ var Reusable = {
 	obj_className_line_redirect: {"className": "line-redirect"},
 	obj_className_line_ignore: {"className": "line-ignore"},
 	obj_className_line_stdout: {"className": "line-stdout"},
-	obj_className_bold: {"className": "bold"}
+	obj_className_bold: {"className": "bold"},
+	obj_className_line_wget_code: {"className": "line-wget-code"},
+	obj_className_job_info: {"className": "job-info"},
+	obj_className_job_info_expert: {"className": "job-info-expert"},
+	
 };
 
 
@@ -426,7 +522,8 @@ var getSummaryResponses = function(jobData) {
 
 
 
-var JobsRenderer = function(container, historyLines, showNicks) {
+var JobsRenderer = function(table, container, historyLines, showNicks) {
+	this.table = table;
 	this.container = container;
 	this.historyLines = historyLines;
 	this.showNicks = showNicks;
@@ -454,9 +551,6 @@ JobsRenderer.prototype._createLogSegment = function() {
 
 JobsRenderer.prototype._createLogContainer = function(jobData) {
 	var ident = jobData["ident"];
-	var beforeJob = this._getNextJobInSorted(ident);
-	var beforeElement = beforeJob == null ? null : byId("log-container-" + beforeJob["ident"]);
-
 	var logSegment = this._createLogSegment();
 
 	var logWindowAttrs = {
@@ -503,7 +597,7 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 		mb: h("span", null, "?"),
 		responses: h("span", null, "?"),
 		responsesPerSecond: h("span", null, "?"),
-		queueLength: h("span", null, "? in q."),
+		queueLength: h("span", null, "?"),
 		connections: h("span", null, "?"),
 		delay: h("span", null, "?"),
 		ignores: h("span", null, "?")
@@ -515,44 +609,56 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 	var startedISOString = new Date(parseFloat(jobData["started_at"]) * 1000).toISOString();
 	var div = h(
 		'div',
-		{"id": "log-container-" + ident}, [
-			h("div", {"className": "job-header"}, [
-				h("span", {"className": "job-info"}, [
-					h("a", {"className": "job-url", "href": jobData["url"]}, jobData["url"]),
-					" on ",
-					h("span", {"title": startedISOString}, startedISOString.split("T")[0].substr(5)),
-					(this.showNicks ? " by " + jobData["started_by"] : ""),
-					jobNote,
-					"; ",
-					statsElements.mb,
-					h("span", null, " MB in "),
-					statsElements.responses,
-					" at ",
-					statsElements.responsesPerSecond,
-					"/s, ",
-					statsElements.queueLength,
-					"; ",
-					statsElements.connections,
-					" con. w/ ",
-					statsElements.delay,
-					" ms delay; ",
-					statsElements.ignores
+		{"id": "log-container-" + ident, "className": "job-container"}, [
+			h("table", Reusable.obj_className_job_info, [
+				h("tr", null, [
+					h("th", null, "Remark"),
+					h("td", null, jobNote),
 				]),
-				h("input", {
-					"className": "job-ident",
-					"type": "text",
-					"value": ident,
-					"size": "28",
-					"spellcheck": "false",
-					"readonly": "",
-					"onclick": function() { this.select(); }
-				})
+				h("tr", null, [
+					h("th", null, "Resp."),
+					h("td", null, statsElements.responses),
+				]),
+				h("tr", null, [
+					h("th", null, "Speed"),
+					h("td", null, [statsElements.responsesPerSecond, "/s"]),
+				]),
+				h("tr", null, [
+					h("th", null, "Queued"),
+					h("td", null, statsElements.queueLength),
+				]),
+				h("tr", null, [
+					h("th", null, "Conn"),
+					h("td", null, statsElements.connections),
+				]),
+				h("tr", null, [
+					h("th", null, "Delay"),
+					h("td", null, statsElements.delay),
+				]),
+				h("tr", null, [
+					h("th", null, "Ignores"),
+					h("td", null, statsElements.ignores),
+				]),
+				h("tr", null, [
+					h("th", null, "By"),
+					h("td", null, this.showNicks ? jobData["started_by"] : "")
+				]),
+				h("tr", Reusable.obj_className_job_info_expert, [
+					h("th", null, "Pipeline"),
+					h("td", null, jobData["pipeline_id"]),
+				]),
 			]),
 			logWindow
 		]
 	);
-	this.renderInfo[ident] = new JobRenderInfo(logWindow, logSegment, statsElements, jobNote, 0, [0]);
-	this.container.insertBefore(div, beforeElement);
+	var tableRow = this.table.row.add(jobData).node();
+	this.renderInfo[ident] = new JobRenderInfo(tableRow, logWindow, logSegment, statsElements, jobNote, 0, [0]);
+	var child = this.table.row(tableRow).child(div);
+
+	if ($('#details_toggle').is(':checked')) {
+		child.show();
+	}
+	ds.drawTable();
 }
 
 JobsRenderer.prototype._renderDownloadLine = function(data, logSegment) {
@@ -566,7 +672,9 @@ JobsRenderer.prototype._renderDownloadLine = function(data, logSegment) {
 		var attrs = Reusable.obj_className_line_normal;
 	}
 	logSegment.appendChild(h("div", attrs, [
-		data["response_code"] + " " + data["wget_code"] + " ",
+		data["response_code"] + "  ",
+		h("span", Reusable.obj_className_line_wget_code, data["wget_code"]), 
+		"  ",
 		href(data["url"], data["url"])
 	]));
 	return 1;
@@ -575,7 +683,7 @@ JobsRenderer.prototype._renderDownloadLine = function(data, logSegment) {
 JobsRenderer.prototype._renderIgnoreLine = function(data, logSegment) {
 	var attrs = Reusable.obj_className_line_ignore;
 	logSegment.appendChild(h("div", attrs, [
-		h('span', null, " IGNOR "),
+		h('span', null, "  IGNOR  "),
 		h('a', {"href": data["url"], "className": "ignore"}, data["url"]),
 		h('span', Reusable.obj_className_bold, " by "),
 		data["pattern"]
@@ -603,6 +711,7 @@ JobsRenderer.prototype._renderStdoutLine = function(data, logSegment) {
 
 JobsRenderer.prototype.handleData = function(data) {
 	var jobData = data["job_data"];
+	jobData["ts"] = data["ts"];
 	var added = this.jobs.handleJobData(jobData);
 	this.numCrawls.textContent = this.jobs.countActive();
 	if(added) {
@@ -634,7 +743,7 @@ JobsRenderer.prototype.handleData = function(data) {
 			toStringTenths(
 				(parseInt(jobData["bytes_downloaded"]) / (1024 * 1024)).toString()));
 	info.statsElements.responses.textContent =
-		numberWithCommas(totalResponses) + " resp.";
+		numberWithCommas(totalResponses);
 	info.statsElements.responses.title = getSummaryResponses(jobData);
 	var duration = Date.now()/1000 - parseFloat(jobData["started_at"]);
 	info.statsElements.responsesPerSecond.textContent =
@@ -644,7 +753,7 @@ JobsRenderer.prototype.handleData = function(data) {
 		var totalQueued = parseInt(jobData["items_queued"], 10);
 		var totalDownloaded = parseInt(jobData["items_downloaded"], 10);
 		info.statsElements.queueLength.textContent =
-			numberWithCommas((totalQueued - totalDownloaded) + " in q.");
+			numberWithCommas((totalQueued - totalDownloaded));
 		info.statsElements.queueLength.title =
 			numberWithCommas(totalQueued) + " queued\n" +
 			numberWithCommas(totalDownloaded) + " downloaded";
@@ -659,14 +768,12 @@ JobsRenderer.prototype.handleData = function(data) {
 			delayMin + "-" + delayMax;
 	info.statsElements.ignores.textContent =
 		jobData["suppress_ignore_reports"] ?
-			'igoff' :
-			'igon';
+			'off' :
+			'on';
 
 	// Update note
 	info.jobNote.textContent =
-		isBlank(jobData["note"]) ?
-			"" :
-			" (" + jobData["note"] + ")";
+		isBlank(jobData["note"]) ? "" : jobData["note"];
 
 	info.lineCountWindow += linesRendered;
 	info.lineCountSegments[info.lineCountSegments.length - 1] += linesRendered;
@@ -677,6 +784,12 @@ JobsRenderer.prototype.handleData = function(data) {
 		info.logWindow.appendChild(newSegment);
 		info.logSegment = newSegment;
 		info.lineCountSegments.push(0);
+	}
+
+	var nowDate = new Date();
+	if (nowDate - info.tableRowDataDate > 5000) {
+		info.tableRowDataDate = nowDate;
+		this.table.row(info.tableRow).data(jobData);
 	}
 
 	if(this.mouseInside != ident) {
@@ -759,6 +872,8 @@ Decayer.prototype.decay = function() {
 
 var Dashboard = function() {
 	this.messageCount = 0;
+	var timestampThreshold = 60 * 5 * 1000;
+	this.drawTableTimer = null;
 
 	var args = getQueryArgs();
 
@@ -779,9 +894,120 @@ var Dashboard = function() {
 	if(this.dumpTraffic) {
 		this.dumpMax = Number(args["dumpMax"]);
 	}
-	this.jobsRenderer = new JobsRenderer(byId('logs'), historyLines, showNicks);
+	this.table = $('#jobs_table').DataTable({
+		"order": [2, 'desc'],
+		"columns": [
+			{
+				"data": "url",
+				"className": "job-url",
+				"render": function(cellData, type, row, meta) {
+					if (type === 'sort') {
+						return stripUrlScheme(cellData).replace(/^www\./, '');
+					}
+					if (type !== 'display') {
+						return cellData;
+					}
+					return $('<a>', {
+						href: cellData,
+						text: stripUrlScheme(cellData),
+						className: row.finished ? 'job-finished' : null,
+					})[0].outerHTML;
+				}
+			},
+			{
+				"data": "queued_at",
+				"visible": false,
+				"render": function(cellData, type, row, meta) {
+					if (type !== 'display') {
+						return cellData;
+					}
+					var cellDate = new Date(cellData * 1000);
+
+					var span = $('<span>');
+					span.attr('title', cellDate.toLocaleString());
+					span.text(dateToFriendlyString(cellDate));
+					return span[0].outerHTML;
+				},
+			},
+			{
+				"data": "started_at",
+				"render": function(cellData, type, row, meta) {
+					if (type !== 'display') {
+						return cellData;
+					}
+					var cellDate = new Date(cellData * 1000);
+
+					var span = $('<span>');
+					span.attr('title', cellDate.toLocaleString());
+					span.text(dateToFriendlyString(cellDate));
+					return span[0].outerHTML;
+				},
+			},
+			{
+				"data": "bytes_downloaded",
+				"className": "numeric-cell",
+				"render" : function(cellData, type, row, meta) {
+					cellData = cellData || 0
+
+					if (type !== 'display') {
+						return cellData;
+					}
+
+					var span = $('<span>');
+					span.attr('title', cellData);
+					span.text(numberWithCommas(
+							toStringTenths(
+									(parseInt(cellData) / (1024 * 1024)).toString())) + ' MB');
+					return span[0].outerHTML;
+				},
+			},
+			{
+				"data": "ts",
+				"visible": false,
+				"render" : function(cellData, type, row, meta) {
+					cellData = cellData || 0
+
+					if (type !== 'display') {
+						return cellData;
+					}
+
+					var cellDate = new Date(cellData * 1000);
+					var dateNow = new Date();
+
+					var span = $('<span>');
+					span.attr('title', cellDate.toLocaleString());
+					span.text(dateToFriendlyString(cellDate));
+
+					if (dateNow.getTime() - cellDate.getTime() > timestampThreshold) {
+						span.addClass('cell_warn_higlight');
+					}
+
+					return span[0].outerHTML;
+				},
+			},
+			{
+				"data": "ident",
+				"render": function(cellData, type, row, meta) {
+					if (type !== 'display') {
+						return cellData;
+					}
+					return $('<input>', {
+						"class": "job-ident",
+						"type": "text",
+						"value": cellData,
+						"size": "28",
+						"spellcheck": "false",
+						"readonly": "",
+						"onclick": "this.select();",
+					})[0].outerHTML;
+				},
+			},
+		]
+	});
+	this.jobsRenderer = new JobsRenderer(this.table, byId('logs'), historyLines, showNicks);
 
 	var batchTimeWhenHidden = 5000;
+
 
 	var xhr = new XMLHttpRequest();
 	xhr.onload = function() {
@@ -814,6 +1040,10 @@ var Dashboard = function() {
 	xhr.open("GET", "http://" + this.host + "/logs/recent?cb=" + Date.now() + Math.random());
 	xhr.setRequestHeader('Accept', 'application/json');
 	xhr.send("");
+
+	$('#details_toggle').click($.proxy(this.toggleDetails, this));
+	$('#expert_details_toggle').click($.proxy(this.toggleExpertDetails, this));
+	setInterval($.proxy(this.drawTable, this), 60000);
 };
 
 Dashboard.prototype.handleData = function(data) {
@@ -852,6 +1082,59 @@ Dashboard.prototype.toggleHelp = function() {
 		help.classList.add('undisplayed');
 	}
 };
+
+Dashboard.prototype.toggleDetails = function() {
+	var checkbox = $('#details_toggle');
+	var table = this.table;
+
+	if (checkbox.is(':checked')) {
+		$.each(table.rows().indexes(), function(row) { table.row(row).child.show() });
+	} else {
+		$.each(table.rows().indexes(), function(row) { table.row(row).child.hide() });
+	}
+};
+
+Dashboard.prototype.toggleExpertDetails = function() {
+	var checkbox = $('#expert_details_toggle');
+	var table = this.table;
+
+	if (checkbox.is(':checked')) {
+		this.table.column(1).visible(true);
+		this.table.column(4).visible(true);
+		$('.job-info-expert').show();
+	} else {
+		this.table.column(1).visible(false);
+		this.table.column(4).visible(false);
+		$('.job-info-expert').hide();
+	}
+};
+
+Dashboard.prototype.drawTable = function() {
+	if (document.hidden) {
+		return;
+	}
+
+	if (this.drawTableTimer) {
+		clearTimeout(this.drawTableTimer);
+		this.drawTableTimer = null;
+	}
+
+	this.drawTableTimer = setTimeout($.proxy(function() {
+		// Preserve the scrollbar positions while Datatables draw() causes 
+		// DOM updates
+		$('.log-window').each(function() {
+			$(this).attr('data-scrollTop', $(this).scrollTop());
+			$(this).attr('data-scrollLeft', $(this).scrollLeft());
+		});
+	
+		this.table.draw();
+	
+		$('.log-window').each(function() {
+			$(this).scrollTop($(this).attr('data-scrollTop'));
+			$(this).scrollLeft($(this).attr('data-scrollLeft'));
+		});
+	}, this), 1000);
+}
 
 var ds = new Dashboard();
 
