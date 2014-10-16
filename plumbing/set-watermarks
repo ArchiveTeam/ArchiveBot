@@ -21,7 +21,7 @@ $stdin.each_line do |line|
   watermark = w.to_i
   queued = q.to_i
 
-  if watermark == 0 || queued > watermark
+  if queued > watermark
     r.hset(job_key, 'next_watermark', next_watermark(queued, increment))
   end
 end
