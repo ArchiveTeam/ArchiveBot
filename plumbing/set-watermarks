@@ -22,8 +22,6 @@ $stdin.each_line do |line|
   queued = q.to_i
 
   if watermark == 0 || queued > watermark
-    nw = next_watermark(queued, increment)
-    r.hset(job_key, 'next_watermark', nw)
-    puts "set watermark on #{job_key} to #{nw}"
+    r.hset(job_key, 'next_watermark', next_watermark(queued, increment))
   end
 end
