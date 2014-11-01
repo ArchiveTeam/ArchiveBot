@@ -9,7 +9,7 @@ import errno
 import subprocess
 import sys
 
-WAIT = 30
+WAIT = 10
 
 class CannotLock(Exception):
     pass
