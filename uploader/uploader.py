@@ -72,6 +72,9 @@ def main():
     print()
 
     while True:
+        print("Waiting %d seconds" % (WAIT,))
+        time.sleep(WAIT)
+
         fnames = sorted(list(f for f in os.listdir(directory) if should_upload(f)))
         if len(fnames):
             fname = os.path.join(directory, fnames[0])
@@ -84,8 +87,6 @@ def main():
                 os.remove(fname)
         else:
             print("Nothing to upload")
-        print("Waiting %d seconds" % (WAIT,))
-        time.sleep(WAIT)
 
 
 if __name__ == '__main__':
