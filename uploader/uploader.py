@@ -64,6 +64,13 @@ def main():
     except CannotLock:
         raise RuntimeError("Another uploader is uploading from %s" % (directory,))
 
+    print("CHECK THE UPLOAD TARGET: %s" % (url,))
+    print()
+    print("Upload target must reliably store data")
+    print("Each local file will removed after upload")
+    print("Hit CTRL-C immediately if upload target is incorrect")
+    print()
+
     while True:
         fnames = sorted(list(f for f in os.listdir(directory) if should_upload(f)))
         if len(fnames):
