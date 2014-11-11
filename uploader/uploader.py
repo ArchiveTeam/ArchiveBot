@@ -53,6 +53,10 @@ def main():
     url = os.environ.get('RSYNC_URL')
     if url == None:
         raise RuntimeError('RSYNC_URL not set')
+    if '/localhost' in url or '/127.' in url:
+        raise RuntimeError("Won't let you upload to localhost because I "
+            "remove files after uploading them, and you might be uploading "
+            "to the same directory")
 
     try:
         # Do not remove this local even if pyflakes complains about it
