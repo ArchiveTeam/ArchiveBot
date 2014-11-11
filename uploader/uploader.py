@@ -38,7 +38,7 @@ def acquire_lock(fname):
 def should_upload(basename):
     assert not '/' in basename, basename
     return not basename.startswith('.') and \
-        (basename.endswith('.warc.gz') or basename.endswith('.json'))
+        (basename.endswith('.warc.gz') or basename.endswith('.json') or basename.endswith('.txt'))
 
 
 def main():
