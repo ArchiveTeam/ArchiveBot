@@ -12,7 +12,7 @@ Quick install, for Debian and Debian-esque systems:
     sudo apt-get update
     sudo apt-get install build-essential python3-dev python3-pip \
       libxml2-dev libxslt-dev zlib1g-dev libssl-dev libsqlite3-dev \
-      git screen fontconfig-config fonts-dejavu-core \
+      git tmux fontconfig-config fonts-dejavu-core \
       libfontconfig1 libjpeg-turbo8 libjpeg8
 
 Set up a dedicated account:
@@ -32,12 +32,12 @@ As user archivebot:
     pip3 install --user -r pipeline/requirements.txt
     pip3 install --user wpull
 
-As user archivebot, in first screen session:
+As user archivebot, in first tmux session:
 
     ssh -C -L 127.0.0.1:16379:127.0.0.1:6379 \
       yourusername@archivebot.at.ninjawedding.org -N
 
-As user archivebot, in second screen session:
+As user archivebot, in second tmux session:
 
     cd ~/ArchiveBot/pipeline
     mkdir -p ~/warcs4fos
@@ -62,7 +62,7 @@ or
     ~/.local/bin/run-pipeline3 pipeline.py --disable-web-server \
       --concurrent 2 NAME
 
-As user archivebot, in third screen session:
+As user archivebot, in third tmux session:
 
     export RSYNC_URL=rsync://fos.textfiles.com/archivebot/
     ~/ArchiveBot/uploader/uploader.py $HOME/warcs4fos
@@ -74,7 +74,7 @@ To gracefully stop the pipeline:
 
     touch ~/ArchiveBot/pipeline/STOP
 
-To gracefully stop the uploader, hit ctrl-c in its screen.
+To gracefully stop the uploader, hit ctrl-c in its tmux session.
 
 To upgrade, run:
 
