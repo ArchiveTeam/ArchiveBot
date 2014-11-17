@@ -7,3 +7,4 @@ git+https://github.com/ludios/wpull.git@hax-19#egg=wpull
 sqlalchemy
 hiredis
 requests
+manhole
