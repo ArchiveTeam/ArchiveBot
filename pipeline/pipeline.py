@@ -31,8 +31,8 @@ from archivebot.seesaw.tasks import GetItemFromQueue, StartHeartbeat, \
     MarkItemAsDone
 
 
-VERSION = "20141117.01"
-PHANTOMJS_VERSION = '1.9.7'
+VERSION = "20141117.02"
+PHANTOMJS_VERSION = '1.9.8'
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
 WPULL_EXE = find_executable('Wpull', None, [ './wpull' ])
 PHANTOMJS = find_executable('PhantomJS', PHANTOMJS_VERSION,
