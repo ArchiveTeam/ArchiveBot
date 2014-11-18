@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %} Job {% end %}
+
+{% block body %}
+    <table>
+        <tr>
+           <th>Filename</th>
+           <th>IA Identifier</th>
+        </tr>
+        {% for filename in sorted(item_info['files']) %}
+            <tr>
+                <td>{{ filename }}</td>
+                <td>
+                    <a href="{{ reverse_url('item', item_info['files'][filename]['identifier']) }}">
+                    {{ item_info['files'][filename]['identifier'] }}
+                    </a>
+                </td>
+            </tr>
+        {% end %}
+    </table>
+{% end %}

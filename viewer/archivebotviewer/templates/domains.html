@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %} Domains {% end %}
+
+{% block body %}
+    <p>
+    {% for char in '0123456789abcdefghijklmnopqrstuvwxyz' %}
+        <a href="{{ reverse_url('domains', char) }}">{{ char }}</a>
+    {% end %}
+    </p>
+
+    <table>
+        <tr>
+            <th>Domains</th>
+        </tr>
+        {% for domain in domains %}
+            <tr>
+                <td><a href="{{ reverse_url('domain', domain) }}">{{ domain }}</a></td>
+            </tr>
+        {% end %}
+    </table>
+{% end %}

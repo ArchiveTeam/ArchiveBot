@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %} Jobs {% end %}
+
+{% block body %}
+    <p>
+    {% for char in '0123456789abcdefghijklmnopqrstuvwxyz' %}
+        <a href="{{ reverse_url('jobs', char) }}">{{ char }}</a>
+    {% end %}
+    </p>
+
+    <table>
+        <tr>
+            <th>Job Identifier</th>
+        </tr>
+        {% for identifier in identifiers %}
+            <tr>
+                <td><a href="{{ reverse_url('job', identifier) }}">{{ identifier }}</a></td>
+            </tr>
+        {% end %}
+    </table>
+{% end %}

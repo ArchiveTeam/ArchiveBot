@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %} Domain {% end %}
+
+{% block body %}
+    <table>
+        <tr>
+           <th>Job Identifier</th>
+        </tr>
+        {% for job_identifier in sorted(item_info['jobs']) %}
+            <tr>
+                <td>
+                    <a href="{{ reverse_url('job', job_identifier) }}">
+                    {{ job_identifier }}
+                    </a>
+                </td>
+            </tr>
+        {% end %}
+    </table>
+{% end %}
