@@ -31,7 +31,7 @@ def make_args(item, default_user_agent, wpull_exe, phantomjs_exe, finished_warcs
         '--tries', '3',
         '--waitretry', '5',
         '--warc-file', '%(item_dir)s/%(warc_file_base)s' % item,
-        '--warc-max-size', '10737418240',
+        '--warc-max-size', '5368709120',
         '--warc-header', 'operator: Archive Team',
         '--warc-header', 'downloaded-by: ArchiveBot',
         '--warc-header', 'archivebot-job-ident: %(ident)s' % item,
