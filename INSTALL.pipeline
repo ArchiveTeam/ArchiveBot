@@ -5,7 +5,7 @@ To run the pipeline, you will need:
 - seesaw
 - rsync
 - wpull
-- PhantomJS 1.9.7
+- PhantomJS 1.9.8
 
 Quick install, for Debian and Debian-esque systems:
 
