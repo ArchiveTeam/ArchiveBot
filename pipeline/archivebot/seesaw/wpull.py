@@ -18,6 +18,7 @@ def make_args(item, default_user_agent, wpull_exe, phantomjs_exe, finished_warcs
         '--quiet',
         '-o', '%(item_dir)s/wpull.log' % item,
         '--database', '%(item_dir)s/wpull.db' % item,
+        '--html-parser', 'libxml2-lxml',
         '--dupes-db', '%(item_dir)s/dupes_db' % item,
         '--save-cookies', '%(cookie_jar)s' % item,
         '--no-check-certificate',
