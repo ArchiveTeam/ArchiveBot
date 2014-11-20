@@ -20,6 +20,11 @@ class ItemModel(object):
 class JobModel(object):
     def __init__(self):
         self.files = {}
+        self.aborts = 0
+        self.warcs = 0
+        self.jsons = 0
+        self.size = 0
+        self.domain = None
 
 
 class DomainModel(object):
@@ -79,7 +84,6 @@ class Database(object):
 
             self._shelf[key] = item_model
 
-
         self._shelf.sync()
 
     def populate_jobs(self):
@@ -104,11 +108,24 @@ class Database(object):
 
                 job_model = self._shelf[job_key]
 
+                if not job_model.domain:
+                    job_model.domain = filename_info['domain']
+
                 if filename not in job_model.files:
                     job_model.files[filename] = {
                         'identifier': identifier,
                         'size': size,
                     }
+
+                if filename_info['aborted']:
+                    job_model.aborts += 1
+
+                if filename_info['extension'] == 'warc.gz':
+                    job_model.warcs += 1
+                elif filename_info['extension'] == 'json':
+                    job_model.jsons += 1
+
+                job_model.size += size
 
                 self._shelf[job_key] = job_model
 
@@ -175,6 +192,13 @@ class Database(object):
         for key, job_ident in self.job_keys():
             if ident_query in job_ident:
                 yield 'job', job_ident
+
+    def get_no_json_jobs(self):
+        for key, job_ident in self.job_keys():
+            job_model = self.get_job(job_ident)
+
+            if job_model.jsons == 0:
+                yield job_ident, job_model
 
 
 class API(object):
@@ -252,4 +276,5 @@ def parse_filename(filename):
         'time': match.group(4),
         'ident': match.group(5),
         'aborted': match.group(6),
+        'extension': match.group(7),
     }
