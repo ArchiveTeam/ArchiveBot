@@ -6,7 +6,7 @@
         <tr>
            <th>Job Identifier</th>
         </tr>
-        {% for job_identifier in sorted(item_info['jobs']) %}
+        {% for job_identifier in sorted(domain_model.jobs) %}
             <tr>
                 <td>
                     <a href="{{ reverse_url('job', job_identifier) }}">

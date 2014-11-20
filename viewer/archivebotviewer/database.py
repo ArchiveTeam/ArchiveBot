@@ -12,9 +12,22 @@ import tornado.httpclient
 _logger = logging.getLogger(__name__)
 
 
-class Database(object):
-    JOB_FILENAME_RE = re.compile(r'([\w.-]+)-(inf|shallow)-(\d+)-(\d+)-(\w+).*\.(json|warc\.gz)')
+class ItemModel(object):
+    def __init__(self):
+        self.files = []
 
+
+class JobModel(object):
+    def __init__(self):
+        self.files = {}
+
+
+class DomainModel(object):
+    def __init__(self):
+        self.jobs = set()
+
+
+class Database(object):
     def __init__(self, filename):
         self._shelf = shelve.open(filename)
         self._api = API()
@@ -42,7 +55,7 @@ class Database(object):
             key = 'item:{}'.format(identifier)
 
             if key not in self._shelf:
-                self._shelf[key] = {}
+                self._shelf[key] = ItemModel()
 
         yield self.populate_files()
         self.populate_jobs()
@@ -54,78 +67,75 @@ class Database(object):
     @gen.coroutine
     def populate_files(self):
         for key, identifier in sorted(self.item_keys()):
-            doc = self._shelf[key]
+            item_model = self._shelf[key]
 
-            if 'files' in doc:
+            if item_model.files:
                 continue
 
             _logger.info('Populating item %s.', identifier)
             files = yield self._api.get_item_files(identifier)
 
-            doc['files'] = files
+            item_model.files = files
 
-            self._shelf[key] = doc
+            self._shelf[key] = item_model
+
 
         self._shelf.sync()
 
     def populate_jobs(self):
         for key, identifier in self.item_keys():
-            doc = self._shelf[key]
+            item_model = self._shelf[key]
 
-            if 'files' not in doc:
+            if not item_model.files:
                 continue
 
-            for filename, size in doc['files']:
-                match = self.JOB_FILENAME_RE.match(filename)
+            for filename, size in item_model.files:
+                filename_info = parse_filename(filename)
 
-                if not match:
+                if not filename_info:
                     continue
 
-                job_key = 'job:{}'.format(match.group(5))
+                job_ident = filename_info['ident'] or \
+                    '{}{}'.format(filename_info['date'], filename_info['time'])
+                job_key = 'job:{}'.format(job_ident)
 
                 if job_key not in self._shelf:
-                    self._shelf[job_key] = {}
+                    self._shelf[job_key] = JobModel()
 
-                job_doc = self._shelf[job_key]
+                job_model = self._shelf[job_key]
 
-                if 'files' not in job_doc:
-                    job_doc['files'] = {}
+                if filename not in job_model.files:
+                    job_model.files[filename] = {
+                        'identifier': identifier,
+                        'size': size,
+                    }
 
-                if filename not in job_doc['files']:
-                    job_doc['files'][filename] = {'identifier': identifier}
-
-                self._shelf[job_key] = job_doc
+                self._shelf[job_key] = job_model
 
         self._shelf.sync()
 
     def populate_domains(self):
         for key, identifier in self.job_keys():
-            doc = self._shelf[key]
+            job_model = self._shelf[key]
 
-            if 'files' not in doc:
-                continue
+            for filename in job_model.files:
+                filename_info = parse_filename(filename)
 
-            for filename in doc['files']:
-                match = self.JOB_FILENAME_RE.match(filename)
-
-                if not match:
+                if not filename_info:
                     continue
 
-                domain = match.group(1)
+                domain = filename_info['domain']
                 domain_key = 'domain:{}'.format(domain)
 
                 if domain_key not in self._shelf:
-                    self._shelf[domain_key] = {}
+                    self._shelf[domain_key] = DomainModel()
 
-                domain_doc = self._shelf[domain_key]
+                domain_model = self._shelf[domain_key]
 
-                if 'jobs' not in domain_doc:
-                    domain_doc['jobs'] = set()
+                if identifier not in domain_model.jobs:
+                    domain_model.jobs.add(identifier)
 
-                if identifier not in domain_doc['jobs']:
-                    domain_doc['jobs'].add(identifier)
-
-                self._shelf[domain_key] = domain_doc
+                self._shelf[domain_key] = domain_model
 
         self._shelf.sync()
 
@@ -224,3 +234,22 @@ class API(object):
             files.append((name.lstrip('/'), int(file_info.get('size', 0))))
 
         raise gen.Return(files)
+
+
+JOB_FILENAME_RE = re.compile(r'([\w.-]+)-(inf|shallow)-(\d{8})-(\d{6})-?(\w{5})?-?(aborted)?\.(json|warc\.gz)')
+
+
+def parse_filename(filename):
+    match = JOB_FILENAME_RE.match(filename)
+
+    if not match:
+        return
+
+    return {
+        'domain': match.group(1),
+        'depth': match.group(2),
+        'date': match.group(3),
+        'time': match.group(4),
+        'ident': match.group(5),
+        'aborted': match.group(6),
+    }

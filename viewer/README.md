@@ -24,3 +24,4 @@ To complement the dashboard behind a web server:
 
         python3 -m archivebotviewer --xheaders --prefix /viewer/ --data-dir /var/lib/archivebotviewer/data/
 
+If you have problems with the database, try deleting and letting it repopulate.

@@ -2,6 +2,7 @@ import os
 
 from tornado.web import URLSpec as U
 import tornado.web
+from archivebotviewer.database import parse_filename
 
 
 class Application(tornado.web.Application):
@@ -61,18 +62,19 @@ class ItemsHandler(BaseHandler):
 class ItemHandler(BaseHandler):
     def get(self, identifier):
         database = self.application.database
-        item_info = database.get_item(identifier)
+        item_model = database.get_item(identifier)
 
         job_ident_map = {}
 
-        for filename, size in item_info['files']:
-            match = database.JOB_FILENAME_RE.match(filename)
+        for filename, size in item_model.files:
+            filename_info = parse_filename(filename)
 
-            if match:
-                job_ident_map[filename] = match.group(5)
+            if filename_info:
+                job_ident_map[filename] = filename_info['ident'] or \
+                    '{}{}'.format(filename_info['date'], filename_info['time'])
 
         self.render('item.html', identifier=identifier,
-                    item_info=item_info,
+                    item_model=item_model,
                     job_ident_map=job_ident_map)
 
 
@@ -87,9 +89,9 @@ class JobsHandler(BaseHandler):
 
 class JobHandler(BaseHandler):
     def get(self, identifier):
-        item_info = self.application.database.get_job(identifier)
+        job_model = self.application.database.get_job(identifier)
 
-        self.render('job.html', item_info=item_info)
+        self.render('job.html', job_model=job_model)
 
 
 class DomainsHandler(BaseHandler):
@@ -103,6 +105,6 @@ class DomainsHandler(BaseHandler):
 
 class DomainHandler(BaseHandler):
     def get(self, domain):
-        item_info = self.application.database.get_domain(domain)
+        domain_model = self.application.database.get_domain(domain)
 
-        self.render('domain.html', item_info=item_info)
+        self.render('domain.html', domain_model=domain_model)

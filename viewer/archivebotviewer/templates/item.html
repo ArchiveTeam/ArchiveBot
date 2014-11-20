@@ -11,7 +11,7 @@
            <th>Filename</th>
            <th>Size</th>
         </tr>
-        {% for filename, size in sorted(item_info['files']) %}
+        {% for filename, size in sorted(item_model.files) %}
             <tr>
                 <td>
                     {% if filename in job_ident_map %}
