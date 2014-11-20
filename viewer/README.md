@@ -13,6 +13,7 @@ Requires:
 
 * Python 3.
 * [Tornado](https://tornadoweb.org/)
+* [dateutil](https://pypi.python.org/pypi/python-dateutil)
 
 Quick start:
 

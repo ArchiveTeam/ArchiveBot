@@ -7,6 +7,7 @@ import time
 
 from tornado import gen
 import tornado.httpclient
+import dateutil.parser
 
 
 _logger = logging.getLogger(__name__)
@@ -15,6 +16,7 @@ _logger = logging.getLogger(__name__)
 class ItemModel(object):
     def __init__(self):
         self.files = []
+        self.public_date = None
 
 
 class JobModel(object):
@@ -35,6 +37,7 @@ class DomainModel(object):
 class StatsDailyModel(object):
     def __init__(self):
         self.size = 0
+        self.item_ids = set()
 
 
 class Database(object):
@@ -59,13 +62,16 @@ class Database(object):
 
         _logger.info('Populating database.')
 
-        identifiers = yield self._api.get_item_identifiers()
+        results = yield self._api.get_item_list()
 
-        for identifier in identifiers:
+        for identifier, public_date_str in results:
             key = 'item:{}'.format(identifier)
 
             if key not in self._shelf:
-                self._shelf[key] = ItemModel()
+                item_model = ItemModel()
+                item_model.public_date = dateutil.parser.parse(public_date_str)
+
+                self._shelf[key] = item_model
 
         yield self.populate_files()
         self.populate_jobs()
@@ -168,23 +174,28 @@ class Database(object):
             if not item_model.files:
                 continue
 
+            date = item_model.public_date.strftime('%Y%m%d')
+            stats_daily_key = 'stats-daily:{}'.format(date)
+
+            if stats_daily_key not in self._shelf:
+                self._shelf[stats_daily_key] = StatsDailyModel()
+
+            stats_daily_model = self._shelf[stats_daily_key]
+
+            if identifier in stats_daily_model.item_ids:
+                continue
+
+            stats_daily_model.item_ids.add(identifier)
+
             for filename, size in item_model.files:
                 filename_info = parse_filename(filename)
 
                 if not filename_info:
                     continue
 
-                date = filename_info['date']
-
-                stats_daily_key = 'stats-daily:{}'.format(date)
-
-                if stats_daily_key not in self._shelf:
-                    self._shelf[stats_daily_key] = StatsDailyModel()
-
-                stats_daily_model = self._shelf[stats_daily_key]
                 stats_daily_model.size += size
 
-                self._shelf[stats_daily_key] = stats_daily_model
+            self._shelf[stats_daily_key] = stats_daily_model
 
         self._shelf.sync()
 
@@ -250,13 +261,13 @@ class API(object):
         self._client = tornado.httpclient.AsyncHTTPClient()
 
     @gen.coroutine
-    def get_item_identifiers(self):
+    def get_item_list(self):
         item_identifiers = []
 
         for page in itertools.count(1):
             url = tornado.httputil.url_concat(self.SEARCH_URL, {
                 'q': 'collection:archivebot',
-                'fl[]': 'identifier',
+                'fl[]': 'identifier,publicdate',
                 'sort[]': 'addeddate asc',
                 'output': 'json',
                 'rows': '100',
@@ -275,7 +286,9 @@ class API(object):
                 break
 
             for result in results:
-                item_identifiers.append(result['identifier'])
+                item_identifiers.append(
+                    (result['identifier'], result['publicdate'])
+                )
 
         raise gen.Return(item_identifiers)
 
