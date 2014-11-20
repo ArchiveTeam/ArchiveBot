@@ -12,6 +12,7 @@ class Application(tornado.web.Application):
         handlers = (
             U(prefix + r'', IndexHandler, name='index'),
             U(prefix + r'audit', AuditHandler, name='audit'),
+            U(prefix + r'stats', StatsHandler, name='stats'),
             U(prefix + r'domains/(\w?)', DomainsHandler, name='domains'),
             U(prefix + r'domain/([\w.-]+)', DomainHandler, name='domain'),
             U(prefix + r'items/', ItemsHandler, name='items'),
@@ -116,3 +117,10 @@ class AuditHandler(BaseHandler):
         database = self.application.database
         no_json_items = database.get_no_json_jobs()
         self.render('audit.html', no_json_items=no_json_items)
+
+
+class StatsHandler(BaseHandler):
+    def get(self):
+        database = self.application.database
+        daily_stats = tuple(sorted(database.iter_objects('stats-daily')))
+        self.render('stats.html', daily_stats=daily_stats)

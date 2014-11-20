@@ -17,8 +17,9 @@
     <p><em>No search results.</em></p>
     {% end %}
 
-    <a href="{{ reverse_url('items') }}">View items</a><br>
-    <a href="{{ reverse_url('jobs', '') }}">View jobs</a><br>
-    <a href="{{ reverse_url('domains', '') }}">View domains</a><br>
+    <a href="{{ reverse_url('items') }}">Items</a><br>
+    <a href="{{ reverse_url('jobs', '') }}">Jobs</a><br>
+    <a href="{{ reverse_url('domains', '') }}">Domains</a><br>
     <a href="{{ reverse_url('audit') }}">Audit</a><br>
+    <a href="{{ reverse_url('stats') }}">Stats</a><br>
 {% end %}

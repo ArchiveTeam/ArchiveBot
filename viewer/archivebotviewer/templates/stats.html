@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% block title %} Stats {% end %}
+
+{% block body %}
+<noscript>JavaScript needed for visualization.</noscript>
+
+<div id="chart_daily" style="width: 95vw; height: 20em;"></div>
+<div id="chart_daily_cumulative" style="width: 95vw; height: 20em;"></div>
+
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript">
+function drawChartDaily() {
+    var data = google.visualization.arrayToDataTable([
+        ['Day', 'Size (mebibytes)'],
+    {% for date, stats_daily_model in daily_stats %}
+        [
+            new Date({{ date[0:4] }}, {{ date[4:6] }}, {{ date[6:8] }}),
+            {{ stats_daily_model.size / 1024 ** 2 }}
+        ],
+    {% end %}
+    ]);
+
+    var options = {
+        title: 'WARC File Size Per Day',
+        // curveType: 'function',
+        explorer: {},
+        trendlines: {
+            0: {
+                type: 'linear',
+                color: 'green',
+                lineWidth: 3,
+                opacity: 0.3,
+                showR2: true,
+                visibleInLegend: true
+            }
+        }
+    };
+    var chart = new google.visualization.LineChart(document.getElementById('chart_daily'));
+
+    chart.draw(data, options);
+}
+
+function drawChartDailyCumulative() {
+    var data = google.visualization.arrayToDataTable([
+        ['Day', 'Size (mebibytes)'],
+    
+    {% set total = 0 %}
+    {% for date, stats_daily_model in daily_stats %}
+        {% set total+= stats_daily_model.size %}
+        [
+            new Date({{ date[0:4] }}, {{ date[4:6] }}, {{ date[6:8] }}),
+            {{ total / 1024 ** 2 }}
+        ],
+    {% end %}
+    ]);
+
+    var options = {
+        title: 'Cumulative WARC File Size Per Day',
+        // curveType: 'function',
+        explorer: {},
+        trendlines: {
+            0: {
+                type: 'polynomial',
+                degree: 3,
+                color: 'green',
+                lineWidth: 3,
+                opacity: 0.3,
+                showR2: true,
+                visibleInLegend: true
+            }
+        }
+    };
+    var chart = new google.visualization.LineChart(document.getElementById('chart_daily_cumulative'));
+
+    chart.draw(data, options);
+}
+
+google.load("visualization", "1", {packages:["corechart"]});
+google.setOnLoadCallback(drawChartDaily);
+google.setOnLoadCallback(drawChartDailyCumulative);
+</script>
+{% end %}

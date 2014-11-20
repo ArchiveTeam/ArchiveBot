@@ -32,6 +32,11 @@ class DomainModel(object):
         self.jobs = set()
 
 
+class StatsDailyModel(object):
+    def __init__(self):
+        self.size = 0
+
+
 class Database(object):
     def __init__(self, filename):
         self._shelf = shelve.open(filename)
@@ -65,6 +70,7 @@ class Database(object):
         yield self.populate_files()
         self.populate_jobs()
         self.populate_domains()
+        self.populate_daily_stats()
 
         self._shelf['option:last_update'] = time.time()
         self._shelf.sync()
@@ -122,10 +128,9 @@ class Database(object):
 
                 if filename_info['extension'] == 'warc.gz':
                     job_model.warcs += 1
+                    job_model.size += size
                 elif filename_info['extension'] == 'json':
                     job_model.jsons += 1
-
-                job_model.size += size
 
                 self._shelf[job_key] = job_model
 
@@ -156,29 +161,65 @@ class Database(object):
 
         self._shelf.sync()
 
-    def item_keys(self):
+    def populate_daily_stats(self):
+        for key, identifier in self.item_keys():
+            item_model = self._shelf[key]
+
+            if not item_model.files:
+                continue
+
+            for filename, size in item_model.files:
+                filename_info = parse_filename(filename)
+
+                if not filename_info:
+                    continue
+
+                date = filename_info['date']
+
+                stats_daily_key = 'stats-daily:{}'.format(date)
+
+                if stats_daily_key not in self._shelf:
+                    self._shelf[stats_daily_key] = StatsDailyModel()
+
+                stats_daily_model = self._shelf[stats_daily_key]
+                stats_daily_model.size += size
+
+                self._shelf[stats_daily_key] = stats_daily_model
+
+        self._shelf.sync()
+
+    def get_keys(self, namespace):
+        namespace_key = '{}:'.format(namespace)
         for key in self._shelf.keys():
-            if key.startswith('item:'):
-                yield key, key[5:]
+            if key.startswith(namespace_key):
+                yield key, key[len(namespace_key):]
+
+    def iter_objects(self, namespace):
+        namespace_key = '{}:'.format(namespace)
+        for key in self._shelf.keys():
+            if key.startswith(namespace_key):
+                yield key[len(namespace_key):], self._shelf[key]
+
+    def get_object(self, namespace, key):
+        return self._shelf['{}:{}'.format(namespace, key)]
+
+    def item_keys(self):
+        return self.get_keys('item')
 
     def get_item(self, identifier):
-        return self._shelf['item:{}'.format(identifier)]
+        return self.get_object('item', identifier)
 
     def job_keys(self):
-        for key in self._shelf.keys():
-            if key.startswith('job:'):
-                yield key, key[4:]
+        return self.get_keys('job')
 
     def get_job(self, identifier):
-        return self._shelf['job:{}'.format(identifier)]
+        return self.get_object('job', identifier)
 
     def domain_keys(self):
-        for key in self._shelf.keys():
-            if key.startswith('domain:'):
-                yield key, key[7:]
+        return self.get_keys('domain')
 
     def get_domain(self, domain):
-        return self._shelf['domain:{}'.format(domain)]
+        return self.get_object('domain', domain)
 
     def search(self, query):
         query = query.lower()
