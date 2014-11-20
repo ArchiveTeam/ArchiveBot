@@ -260,7 +260,7 @@ class API(object):
         raise gen.Return(files)
 
 
-JOB_FILENAME_RE = re.compile(r'([\w.-]+)-(inf|shallow)-(\d{8})-(\d{6})-?(\w{5})?-?(aborted)?\.(json|warc\.gz)')
+JOB_FILENAME_RE = re.compile(r'([\w.-]+)-(inf|shallow)-(\d{8})-(\d{6})-?(\w{5})?-?(aborted)?.*\.(json|warc\.gz)')
 
 
 def parse_filename(filename):
