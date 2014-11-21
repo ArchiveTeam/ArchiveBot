@@ -63,12 +63,6 @@ class Database(object):
 
     @gen.coroutine
     def populate(self, min_fetch_internal=3600 * 4, flush_interval=86400 * 3):
-        last_flush = self._shelf.get('option:last_flush', 0)
-        time_ago = time.time() - flush_interval
-
-        if last_flush < time_ago:
-            self.flush_data()
-
         last_update = self._shelf.get('option:last_update', 0)
         time_ago = time.time() - min_fetch_internal
 
@@ -78,6 +72,12 @@ class Database(object):
 
         self._shelf['option:last_update'] = time.time()
         self._shelf.sync()
+
+        last_flush = self._shelf.get('option:last_flush', 0)
+        time_ago = time.time() - flush_interval
+
+        if last_flush < time_ago:
+            self.flush_data()
 
         _logger.info('Populating database.')
 
