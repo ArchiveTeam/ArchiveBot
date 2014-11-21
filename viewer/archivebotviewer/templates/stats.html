@@ -4,22 +4,31 @@
 {% block body %}
 <noscript>JavaScript needed for visualization.</noscript>
 
+<div id="dashboard">
 <div id="chart_daily" style="width: 95vw; height: 20em;"></div>
+<div id="dashboard_control" style="text-align:center;"></div>
 <div id="chart_daily_cumulative" style="width: 95vw; height: 20em;"></div>
+</div>
 
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
 <script type="text/javascript">
-function drawChartDaily() {
+function getData() {
+    {% set total = 0 %}
     var data = google.visualization.arrayToDataTable([
-        ['Day', 'Size (mebibytes)'],
+        ['Day', 'Size (mebibytes)', 'Size (mebibytes)'],
     {% for date, stats_daily_model in daily_stats %}
+        {% set total+= stats_daily_model.size %}
         [
             new Date({{ date[0:4] }}, {{ int(date[4:6]) - 1 }}, {{ date[6:8] }}),
-            {{ stats_daily_model.size / 1024 ** 2 }}
+            {{ stats_daily_model.size / 1024 ** 2 }},
+            {{ total / 1024 ** 2 }}
         ],
     {% end %}
     ]);
+    return data;
+}
 
+function getChartDaily() {
     var options = {
         title: 'WARC File Size Per Day',
         // curveType: 'function',
@@ -36,25 +45,17 @@ function drawChartDaily() {
             }
         }
     };
-    var chart = new google.visualization.LineChart(document.getElementById('chart_daily'));
+    var chart = new google.visualization.ChartWrapper({
+        chartType: 'ColumnChart',
+        containerId: 'chart_daily',
+        options: options,
+        view: {columns: [0, 1]},
+    });
 
-    chart.draw(data, options);
+    return chart;
 }
 
-function drawChartDailyCumulative() {
-    var data = google.visualization.arrayToDataTable([
-        ['Day', 'Size (mebibytes)'],
-    
-    {% set total = 0 %}
-    {% for date, stats_daily_model in daily_stats %}
-        {% set total+= stats_daily_model.size %}
-        [
-            new Date({{ date[0:4] }}, {{ int(date[4:6]) - 1 }}, {{ date[6:8] }}),
-            {{ total / 1024 ** 2 }}
-        ],
-    {% end %}
-    ]);
-
+function getChartDailyCumulative(data) {
     var options = {
         title: 'Cumulative WARC File Size Per Day',
         // curveType: 'function',
@@ -71,13 +72,36 @@ function drawChartDailyCumulative() {
             }
         }
     };
-    var chart = new google.visualization.LineChart(document.getElementById('chart_daily_cumulative'));
+    var chart = new google.visualization.ChartWrapper({
+        chartType: 'LineChart',
+        containerId: 'chart_daily_cumulative',
+        options: options,
+        view: {columns: [0, 2]},
+    });
 
-    chart.draw(data, options);
+    return chart;
 }
 
-google.load("visualization", "1", {packages:["corechart"]});
-google.setOnLoadCallback(drawChartDaily);
-google.setOnLoadCallback(drawChartDailyCumulative);
+function drawCharts() {
+    var data = getData();
+    var chart1 = getChartDaily();
+    var chart2 = getChartDailyCumulative();
+
+    var dashboard = new google.visualization.Dashboard(document.getElementById('dashboard'));
+    var filter = new google.visualization.ControlWrapper({
+        controlType: 'DateRangeFilter',
+        containerId: 'dashboard_control',
+        options: {
+            filterColumnIndex: 0
+        }
+    });
+
+    dashboard.bind(filter, chart1);
+    dashboard.bind(filter, chart2);
+    dashboard.draw(data);
+}
+
+google.load("visualization", "1", {packages:["controls"]});
+google.setOnLoadCallback(drawCharts);
 </script>
 {% end %}
