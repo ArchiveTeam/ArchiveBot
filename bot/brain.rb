@@ -113,6 +113,7 @@ class Brain
 
       run_post_registration_hooks(m, job, h)
       add_ignore_sets(m, job, ['global'])
+      toggle_ignores(m, job, false)
 
       pipeline = h[:pipeline]
       job.queue(pipeline)
