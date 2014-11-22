@@ -93,6 +93,16 @@ describe CommandPatterns do
     end
   end
 
+  describe '!a < command' do
+    let(:regex) { CommandPatterns::ARCHIVE_FILE }
+
+    it 'recognizes !a < http://www.example.com/urls.txt' do
+      md = regex.match '!a < http://www.example.com/urls.txt'
+
+      md[1].should == 'http://www.example.com/urls.txt'
+    end
+  end
+
   describe '!ao < command' do
     let(:regex) { CommandPatterns::ARCHIVEONLY_FILE }
 
