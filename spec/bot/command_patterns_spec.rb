@@ -43,6 +43,12 @@ describe CommandPatterns do
       md[1].should == 'http://www.example.com/'
       md[2].should == '--ignores=blogs --someother=param'
     end
+
+    it 'does not recognize !a < URL' do
+      md = regex.match '!a < http://www.example.com/urls.txt'
+
+      md.should be_nil
+    end
   end
 
   describe 'Archiveonly command' do
