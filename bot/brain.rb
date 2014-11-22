@@ -37,9 +37,14 @@ class Brain
     end
   end
 
-  def request_archive(m, target, params, depth='inf', url_file=false)
+  def request_archive(m, target, params, depth=:inf, url_file=false)
     # Is the user authorized?
     return unless authorized?(m)
+
+    # Lock !a < FILE to ops for now: it's a very niche thing.
+    if depth == :inf && url_file
+      return unless op?(m)
+    end
 
     # Do we have a valid URI?
     begin
