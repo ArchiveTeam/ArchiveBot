@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %} Items {% end %}
+
+{% block body %}
+    <p>
+        <a href="https://archive.org/details/{{ identifier }}">View on Internet Archive</a>
+    </p>
+
+    <table>
+        <tr>
+           <th>Filename</th>
+           <th>Size</th>
+        </tr>
+        {% for filename, size in sorted(item_model.files) %}
+            <tr>
+                <td>
+                    {% if filename in job_ident_map %}
+                    <a href="{{ reverse_url('job', job_ident_map[filename]) }}">
+                        {{ filename }}
+                    </a>
+                    {% else %}
+                    {{ filename }}
+                    {% end %}
+                </td>
+                <td>{{ size }}</td>
+            </tr>
+        {% end %}
+    </table>
+{% end %}

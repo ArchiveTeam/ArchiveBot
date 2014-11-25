@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %} Items {% end %}
+
+{% block body %}
+    <table>
+        <tr>
+            <th>IA Identifier</th>
+        </tr>
+        {% for identifier in identifiers %}
+            <tr>
+                <td><a href="{{ reverse_url('item', identifier) }}">{{ identifier }}</a></td>
+            </tr>
+        {% end %}
+    </table>
+{% end %}

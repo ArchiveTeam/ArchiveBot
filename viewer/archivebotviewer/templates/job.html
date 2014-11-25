@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %} Job {% end %}
+
+{% block body %}
+    <table>
+        <tr>
+           <th>Filename</th>
+           <th>Size</th>
+           <th>IA Identifier</th>
+        </tr>
+        {% for filename in sorted(job_model.files) %}
+            <tr>
+                <td>{{ filename }}</td>
+                <td>{{ job_model.files[filename]['size'] }}</td>
+                <td>
+                    <a href="{{ reverse_url('item', job_model.files[filename]['identifier']) }}">
+                    {{ job_model.files[filename]['identifier'] }}
+                    </a>
+                </td>
+            </tr>
+        {% end %}
+    </table>
+{% end %}
