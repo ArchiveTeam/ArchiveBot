@@ -1,0 +1,84 @@
+To run the pipeline, you will need:
+
+- a Python 3.3+ installation
+- Pip (for Python 3.3+)
+- seesaw
+- rsync
+- wpull
+- PhantomJS 1.9.8
+
+Quick install, for Debian and Debian-esque systems:
+
+    sudo apt-get update
+    sudo apt-get install build-essential python3-dev python3-pip \
+      libxml2-dev libxslt-dev zlib1g-dev libssl-dev libsqlite3-dev \
+      libffi-dev git tmux fontconfig-config fonts-dejavu-core \
+      libfontconfig1 libjpeg-turbo8 libjpeg8
+
+Set up a dedicated account:
+
+  adduser archivebot
+
+As user archivebot:
+
+    ssh-keygen
+      [keep hitting Enter]
+    cat ~/.ssh/id_rsa.pub
+      [send the public key to yipdw]
+    cd ~/
+    git clone https://github.com/ArchiveTeam/ArchiveBot
+    cd ArchiveBot
+    git submodule update --init
+    pip3 install --user -r pipeline/requirements.txt
+    pip3 install --user wpull
+
+As user archivebot, in first tmux session:
+
+    ssh -C -L 127.0.0.1:16379:127.0.0.1:6379 \
+      yourusername@archivebot.at.ninjawedding.org -N
+
+As user archivebot, in second tmux session:
+
+    cd ~/ArchiveBot/pipeline
+    mkdir -p ~/warcs4fos
+    export RSYNC_URL=rsync://fos.textfiles.com/archivebot/
+    export REDIS_URL=redis://127.0.0.1:16379/0
+    export FINISHED_WARCS_DIR=$HOME/warcs4fos
+    ~/.local/bin/run-pipeline3 pipeline.py --disable-web-server \
+      --concurrent 2 NAME 2>&1 | \
+      tee "pipeline-$(date -u +"%Y-%m-%dT%H_%M_%SZ").log"
+
+Adjust --concurrent as needed.
+
+If you want your pipeline to only handle !ao/!archiveonly jobs, run it
+with the AO_ONLY environment variable set:
+
+    AO_ONLY=1 ~/.local/bin/run-pipeline3 pipeline.py \
+      --disable-web-server --concurrent 2 NAME
+
+or
+
+    export AO_ONLY=1
+    ~/.local/bin/run-pipeline3 pipeline.py --disable-web-server \
+      --concurrent 2 NAME
+
+As user archivebot, in third tmux session:
+
+    export RSYNC_URL=rsync://fos.textfiles.com/archivebot/
+    ~/ArchiveBot/uploader/uploader.py $HOME/warcs4fos
+
+If you start multiple pipelines, you can safely point them to the
+same FINISHED_WARCS_DIR and run just one uploader.
+
+To gracefully stop the pipeline:
+
+    touch ~/ArchiveBot/pipeline/STOP
+
+To gracefully stop the uploader, hit ctrl-c in its tmux session.
+
+To upgrade, run:
+
+    pip3 install --user --upgrade -r pipeline/requirements.txt
+    pip3 install --user --upgrade wpull
+
+ vim:ts=2:sw=2:tw=72:et

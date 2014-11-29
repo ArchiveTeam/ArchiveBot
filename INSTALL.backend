@@ -1,0 +1,68 @@
+To run the backend, you will need:
+
+- a Redis 2.8+ server
+- a CouchDB server
+- a Ruby 1.9 installation
+- Bundler
+- ExecJS supported runtime (for the dashboard)
+  (see https://github.com/sstephenson/execjs)
+
+(Little known fact: ArchiveBot is made to be as hard as possible to set
+up.)
+
+Quick install, for Debian and Debian-esque systems:
+
+    sudo apt-get update
+    sudo apt-get install bundler couchdb git tmux
+    git clone https://github.com/ArchiveTeam/ArchiveBot.git
+    cd ArchiveBot
+    git submodule update --init
+    bundle install
+
+It is recommended that you build Redis from source (from
+http://redis.io); version 2.8 or higher is recommended.
+
+Set up CouchDB by creating the "archivebot" and "archivebot_logs"
+databases. Upload the design documents from db/design_docs. (You can use
+CURL or go to http://localhost:5984/_utils/index.html and copy & paste
+the content of the JSON files into new documents manually.)
+
+Once that's all in place, run the following:
+
+    redis-server   # ensure it has no password
+    bundle exec ruby bot.rb \
+      -s 'irc://your-irc-host:6667' \
+      -r 'redis://your-redis-host:6379/0' \
+      -c '#archivebot' -n 'YourBot'
+
+The bot should join the IRC channel.
+
+You can run the dashboard webapp on the same machine, or a different
+machine:
+
+    bundle exec ruby dashboard/app.rb \
+      --redis 'redis://your-redis-host:6379/0' \
+      --url 'http://your-dashboard-host:8080'
+
+The last part of ArchiveBot is a set of maintenance tasks.  They are
+currently split between the cogs and plumbing directories; eventually, they
+will all move to plumbing.
+
+In cogs:
+
+1. Configure twitter_conf.json if you want to post Twitter Tweets.
+2. Run the cogs with bundle exec ruby cogs/start.rb.
+
+In plumbing:
+
+1. bundle install (yes, again -- the plumbing currently has its own Gemfile)
+2. export REDIS_URL=redis://your-redis-host:6379/0
+3. In separate terminals, tmux panes, or screen sessions, run
+   a. ./analyzer
+   b. ./trimmer
+   c. COUCHDB_URL=http://your-couchdb-url:5984/db-name ./recorder
+
+To upgrade, run `git pull` and restart all programs.
+
+bot.rb, dashboard/app.rb, and cogs/start.rb accept a --help option. Run
+them with --help to see accepted options.

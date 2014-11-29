@@ -24,10 +24,13 @@ html, body {
 		<thead>
 			<tr>
 				<th>Pipeline</th>
+				<th>Nickname</th>
 				<th>Version</th>
 				<th>Memory %</th>
+				<th>Free Disk Space</th>
 				<th>Disk %</th>
-				<th>Timestamp</th>
+				<th>Load Averages</th>
+				<th>Last Checkin</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -44,6 +47,43 @@ html, body {
 		var memThreshold = 90;
 		var diskThreshold = 90;
 		var timestampThreshold = 60 * 5 * 1000;
+
+		/**
+		 * Formats a byte quantity in TiB, GiB, or MiB.
+		 *
+		 * If the quantity is >= 1 TiB, we format as TiB.
+		 * If the quantity is >= 1 GiB, we format as GiB.
+		 * Otherwise, we format as MiB.
+		 *
+		 * Returns [quantity, suffix], where quantity is a number and
+		 * suffix is a string.
+		 */
+		var formatBytes = (function () {
+			var tebibyte = Math.pow(2, 40);
+			var gibibyte = Math.pow(2, 30);
+			var mebibyte = Math.pow(2, 20);
+
+			return function(bytes) {
+				if (bytes >= tebibyte) {
+					return [bytes / tebibyte, 'TiB'];
+				} else if (bytes >= gibibyte) {
+					return [bytes / gibibyte, 'GiB'];
+				} else {
+					return [bytes / mebibyte, 'MiB'];
+				}
+			}
+		})();
+
+		/**
+		 * Adaptation of ActiveSupport's #blank?.
+		 *
+		 * Returns true if the object is undefined, null, or is a string whose
+		 * post-trim length is zero.  Otherwise, returns false.
+		 */
+		var isBlank = function(o) {
+			return !o || o.trim().length === 0;
+		}
+
 		function initTable() {
 			table = $('#pipeline_table').DataTable({
 				"paging" : false,
@@ -52,7 +92,10 @@ html, body {
 					"dataSrc" : "pipelines"
 				},
 				"columns" : [ {
-					"data" : "pipeline_id"
+					"data" : "id"
+				}, {
+					"data" :  "nickname",
+					"defaultContent" : "(unknown)"
 				}, {
 					"data" : "version"
 				}, {
@@ -63,6 +106,13 @@ html, body {
 						}
 					}
 				}, {
+					"data" : "disk_available",
+					"createdCell": function(td, cellData, rowData, row, col) {
+						var result = formatBytes(parseInt(cellData, 10));
+
+						return $(td).text(result[0].toFixed(2) + ' ' + result[1]);
+					}
+				}, {
 					"data" : "disk_usage",
 					"createdCell" : function(td, cellData, rowData, row, col) {
 						if (cellData > diskThreshold) {
@@ -70,9 +120,24 @@ html, body {
 						}
 					}
 				}, {
-					"data" : "timestamp",
+					"data": "load_average_1m",
+					"defaultContent": "(unknown)",
+					"createdCell": function(td, cellData, rowData, row, col) {
+						var a1m, a5m, a15m;
+
+						a1m = rowData['load_average_1m'];
+						a5m = rowData['load_average_5m'];
+						a15m = rowData['load_average_15m'];
+
+						if (!(isBlank(a1m) || isBlank(a5m) || isBlank(a15m))) {
+							$(td).text("" + a1m + ", " + a5m + ", " + a15m);
+						}
+					}
+				}, {
+					"data" : "ts",
 					"createdCell" : function(td, cellData, rowData, row, col) {
-						var cellDate = new Date(cellData * 1000);
+						var timestamp = parseInt(cellData, 10);
+						var cellDate = new Date(timestamp * 1000);
 						var dateNow = new Date();
 						
 						$(td).attr('title', cellDate.toLocaleString());
@@ -100,4 +165,4 @@ html, body {
 		$(document).ready(initTable);
 	</script>
 </body>
-</head>
+</html>

@@ -1,9 +1,11 @@
-git+https://github.com/ArchiveTeam/seesaw-kit.git@f55422c9046b4b16454161e5f81ab320ad9cd9a3#egg=seesaw
+seesaw>=0.4.0,<1.0
 psutil
-pykka
 pyyaml
-git+https://github.com/andymccurdy/redis-py.git@f96e46b971a5bb66ab5f94ba87ab3e092e5f01ac#egg=redis
-wpull>=0.1000
+redis==2.10.3
+trollius>=1.0.2
+git+https://github.com/ludios/wpull.git@hax-20#egg=wpull
 sqlalchemy
 hiredis
 requests
+manhole
+lxml

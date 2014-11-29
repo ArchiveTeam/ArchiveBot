@@ -1,0 +1,31 @@
+#!/usr/bin/env ruby
+
+require File.expand_path('../lib/archive_bot/redis', __FILE__)
+require File.expand_path('../lib/archive_bot/log_aggregator', __FILE__)
+
+require 'yajl'
+
+include ArchiveBot::Redis
+
+max = (ARGV[0] || 10).to_i
+r = make_redis
+
+agg = ArchiveBot::LogAggregator.new($stdout)
+p = Yajl::Parser.new
+p.on_parse_complete = agg.method(:output)
+
+$stdin.each_line do |line|
+  job_key = line.chomp
+  job = r.hgetall(job_key)
+
+  agg.job = job
+  agg.ident = job_key
+
+  begin
+    r.zrange(job['log_key'], -max, -1).each do |entry|
+      p << entry
+    end
+  rescue Errno::EPIPE
+    break
+  end
+end

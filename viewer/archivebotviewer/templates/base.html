@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>{% block title %}{% end %} - ArchiveBot Viewer</title>
+</head>
+<body>
+    <nav>
+        <a href="{{ reverse_url('index') }}">Home</a>
+    </nav>
+    <hr>
+    <div id="body_container" role="main">
+    {% block body %}
+    {% end %}
+    </div>
+    <hr>
+    <p>
+        <a href="http://archiveteam.org/index.php?title=ArchiveBot">ArchiveBot Viewer</a>
+    </p>
+</body>
+</html>

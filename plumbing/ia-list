@@ -1,0 +1,6 @@
+#!/bin/sh
+
+ia search 'collection:archivebot' | ia mine - 2>&1 | \
+	jq '"CREATED " + (.created | tostring),
+		"ITEM " + .metadata.identifier,
+		"URL https://" + .workable_servers[] + .dir + "/" + (.files[] | .name)'

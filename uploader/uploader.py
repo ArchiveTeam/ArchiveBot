@@ -1,0 +1,93 @@
+#!/usr/bin/python3
+
+from __future__ import print_function
+
+import os
+import time
+import fcntl
+import errno
+import subprocess
+import sys
+
+WAIT = 10
+
+class CannotLock(Exception):
+    pass
+
+
+def acquire_lock(fname):
+    """
+    Acquires an exclusive lock on `fname`, which will be truncated to a
+    0-byte file.
+
+    To keep holding the lock, make sure you keep a reference to the
+    returned file object.
+    """
+    f = open(fname, 'wb')
+    try:
+        fcntl.lockf(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError as e:
+        if e.errno not in (errno.EACCES, errno.EAGAIN):
+            # Error was not locking-related, so re-raise.
+            # See https://docs.python.org/3/library/fcntl.html#fcntl.lockf
+            raise
+        raise CannotLock(fname)
+    return f
+
+
+def should_upload(basename):
+    assert not '/' in basename, basename
+    return not basename.startswith('.') and \
+        (basename.endswith('.warc.gz') or basename.endswith('.json') or basename.endswith('.txt'))
+
+
+def main():
+    if len(sys.argv) > 1:
+        directory = sys.argv[1]
+    elif os.environ.get('FINISHED_WARCS_DIR') != None:
+        directory = os.environ['FINISHED_WARCS_DIR']
+    else:
+        raise RuntimeError('No directory specified (set FINISHED_WARCS_DIR '
+            'or specify directory on command line)')
+
+    url = os.environ.get('RSYNC_URL')
+    if url == None:
+        raise RuntimeError('RSYNC_URL not set')
+    if '/localhost' in url or '/127.' in url:
+        raise RuntimeError("Won't let you upload to localhost because I "
+            "remove files after uploading them, and you might be uploading "
+            "to the same directory")
+
+    try:
+        # Do not remove this local even if pyflakes complains about it
+        lockfile = acquire_lock(os.path.join(directory, ".uploader.lock"))
+    except CannotLock:
+        raise RuntimeError("Another uploader is uploading from %s" % (directory,))
+
+    print("CHECK THE UPLOAD TARGET: %s" % (url,))
+    print()
+    print("Upload target must reliably store data")
+    print("Each local file will removed after upload")
+    print("Hit CTRL-C immediately if upload target is incorrect")
+    print()
+
+    while True:
+        print("Waiting %d seconds" % (WAIT,))
+        time.sleep(WAIT)
+
+        fnames = sorted(list(f for f in os.listdir(directory) if should_upload(f)))
+        if len(fnames):
+            fname = os.path.join(directory, fnames[0])
+            print("Uploading %r" % (fname,))
+            exit = subprocess.call([
+                "rsync", "-av", "--timeout=300", "--contimeout=300",
+                "--progress", fname, url])
+            if exit == 0:
+                print("Removing %r" % (fname,))
+                os.remove(fname)
+        else:
+            print("Nothing to upload")
+
+
+if __name__ == '__main__':
+    main()

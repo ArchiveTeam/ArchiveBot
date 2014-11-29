@@ -24,7 +24,7 @@ def install_stdout_extension(control):
                 'message': data
             }
 
-            control.log(packet, ident, log_key).get()
+            control.log(packet, ident, log_key)
 
     Item.log_output = tee_to_control
 

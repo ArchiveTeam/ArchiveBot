@@ -6,7 +6,6 @@ import time
 from archivebot import shared_config
 from archivebot.control import Control
 from archivebot.wpull import settings as mod_settings
-from pykka.registry import ActorRegistry
 
 ident = os.environ['ITEM_IDENT']
 redis_url = os.environ['REDIS_URL']
@@ -14,12 +13,9 @@ log_key = os.environ['LOG_KEY']
 log_channel = shared_config.log_channel()
 pipeline_channel = shared_config.pipeline_channel()
 
-settings_ref = mod_settings.Settings.start()
-settings = settings_ref.proxy()
+control = Control(redis_url, log_channel, pipeline_channel)
 
-control_ref = Control.start(redis_url, log_channel, pipeline_channel)
-control = control_ref.proxy()
-
+settings = mod_settings.Settings()
 settings_listener = mod_settings.Listener(redis_url, settings, control, ident)
 settings_listener.start()
 
@@ -33,7 +29,7 @@ def log_ignore(url, pattern):
     type='ignore'
   )
 
-  control.log(packet, ident, log_key).get()
+  control.log(packet, ident, log_key)
 
 def log_result(url, statcode, error):
   packet = dict(
@@ -46,7 +42,7 @@ def log_result(url, statcode, error):
     type='download'
   )
 
-  control.log(packet, ident, log_key).get()
+  control.log(packet, ident, log_key)
 
 def is_error(statcode, err):
     '''
@@ -80,10 +76,10 @@ def accept_url(url_info, record_info, verdict, reasons):
     return False
 
   # Does the URL match any of the ignore patterns?
-  pattern = settings.ignore_url_p(url).get()
+  pattern = settings.ignore_url_p(url)
 
   if pattern:
-    if not settings.suppress_ignore_reports().get():
+    if not settings.suppress_ignore_reports():
       log_ignore(url, pattern)
     return False
 
@@ -93,25 +89,25 @@ def accept_url(url_info, record_info, verdict, reasons):
 
 def queued_url(url_info):
   # Increment the items queued counter.
-  control.update_items_queued(1).get()
+  control.update_items_queued(1)
 
 
 def dequeued_url(url_info, record_info):
   # Increment the items downloaded counter.
-  control.update_items_downloaded(1).get()
+  control.update_items_downloaded(1)
 
 
 def handle_result(url_info, record_info, error_info=None, http_info=None):
   global last_age
 
   if http_info:
-    # Update the traffic downloaded counter.
-    control.update_bytes_downloaded(ident, http_info['body']['content_size']).get()
+    # Update the traffic counters.
+    control.update_bytes_downloaded(ident, http_info['body']['content_size'])
 
   statcode = 0
   error = 'OK'
 
-  pattern = settings.ignore_url_p(url_info['url']).get()
+  pattern = settings.ignore_url_p(url_info['url'])
 
   if pattern:
     log_ignore(url_info['url'], pattern)
@@ -127,30 +123,30 @@ def handle_result(url_info, record_info, error_info=None, http_info=None):
   log_result(url_info['url'], statcode, error)
 
   # If settings were updated, print out a report.
-  settings_age = settings.age().get()
+  settings_age = settings.age()
 
   if last_age < settings_age:
     last_age = settings_age
 
-    print("Settings updated: ", settings.inspect().get())
+    print("Settings updated: ", settings.inspect())
 
     # Also adjust concurrency level.
-    clevel = settings.concurrency().get()
+    clevel = settings.concurrency()
     wpull_hook.factory.get('Engine').set_concurrent(clevel)
 
   # One last thing about settings: make sure the listener is online.
   settings_listener.check()
 
   # Flush queued/downloaded updates.
-  control.flush_item_counts(ident).get()
+  control.flush_item_counts(ident)
 
   # Should we abort?
-  if settings.abort_requested().get():
+  if settings.abort_requested():
     print("Wget terminating on bot command")
 
     while True:
       try:
-        control.mark_aborted(ident).get()
+        control.mark_aborted(ident)
         break
       except ConnectionError:
         time.sleep(5)
@@ -162,7 +158,7 @@ def handle_result(url_info, record_info, error_info=None, http_info=None):
   return wpull_hook.actions.NORMAL
 
 def wait_time(seconds):
-    sl, sm = settings.delay_time_range().get()
+    sl, sm = settings.delay_time_range()
 
     return random.uniform(sl, sm) / 1000
 
@@ -179,7 +175,6 @@ def finish_statistics(start_time, end_time, num_urls, bytes_downloaded):
 
 def exit_status(exit_code):
   settings_listener.stop()
-  ActorRegistry.stop_all()
   return exit_code
 
 

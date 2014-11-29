@@ -1,6 +1,5 @@
 import json
 import os
-import pykka
 import redis
 import time
 
@@ -25,7 +24,7 @@ def conn(controller):
         controller.disconnect()
         raise ConnectionError(str(e)) from e
 
-class Control(pykka.ThreadingActor):
+class Control(object):
     '''
     Handles communication to and from the ArchiveBot control server.
 
@@ -35,8 +34,6 @@ class Control(pykka.ThreadingActor):
     '''
 
     def __init__(self, redis_url, log_channel, pipeline_channel):
-        super(Control, self).__init__()
-
         self.log_channel = log_channel
         self.pipeline_channel = pipeline_channel
         self.bytes_outstanding = 0

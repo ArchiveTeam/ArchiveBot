@@ -31,8 +31,8 @@ from archivebot.seesaw.tasks import GetItemFromQueue, StartHeartbeat, \
     MarkItemAsDone
 
 
-VERSION = "20140915.01"
-PHANTOMJS_VERSION = '1.9.7'
+VERSION = "20141118.02"
+PHANTOMJS_VERSION = '1.9.8'
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
 WPULL_EXE = find_executable('Wpull', None, [ './wpull' ])
 PHANTOMJS = find_executable('PhantomJS', PHANTOMJS_VERSION,
@@ -48,6 +48,10 @@ assert WPULL_EXE, 'No usable Wpull found.'
 assert PHANTOMJS, 'PhantomJS %s was not found.' % PHANTOMJS_VERSION
 assert 'RSYNC_URL' in env, 'RSYNC_URL not set.'
 assert 'REDIS_URL' in env, 'REDIS_URL not set.'
+assert 'FINISHED_WARCS_DIR' in env, 'FINISHED_WARCS_DIR not set.'
+
+assert 'TMUX' in env or 'STY' in env or env.get('NO_SCREEN') == "1", \
+        "Refusing to start outside of screen or tmux, set NO_SCREEN=1 to override"
 
 assert 'TMUX' in env or 'STY' in env or env.get('NO_SCREEN') == "1", \
         "Refusing to start outside of screen or tmux, set NO_SCREEN=1 to override"
@@ -69,8 +73,7 @@ PIPELINE_CHANNEL = shared_config.pipeline_channel()
 # CONTROL CONNECTION
 # ------------------------------------------------------------------------------
 
-control_ref = control.Control.start(REDIS_URL, LOG_CHANNEL, PIPELINE_CHANNEL)
-control = control_ref.proxy()
+control = control.Control(REDIS_URL, LOG_CHANNEL, PIPELINE_CHANNEL)
 
 # ------------------------------------------------------------------------------
 # SEESAW EXTENSIONS
@@ -99,7 +102,7 @@ class AcceptAny:
 DEFAULT_USER_AGENT = \
     'ArchiveTeam ArchiveBot/%s (wpull %s) and not Mozilla/5.0 ' \
     '(Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) ' \
-    'Chrome/36.0.1985.125 Safari/537.36' % (VERSION, wpull_version())
+    'Chrome/38.0.2125.101 Safari/537.36' % (VERSION, wpull_version())
 
 _, _, _, pipeline_id = monitoring.pipeline_id()
 
@@ -112,7 +115,7 @@ pipeline = Pipeline(
     DownloadUrlFile(control),
     WgetDownload(
         WpullArgs(default_user_agent=DEFAULT_USER_AGENT, wpull_exe=WPULL_EXE,
-                  phantomjs_exe=PHANTOMJS),
+                  phantomjs_exe=PHANTOMJS, finished_warcs_dir=os.environ["FINISHED_WARCS_DIR"]),
         accept_on_exit_code=AcceptAny(),
         env={
             'ITEM_IDENT': ItemInterpolation('%(ident)s'),
@@ -141,8 +144,7 @@ pipeline = Pipeline(
 )
 
 def stop_control():
-    control.unregister_pipeline(pipeline_id).get()
-    control_ref.stop()
+    control.unregister_pipeline(pipeline_id)
 
 pipeline.on_cleanup += stop_control
 

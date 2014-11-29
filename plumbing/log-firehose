@@ -1,0 +1,40 @@
+#!/usr/bin/env ruby
+
+require File.expand_path('../lib/archive_bot/redis', __FILE__)
+require File.expand_path('../lib/archive_bot/log_aggregator', __FILE__)
+
+require 'yajl'
+
+include ArchiveBot::Redis
+
+r = make_redis
+
+agg = ArchiveBot::LogAggregator.new($stdout)
+p = Yajl::Parser.new
+p.on_parse_complete = agg.method(:output)
+
+def unbroadcasted_log_entries(job, r)
+  log_key = job['log_key']
+  start = job['last_broadcasted_log_entry']
+
+  r.zrangebyscore(log_key, "(#{start}", '+inf', with_scores: true)
+end
+
+$stdin.each_line do |line|
+  job_key = line.chomp
+  job = r.hgetall(job_key)
+
+  agg.job = job
+  agg.ident = job_key
+
+  log_entries = unbroadcasted_log_entries(job, r)
+  next if log_entries.empty?
+
+  begin
+    log_entries.each { |entry, _| p << entry }
+  rescue Errno::EPIPE
+    break
+  end
+
+  r.hset(job_key, 'last_broadcasted_log_entry', log_entries.last.last)
+end

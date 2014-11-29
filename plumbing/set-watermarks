@@ -1,0 +1,27 @@
+#!/usr/bin/env ruby
+
+require File.expand_path('../lib/archive_bot', __FILE__)
+
+include ArchiveBot::Redis
+
+r = make_redis
+
+increment = 10 ** 5
+
+def next_watermark(val, increment)
+  (val.to_f / increment).ceil * increment
+end
+
+$stdin.each_line do |line|
+  job_key = line.chomp
+
+  w, q = r.hmget(job_key, 'next_watermark', 'items_queued')
+  next if q.nil?
+
+  watermark = w.to_i
+  queued = q.to_i
+
+  if queued > watermark
+    r.hset(job_key, 'next_watermark', next_watermark(queued, increment))
+  end
+end

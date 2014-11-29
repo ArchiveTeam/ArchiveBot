@@ -12,10 +12,27 @@
 </head>
 <body>
 <style>
+html {
+	/* Always show scrollbar to prevent jumpiness when filtering */
+	overflow-y: scroll;
+}
+
 html, body {
 	background-color: #D0C0AE;
 	font-family: Tahoma, Arial, sans-serif;
 	font-size: 13px;
+}
+
+#filter-box {
+	background-color: #eee;
+	border: 1px solid #999;
+	padding: 1px 3px 1px 3px;
+	font-size: 18px;
+	border-radius: 3px;
+}
+
+.button {
+	font-size: 18px;
 }
 
 .padded-page {
@@ -45,6 +62,15 @@ html, body {
 	overflow: hidden;
 }
 
+.inline-stat {
+	/* Needed for 'Align!' feature */
+	display: inline-block;
+	/* Needed to avoid extra vertical padding */
+	vertical-align: bottom;
+	/* Needed to avoid collapsing of leading space */
+	white-space: pre;
+}
+
 .job-url {
 	font-family: Arial, sans-serif;
 	font-size: 14px;
@@ -52,12 +78,65 @@ html, body {
 	text-decoration: none;
 }
 
+.job-url-aligned {
+	width: 260px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.job-note-aligned {
+	display: none;
+}
+
+.job-nick-aligned {
+	width: 60px;
+	overflow: hidden;
+	text-overflow: hidden;
+}
+
+.job-mb-aligned {
+	width: 70px;
+	overflow: hidden;
+	text-overflow: hidden;
+	text-align: right;
+}
+
+.job-responses-aligned {
+	width: 92px;
+	overflow: hidden;
+	text-overflow: hidden;
+	text-align: right;
+}
+
+.job-in-queue-aligned {
+	width: 92px;
+	overflow: hidden;
+	text-overflow: hidden;
+	text-align: right;
+}
+
+.job-delay-aligned {
+	width: 130px;
+	overflow: hidden;
+	text-overflow: hidden;
+	text-align: right;
+}
+
+.job-ignores {
+	font-weight: bold;
+}
+
+.job-igoff {
+	font-weight: normal !important;
+}
+
 .job-ident {
+	font-family: Tahoma, Arial, sans-serif;
 	margin: 0 1px 0 0;
+	padding: 0;
 	border: 0;
 	background-color: #D0C0AE;
-	color: #786552;
-	font-weight: bold;
+	color: #645444;
 	text-align: right;
 }
 
@@ -165,10 +244,15 @@ a.ignore {
 	<div class="header">
 		<div>
 			<a href="http://archiveteam.org/index.php?title=ArchiveBot" class="underlined-a">ArchiveBot</a>
-			tracking ~<span id="num-crawls">0</span> crawls.<br>
+			tracking ~<span id="num-crawls">0</span> crawls.
+			See also <a href="pipelines" class="underlined-a">pipeline</a> or <a href="logs/recent" class="underlined-a">job</a> reports.
+			Show: <input id="filter-box" type="text" size="21" autofocus>
+			<input onclick="ds.setFilter('');" type="button" value="  All  " class="button">
+			<input onclick="ds.setFilter('`');" type="button" value="None" class="button">
 		</div>
 		<div>
-			<a href="#" onclick="ds.toggleHelp();return false;" class="underlined-a">Help!</a>
+			<input type="button" onclick="ds.toggleAlign()" class="button" value="Align!">
+			<input type="button" onclick="ds.toggleHelp()" class="button" value="Help!">
 		</div>
 	</div>
 
@@ -182,6 +266,9 @@ a.ignore {
 			</p>
 			<p>
 				To pause scrolling, move your mouse inside a log window.
+			</p>
+			<p>
+				To show just one job, click anywhere on its stats.
 			</p>
 			<p>
 				To clear all finished jobs, reload the page.
@@ -328,6 +415,45 @@ var getQueryArgs = function() {
 
 var isSafari = navigator.userAgent.indexOf("Safari") != -1;
 
+var addAnyChangeListener = function(elem, func) {
+	// DOM0 handler for convenient use by Clear button
+	elem.onchange = func;
+	elem.addEventListener('keydown', func, false);
+	elem.addEventListener('paste', func, false);
+	elem.addEventListener('input', func, false);
+};
+
+var arrayFrom = function(arrayLike) {
+	return Array.prototype.slice.call(arrayLike);
+};
+
+/**
+ * Returns a function that gets the given property on any object passed in
+ */
+var prop = function(name) {
+	return function(obj) {
+		return obj[name];
+	};
+};
+
+/**
+ * Returns a function that adds the given class to any element passed in
+ */
+var classAdder = function(name) {
+	return function(elem) {
+		elem.classList.add(name);
+	};
+};
+
+/**
+ * Returns a function that removes the given class to any element passed in
+ */
+var classRemover = function(name) {
+	return function(elem) {
+		elem.classList.remove(name);
+	};
+};
+
 /*** End of utility code ***/
 
 
@@ -425,8 +551,10 @@ var getSummaryResponses = function(jobData) {
 
 
 
-var JobsRenderer = function(container, historyLines, showNicks) {
+var JobsRenderer = function(container, filterBox, historyLines, showNicks) {
 	this.container = container;
+	this.filterBox = filterBox;
+	addAnyChangeListener(this.filterBox, this.applyFilter.bind(this));
 	this.historyLines = historyLines;
 	this.showNicks = showNicks;
 	this.linesPerSegment = Math.max(1, Math.round(this.historyLines / 10));
@@ -435,6 +563,7 @@ var JobsRenderer = function(container, historyLines, showNicks) {
 	this.renderInfo = {};
 	this.mouseInside = null;
 	this.numCrawls = byId('num-crawls');
+	this.aligned = false;
 };
 
 JobsRenderer.prototype._getNextJobInSorted = function(ident) {
@@ -499,16 +628,16 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 	}
 
 	var statsElements = {
-		mb: h("span", null, "?"),
-		responses: h("span", null, "?"),
+		mb: h("span", {"className": "inline-stat job-mb"}, "?"),
+		responses: h("span", {"className": "inline-stat job-responses"}, "?"),
 		responsesPerSecond: h("span", null, "?"),
-		queueLength: h("span", null, "? in q."),
+		queueLength: h("span", {"className": "inline-stat job-in-queue"}, "? in q."),
 		connections: h("span", null, "?"),
-		delay: h("span", null, "?"),
-		ignores: h("span", null, "?")
+		delay: h("span", {"className": "inline-stat job-delay"}, "? ms delay"),
+		ignores: h("span", {"className": "job-ignores"}, "?")
 	};
 
-	var jobNote = h("span", null, null);
+	var jobNote = h("span", {"className": "job-note"}, null);
 
 	var logWindow = h('div', logWindowAttrs, logSegment);
 	var startedISOString = new Date(parseFloat(jobData["started_at"]) * 1000).toISOString();
@@ -517,25 +646,41 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 		{"id": "log-container-" + ident}, [
 			h("div", {"className": "job-header"}, [
 				h("span", {"className": "job-info"}, [
-					h("a", {"className": "job-url", "href": jobData["url"]}, jobData["url"]),
-					" on ",
-					h("span", {"title": startedISOString}, startedISOString.split("T")[0].substr(5)),
-					(this.showNicks ? " by " + jobData["started_by"] : ""),
-					jobNote,
-					"; ",
-					statsElements.mb,
-					h("span", null, " MB in "),
-					statsElements.responses,
-					" at ",
-					statsElements.responsesPerSecond,
-					"/s, ",
-					statsElements.queueLength,
-					"; ",
-					statsElements.connections,
-					" con. w/ ",
-					statsElements.delay,
-					" ms delay; ",
-					statsElements.ignores
+					h("a", {"className": "inline-stat job-url", "href": jobData["url"]}, jobData["url"]),
+					// Clicking anywhere in this area will set the filter to
+					// this job URL, (usually) hiding everything but this job.
+					h("span", {"onclick": function() {
+						if(window.getSelection().toString()) {
+							// Set the filter on clicks, but not on text selections.
+							return;
+						}
+						if(ds.getFilter() == jobData["url"]) {
+							// If we're already showing just this log window, go back
+							// to showing nothing.
+							ds.setFilter("`");
+						} else {
+							ds.setFilter(jobData["url"]);
+						}
+					}}, [
+						" on ",
+						h("span", {"title": startedISOString}, startedISOString.split("T")[0].substr(5)),
+						h("span", {"className": "inline-stat job-nick"}, (this.showNicks ? " by " + jobData["started_by"] : "")),
+						jobNote,
+						"; ",
+						statsElements.mb,
+						" MB in ",
+						statsElements.responses,
+						" at ",
+						statsElements.responsesPerSecond,
+						"/s, ",
+						statsElements.queueLength,
+						"; ",
+						statsElements.connections,
+						" con. w/ ",
+						statsElements.delay,
+						"; ",
+						statsElements.ignores
+					])
 				]),
 				h("input", {
 					"className": "job-ident",
@@ -552,6 +697,10 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 	);
 	this.renderInfo[ident] = new JobRenderInfo(logWindow, logSegment, statsElements, jobNote, 0, [0]);
 	this.container.insertBefore(div, beforeElement);
+	// Set appropriate CSS classes - we might be in aligned mode already
+	this.updateAlign();
+	// Filter hasn't changed, but we might need to filter out the new job
+	this.applyFilter();
 }
 
 JobsRenderer.prototype._renderDownloadLine = function(data, logSegment) {
@@ -650,16 +799,25 @@ JobsRenderer.prototype.handleData = function(data) {
 	}
 
 	info.statsElements.connections.textContent = jobData["concurrency"];
+
 	var delayMin = parseInt(jobData["delay_min"]);
 	var delayMax = parseInt(jobData["delay_max"]);
 	info.statsElements.delay.textContent =
-		delayMin == delayMax ?
+		(delayMin == delayMax ?
 			delayMin :
-			delayMin + "-" + delayMax;
-	info.statsElements.ignores.textContent =
-		jobData["suppress_ignore_reports"] ?
-			'igoff' :
-			'igon';
+			delayMin + "-" + delayMax) + " ms delay";
+
+	if(jobData["suppress_ignore_reports"]) {
+		info.statsElements.ignores.textContent = 'igoff';
+		if(!info.statsElements.ignores.classList.contains('job-igoff')) {
+			info.statsElements.ignores.classList.add('job-igoff');
+		}
+	} else {
+		info.statsElements.ignores.textContent = 'igon';
+		if(info.statsElements.ignores.classList.contains('job-igoff')) {
+			info.statsElements.ignores.classList.remove('job-igoff');
+		}
+	}
 
 	// Update note
 	info.jobNote.textContent =
@@ -695,6 +853,48 @@ JobsRenderer.prototype.handleData = function(data) {
 		// Scroll to the bottom
 		info.logWindow.scrollTop = info.logWindow.scrollHeight;
 	}
+};
+
+JobsRenderer.prototype.applyFilter = function() {
+	var query = this.filterBox.value;
+	var matches = 0;
+	for(var i=0; i < this.jobs.sorted.length; i++) {
+		var job = this.jobs.sorted[i];
+		if(job["url"].indexOf(query) == -1) {
+			this.renderInfo[job["ident"]].logWindow.style.display = "none";
+		} else {
+			this.renderInfo[job["ident"]].logWindow.style.display = "block";
+			matches += 1;
+		}
+	}
+
+	if(matches < this.jobs.sorted.length) {
+		// If you're not seeing all of the log windows, you're probably seeing very
+		// few of them, so you probably want alignment enabled.
+		this.aligned = true;
+		this.updateAlign();
+	} else {
+		// You're seeing all of the log windows, so alignment doesn't help as much
+		// as seeing the full info.
+		this.aligned = false;
+		this.updateAlign();
+	}
+};
+
+JobsRenderer.prototype.updateAlign = function() {
+	var adderOrRemover = this.aligned ? classAdder : classRemover;
+	arrayFrom(document.querySelectorAll('.job-url')).map(adderOrRemover('job-url-aligned'));
+	arrayFrom(document.querySelectorAll('.job-note')).map(adderOrRemover('job-note-aligned'));
+	arrayFrom(document.querySelectorAll('.job-nick')).map(adderOrRemover('job-nick-aligned'));
+	arrayFrom(document.querySelectorAll('.job-mb')).map(adderOrRemover('job-mb-aligned'));
+	arrayFrom(document.querySelectorAll('.job-responses')).map(adderOrRemover('job-responses-aligned'));
+	arrayFrom(document.querySelectorAll('.job-in-queue')).map(adderOrRemover('job-in-queue-aligned'));
+	arrayFrom(document.querySelectorAll('.job-delay')).map(adderOrRemover('job-delay-aligned'));
+};
+
+JobsRenderer.prototype.toggleAlign = function() {
+	this.aligned = !this.aligned;
+	this.updateAlign();
 };
 
 
@@ -778,7 +978,8 @@ var Dashboard = function() {
 	if(this.dumpTraffic) {
 		this.dumpMax = Number(args["dumpMax"]);
 	}
-	this.jobsRenderer = new JobsRenderer(byId('logs'), historyLines, showNicks);
+	this.jobsRenderer = new JobsRenderer(
+		byId('logs'), byId('filter-box'), historyLines, showNicks);
 
 	var batchTimeWhenHidden = 5000;
 
@@ -811,6 +1012,7 @@ var Dashboard = function() {
 		}.bind(this), false);
 	}.bind(this);
 	xhr.open("GET", "http://" + this.host + "/logs/recent?cb=" + Date.now() + Math.random());
+	xhr.setRequestHeader('Accept', 'application/json');
 	xhr.send("");
 };
 
@@ -842,6 +1044,10 @@ Dashboard.prototype.connectWebSocket = function() {
 	}.bind(this);
 };
 
+Dashboard.prototype.toggleAlign = function() {
+	this.jobsRenderer.toggleAlign();
+};
+
 Dashboard.prototype.toggleHelp = function() {
 	var help = byId('help');
 	if(help.classList.contains('undisplayed')) {
@@ -849,6 +1055,15 @@ Dashboard.prototype.toggleHelp = function() {
 	} else {
 		help.classList.add('undisplayed');
 	}
+};
+
+Dashboard.prototype.getFilter = function(value) {
+	return byId('filter-box').value;
+};
+
+Dashboard.prototype.setFilter = function(value) {
+	byId('filter-box').value = value;
+	byId('filter-box').onchange();
 };
 
 var ds = new Dashboard();

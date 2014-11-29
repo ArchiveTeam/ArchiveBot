@@ -4,7 +4,6 @@ require 'uri'
 require 'webmachine'
 require 'webmachine/sprockets'
 
-require File.expand_path('../../lib/couchdb', __FILE__)
 require File.expand_path('../../lib/shared_config', __FILE__)
 require File.expand_path('../log_actors', __FILE__)
 require File.expand_path('../resources/dashboard', __FILE__)
@@ -15,13 +14,10 @@ require File.expand_path('../resources/recent', __FILE__)
 opts = Trollop.options do
   opt :url, 'URL to bind to', :default => 'http://localhost:4567'
   opt :redis, 'URL of Redis server', :default => ENV['REDIS_URL'] || 'redis://localhost:6379/0'
-  opt :db, 'URL of CouchDB database', :default => ENV['COUCHDB_URL'] || 'http://localhost:5984/archivebot'
-  opt :db_credentials, 'Credentials for CouchDB database (USERNAME:PASSWORD)', :type => String, :default => nil
 end
 
 bind_uri = URI.parse(opts[:url])
 
-DB = Couchdb.new(URI(opts[:db]), opts[:db_credentials])
 R = Redis.new(:url => opts[:redis], :driver => :hiredis)
 
 Pipeline.redis = R
@@ -59,10 +55,27 @@ App = Webmachine::Application.new do |app|
   end
 end
 
-LogReceiver.supervise_as :log_receiver, opts[:redis], SharedConfig.log_channel
-
 at_exit do
   Celluloid::Actor[:log_receiver].stop
 end
 
-App.run
+class Broadcaster
+  include Celluloid
+  include Celluloid::Notifications
+
+  def initialize(channel)
+    @channel = channel
+  end
+
+  def broadcast(msg)
+    publish(@channel, msg)
+  end
+end
+
+Broadcaster.supervise_as :broadcaster, SharedConfig.log_channel
+
+Thread.new { App.run }
+
+$stdin.each_line do |line|
+  Celluloid::Actor[:broadcaster].broadcast line.chomp
+end

@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby
+
+require File.expand_path('../lib/archive_bot', __FILE__)
+
+include ArchiveBot::Redis
+
+r = make_redis
+puts r.lrange('working', 0, -1)

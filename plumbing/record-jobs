@@ -1,0 +1,35 @@
+#!/usr/bin/env ruby
+
+require File.expand_path('../lib/archive_bot', __FILE__)
+
+require 'yajl'
+require 'analysand'
+require 'uri'
+
+include ArchiveBot::Redis
+
+r = make_redis
+uri = URI(ARGV[1])
+db = Analysand::Database.new(uri)
+
+$stdin.each_line do |line|
+  job_key = line.chomp
+
+  finished_at, recorded_at = r.hmget(job_key, 'finished_at', 'recorded_at')
+
+  if finished_at && !recorded_at
+    hash = r.hgetall(job_key)
+    hash['ident'] = job_key
+    hash['type'] = 'job'
+    doc_id = "#{job_key}:#{hash['queued_at']}"
+
+    resp = db.put(doc_id, hash, uri.userinfo)
+
+    if resp.success?
+      r.hset(job_key, 'recorded_at', Time.now.to_i)
+    end
+
+    $stderr.puts "PUT #{uri.path}#{doc_id} #{resp.code}"
+    $stderr.flush
+  end
+end
