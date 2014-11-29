@@ -76,11 +76,12 @@ Once that's all in place, run the following:
 
 The bot should join the IRC channel.
 
-You can run the dashboard webapp on the same machine, or a different machine:
+You can run the dashboard webapp on the same machine, or a different machine.  From the root of ArchiveBot's repository, run
 
-    bundle exec ruby dashboard/app.rb \
-      --redis 'redis://your-redis-host:6379/0' \
-      --url 'http://your-dashboard-host:8080'
+    export REDIS_URL=redis://your-redis-host:6379/0
+    export UPDATES_CHANNEL=updates
+
+    plumbing/updates-listener | plumbing/log-firehose | bundle exec ruby dashboard/app.rb -u http://your-dashboard-host:8080
 
 Configure twitter_conf.json if you want to post Twitter Tweets.
 
@@ -95,7 +96,8 @@ In plumbing:
 
 1. bundle install (yes, again -- the plumbing currently has its own Gemfile)
 2. export REDIS_URL=redis://your-redis-host:6379/0
-3. In separate terminals, tmux panes, or screen sessions, run
+3. export UPDATES_CHANNEL=updates
+4. In separate terminals, tmux panes, or screen sessions, run
    a. ./analyzer
    b. ./trimmer > /dev/null
    c. COUCHDB_URL=http://your-couchdb-url:5984/db-name ./recorder
