@@ -97,8 +97,16 @@ In plumbing:
 2. export REDIS_URL=redis://your-redis-host:6379/0
 3. In separate terminals, tmux panes, or screen sessions, run
    a. ./analyzer
-   b. ./trimmer
+   b. ./trimmer > /dev/null
    c. COUCHDB_URL=http://your-couchdb-url:5984/db-name ./recorder
+
+The trimmer prints all the data it trims to standard output in the form
+
+  IDENT JSON
+  IDENT JSON
+  ...
+
+For the EFNet ArchiveBot, we redirect it to /dev/null because we currently don't do anything with that data.
 
 To upgrade, run `git pull` and restart all programs.
 
