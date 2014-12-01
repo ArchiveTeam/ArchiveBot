@@ -13,15 +13,15 @@
                 "chrome-ubuntu"
             ],
             "name": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chrome/38.0.2125.101 Safari/537.36"
-        }
+        },
         {
             "aliases": [
                 "chrome-android",
                 "mobile-chrome"
             ],
             "name": "Mozilla/5.0 (Linux; Android 4.4.4; Galaxy Nexus Build/IMM76B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.101 Mobile Safari/535.19"
-        }
-                {
+        },
+        {
             "aliases": [
                 "mobile-chrome-ios",
                 "chrome-ios"
