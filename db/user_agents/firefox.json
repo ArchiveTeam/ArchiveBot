@@ -14,6 +14,13 @@
             ],
             "name": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:32.0) Gecko/20100101 Firefox/32.0"
         }
+        {
+            "aliases": [
+                "firefox-android",
+                "mobile-firefox"
+            ],
+            "name": "Mozilla/5.0 (Android; Mobile; rv:32.0) Gecko/32.0 Firefox/32.0"
+        }
     ],
     "type": "user_agents"
 }
