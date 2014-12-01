@@ -1,0 +1,8 @@
+{
+    "name": "youtube",
+    "patterns": [
+        "^http(s)?://accounts\\.google\\.com/ServiceLogin",
+        "\\.?youtube\\.com/(playlists|channels|videos)/\\?(flow|view|sort|live_view)=",
+    ],
+    "type": "ignore_patterns"
+}

@@ -1,0 +1,12 @@
+{
+    "name": "pinterest",
+    "patterns": [
+        "^http(s)?://(www\\.)?pinterest\\.com/[^/]+/\\^/[^/]+/",
+        "^http(s)?://(www\\.)?pinterest\\.com/[^/]+/[^/]+/\\^/[^/]+/",
+        "^http(s)?://(www\\.)?pinterest\\.com/[^/]+/[^/]+\\.[^/]+",
+        "^http(s)?://(www\\.)?pinterest\\.com/[^/]+/[^/]+/[^/]+\\.[^/]+",
+        "^http(s)?://(www\\.)?pinterest\\.com/[^/]+/webapp/js/app/(desktop|common)/bundle-(jcrop|mapbox)\\.js",
+        "^http(s)?://(www\\.)?pinterest\\.com/[^/]+/[^/]+/webapp/js/app/(desktop|common)/bundle-(jcrop|mapbox)\\.js",
+    ],
+    "type": "ignore_patterns"
+}

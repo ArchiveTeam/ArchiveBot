@@ -1,0 +1,10 @@
+{
+    "name": "facebook",
+    "patterns": [
+        "^http(s)?://error\\.facebook\\.com/common/scribe_endpoint\\.php\\?c=",
+        "^http(s)?://(www\\.)?facebook\\.com/[^/]+/(posts/|app_)[^/]+\\?(ref=page_internal&)?_fb_noscript=",
+        "^http(s)?://'www\\.)?facebook\\.com/[^/]+/photos/(pb|a)\\.[^/]+/[^/]+/.{4}/",
+        "^http(s)?://(www\\.)?facebook\\.com/[^/]+/photos/(pb|a)\\.[^/]+/[^/]+/\\?type=",
+    ],
+    "type": "ignore_patterns"
+}
