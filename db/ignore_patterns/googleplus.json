@@ -1,10 +1,10 @@
 {
     "name": "googleplus",
     "patterns": [
-        "^https?://accounts\\.google\\.com/ServiceLogin",
-        "^https?://accounts\\.google\\.com/SignUp",
-        "^https?://lh4\\.googleusercontent\\.com/proxy/[^/]+",
-        "^https?://plus\\.google\\.com/_/scs/apps-static/",
+        "^http(s)?://accounts\\.google\\.com/ServiceLogin",
+        "^http(s)?://accounts\\.google\\.com/SignUp",
+        "^http(s)?://lh4\\.googleusercontent\\.com/proxy/[^/]+",
+        "^http(s)?://plus\\.google\\.com/_/scs/apps-static/",
     ],
     "type": "ignore_patterns"
 }
