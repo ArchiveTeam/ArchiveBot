@@ -284,16 +284,9 @@ class Brain
     reply m, "Inter-request delay for job #{job.ident} set to [#{min}, #{max}] ms."
   end
 
-  def set_concurrency(job, l, m)
+  def set_concurrency(job, level, m)
     return unless authorized?(m)
-
-    level = l.to_i
     return unless concurrency_ok?(level, m)
-
-    if level > job.concurrency && !op?(m)
-      reply m, 'Sorry, only channel operators may raise concurrency.'
-      return
-    end
 
     job.set_concurrency(level)
 
@@ -320,16 +313,12 @@ class Brain
   private
 
   def authorized?(m)
-    if !(op?(m) || m.channel.voiced?(m.user))
+    if !(m.channel.opped?(m.user) || m.channel.voiced?(m.user))
       reply m, "Sorry, only channel operators or voiced users may use that command."
       return false
     end
 
     return true
-  end
-
-  def op?(m)
-    m.channel.opped?(m.user)
   end
 
   def delay_ok?(min, max, m)
@@ -342,7 +331,7 @@ class Brain
   end
 
   def concurrency_ok?(level, m)
-    if level < 1
+    if level.to_i < 1
       reply m, 'Sorry, concurrency level must be at least 1.'
       return false
     end
