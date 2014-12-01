@@ -321,6 +321,10 @@ class Brain
     return true
   end
 
+  def op?(m)
+    m.channel.opped?(m.user)
+  end
+
   def delay_ok?(min, max, m)
     if min.to_f > max.to_f
       reply m, 'Sorry, min delay must be less than or equal to max delay.'
