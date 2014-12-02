@@ -10,7 +10,7 @@ trim_threshold = 500
 
 def flush_logs(r, log_key, job_key, last_trimmed, min_last)
   r.zrangebyscore(log_key, last_trimmed, min_last).each do |l|
-    $stdout.puts "#{log_key} #{l}"
+    $stdout.puts "#{job_key} #{l}"
   end
 
   $stdout.flush
