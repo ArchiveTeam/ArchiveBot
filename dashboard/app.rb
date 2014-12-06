@@ -63,19 +63,22 @@ class Broadcaster
   include Celluloid
   include Celluloid::Notifications
 
-  def initialize(channel)
+  def initialize(channel, input)
     @channel = channel
+    @input = input
+
+    async.slurp
   end
 
   def broadcast(msg)
     publish(@channel, msg)
   end
+
+  def slurp
+    @input.each_line { |l| broadcast(l.chomp) }
+  end
 end
 
-Broadcaster.supervise_as :broadcaster, SharedConfig.log_channel
+Broadcaster.supervise_as :broadcaster, SharedConfig.log_channel, $stdin
 
-Thread.new { App.run }
-
-$stdin.each_line do |line|
-  Celluloid::Actor[:broadcaster].broadcast line.chomp
-end
+App.run
