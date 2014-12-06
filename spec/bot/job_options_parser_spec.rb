@@ -6,7 +6,7 @@ describe JobOptionsParser do
   let(:parser) { JobOptionsParser.new }
 
   it 'recognizes --phantomjs' do
-    parser.parse('--phantomjs')[:phantomjs].should be_true
+    expect(parser.parse('--phantomjs')[:phantomjs]).to eq(true)
   end
 
   it 'parses --phantomjs-scroll=10 to an integer' do
@@ -18,11 +18,11 @@ describe JobOptionsParser do
   end
 
   it 'recognizes --no-phantomjs-smart-scroll' do
-    parser.parse('--no-phantomjs-smart-scroll')[:no_phantomjs_smart_scroll].should be_true
+    expect(parser.parse('--no-phantomjs-smart-scroll')[:no_phantomjs_smart_scroll]).to eq(true)
   end
 
   it 'recognizes --no-offsite-links' do
-    parser.parse('--no-offsite-links')[:no_offsite_links].should be_true
+    expect(parser.parse('--no-offsite-links')[:no_offsite_links]).to eq(true)
   end
 
   it 'parses --ignore-sets=A,B to an array' do
