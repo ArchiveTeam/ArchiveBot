@@ -6,6 +6,12 @@ describe CommandPatterns do
   describe 'Archive command' do
     let(:regex) { CommandPatterns::ARCHIVE }
 
+    it 'strips excess spaces' do
+      md = regex.match "!archive     http://www.example.com/     "
+
+      md[1].should == 'http://www.example.com/'
+    end
+
     it 'recognizes !archive URL' do
       md = regex.match "!archive http://www.example.com/"
 
@@ -53,6 +59,12 @@ describe CommandPatterns do
 
   describe 'Archiveonly command' do
     let(:regex) { CommandPatterns::ARCHIVEONLY }
+
+    it 'strips excess spaces' do
+      md = regex.match "!archiveonly     http://www.example.com/     "
+
+      md[1].should == 'http://www.example.com/'
+    end
 
     it 'recognizes !archiveonly URL' do
       md = regex.match "!archiveonly http://www.example.com/"
@@ -102,6 +114,12 @@ describe CommandPatterns do
   describe '!a < command' do
     let(:regex) { CommandPatterns::ARCHIVE_FILE }
 
+    it 'strips excess spaces' do
+      md = regex.match "!a <     http://www.example.com/     "
+
+      md[1].should == 'http://www.example.com/'
+    end
+
     it 'recognizes !a < http://www.example.com/urls.txt' do
       md = regex.match '!a < http://www.example.com/urls.txt'
 
@@ -111,6 +129,12 @@ describe CommandPatterns do
 
   describe '!ao < command' do
     let(:regex) { CommandPatterns::ARCHIVEONLY_FILE }
+
+    it 'strips excess spaces' do
+      md = regex.match "!ao <     http://www.example.com/     "
+
+      md[1].should == 'http://www.example.com/'
+    end
 
     it 'recognizes !archiveonly < http://www.example.com/urls.txt' do
       md = regex.match '!archiveonly < http://www.example.com/urls.txt'
@@ -122,6 +146,28 @@ describe CommandPatterns do
       md = regex.match '!ao < http://www.example.com/urls.txt'
 
       md[1].should == 'http://www.example.com/urls.txt'
+    end
+  end
+
+  describe '!ig command' do
+    let(:regex) { CommandPatterns::IGNORE }
+
+    it 'strips excess spaces' do
+      md = regex.match "!ig       foobar     barbaz    "
+
+      md[1].should == 'foobar'
+      md[2].should == 'barbaz'
+    end
+  end
+
+  describe '!unig command' do
+    let(:regex) { CommandPatterns::UNIGNORE }
+
+    it 'strips excess spaces' do
+      md = regex.match "!unig       foobar     barbaz    "
+
+      md[1].should == 'foobar'
+      md[2].should == 'barbaz'
     end
   end
 

@@ -77,11 +77,11 @@ bot = Cinch::Bot.new do
     brain.request_status_by_url(m, url)
   end
 
-  on :message, /\A!ig(?:nore)? (#{CommandPatterns::IDENT}) (.+)/ do |m, ident, pattern|
+  on :message, CommandPatterns::IGNORE do |m, ident, pattern|
     brain.find_job(ident, m) { |j| brain.add_ignore_pattern(m, j, pattern) }
   end
 
-  on :message, /\A!unig(?:nore)? (#{CommandPatterns::IDENT}) (.+)/ do |m, ident, pattern|
+  on :message, CommandPatterns::UNIGNORE do |m, ident, pattern|
     brain.find_job(ident, m) { |j| brain.remove_ignore_pattern(m, j, pattern) }
   end
 
