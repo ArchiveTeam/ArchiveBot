@@ -178,27 +178,24 @@ def exit_status(exit_code):
   settings_listener.stop()
   return exit_code
 
-#pattern for http version response (e.g. ICY or HTTP/1.1)
-icyverpattern = re.compile('icy',re.I) #IGNORECASE
-
-#regular expressions for server headers go here
-icyfieldpattern = re.compile('icy-|x-audiocast-',re.I) #IGNORECASE
-icyvaluepattern = re.compile('icecast',re.I) #IGNORECASE
+# Regular expressions for server headers go here
+ICY_FIELD_PATTERN = re.compile('icy-|x-audiocast-', re.IGNORECASE)
+ICY_VALUE_PATTERN = re.compile('icecast', re.IGNORECASE)
 
 def handle_pre_response(url_info, url_record, response_info):
-  #check if server version starts with ICY
-  if icyverpattern.match(response_info['version']):
+  # Check if server version starts with ICY
+  if response_info['version'] == 'ICY':
     return wpull_hook.actions.FINISH
 
-  #loop through all the server header fields for matches
-  #individual headers are tuples in the form of ('field', 'value')
-  for header in response_info['fields']:
-    if icyfieldpattern.match(header[0]):
+  # Loop through all the server headers for matches
+  # Individual headers are tuples in the form of ('field', 'value')
+  for field, value in response_info['fields']:
+    if ICY_FIELD_PATTERN.match(field):
       return wpull_hook.actions.FINISH
-    if header[0] == 'Server' and icyvaluepattern.match(header[1]):
+    if field == 'Server' and ICY_VALUE_PATTERN.match(value):
       return wpull_hook.actions.FINISH
 
-  #nothing matched, allow download
+  # Nothing matched, allow download
   return wpull_hook.actions.NORMAL
 
 assert 2 in wpull_hook.callbacks.AVAILABLE_VERSIONS
