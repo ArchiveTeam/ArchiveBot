@@ -2,6 +2,7 @@ import json
 import os
 import random
 import time
+import re
 
 from archivebot import shared_config
 from archivebot.control import Control
@@ -177,6 +178,28 @@ def exit_status(exit_code):
   settings_listener.stop()
   return exit_code
 
+#pattern for http version response (e.g. ICY or HTTP/1.1)
+icyverpattern = re.compile('icy',re.I) #IGNORECASE
+
+#regular expressions for server headers go here
+icyfieldpattern = re.compile('icy-|x-audiocast-',re.I) #IGNORECASE
+icyvaluepattern = re.compile('icecast',re.I) #IGNORECASE
+
+def handle_pre_response(url_info, url_record, response_info):
+  #check if server version starts with ICY
+  if icyverpattern.match(response_info['version']):
+    return wpull_hook.actions.FINISH
+
+  #loop through all the server header fields for matches
+  #individual headers are tuples in the form of ('field', 'value')
+  for header in response_info['fields']:
+    if icyfieldpattern.match(header[0]):
+      return wpull_hook.actions.FINISH
+    if header[0] == 'Server' and icyvaluepattern.match(header[1]):
+      return wpull_hook.actions.FINISH
+
+  #nothing matched, allow download
+  return wpull_hook.actions.NORMAL
 
 assert 2 in wpull_hook.callbacks.AVAILABLE_VERSIONS
 
@@ -184,6 +207,7 @@ wpull_hook.callbacks.version = 2
 wpull_hook.callbacks.accept_url = accept_url
 wpull_hook.callbacks.queued_url = queued_url
 wpull_hook.callbacks.dequeued_url = dequeued_url
+wpull_hook.callbacks.handle_pre_response = handle_pre_response
 wpull_hook.callbacks.handle_response = handle_response
 wpull_hook.callbacks.handle_error = handle_error
 wpull_hook.callbacks.finish_statistics = finish_statistics
