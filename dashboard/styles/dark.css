@@ -5,6 +5,11 @@
     color: rgb(142, 170, 209);
   }
   
+  .log-window {
+    font-family: "Essential PragmataPro", Inconsolata, monospace;
+    font-size: 14px;
+  }
+
   html, body, .job-ident, .button {
     background-color: rgb(52, 60, 69);
   }
