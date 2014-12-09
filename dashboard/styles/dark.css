@@ -1,6 +1,6 @@
 @namespace url(http://www.w3.org/1999/xhtml);
 
-@-moz-document domain("archivebot.com") {
+@-moz-document domain("dashboard.at.ninjawedding.org") {
   html, body, a, .header, .job-url, .job-ident, .button {
     color: rgb(142, 170, 209);
   }
