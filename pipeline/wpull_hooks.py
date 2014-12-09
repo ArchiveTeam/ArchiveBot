@@ -179,7 +179,7 @@ def exit_status(exit_code):
   return exit_code
 
 # Regular expressions for server headers go here
-ICY_FIELD_PATTERN = re.compile('icy-|x-audiocast-', re.IGNORECASE)
+ICY_FIELD_PATTERN = re.compile('Icy-|Ice-|X-Audiocast-')
 ICY_VALUE_PATTERN = re.compile('icecast', re.IGNORECASE)
 
 def handle_pre_response(url_info, url_record, response_info):
@@ -188,7 +188,6 @@ def handle_pre_response(url_info, url_record, response_info):
     return wpull_hook.actions.FINISH
 
   # Loop through all the server headers for matches
-  # Individual headers are tuples in the form of ('field', 'value')
   for field, value in response_info['fields']:
     if ICY_FIELD_PATTERN.match(field):
       return wpull_hook.actions.FINISH
