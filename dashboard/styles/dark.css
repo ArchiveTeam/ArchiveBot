@@ -1,7 +1,7 @@
 @namespace url(http://www.w3.org/1999/xhtml);
 
 @-moz-document domain("archivebot.com") {
-  html, body, a, .job-ident, .button {
+  html, body, a, .header, .job-url, .job-ident, .button {
     color: rgb(142, 170, 209);
   }
   
