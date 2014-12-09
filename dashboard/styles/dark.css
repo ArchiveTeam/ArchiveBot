@@ -1,0 +1,40 @@
+@namespace url(http://www.w3.org/1999/xhtml);
+
+@-moz-document domain("dashboard.at.ninjawedding.org") {
+  html, body, a, .job-ident, .button {
+    color: rgb(142, 170, 209);
+  }
+  
+  html, body, .job-ident, .button {
+    background-color: rgb(52, 60, 69);
+  }
+  
+  .button {
+    border-color: rgb(142, 170, 209);
+  }
+  
+  .log-window, .line-stdout, .line-error, .line-warning, .line-redirect {
+    background-color: rgb(20, 23, 26);
+  }
+  
+  .line-stdout {
+    color: rgb(72, 110, 149);
+  }
+  
+  .line-error, .line-error a {
+    color: rgb(185, 84, 66);
+  }
+  
+  .line-warning, .line-warning a {
+    color: rgb(178, 107, 64);
+  }
+  
+  .line-redirect, .line-redirect a {
+    color: rgb(133, 112, 169);
+  }
+  
+  #filter-box {
+    background-color: rgb(20, 23, 26);
+    color: rgb(142, 170, 209);
+  }
+}
