@@ -36,5 +36,7 @@ $stdin.each_line do |line|
     break
   end
 
-  r.hset(job_key, 'last_broadcasted_log_entry', log_entries.last.last)
+  r.hmset(job_key,
+          'last_broadcasted_log_entry', log_entries.last.last,
+          'ts', Time.now.to_f)
 end
