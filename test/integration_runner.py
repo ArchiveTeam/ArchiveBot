@@ -11,9 +11,9 @@ def main():
     dashboard_script = os.path.join(script_dir, 'run_dashboard.sh')
     pipeline_script = os.path.join(script_dir, 'run_pipeline.sh')
 
-    bot_proc = subprocess.Popen([bot_script])
-    dashboard_proc = subprocess.Popen([dashboard_script])
-    pipeline_proc = subprocess.Popen([pipeline_script])
+    bot_proc = subprocess.Popen([bot_script], preexec_fn=os.setpgrp)
+    dashboard_proc = subprocess.Popen([dashboard_script], preexec_fn=os.setpgrp)
+    pipeline_proc = subprocess.Popen([pipeline_script], preexec_fn=os.setpgrp)
 
     @atexit.register
     def cleanup():
