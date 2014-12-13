@@ -33,3 +33,4 @@ services:
 script:
   - bundle exec rake
   - python3.4 -m nose pipeline/
+  - python3.4 test/integration_runner.py
