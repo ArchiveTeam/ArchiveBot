@@ -1,6 +1,17 @@
+# Multi language is not supported so Python needs to be installed ourselves.
+# Ruby is default.
+
 before_install:
+  - sudo add-apt-repository ppa:fkrull/deadsnakes
   - sudo apt-get update -qq
-  - sudo apt-get install ircd-hybrid
+  - wget https://bootstrap.pypa.io/get-pip.py
+
+install:
+  - sudo apt-get install ircd-hybrid python3.4
+  - sudo python3.4 get-pip.py
+  - python3.4 -m pip install -r pipeline/requirements.txt --user
+  - python3.4 -m pip install nose --user
+
 before_script:
   - curl -X PUT http://localhost:5984/archivebot
 
@@ -8,6 +19,11 @@ before_script:
   # this will restart it.
   # If ircd-hybrid is not running (could happen in future), this will start it.
   - sudo /etc/init.d/ircd-hybrid restart
+
 services:
   - redis-server
   - couchdb
+
+script:
+  - bundle exec rake
+  - python3.4 -m nose pipeline/
