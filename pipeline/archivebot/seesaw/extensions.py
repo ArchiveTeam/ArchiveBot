@@ -1,7 +1,7 @@
 import time
-import json
 
 from seesaw.item import Item
+
 
 def install_stdout_extension(control):
     '''
@@ -14,6 +14,12 @@ def install_stdout_extension(control):
     def tee_to_control(self, data, full_line=True):
         old_logger(self, data, full_line)
 
+        # seesaw's interface accepts data as str or byte
+        if isinstance(data, bytes):
+            text = data.decode('utf8', 'replace')
+        else:
+            text = data
+
         if 'ident' in self and 'log_key' in self:
             ident = self['ident']
             log_key = self['log_key']
@@ -21,7 +27,7 @@ def install_stdout_extension(control):
             packet = {
                 'type': 'stdout',
                 'ts': int(time.time()),
-                'message': data
+                'message': text
             }
 
             control.log(packet, ident, log_key)
