@@ -2,6 +2,7 @@ import json
 import os
 import random
 import time
+import re
 
 from archivebot import shared_config
 from archivebot.control import Control
@@ -177,6 +178,24 @@ def exit_status(exit_code):
   settings_listener.stop()
   return exit_code
 
+# Regular expressions for server headers go here
+ICY_FIELD_PATTERN = re.compile('Icy-|Ice-|X-Audiocast-')
+ICY_VALUE_PATTERN = re.compile('icecast', re.IGNORECASE)
+
+def handle_pre_response(url_info, url_record, response_info):
+  # Check if server version starts with ICY
+  if response_info['version'] == 'ICY':
+    return wpull_hook.actions.FINISH
+
+  # Loop through all the server headers for matches
+  for field, value in response_info['fields']:
+    if ICY_FIELD_PATTERN.match(field):
+      return wpull_hook.actions.FINISH
+    if field == 'Server' and ICY_VALUE_PATTERN.match(value):
+      return wpull_hook.actions.FINISH
+
+  # Nothing matched, allow download
+  return wpull_hook.actions.NORMAL
 
 assert 2 in wpull_hook.callbacks.AVAILABLE_VERSIONS
 
@@ -184,6 +203,7 @@ wpull_hook.callbacks.version = 2
 wpull_hook.callbacks.accept_url = accept_url
 wpull_hook.callbacks.queued_url = queued_url
 wpull_hook.callbacks.dequeued_url = dequeued_url
+wpull_hook.callbacks.handle_pre_response = handle_pre_response
 wpull_hook.callbacks.handle_response = handle_response
 wpull_hook.callbacks.handle_error = handle_error
 wpull_hook.callbacks.finish_statistics = finish_statistics
