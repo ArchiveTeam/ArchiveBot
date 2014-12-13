@@ -183,15 +183,27 @@ ICY_FIELD_PATTERN = re.compile('Icy-|Ice-|X-Audiocast-')
 ICY_VALUE_PATTERN = re.compile('icecast', re.IGNORECASE)
 
 def handle_pre_response(url_info, url_record, response_info):
+  url = url_info['url']
+
   # Check if server version starts with ICY
   if response_info['version'] == 'ICY':
+    if not settings.suppress_ignore_reports():
+      log_ignore(url, '[icy version]')
+      
     return wpull_hook.actions.FINISH
 
   # Loop through all the server headers for matches
   for field, value in response_info['fields']:
     if ICY_FIELD_PATTERN.match(field):
+      if not settings.suppress_ignore_reports():
+        log_ignore(url, '[icy field]')
+
       return wpull_hook.actions.FINISH
+
     if field == 'Server' and ICY_VALUE_PATTERN.match(value):
+      if not settings.suppress_ignore_reports():
+        log_ignore(url, '[icy server]')
+
       return wpull_hook.actions.FINISH
 
   # Nothing matched, allow download
