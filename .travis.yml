@@ -7,7 +7,7 @@ before_install:
   - wget https://bootstrap.pypa.io/get-pip.py
 
 install:
-  - sudo apt-get install ircd-hybrid python3.4
+  - sudo apt-get install ircd-hybrid python3.4 python3.4-dev
   - sudo python3.4 get-pip.py
   - python3.4 -m pip install -r pipeline/requirements.txt --user
   - python3.4 -m pip install nose --user
