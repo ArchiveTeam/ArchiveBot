@@ -22,7 +22,8 @@ class Settings(object):
             abort_requested=None,
             ignore_patterns={},
             delay_min=None,
-            delay_max=None
+            delay_max=None,
+            suppress_ignore_reports=False
     )
 
     def update_settings(self, new_settings):
