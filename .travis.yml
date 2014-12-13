@@ -2,7 +2,7 @@
 # Ruby is default.
 
 before_install:
-  - sudo add-apt-repository ppa:fkrull/deadsnakes
+  - sudo add-apt-repository ppa:fkrull/deadsnakes --yes
   - sudo apt-get update -qq
   - wget https://bootstrap.pypa.io/get-pip.py
 
