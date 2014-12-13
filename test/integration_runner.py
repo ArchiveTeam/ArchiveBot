@@ -33,15 +33,23 @@ def main():
             except OSError as error:
                 print(error)
 
+    def check_alive():
+        bot_proc.poll()
+        dashboard_proc.poll()
+        pipeline_proc.poll()
+
+        assert bot_proc.returncode is None, bot_proc.returncode
+        assert dashboard_proc.returncode is None, dashboard_proc.returncode
+        assert pipeline_proc.returncode is None, pipeline_proc.returncode
+
     time.sleep(2)
 
-    assert bot_proc.returncode is None, bot_proc.returncode
-    assert dashboard_proc.returncode is None, dashboard_proc.returncode
-    assert pipeline_proc.returncode is None, pipeline_proc.returncode
+    check_alive()
 
     # TODO: time to test things here
     time.sleep(10)
 
+    check_alive()
 
 if __name__ == '__main__':
     main()
