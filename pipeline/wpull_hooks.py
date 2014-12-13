@@ -1,8 +1,10 @@
 import json
+import logging
 import os
 import random
 import time
 import re
+import sys
 
 from archivebot import shared_config
 from archivebot.control import Control
@@ -22,6 +24,9 @@ settings_listener.start()
 
 last_age = 0
 
+logger = logging.getLogger('archivebot.pipeline.wpull_hooks')
+
+
 def log_ignore(url, pattern):
   packet = dict(
     ts=time.time(),
@@ -31,6 +36,14 @@ def log_ignore(url, pattern):
   )
 
   control.log(packet, ident, log_key)
+
+
+def maybe_log_ignore(url, pattern):
+  if not settings.suppress_ignore_reports():
+    log_ignore(url, pattern)
+
+  logger.info('Ignore %s using pattern %s', url, pattern)
+
 
 def log_result(url, statcode, error):
   packet = dict(
@@ -44,6 +57,13 @@ def log_result(url, statcode, error):
   )
 
   control.log(packet, ident, log_key)
+
+
+def print_log(*args):
+    print(*args)
+    sys.stdout.flush()
+    logger.info(' '.join(str(arg) for arg in args))
+
 
 def is_error(statcode, err):
     '''
@@ -80,8 +100,7 @@ def accept_url(url_info, record_info, verdict, reasons):
   pattern = settings.ignore_url_p(url)
 
   if pattern:
-    if not settings.suppress_ignore_reports():
-      log_ignore(url, pattern)
+    maybe_log_ignore(url, pattern)
     return False
 
   # If we get here, none of our ignores apply.  Return the original verdict.
@@ -111,7 +130,7 @@ def handle_result(url_info, record_info, error_info=None, http_info=None):
   pattern = settings.ignore_url_p(url_info['url'])
 
   if pattern:
-    log_ignore(url_info['url'], pattern)
+    maybe_log_ignore(url_info['url'], pattern)
     return wpull_hook.actions.FINISH
 
   if http_info:
@@ -129,7 +148,7 @@ def handle_result(url_info, record_info, error_info=None, http_info=None):
   if last_age < settings_age:
     last_age = settings_age
 
-    print("Settings updated: ", settings.inspect())
+    print_log("Settings updated: ", settings.inspect())
 
     # Also adjust concurrency level.
     clevel = settings.concurrency()
@@ -143,7 +162,7 @@ def handle_result(url_info, record_info, error_info=None, http_info=None):
 
   # Should we abort?
   if settings.abort_requested():
-    print("Wget terminating on bot command")
+    print_log("Wget terminating on bot command")
 
     while True:
       try:
@@ -172,7 +191,7 @@ def handle_error(url_info, record_info, error_info):
 
 
 def finish_statistics(start_time, end_time, num_urls, bytes_downloaded):
-  print(" ", bytes_downloaded, "bytes.")
+  print_log(" ", bytes_downloaded, "bytes.")
 
 def exit_status(exit_code):
   settings_listener.stop()
@@ -187,22 +206,19 @@ def handle_pre_response(url_info, url_record, response_info):
 
   # Check if server version starts with ICY
   if response_info['version'] == 'ICY':
-    if not settings.suppress_ignore_reports():
-      log_ignore(url, '[icy version]')
-      
+    maybe_log_ignore(url, '[icy version]')
+
     return wpull_hook.actions.FINISH
 
   # Loop through all the server headers for matches
   for field, value in response_info['fields']:
     if ICY_FIELD_PATTERN.match(field):
-      if not settings.suppress_ignore_reports():
-        log_ignore(url, '[icy field]')
+      maybe_log_ignore(url, '[icy field]')
 
       return wpull_hook.actions.FINISH
 
     if field == 'Server' and ICY_VALUE_PATTERN.match(value):
-      if not settings.suppress_ignore_reports():
-        log_ignore(url, '[icy server]')
+      maybe_log_ignore(url, '[icy server]')
 
       return wpull_hook.actions.FINISH
 
