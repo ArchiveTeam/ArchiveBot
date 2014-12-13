@@ -1,12 +1,18 @@
 # Multi language is not supported so Python needs to be installed ourselves.
 # Ruby is default.
 
+language: ruby
+
+rvm:
+  - 1.9.3
+
 before_install:
   - sudo add-apt-repository ppa:fkrull/deadsnakes --yes
   - sudo apt-get update -qq
   - wget https://bootstrap.pypa.io/get-pip.py
 
 install:
+  - bundle install --jobs=3 --retry=3 --deployment
   - sudo apt-get install ircd-hybrid python3.4 python3.4-dev
   - sudo python3.4 get-pip.py
   - python3.4 -m pip install -r pipeline/requirements.txt --user
