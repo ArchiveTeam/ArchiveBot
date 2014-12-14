@@ -2,10 +2,11 @@
 
 export PATH="/tmp/bin/:$PATH"
 export REDIS_URL='redis://localhost:6379/0'
-export RSYNC_URL='/tmp/rsync/' LOG_CHANNEL='updates'
+export RSYNC_URL='rsync://localhost/tmp/rsync/' LOG_CHANNEL='updates'
 export NO_SCREEN=1 FINISHED_WARCS_DIR=/tmp/warc/
 
 mkdir -p /tmp/rsync/
+chmod +rw /tmp/rsync/
 mkdir -p /tmp/warc/
 
 # This will affect the wpull exe wrapper
