@@ -23,10 +23,18 @@ install:
 before_script:
   - curl -X PUT http://127.0.0.1:5984/archivebot
   - curl -X PUT http://127.0.0.1:5984/archivebot_logs
-  - curl -X PUT http://127.0.0.1:5984/archivebot/_design/archive_urls -d @db/design_docs/archive_urls.json
-  - curl -X PUT http://127.0.0.1:5984/archivebot/_design/ignore_patterns -d @db/design_docs/ignore_patterns.json
-  - curl -X PUT http://127.0.0.1:5984/archivebot/_design/jobs -d @db/design_docs/jobs.json
-  - curl -X PUT http://127.0.0.1:5984/archivebot/_design/user_agents -d @db/design_docs/user_agents.json
+
+  - grep -v _rev db/design_docs/archive_urls.json > /tmp/archive_urls.json
+  - curl -X PUT http://127.0.0.1:5984/archivebot/_design/archive_urls -d @/tmp/archive_urls.json
+
+  - grep -v _rev db/design_docs/ignore_patterns.json > /tmp/ignore_patterns.json
+  - curl -X PUT http://127.0.0.1:5984/archivebot/_design/ignore_patterns -d @/tmp/ignore_patterns.json
+
+  - grep -v _rev db/design_docs/jobs.json > /tmp/jobs.json
+  - curl -X PUT http://127.0.0.1:5984/archivebot/_design/jobs -d @/tmp/jobs.json
+
+  - grep -v _rev db/design_docs/user_agents.json > /tmp/user_agents.json
+  - curl -X PUT http://127.0.0.1:5984/archivebot/_design/user_agents -d @/tmp/user_agents.json
 
   # If ircd-hybrid is running (which currently happens with Ubuntu packages),
   # this will restart it.
