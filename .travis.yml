@@ -40,6 +40,8 @@ before_script:
   # this will restart it.
   # If ircd-hybrid is not running (could happen in future), this will start it.
   - sudo /etc/init.d/ircd-hybrid restart
+
+  - echo -e '\n\nRSYNC_ENABLE=true\n\n' | sudo tee -a /etc/default/rsync
   - sudo /etc/init.d/rsync restart
 
 services:
