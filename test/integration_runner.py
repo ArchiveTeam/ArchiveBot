@@ -1,7 +1,9 @@
 import atexit
+import glob
 import logging
 import os
 import random
+import re
 import signal
 import subprocess
 import sys
@@ -16,6 +18,7 @@ class Client(irc.client.SimpleIRCClient):
         self.flags = {
             'queued': False,
             'finished': False,
+            'ident': None,
         }
 
     def on_nicknameinuse(self, connection, event):
@@ -65,8 +68,13 @@ class Client(irc.client.SimpleIRCClient):
 
         if 'Queued' in text:
             self.flags['queued'] = True
+
         elif 'finished' in text:
             self.flags['finished'] = True
+
+        elif '!status' in text:
+            match = re.search(r'!status ([a-z0-9]+)', text)
+            self.flags['ident'] = match.group(1)
 
     def on_pubnotice(self, connection, event):
         channel = event.target
@@ -101,6 +109,7 @@ def main():
     bot_script = os.path.join(script_dir, 'run_bot.sh')
     dashboard_script = os.path.join(script_dir, 'run_dashboard.sh')
     pipeline_script = os.path.join(script_dir, 'run_pipeline.sh')
+    cogs_script = os.path.join(script_dir, 'run_cogs.sh')
 
     irc_client = Client()
     irc_client.connect('127.0.0.1', 6667, 'obsessive')
@@ -117,14 +126,16 @@ def main():
     bot_proc = subprocess.Popen([bot_script], preexec_fn=os.setpgrp)
     dashboard_proc = subprocess.Popen([dashboard_script], preexec_fn=os.setpgrp)
     pipeline_proc = subprocess.Popen([pipeline_script], preexec_fn=os.setpgrp)
+    cogs_proc = subprocess.Popen([cogs_script], preexec_fn=os.setpgrp)
     web_proc = subprocess.Popen(
         ['python3.4', '-m', 'huhhttp', '--port', '8866'],
         preexec_fn=os.setpgrp
     )
+    all_procs = [bot_proc, dashboard_proc, pipeline_proc, cogs_proc, web_proc]
 
     @atexit.register
     def cleanup():
-        for proc in [bot_proc, dashboard_proc, pipeline_proc, web_proc]:
+        for proc in all_procs:
             print('Terminate', proc)
             try:
                 os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
@@ -133,7 +144,7 @@ def main():
 
         time.sleep(1)
 
-        for proc in [bot_proc, dashboard_proc, pipeline_proc, web_proc]:
+        for proc in all_procs:
             print('Kill', proc)
             try:
                 os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
@@ -144,11 +155,14 @@ def main():
         bot_proc.poll()
         dashboard_proc.poll()
         pipeline_proc.poll()
+        web_proc.poll()
+        cogs_proc.poll()
 
         assert bot_proc.returncode is None, bot_proc.returncode
         assert dashboard_proc.returncode is None, dashboard_proc.returncode
         assert pipeline_proc.returncode is None, pipeline_proc.returncode
         assert web_proc.returncode is None, web_proc.returncode
+        assert cogs_proc.returncode is None, cogs_proc.returncode
 
     time.sleep(2)
 
@@ -166,11 +180,20 @@ def main():
 
         if all(irc_client.flags.values()):
             break
+    
+    flags = irc_client.flags
+    short_ident = flags['ident'][:5]
+    flags['warc_dir'] = tuple(
+        glob.glob('/tmp/warc/*{}*.gz'.format(short_ident))
+    )
+    flags['rsync_dir'] = tuple(
+        glob.glob('/tmp/rsync/*{}*.json'.format(short_ident))
+    )
 
     print('---FIN---')
-    print(irc_client.flags)
+    print(flags)
 
-    if not all(irc_client.flags.values()):
+    if not all(flags.values()):
         print('FAIL!')
         sys.exit(42)
 
