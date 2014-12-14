@@ -148,6 +148,7 @@ def main():
         assert bot_proc.returncode is None, bot_proc.returncode
         assert dashboard_proc.returncode is None, dashboard_proc.returncode
         assert pipeline_proc.returncode is None, pipeline_proc.returncode
+        assert web_proc.returncode is None, web_proc.returncode
 
     time.sleep(2)
 
