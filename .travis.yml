@@ -21,7 +21,12 @@ install:
   - python3.4 -m pip install git+https://github.com/chfoo/huhhttp#egg=huhhttp --user
 
 before_script:
-  - curl -X PUT http://localhost:5984/archivebot
+  - curl -X PUT http://127.0.0.1:5984/archivebot
+  - curl -X PUT http://127.0.0.1:5984/archivebot_logs
+  - curl -X PUT http://127.0.0.1:5984/archivebot/_design/archive_urls -d @db/design_docs/archive_urls.json
+  - curl -X PUT http://127.0.0.1:5984/archivebot/_design/ignore_patterns -d @db/design_docs/ignore_patterns.json
+  - curl -X PUT http://127.0.0.1:5984/archivebot/_design/jobs -d @db/design_docs/jobs.json
+  - curl -X PUT http://127.0.0.1:5984/archivebot/_design/user_agents -d @db/design_docs/user_agents.json
 
   # If ircd-hybrid is running (which currently happens with Ubuntu packages),
   # this will restart it.
