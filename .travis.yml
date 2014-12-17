@@ -1,13 +1,58 @@
+# Multi language is not supported so Python needs to be installed ourselves.
+# Ruby is default.
+
+language: ruby
+
+rvm:
+  - 1.9.3
+
+notifications:
+  irc:
+    - "irc.efnet.net#archivebot"
+
 before_install:
+  - sudo add-apt-repository ppa:fkrull/deadsnakes --yes
   - sudo apt-get update -qq
-  - sudo apt-get install ircd-hybrid
+  - wget https://bootstrap.pypa.io/get-pip.py
+
+install:
+  - bundle install --jobs=3 --retry=3 --deployment
+  - sudo apt-get install ircd-hybrid python3.4 python3.4-dev rsync
+  - sudo python3.4 get-pip.py
+  - python3.4 -m pip install -r pipeline/requirements.txt --user
+  - python3.4 -m pip install nose irc --user
+  - sudo cp test/example_rsyncd.conf /etc/rsyncd.conf
+  - python3.4 -m pip install git+https://github.com/chfoo/huhhttp#egg=huhhttp --user
+
 before_script:
-  - curl -X PUT http://localhost:5984/archivebot
+  - curl -X PUT http://127.0.0.1:5984/archivebot
+  - curl -X PUT http://127.0.0.1:5984/archivebot_logs
+
+  - grep -v _rev db/design_docs/archive_urls.json > /tmp/archive_urls.json
+  - curl -X PUT http://127.0.0.1:5984/archivebot/_design/archive_urls -d @/tmp/archive_urls.json
+
+  - grep -v _rev db/design_docs/ignore_patterns.json > /tmp/ignore_patterns.json
+  - curl -X PUT http://127.0.0.1:5984/archivebot/_design/ignore_patterns -d @/tmp/ignore_patterns.json
+
+  - grep -v _rev db/design_docs/jobs.json > /tmp/jobs.json
+  - curl -X PUT http://127.0.0.1:5984/archivebot/_design/jobs -d @/tmp/jobs.json
+
+  - grep -v _rev db/design_docs/user_agents.json > /tmp/user_agents.json
+  - curl -X PUT http://127.0.0.1:5984/archivebot/_design/user_agents -d @/tmp/user_agents.json
 
   # If ircd-hybrid is running (which currently happens with Ubuntu packages),
   # this will restart it.
   # If ircd-hybrid is not running (could happen in future), this will start it.
   - sudo /etc/init.d/ircd-hybrid restart
+
+  - echo -e '\n\nRSYNC_ENABLE=true\n\n' | sudo tee -a /etc/default/rsync
+  - sudo /etc/init.d/rsync restart
+
 services:
   - redis-server
   - couchdb
+
+script:
+  - bundle exec rake
+  - python3.4 -m nose pipeline/
+  - python3.4 test/integration_runner.py
