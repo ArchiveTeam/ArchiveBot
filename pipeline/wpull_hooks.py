@@ -125,6 +125,7 @@ def handle_result(url_info, record_info, error_info=None, http_info=None):
     control.update_bytes_downloaded(ident, http_info['body']['content_size'])
 
   error = 'OK'
+  statcode = 0
 
   pattern = settings.ignore_url_p(url_info['url'])
 
@@ -141,7 +142,7 @@ def handle_result(url_info, record_info, error_info=None, http_info=None):
         # FTP
         statcode = http_info['response_code']
       except KeyError:
-        statcode = 0
+        pass
 
   if error_info:
     error = error_info['error']
