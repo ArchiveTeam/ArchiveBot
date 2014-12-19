@@ -124,7 +124,6 @@ def handle_result(url_info, record_info, error_info=None, http_info=None):
     # Update the traffic counters.
     control.update_bytes_downloaded(ident, http_info['body']['content_size'])
 
-  statcode = 0
   error = 'OK'
 
   pattern = settings.ignore_url_p(url_info['url'])
@@ -134,7 +133,15 @@ def handle_result(url_info, record_info, error_info=None, http_info=None):
     return wpull_hook.actions.FINISH
 
   if http_info:
-    statcode = http_info['status_code']
+    try:
+      # HTTP
+      statcode = http_info['status_code']
+    except KeyError:
+      try:
+        # FTP
+        statcode = http_info['response_code']
+      except KeyError:
+        statcode = 0
 
   if error_info:
     error = error_info['error']
