@@ -3,6 +3,7 @@ To run the backend, you will need:
 - a Redis 2.8+ server
 - a CouchDB server
 - a Ruby 1.9 installation
+- ZeroMQ 4.0.5 (earlier API-compatible versions may work, but they have not been tested)
 - Bundler
 - ExecJS supported runtime (for the dashboard)
   (see https://github.com/sstephenson/execjs)
