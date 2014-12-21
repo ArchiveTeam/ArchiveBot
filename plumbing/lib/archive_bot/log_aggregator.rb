@@ -5,6 +5,8 @@ module ArchiveBot
   # Merges a job hash into log messages and writes the product as JSON to the
   # given IO stream.  The IO stream is flushed after every write.
   #
+  # Any object that responds to #puts and #flush may be used as a write target.
+  #
   # This is meant to be used as a yajl-ruby parser callback.
   class LogAggregator
     ##
