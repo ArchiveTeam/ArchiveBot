@@ -3,6 +3,37 @@
 <head lang="en">
     <meta charset="UTF-8">
     <title>{% block title %}{% end %} - ArchiveBot Viewer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        html, body {
+            color: black;
+            background-color: lavender;
+            font-family: sans-serif;
+        }
+        a:link {
+            color: navy;
+        }
+        a:visited {
+            color: indigo;
+        }
+        a:hover, a:active { 
+            color: red;
+        }
+        table {
+            border-collapse: collapse;
+        }
+        th {
+            border-width: 0px 0px 0.1em 0px;
+            border-style: ridge;
+            border-color: silver;
+        }
+        td, th {
+            padding: 0.2em;
+        }
+        .numeric {
+            text-align: right;
+        }
+    </style>
 </head>
 <body>
     <nav>
