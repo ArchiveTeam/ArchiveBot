@@ -55,61 +55,45 @@ class IndexHandler(BaseHandler):
 
 class ItemsHandler(BaseHandler):
     def get(self):
-        identifiers = sorted(
-            item[1] for item in self.application.database.item_keys()
-        )
+        identifiers = sorted(self.application.database.get_all_item_names())
         self.render('items.html', identifiers=identifiers)
 
 
 class ItemHandler(BaseHandler):
     def get(self, identifier):
         database = self.application.database
-        item_model = database.get_item(identifier)
-
-        job_ident_map = {}
-
-        for filename, size in item_model.files:
-            filename_info = parse_filename(filename)
-
-            if filename_info:
-                job_ident_map[filename] = filename_info['ident'] or \
-                    '{}{}'.format(filename_info['date'], filename_info['time'])
-
-        self.render('item.html', identifier=identifier,
-                    item_model=item_model,
-                    job_ident_map=job_ident_map)
+        rows = database.get_item_files(identifier)
+        self.render('item.html', identifier=identifier, rows=rows)
 
 
 class JobsHandler(BaseHandler):
     def get(self, char):
         identifiers = sorted(
-            item[1] for item in self.application.database.job_keys()
-            if item[1].startswith(char or '0')
+            self.application.database.get_all_jobs_starting_with(char or '0')
         )
         self.render('jobs.html', identifiers=identifiers)
 
 
 class JobHandler(BaseHandler):
     def get(self, identifier):
-        job_model = self.application.database.get_job(identifier)
+        rows = self.application.database.get_job_files(identifier)
 
-        self.render('job.html', job_model=job_model)
+        self.render('job.html', rows=rows)
 
 
 class DomainsHandler(BaseHandler):
     def get(self, char):
         domains = sorted(
-            item[1] for item in self.application.database.domain_keys()
-            if item[1].startswith(char or '0')
+            self.application.database.get_all_domains_starting_with(char or '0')
         )
         self.render('domains.html', domains=domains)
 
 
 class DomainHandler(BaseHandler):
     def get(self, domain):
-        domain_model = self.application.database.get_domain(domain)
+        rows = self.application.database.get_jobs_by_domain(domain)
 
-        self.render('domain.html', domain_model=domain_model)
+        self.render('domain.html', rows=rows)
 
 
 class AuditHandler(BaseHandler):
@@ -122,5 +106,5 @@ class AuditHandler(BaseHandler):
 class StatsHandler(BaseHandler):
     def get(self):
         database = self.application.database
-        daily_stats = tuple(sorted(database.iter_objects('stats-daily')))
+        daily_stats = tuple(sorted(database.get_daily_stats()))
         self.render('stats.html', daily_stats=daily_stats)

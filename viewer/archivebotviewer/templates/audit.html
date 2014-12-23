@@ -9,10 +9,10 @@
         <th>Job</th>
         <th>Domain</th>
     </tr>
-    {% for identifier, job_model in no_json_items %}
+    {% for identifier, domain in no_json_items %}
         <tr>
             <td><a href="{{ reverse_url('job', identifier) }}">{{ identifier }}</a></td>
-            <td>{{ job_model.domain }}</td>
+            <td>{{ domain }}</td>
         </tr>
     {% end %}
 </table>

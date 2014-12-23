@@ -16,11 +16,11 @@ function getData() {
     {% set total = 0 %}
     var data = google.visualization.arrayToDataTable([
         ['Day', 'Size (mebibytes)', 'Size (mebibytes)'],
-    {% for date, stats_daily_model in daily_stats %}
-        {% set total+= stats_daily_model.size %}
+    {% for date, size in daily_stats %}
+        {% set total+= size %}
         [
-            new Date({{ date[0:4] }}, {{ int(date[4:6]) - 1 }}, {{ date[6:8] }}),
-            {{ stats_daily_model.size / 1024 ** 2 }},
+            new Date({{ date.year }}, {{ date.month - 1 }}, {{ date.day }}),
+            {{ size / 1024 ** 2 }},
             {{ total / 1024 ** 2 }}
         ],
     {% end %}

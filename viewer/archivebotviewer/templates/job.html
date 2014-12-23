@@ -8,13 +8,13 @@
            <th>Size</th>
            <th>IA Identifier</th>
         </tr>
-        {% for filename in sorted(job_model.files) %}
+        {% for ia_item_id, filename, size in sorted(rows) %}
             <tr>
                 <td>{{ filename }}</td>
-                <td>{{ job_model.files[filename]['size'] }}</td>
+                <td>{{ size }}</td>
                 <td>
-                    <a href="{{ reverse_url('item', job_model.files[filename]['identifier']) }}">
-                    {{ job_model.files[filename]['identifier'] }}
+                    <a href="{{ reverse_url('item', ia_item_id) }}">
+                    {{ ia_item_id }}
                     </a>
                 </td>
             </tr>

@@ -11,11 +11,11 @@
            <th>Filename</th>
            <th>Size</th>
         </tr>
-        {% for filename, size in sorted(item_model.files) %}
+        {% for filename, size, job_ident in sorted(rows) %}
             <tr>
                 <td>
-                    {% if filename in job_ident_map %}
-                    <a href="{{ reverse_url('job', job_ident_map[filename]) }}">
+                    {% if job_ident %}
+                    <a href="{{ reverse_url('job', job_ident) }}">
                         {{ filename }}
                     </a>
                     {% else %}
