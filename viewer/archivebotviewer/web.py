@@ -40,7 +40,7 @@ class BaseHandler(tornado.web.RequestHandler):
 
 class IndexHandler(BaseHandler):
     def get(self):
-        search_results = self._search()
+        search_results = tuple(self._search() or ())
 
         self.render('index.html', search_results=search_results)
 
