@@ -1,7 +1,7 @@
 import unittest
 import re
 
-from .ignoracle import Ignoracle
+from .ignoracle import Ignoracle, parameterize_url_info
 
 p1 = 'www\.example\.com/foo\.css\?'
 p2 = 'bar/.+/baz'
@@ -53,3 +53,31 @@ class TestIgnoracle(unittest.TestCase):
         self.oracle.set_patterns([b'foobar'])
 
         self.assertEqual(self.oracle.patterns[0], 'foobar')
+
+class TestUrlInfoParameterization(unittest.TestCase):
+    def test_uses_top_url_if_present(self):
+        url_info = dict(
+            top_url='http://www.example.com/'
+        )
+
+        result = parameterize_url_info(url_info)
+
+        self.assertEqual('http://www.example.com/', result['primary_url'])
+        self.assertEqual('www.example.com', result['primary_host'])
+
+    def test_uses_url_for_level_zero_url(self):
+        url_info = dict(
+            url='http://www.example.com/',
+            level=0
+        )
+
+        result = parameterize_url_info(url_info)
+
+        self.assertEqual('http://www.example.com/', result['primary_url'])
+        self.assertEqual('www.example.com', result['primary_host'])
+
+    def test_missing_primary_url_results_in_no_host(self):
+        result = parameterize_url_info(dict())
+
+        self.assertIsNone(result['primary_url'])
+        self.assertIsNone(result['primary_host'])

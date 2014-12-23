@@ -1,6 +1,8 @@
 import re
 import sys
 
+from urllib.parse import urlparse
+
 class Ignoracle(object):
     '''
     An Ignoracle tests a URL against a list of patterns and returns whether or
@@ -44,3 +46,35 @@ class Ignoracle(object):
                 print('Pattern %s is invalid (error: %s).  Ignored.' % (pattern, str(error)), file=sys.stderr)
 
         return False
+
+def parameterize_url_info(url_info):
+    '''
+    Given a wpull url_info dict, generates a dict with primary_url and
+    primary_host keys.  This is meant to be used in Ignoracle.ignores.
+
+    The primary_url key is:
+
+    1. url_info['top_url'], or
+    2. url_info['url'] if url_info['level'] is zero, or
+    3. None otherwise.
+
+    If primary_url is a valid URL, the primary_host key is the host component
+    of primary_url.  Otherwise, primary_host is None.
+    '''
+
+    primary_url = None
+    primary_host = None
+
+    if url_info.get('level') == 0:
+        primary_url = url_info.get('url')
+    else:
+        primary_url = url_info.get('top_url')
+
+    if primary_url:
+        parsed = urlparse(primary_url)
+        primary_host = parsed.netloc
+
+    return dict(
+        primary_url=primary_url,
+        primary_host=primary_host
+    )
