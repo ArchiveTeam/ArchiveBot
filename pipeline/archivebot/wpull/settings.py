@@ -4,6 +4,7 @@ import redis
 import threading
 import time
 
+from .ignoracle import Ignoracle, parameterize_url_info
 from .. import pattern_conversion
 from .. import shared_config
 from ..control import ConnectionError
@@ -15,12 +16,12 @@ class Settings(object):
     '''
 
     settings_lock = threading.RLock()
+    ignoracle = Ignoracle()
 
     settings = dict(
             age=None,
             concurrency=None,
             abort_requested=None,
-            ignore_patterns={},
             delay_min=None,
             delay_max=None,
             suppress_ignore_reports=False
@@ -33,34 +34,24 @@ class Settings(object):
         with self.settings_lock:
             self.settings['delay_min'] = int_or_none(new_settings['delay_min'])
             self.settings['delay_max'] = int_or_none(new_settings['delay_max'])
-            self.settings['ignore_patterns'] = build_patterns(new_settings['ignore_patterns'])
             self.settings['age'] = int_or_none(new_settings['age'])
             self.settings['concurrency'] = int_or_none(new_settings['concurrency'])
             self.settings['abort_requested'] = new_settings['abort_requested']
             self.settings['suppress_ignore_reports'] = new_settings['suppress_ignore_reports']
 
+            self.ignoracle.set_patterns(new_settings['ignore_patterns'])
+
     def age(self):
         with self.settings_lock:
             return self.settings['age'] or 0
 
-    def ignore_url_p(self, url):
+    def ignore_url_p(self, url, url_info):
         '''
-        If a URL matches an ignore pattern, returns the string representation
-        of the matching pattern.  Otherwise, returns false.
+        Returns whether a URL should be ignored.
         '''
-        with self.settings_lock:
-            for pattern in self.settings['ignore_patterns']:
-                try:
-                    match = pattern.search(url)
-                except re.error as error:
-                    # XXX: We might not want to ignore this error
-                    print('Regular expression error:' + str(error) + ' on ' + pattern)
-                    return False
+        parameters = parameterize_url_info(url_info)
 
-                if match:
-                    return pattern.pattern
-
-            return False
+        return self.ignoracle.ignores(url, **parameters)
 
     def abort_requested(self):
         '''
@@ -99,7 +90,7 @@ class Settings(object):
         Returns a string describing the current settings.
         '''
         with self.settings_lock:
-            iglen = len(self.settings['ignore_patterns'])
+            iglen = len(self.ignoracle.patterns)
             sl, sm = self.delay_time_range()
         
             report = str(self.concurrency()) + ' workers, '
@@ -241,24 +232,5 @@ def int_or_none(v):
         return int(v)
     else:
         return None
-
-def build_patterns(strings):
-    patterns = []
-
-    for string in strings:
-        if isinstance(string, bytes):
-            string = string.decode('utf-8')
-
-        if pattern_conversion_enabled:
-            string = pattern_conversion.lua_pattern_to_regex(string)
-
-        try:
-            pattern = re.compile(string)
-            patterns.append(pattern)
-        except re.error as error:
-            print('Pattern %s could not be compiled.  Error: %s.  Ignoring.' %
-                    (string, str(error)))
-
-    return patterns
 
 # vim:ts=4:sw=4:et:tw=78
