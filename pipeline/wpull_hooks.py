@@ -98,7 +98,7 @@ def accept_url(url_info, record_info, verdict, reasons):
     return False
 
   # Does the URL match any of the ignore patterns?
-  pattern = settings.ignore_url_p(url, url_info)
+  pattern = settings.ignore_url_p(url, record_info)
 
   if pattern:
     maybe_log_ignore(url, pattern)
@@ -128,7 +128,7 @@ def handle_result(url_info, record_info, error_info=None, http_info=None):
   error = 'OK'
   statcode = 0
 
-  pattern = settings.ignore_url_p(url_info['url'], url_info)
+  pattern = settings.ignore_url_p(url_info['url'], record_info)
 
   if pattern:
     maybe_log_ignore(url_info['url'], pattern)

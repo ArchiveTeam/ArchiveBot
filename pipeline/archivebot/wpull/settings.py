@@ -4,7 +4,7 @@ import redis
 import threading
 import time
 
-from .ignoracle import Ignoracle, parameterize_url_info
+from .ignoracle import Ignoracle, parameterize_record_info
 from .. import pattern_conversion
 from .. import shared_config
 from ..control import ConnectionError
@@ -45,11 +45,11 @@ class Settings(object):
         with self.settings_lock:
             return self.settings['age'] or 0
 
-    def ignore_url_p(self, url, url_info):
+    def ignore_url_p(self, url, record_info):
         '''
         Returns whether a URL should be ignored.
         '''
-        parameters = parameterize_url_info(url_info)
+        parameters = parameterize_record_info(record_info)
 
         return self.ignoracle.ignores(url, **parameters)
 

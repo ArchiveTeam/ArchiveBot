@@ -59,15 +59,15 @@ class Ignoracle(object):
 
         return False
 
-def parameterize_url_info(url_info):
+def parameterize_record_info(record_info):
     '''
-    Given a wpull url_info dict, generates a dict with primary_url and
+    Given a wpull record_info dict, generates a dict with primary_url and
     primary_netloc keys.  This is meant to be used in Ignoracle.ignores.
 
     The primary_url key is:
 
-    1. url_info['top_url'], or
-    2. url_info['url'] if url_info['level'] is zero, or
+    1. record_info['top_url'], or
+    2. record_info['url'] if record_info['level'] is zero, or
     3. None otherwise.
 
     If primary_url is a valid URL, the primary_netloc key is the network
@@ -78,10 +78,10 @@ def parameterize_url_info(url_info):
     primary_url = None
     primary_netloc = None
 
-    if url_info.get('level') == 0:
-        primary_url = url_info.get('url')
+    if record_info.get('level') == 0:
+        primary_url = record_info.get('url')
     else:
-        primary_url = url_info.get('top_url')
+        primary_url = record_info.get('top_url')
 
     if primary_url:
         parsed = urlparse(primary_url)

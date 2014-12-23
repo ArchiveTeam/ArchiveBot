@@ -1,7 +1,7 @@
 import unittest
 import re
 
-from .ignoracle import Ignoracle, parameterize_url_info
+from .ignoracle import Ignoracle, parameterize_record_info
 
 p1 = 'www\.example\.com/foo\.css\?'
 p2 = 'bar/.+/baz'
@@ -90,40 +90,40 @@ class TestIgnoracle(unittest.TestCase):
 
         self.assertEqual(self.oracle.patterns[0], 'foobar')
 
-class TestUrlInfoParameterization(unittest.TestCase):
+class TestRecordInfoParameterization(unittest.TestCase):
     def test_uses_top_url_if_present(self):
-        url_info = dict(
+        record_info = dict(
             top_url='http://www.example.com/'
         )
 
-        result = parameterize_url_info(url_info)
+        result = parameterize_record_info(record_info)
 
         self.assertEqual('http://www.example.com/', result['primary_url'])
         self.assertEqual('www.example.com', result['primary_netloc'])
 
     def test_uses_url_for_level_zero_url(self):
-        url_info = dict(
+        record_info = dict(
             url='http://www.example.com/',
             level=0
         )
 
-        result = parameterize_url_info(url_info)
+        result = parameterize_record_info(record_info)
 
         self.assertEqual('http://www.example.com/', result['primary_url'])
         self.assertEqual('www.example.com', result['primary_netloc'])
 
     def test_missing_primary_url_results_in_no_netloc(self):
-        result = parameterize_url_info(dict())
+        result = parameterize_record_info(dict())
 
         self.assertIsNone(result['primary_url'])
         self.assertIsNone(result['primary_netloc'])
 
     def test_includes_auth_and_port_in_primary_netloc(self):
-        url_info = dict(
+        record_info = dict(
             url='http://foo:bar@www.example.com:8080/',
             level=0
         )
 
-        result = parameterize_url_info(url_info)
+        result = parameterize_record_info(record_info)
 
         self.assertEqual('foo:bar@www.example.com:8080', result['primary_netloc'])
