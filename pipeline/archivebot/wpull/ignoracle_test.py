@@ -22,15 +22,43 @@ class TestIgnoracle(unittest.TestCase):
         self.assertEqual(self.oracle.ignores('http://www.example.com/bar/abc/def/baz'), p2)
 
     def test_ignores_supports_netloc_parameterization(self):
-        pattern = '{primary_netloc}/foo\.css\?'
+        pattern = '%#{primary_netloc}/foo\.css\?'
         self.oracle.set_patterns([pattern])
 
         result = self.oracle.ignores('http://www.example.com/foo.css?body=1', primary_netloc='www.example.com')
 
         self.assertEqual(result, pattern)
 
+    def test_parameterization_skips_regex_ranges(self):
+        pattern = '/(.*)/(\\1/){3,}'
+        self.oracle.set_patterns([pattern])
+
+        result = self.oracle.ignores('http://www.example.com/foo/foo/foo/foo/foo')
+
+        self.assertEqual(result, pattern)
+
+    def test_parameterization_skips_pattern_with_unknown_parameter(self):
+        wrong = '/(.*)/(\\1/)%#{boom}'
+        right = '/(.*)/(\\1/){3,}'
+
+        self.oracle.set_patterns([wrong, right])
+
+        result = self.oracle.ignores('http://www.example.com/foo/foo/foo/foo/foo')
+
+        self.assertEqual(result, right)
+
+    def test_parameterization_skips_invalid_parameter_keys(self):
+        wrong = '/(.*)/(\\1/)%#{3,4}'
+        right = '/(.*)/(\\1/){3,}'
+
+        self.oracle.set_patterns([wrong, right])
+
+        result = self.oracle.ignores('http://www.example.com/foo/foo/foo/foo/foo')
+
+        self.assertEqual(result, right)
+
     def test_ignores_supports_url_parameterization(self):
-        pattern = '{primary_url}foo\.css\?'
+        pattern = '%#{primary_url}foo\.css\?'
         self.oracle.set_patterns([pattern])
 
         result = self.oracle.ignores('http://www.example.com/foo.css?body=1', primary_url='http://www.example.com/')
@@ -38,7 +66,7 @@ class TestIgnoracle(unittest.TestCase):
         self.assertEqual(result, pattern)
 
     def test_ignores_escapes_url(self):
-        pattern = '{primary_url}foo\.css\?'
+        pattern = '%#{primary_url}foo\.css\?'
         self.oracle.set_patterns([pattern])
 
         result = self.oracle.ignores('http://www.example.com/bar.css??/foo.css?body=1', primary_url='http://www.example.com/bar.css??/')
@@ -46,7 +74,7 @@ class TestIgnoracle(unittest.TestCase):
         self.assertEqual(result, pattern)
 
     def test_ignores_with_parameterized_url_replaces_none_placeholder_with_empty_string(self):
-        pattern = '{primary_url}foo\.css\?'
+        pattern = '%#{primary_url}foo\.css\?'
         self.oracle.set_patterns([pattern])
 
         # This should treat the pattern as if it were "foo\.css\?"

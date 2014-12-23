@@ -2,6 +2,10 @@ import re
 import sys
 
 from urllib.parse import urlparse
+from string import Template
+
+class IgnoracleTemplate(Template):
+    delimiter = '%#'
 
 class Ignoracle(object):
     '''
@@ -38,7 +42,15 @@ class Ignoracle(object):
 
         for pattern in self.patterns:
             try:
-                match = re.search(pattern.format(primary_url=pu, primary_netloc=ph), url)
+                tpl = IgnoracleTemplate(pattern)
+
+                try:
+                    expanded = tpl.substitute(primary_url=pu, primary_netloc=ph)
+                except (KeyError, ValueError) as error:
+                    print('Pattern %s contains invalid placeholder (error: %s).  Pattern ignored.' % (pattern, error), file=sys.stderr)
+                    continue
+
+                match = re.search(expanded, url)
 
                 if match:
                     return pattern
