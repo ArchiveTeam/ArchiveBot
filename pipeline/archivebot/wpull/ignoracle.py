@@ -34,11 +34,11 @@ class Ignoracle(object):
         '''
 
         pu = kwargs.get('primary_url') or ''
-        ph = kwargs.get('primary_host') or ''
+        ph = kwargs.get('primary_netloc') or ''
 
         for pattern in self.patterns:
             try:
-                match = re.search(pattern.format(primary_url=pu, primary_host=ph), url)
+                match = re.search(pattern.format(primary_url=pu, primary_netloc=ph), url)
 
                 if match:
                     return pattern
@@ -50,7 +50,7 @@ class Ignoracle(object):
 def parameterize_url_info(url_info):
     '''
     Given a wpull url_info dict, generates a dict with primary_url and
-    primary_host keys.  This is meant to be used in Ignoracle.ignores.
+    primary_netloc keys.  This is meant to be used in Ignoracle.ignores.
 
     The primary_url key is:
 
@@ -58,12 +58,13 @@ def parameterize_url_info(url_info):
     2. url_info['url'] if url_info['level'] is zero, or
     3. None otherwise.
 
-    If primary_url is a valid URL, the primary_host key is the host component
-    of primary_url.  Otherwise, primary_host is None.
+    If primary_url is a valid URL, the primary_netloc key is the network
+    location component of primary_url (i.e. for HTTP,
+    [user:password@]host[:port]).  Otherwise, primary_netloc is None.
     '''
 
     primary_url = None
-    primary_host = None
+    primary_netloc = None
 
     if url_info.get('level') == 0:
         primary_url = url_info.get('url')
@@ -72,9 +73,9 @@ def parameterize_url_info(url_info):
 
     if primary_url:
         parsed = urlparse(primary_url)
-        primary_host = parsed.netloc
+        primary_netloc = parsed.netloc
 
     return dict(
         primary_url=primary_url,
-        primary_host=primary_host
+        primary_netloc=primary_netloc
     )

@@ -21,11 +21,11 @@ class TestIgnoracle(unittest.TestCase):
 
         self.assertEqual(self.oracle.ignores('http://www.example.com/bar/abc/def/baz'), p2)
 
-    def test_ignores_supports_host_parameterization(self):
-        pattern = '{primary_host}/foo\.css\?'
+    def test_ignores_supports_netloc_parameterization(self):
+        pattern = '{primary_netloc}/foo\.css\?'
         self.oracle.set_patterns([pattern])
 
-        result = self.oracle.ignores('http://www.example.com/foo.css?body=1', primary_host='www.example.com')
+        result = self.oracle.ignores('http://www.example.com/foo.css?body=1', primary_netloc='www.example.com')
 
         self.assertEqual(result, pattern)
 
@@ -63,7 +63,7 @@ class TestUrlInfoParameterization(unittest.TestCase):
         result = parameterize_url_info(url_info)
 
         self.assertEqual('http://www.example.com/', result['primary_url'])
-        self.assertEqual('www.example.com', result['primary_host'])
+        self.assertEqual('www.example.com', result['primary_netloc'])
 
     def test_uses_url_for_level_zero_url(self):
         url_info = dict(
@@ -74,10 +74,20 @@ class TestUrlInfoParameterization(unittest.TestCase):
         result = parameterize_url_info(url_info)
 
         self.assertEqual('http://www.example.com/', result['primary_url'])
-        self.assertEqual('www.example.com', result['primary_host'])
+        self.assertEqual('www.example.com', result['primary_netloc'])
 
-    def test_missing_primary_url_results_in_no_host(self):
+    def test_missing_primary_url_results_in_no_netloc(self):
         result = parameterize_url_info(dict())
 
         self.assertIsNone(result['primary_url'])
-        self.assertIsNone(result['primary_host'])
+        self.assertIsNone(result['primary_netloc'])
+
+    def test_includes_auth_and_port_in_primary_netloc(self):
+        url_info = dict(
+            url='http://foo:bar@www.example.com:8080/',
+            level=0
+        )
+
+        result = parameterize_url_info(url_info)
+
+        self.assertEqual('foo:bar@www.example.com:8080', result['primary_netloc'])
