@@ -37,6 +37,14 @@ class TestIgnoracle(unittest.TestCase):
 
         self.assertEqual(result, pattern)
 
+    def test_ignores_escapes_url(self):
+        pattern = '{primary_url}foo\.css\?'
+        self.oracle.set_patterns([pattern])
+
+        result = self.oracle.ignores('http://www.example.com/bar.css??/foo.css?body=1', primary_url='http://www.example.com/bar.css??/')
+
+        self.assertEqual(result, pattern)
+
     def test_ignores_with_parameterized_url_replaces_none_placeholder_with_empty_string(self):
         pattern = '{primary_url}foo\.css\?'
         self.oracle.set_patterns([pattern])

@@ -33,8 +33,8 @@ class Ignoracle(object):
         Otherwise, returns False.
         '''
 
-        pu = kwargs.get('primary_url') or ''
-        ph = kwargs.get('primary_netloc') or ''
+        pu = re.escape(kwargs.get('primary_url') or '')
+        ph = re.escape(kwargs.get('primary_netloc') or '')
 
         for pattern in self.patterns:
             try:
