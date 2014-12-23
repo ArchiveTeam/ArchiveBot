@@ -21,8 +21,8 @@ describe JobOptionsParser do
     expect(parser.parse('--no-phantomjs-smart-scroll')[:no_phantomjs_smart_scroll]).to eq(true)
   end
 
-  it 'recognizes --offsite-links' do
-    expect(parser.parse('--offsite-links')[:offsite_links]).to eq(true)
+  it 'recognizes --no-offsite-links' do
+    expect(parser.parse('--no-offsite-links')[:no_offsite_links]).to eq(true)
   end
 
   it 'parses --ignore-sets=A,B to an array' do
