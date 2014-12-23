@@ -100,7 +100,12 @@ class AuditHandler(BaseHandler):
     def get(self):
         database = self.application.database
         no_json_items = database.get_no_json_jobs()
-        self.render('audit.html', no_json_items=no_json_items)
+        no_warc_items = database.get_no_warc_jobs()
+        self.render(
+            'audit.html',
+            no_json_items=no_json_items,
+            no_warc_items=no_warc_items
+        )
 
 
 class StatsHandler(BaseHandler):

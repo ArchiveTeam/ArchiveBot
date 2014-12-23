@@ -325,6 +325,14 @@ class Database(object):
             for row in rows:
                 yield row
 
+    def get_no_warc_jobs(self):
+        with self._session() as session:
+            rows = session.query(Job.id, Job.domain)\
+                .filter_by(warcs=0)
+
+            for row in rows:
+                yield row
+
 
 class API(object):
     SEARCH_URL = 'https://archive.org/advancedsearch.php'
