@@ -286,8 +286,8 @@ Examples
 
 5.  Say you have the URL file
 
-    http://www.example.com/foo.html
-    http://www.bar.org:8080/qux.html
+        http://www.example.com/foo.html
+        http://www.bar.org:8080/qux.html
 
     and you submit it as an ``!archiveonly < FILE`` job.
 
