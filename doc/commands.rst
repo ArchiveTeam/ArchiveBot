@@ -295,8 +295,8 @@ Examples
     ``{primary_url}`` will be ``http://www.example.com/foo.html`` and
     ``{primary_netloc}`` will be ``www.example.com``.
 
-    When retriving requisites of ``http://www.bar.org/qux.html```,
-    ``{primary_url}`` will be ``http://www.bar.org/qux.html`` and
+    When retriving requisites of ``http://www.bar.org:8080/qux.html```,
+    ``{primary_url}`` will be ``http://www.bar.org:8080/qux.html`` and
     ``{primary_netloc}`` will be ``www.bar.org:8080``.
 
 
