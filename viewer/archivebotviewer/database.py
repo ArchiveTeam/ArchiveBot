@@ -274,7 +274,8 @@ class Database(object):
     def populate_json_files(self):
         with self._session() as session:
             query = session.query(File.ia_item_id, File.filename, File.job_id)\
-                .filter(File.filename.endswith('.json'))
+                .filter(File.filename.endswith('.json'))\
+                .filter(File.job_id.isnot(None))
 
             for identifier, filename, job_id in query:
                 json_id = filename.replace('.json', '')
@@ -461,7 +462,7 @@ class API(object):
         raise gen.Return(response)
 
 
-JOB_FILENAME_RE = re.compile(r'([\w.-]+)-(inf|shallow)-(\d{8})-(\d{6})-?(\w{5})?-?(aborted)?.*\.(json|warc\.gz)')
+JOB_FILENAME_RE = re.compile(r'([\w. -]+)-(inf|shallow)-(\d{8})-(\d{6})-?(\w{5})?-?(aborted)?.*\.(json|warc\.gz)')
 
 
 def parse_filename(filename):
