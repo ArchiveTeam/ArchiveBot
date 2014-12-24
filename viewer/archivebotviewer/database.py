@@ -93,6 +93,8 @@ class Database(object):
         self._api = API()
         self._fetch_sentinel_filename = filename + '.fetch'
 
+        self._population_in_progress = False
+
     @contextlib.contextmanager
     def _session(self):
         session = self._session_maker_instance()
@@ -117,7 +119,7 @@ class Database(object):
 
         time_ago = time.time() - min_fetch_internal
 
-        if last_update > time_ago:
+        if last_update > time_ago or self._population_in_progress:
             _logger.info('Not populating database.')
             return
 
@@ -126,16 +128,21 @@ class Database(object):
         with open(self._fetch_sentinel_filename, 'wb'):
             pass
 
-        yield self.populate_ia_items()
-        yield self.populate_files()
-        self.populate_jobs()
-        self.populate_daily_stats()
-        yield self.populate_json_files()
+        self._population_in_progress = True
 
-        _logger.info('Populate done.')
+        try:
+            yield self.populate_ia_items()
+            yield self.populate_files()
+            self.populate_jobs()
+            self.populate_daily_stats()
+            yield self.populate_json_files()
+        finally:
+            _logger.info('Populate done.')
 
-        with open(self._fetch_sentinel_filename, 'wb'):
-            pass
+            with open(self._fetch_sentinel_filename, 'wb'):
+                pass
+
+            self._population_in_progress = False
 
     @gen.coroutine
     def populate_ia_items(self):
