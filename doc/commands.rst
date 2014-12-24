@@ -284,7 +284,7 @@ Examples
     servers:
     ``^http://(?!({primary_netloc}|\d+\.media\.tumblr\.com|assets\.tumblr\.com)).*``
 
-5.  Say you have the URL file
+5.  Say you have this URL file::
 
         http://www.example.com/foo.html
         http://www.bar.org:8080/qux.html
