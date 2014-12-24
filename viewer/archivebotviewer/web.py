@@ -68,17 +68,18 @@ class ItemHandler(BaseHandler):
 
 class JobsHandler(BaseHandler):
     def get(self, char):
-        identifiers = sorted(
+        rows = sorted(
             self.application.database.get_all_jobs_starting_with(char or '0')
         )
-        self.render('jobs.html', identifiers=identifiers)
+        self.render('jobs.html', rows=rows)
 
 
 class JobHandler(BaseHandler):
     def get(self, identifier):
         rows = self.application.database.get_job_files(identifier)
+        url = self.application.database.get_job_url(identifier)
 
-        self.render('job.html', rows=rows)
+        self.render('job.html', rows=rows, url=url)
 
 
 class DomainsHandler(BaseHandler):

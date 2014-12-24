@@ -11,7 +11,9 @@ import time
 from sqlalchemy.engine import create_engine
 from sqlalchemy.orm.session import sessionmaker
 from sqlalchemy.pool import SingletonThreadPool
-from sqlalchemy.sql.expression import insert, update, or_, delete
+from sqlalchemy.sql.elements import literal
+from sqlalchemy.sql.expression import insert, update, or_, delete, exists, \
+    select
 from sqlalchemy.sql.schema import Column, ForeignKey
 from sqlalchemy.sql.sqltypes import Integer, String, DateTime, Date
 from tornado import gen
@@ -65,7 +67,8 @@ class JSONMetadata(DBBase):
 
     id = Column(String, primary_key=True)
     job_id = Column(String, ForeignKey('jobs.id'), nullable=False)
-    date = Column(DateTime, nullable=False)
+    url = Column(String, nullable=False)
+    started_by = Column(String)
 
 
 class DailyStat(DBBase):
@@ -127,6 +130,7 @@ class Database(object):
         yield self.populate_files()
         self.populate_jobs()
         self.populate_daily_stats()
+        yield self.populate_json_files()
 
         _logger.info('Populate done.')
 
@@ -259,6 +263,39 @@ class Database(object):
                     .where(DailyStat.date == date)
                 session.execute(query)
 
+    @gen.coroutine
+    def populate_json_files(self):
+        with self._session() as session:
+            query = session.query(File.ia_item_id, File.filename, File.job_id)\
+                .filter(File.filename.endswith('.json'))
+
+            for identifier, filename, job_id in query:
+                json_id = filename.replace('.json', '')
+
+                if session.query(JSONMetadata.id).filter_by(id=json_id).scalar():
+                    continue
+
+                response = yield self._api.download_item_file(identifier, filename)
+
+                doc = json.loads(response.body.decode('utf-8', 'replace'))
+                url = doc.get('url')
+
+                query = insert(JSONMetadata)
+                values = {
+                    'id': json_id,
+                    'job_id': job_id,
+                    'url': url,
+                    'started_by': doc.get('started_by')
+                }
+                session.execute(query, [values])
+
+                if job_id and url:
+                    query = update(Job)\
+                        .values({'url': url}).where(Job.id == job_id)
+                    session.execute(query)
+
+                session.commit()
+
     def get_all_item_names(self):
         with self._session() as session:
             return [row.id for row in session.query(IAItem.id)]
@@ -271,15 +308,19 @@ class Database(object):
 
     def get_all_jobs_starting_with(self, char):
         with self._session() as session:
-            rows = session.query(Job.id)\
+            rows = session.query(Job.id, Job.domain, Job.url)\
                 .filter(Job.id.startswith(char))
-            return [row.id for row in rows]
+            return rows
 
     def get_job_files(self, job_id):
         with self._session() as session:
             rows = session.query(File.ia_item_id, File.filename, File.size)\
                 .filter_by(job_id=job_id)
             return rows
+
+    def get_job_url(self, job_id):
+        with self._session() as session:
+            return session.query(Job.url).filter_by(id=job_id).scalar()
 
     def get_all_domains_starting_with(self, char):
         with self._session() as session:
@@ -290,9 +331,9 @@ class Database(object):
 
     def get_jobs_by_domain(self, domain):
         with self._session() as session:
-            rows = session.query(Job.id)\
+            rows = session.query(Job.id, Job.url)\
                 .filter_by(domain=domain)
-            return [row.id for row in rows]
+            return rows
 
     def get_daily_stats(self):
         with self._session() as session:
@@ -337,6 +378,7 @@ class Database(object):
 class API(object):
     SEARCH_URL = 'https://archive.org/advancedsearch.php'
     ITEM_URL = 'https://archive.org/details/'
+    DOWNLOAD_URL = 'https://archive.org/download/'
 
     def __init__(self):
         self._client = tornado.httpclient.AsyncHTTPClient()
@@ -355,7 +397,7 @@ class API(object):
                 'page': str(page),
             })
 
-            _logger.debug('Fetch %s', url)
+            _logger.info('Fetch %s', url)
 
             response = yield self._client.fetch(url)
             response.rethrow()
@@ -381,7 +423,7 @@ class API(object):
             'output': 'json'
         })
 
-        _logger.debug('Fetch %s', url)
+        _logger.info('Fetch %s', url)
 
         response = yield self._client.fetch(url)
         response.rethrow()
@@ -394,6 +436,17 @@ class API(object):
             files.append((name.lstrip('/'), int(file_info.get('size', 0))))
 
         raise gen.Return(files)
+
+    @gen.coroutine
+    def download_item_file(self, identifier, filename):
+        url = '{}/{}/{}'.format(self.DOWNLOAD_URL, identifier, filename)
+
+        _logger.info('Fetch %s', url)
+
+        response = yield self._client.fetch(url)
+        response.rethrow()
+
+        raise gen.Return(response)
 
 
 JOB_FILENAME_RE = re.compile(r'([\w.-]+)-(inf|shallow)-(\d{8})-(\d{6})-?(\w{5})?-?(aborted)?.*\.(json|warc\.gz)')
