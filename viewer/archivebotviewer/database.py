@@ -284,7 +284,12 @@ class Database(object):
 
                 response = yield self._api.download_item_file(identifier, filename)
 
-                doc = json.loads(response.body.decode('utf-8', 'replace'))
+                try:
+                    doc = json.loads(response.body.decode('utf-8', 'replace'))
+                except ValueError:
+                    _logger.exception('JSON error!')
+                    continue
+
                 url = doc.get('url')
 
                 query = insert(JSONMetadata)
