@@ -2,10 +2,20 @@ import re
 import sys
 
 from urllib.parse import urlparse
-from string import Template
 
-class IgnoracleTemplate(Template):
-    delimiter = '%#'
+class D(dict):
+    '''
+    Allows us to run substitutions on regexes that contain repetition ranges
+    without erroring out on those keys.
+    '''
+    def __missing__(self, k):
+        return '{' + k + '}'
+
+'''
+Workaround for {}s that might appear in ignore patterns; format interprets
+these as positional parameters.
+'''
+pos_placeholders = ['{}'] * 256
 
 class Ignoracle(object):
     '''
@@ -42,14 +52,7 @@ class Ignoracle(object):
 
         for pattern in self.patterns:
             try:
-                tpl = IgnoracleTemplate(pattern)
-
-                try:
-                    expanded = tpl.substitute(primary_url=pu, primary_netloc=ph)
-                except (KeyError, ValueError) as error:
-                    print('Pattern %s contains invalid placeholder (error: %s).  Pattern ignored.' % (pattern, error), file=sys.stderr)
-                    continue
-
+                expanded = pattern.format(*pos_placeholders, **D({'primary_url': pu, 'primary_netloc': ph}))
                 match = re.search(expanded, url)
 
                 if match:
