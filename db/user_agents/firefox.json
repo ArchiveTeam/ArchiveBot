@@ -5,21 +5,21 @@
                 "firefox",
                 "firefox-windows"
             ],
-            "name": "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:32.0) Gecko/20100101 Firefox/32.0"
+            "name": "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:35.0) Gecko/20100101 Firefox/35.0"
         },
         {
             "aliases": [
                 "firefox-linux",
                 "firefox-ubuntu"
             ],
-            "name": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:32.0) Gecko/20100101 Firefox/32.0"
+            "name": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:35.0) Gecko/20100101 Firefox/35.0"
         },
         {
             "aliases": [
                 "firefox-android",
                 "mobile-firefox"
             ],
-            "name": "Mozilla/5.0 (Android; Mobile; rv:32.0) Gecko/32.0 Firefox/32.0"
+            "name": "Mozilla/5.0 (Android; Mobile; rv:35.0) Gecko/35.0 Firefox/35.0"
         }
     ],
     "type": "user_agents"
