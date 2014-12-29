@@ -4,15 +4,17 @@
 {% block body %}
     <table>
         <tr>
-           <th>Job Identifier</th>
+            <th>Job Identifier</th>
+            <th>URL</th>
         </tr>
-        {% for job_identifier in sorted(domain_model.jobs) %}
+        {% for job_identifier, url in sorted(rows) %}
             <tr>
                 <td>
                     <a href="{{ reverse_url('job', job_identifier) }}">
                     {{ job_identifier }}
                     </a>
                 </td>
+                <td>{{ url or '' }}
             </tr>
         {% end %}
     </table>

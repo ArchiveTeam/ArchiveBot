@@ -3,6 +3,7 @@ To run the backend, you will need:
 - a Redis 2.8+ server
 - a CouchDB server
 - a Ruby 1.9 installation
+- ZeroMQ 4.0.5 (earlier API-compatible versions may work, but they have not been tested)
 - Bundler
 - ExecJS supported runtime (for the dashboard)
   (see https://github.com/sstephenson/execjs)
@@ -80,8 +81,15 @@ You can run the dashboard webapp on the same machine, or a different machine.  F
 
     export REDIS_URL=redis://your-redis-host:6379/0
     export UPDATES_CHANNEL=updates
+    export FIREHOSE_SOCKET_URL=tcp://127.0.0.1:12345
 
-    plumbing/updates-listener | plumbing/log-firehose | bundle exec ruby dashboard/app.rb -u http://your-dashboard-host:8080
+    plumbing/updates-listener | plumbing/log-firehose
+
+In another terminal, run
+
+    export FIREHOSE_SOCKET_URL=tcp://127.0.0.1:12345
+
+    plumbing/firehose-client | bundle exec ruby dashboard/app.rb -u http://your-dashboard-host:8080
 
 Configure twitter_conf.json if you want to post Twitter Tweets.
 

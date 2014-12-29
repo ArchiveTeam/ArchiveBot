@@ -15,6 +15,11 @@ GEM
     celluloid-io (0.15.0)
       celluloid (>= 0.15.0)
       nio4r (>= 0.5.0)
+    ffi (1.9.6)
+    ffi-rzmq (2.0.1)
+      ffi-rzmq-core (>= 1.0.1)
+    ffi-rzmq-core (1.0.3)
+      ffi (~> 1.9)
     hiredis (0.5.2)
     http_parser.rb (0.6.0)
     json (1.8.1)
@@ -32,6 +37,7 @@ PLATFORMS
 
 DEPENDENCIES
   analysand (~> 3.0.1)
+  ffi-rzmq
   hiredis
   redis
   trollop

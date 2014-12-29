@@ -2,6 +2,7 @@
 {% block title %} Homepage {% end %}
 
 {% block body %}
+    <p>Browse an index of the archives.</p>
     <form method="get" action="{{ reverse_url('index') }}">
         <input type="search" name="q" id="form-query" value="{{ handler.get_argument('q', '') }}">
         <input type="submit" value="Search">
@@ -16,7 +17,7 @@
     {% if handler.get_argument('q', None) and not search_results %}
     <p><em>No search results.</em></p>
     {% end %}
-
+    <br>
     <a href="{{ reverse_url('items') }}">Items</a><br>
     <a href="{{ reverse_url('jobs', '') }}">Jobs</a><br>
     <a href="{{ reverse_url('domains', '') }}">Domains</a><br>

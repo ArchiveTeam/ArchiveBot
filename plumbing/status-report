@@ -1,0 +1,96 @@
+#!/usr/bin/env ruby
+
+# NAME
+#
+#   status-report - generates a job status report with pipeline health data
+#
+# SYNOPSIS
+#
+#   REDIS_URL=redis://host:port/db ./status-report
+#
+# DESCRIPTION
+#
+#   status-report generates a job status report for ArchiveBot as a JSON
+#   document.
+#
+#   The job status report format is as follows:
+#
+#     [
+#         {
+#             "ident": "...",
+#             "ts": "1234567890",
+#             "pipeline": {
+#                 "disk_available": "1234567890",
+#                 "disk_usage": "56.78",
+#                 "fqdn": "...",
+#                 "hostname": "...",
+#                 "id": "...",
+#                 "load_average_15m": "3.0",
+#                 "load_average_1m": "1.0",
+#                 "load_average_5m": "2.0",
+#                 "mem_available": "1234567890",
+#                 "mem_usage": "56.78",
+#                 "nickname": "...",
+#                 "pid": "1234",
+#                 "python": "...",
+#                 "ts": "1234567890",
+#                 "version": "..."
+#             },
+#             "queued_at": "1234567890"
+#         }
+#     ]
+#
+#   All fields are strings, but some strings have special meaning:
+#
+#   ts and pipeline.ts are UNIX timestamps of the most recent result for the
+#   job and pipeline heartbeat, respectively.
+#
+#   queued_at is a UNIX timestamp.
+#
+#   disk_available and mem_available are in bytes.  disk_usage and mem_usage
+#   are percentages.
+#
+# LIMITATIONS
+#
+#   It is possible for a job to reference a nonexistent pipeline; ArchiveBot
+#   places no constraint checks on that.  If status-report happens across such
+#   a job, it will return {} for that job's pipeline record.
+#
+#   Job entries in the working list that do not have a corresponding record
+#   are silently dropped.
+
+require 'redis'
+require 'json'
+
+r = Redis.new(url: ENV['REDIS_URL'])
+
+# Gather a list of jobs.
+idents = r.lrange('working', 0, -1)
+
+# Get the job data, dropping unresolvable records.
+job_records = idents.each_with_object({}) do |ident, h|
+  h[ident] = r.hgetall(ident)
+end
+
+job_records.reject! { |_, rec| rec.empty? }
+
+# Retrieve pipeline records, also dropping unresolvable records.
+pipeline_ids = job_records.map { |_, v| v['pipeline_id'] }.uniq
+
+pipeline_records = pipeline_ids.each_with_object({}) do |pipeline_id, h|
+  h[pipeline_id] = r.hgetall(pipeline_id)
+end
+
+pipeline_records.reject! { |rec| rec.empty? }
+
+# Build up status records.
+buffer = job_records.map do |ident, rec|
+  {
+    ident: ident,
+    ts: rec['ts'],
+    pipeline: pipeline_records[rec['pipeline_id']] || {},
+    queued_at: rec['queued_at']
+  }
+end
+
+puts buffer.to_json

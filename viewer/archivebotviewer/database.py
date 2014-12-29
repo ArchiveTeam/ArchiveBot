@@ -1,130 +1,210 @@
+import contextlib
+import datetime
+import itertools
 import json
 import logging
+import os
 import re
 import shelve
-import itertools
 import time
 
+from sqlalchemy.engine import create_engine
+from sqlalchemy.orm.session import sessionmaker
+from sqlalchemy.pool import SingletonThreadPool
+from sqlalchemy.sql.elements import literal
+from sqlalchemy.sql.expression import insert, update, or_, delete, exists, \
+    select
+from sqlalchemy.sql.schema import Column, ForeignKey
+from sqlalchemy.sql.sqltypes import Integer, String, DateTime, Date
 from tornado import gen
-import tornado.httpclient
 import dateutil.parser
+import sqlalchemy.event
+import sqlalchemy.ext.declarative
+import tornado.httpclient
 
 
 _logger = logging.getLogger(__name__)
 
 
-class ItemModel(object):
-    def __init__(self):
-        self.files = []
-        self.public_date = None
+DBBase = sqlalchemy.ext.declarative.declarative_base()
 
 
-class JobModel(object):
-    def __init__(self):
-        self.files = {}
-        self.aborts = 0
-        self.warcs = 0
-        self.jsons = 0
-        self.size = 0
-        self.domain = None
+class IAItem(DBBase):
+    __tablename__ = 'ia_items'
+    id = Column(String, nullable=False, primary_key=True)
+    public_date = Column(DateTime, nullable=False)
+    image_count = Column(Integer)
+    refresh_date = Column(DateTime)
 
 
-class DomainModel(object):
-    def __init__(self):
-        self.jobs = set()
+class File(DBBase):
+    __tablename__ = 'files'
+
+    ia_item_id = Column(
+        String, ForeignKey('ia_items.id'),
+        nullable=False, index=True, primary_key=True
+    )
+    filename = Column(String, nullable=False, primary_key=True)
+    size = Column(Integer, nullable=False)
+
+    job_id = Column(String, ForeignKey('jobs.id'), index=True)
 
 
-class StatsDailyModel(object):
-    def __init__(self):
-        self.size = 0
-        self.item_ids = set()
+class Job(DBBase):
+    __tablename__ = 'jobs'
+
+    id = Column(String, primary_key=True)
+    domain = Column(String, nullable=False)
+    url = Column(String)
+    aborts = Column(Integer, default=0)
+    warcs = Column(Integer, default=0)
+    jsons = Column(Integer, default=0)
+    size = Column(Integer, default=0)
+
+
+class JSONMetadata(DBBase):
+    __tablename__ = 'jsons'
+
+    id = Column(String, primary_key=True)
+    job_id = Column(String, ForeignKey('jobs.id'), nullable=False)
+    url = Column(String, nullable=False)
+    started_by = Column(String)
+
+
+class DailyStat(DBBase):
+    __tablename__ = 'daily_stats'
+
+    date = Column(Date, primary_key=True)
+    size = Column(Integer, default=0)
 
 
 class Database(object):
     def __init__(self, filename):
-        self._shelf = shelve.open(filename)
+        def pragma_callback(connection, record):
+            connection.execute('PRAGMA synchronous=NORMAL')
+
+        self._engine = create_engine(
+            'sqlite:///{0}'.format(filename), poolclass=SingletonThreadPool
+        )
+        sqlalchemy.event.listen(self._engine, 'connect', pragma_callback)
+        DBBase.metadata.create_all(self._engine)
+        self._session_maker_instance = sessionmaker(bind=self._engine)
+
         self._api = API()
+        self._fetch_sentinel_filename = filename + '.fetch'
+
+        self._population_in_progress = False
+
+    @contextlib.contextmanager
+    def _session(self):
+        session = self._session_maker_instance()
+        try:
+            yield session
+            session.commit()
+        except:
+            session.rollback()
+            raise
+        finally:
+            session.close()
 
     def close(self):
-        self._shelf.close()
-
-    def flush_data(self):
-        _logger.info('Flushing data.')
-
-        self._shelf['option:last_flush'] = time.time()
-
-        for key in self._shelf.keys():
-            if not key.startswith('option:'):
-                del self._shelf[key]
-
-        self._shelf['option:last_flush'] = time.time()
-
-        self._shelf.sync()
+        pass
 
     @gen.coroutine
-    def populate(self, min_fetch_internal=3600 * 4, flush_interval=86400 * 3):
-        last_update = self._shelf.get('option:last_update', 0)
+    def populate(self, min_fetch_internal=3600 * 4):
+        try:
+            last_update = os.path.getmtime(self._fetch_sentinel_filename)
+        except OSError:
+            last_update = 0
+
         time_ago = time.time() - min_fetch_internal
 
-        if last_update > time_ago:
+        if last_update > time_ago or self._population_in_progress:
             _logger.info('Not populating database.')
             return
 
-        self._shelf['option:last_update'] = time.time()
-        self._shelf.sync()
-
-        last_flush = self._shelf.get('option:last_flush', 0)
-        time_ago = time.time() - flush_interval
-
-        if last_flush < time_ago:
-            self.flush_data()
-
         _logger.info('Populating database.')
 
-        results = yield self._api.get_item_list()
+        with open(self._fetch_sentinel_filename, 'wb'):
+            pass
 
-        for identifier, public_date_str in results:
-            key = 'item:{}'.format(identifier)
+        self._population_in_progress = True
 
-            if key not in self._shelf:
-                item_model = ItemModel()
-                item_model.public_date = dateutil.parser.parse(public_date_str)
+        try:
+            yield self.populate_ia_items()
+            yield self.populate_files()
+            self.populate_jobs()
+            self.populate_daily_stats()
+            yield self.populate_json_files()
+        finally:
+            _logger.info('Populate done.')
 
-                self._shelf[key] = item_model
+            with open(self._fetch_sentinel_filename, 'wb'):
+                pass
 
-        yield self.populate_files()
-        self.populate_jobs()
-        self.populate_domains()
-        self.populate_daily_stats()
+            self._population_in_progress = False
 
-        self._shelf['option:last_update'] = time.time()
-        self._shelf.sync()
+    @gen.coroutine
+    def populate_ia_items(self):
+        with self._session() as session:
+            results = yield self._api.get_item_list()
+
+            for identifier, public_date_str, image_count_str in results:
+                public_date = dateutil.parser.parse(public_date_str)
+                image_count = int(image_count_str) if image_count_str else None
+
+                ia_item = IAItem()
+                ia_item.id = identifier
+                ia_item.public_date = public_date
+                ia_item.image_count = image_count
+
+                ia_item = session.merge(ia_item)
+                session.add(ia_item)
 
     @gen.coroutine
     def populate_files(self):
-        for key, identifier in sorted(self.item_keys()):
-            item_model = self._shelf[key]
+        with self._session() as session:
+            datetime_ago = datetime.datetime.utcnow() - datetime.timedelta(days=3)
+            query = session.query(IAItem.id).filter(
+                or_(
+                    IAItem.refresh_date.is_(None),
+                    IAItem.public_date > datetime_ago
+            ))
 
-            if item_model.files:
-                continue
+            for row in query:
+                identifier = row[0]
 
-            _logger.info('Populating item %s.', identifier)
-            files = yield self._api.get_item_files(identifier)
+                _logger.info('Populating item %s.', identifier)
+                files = yield self._api.get_item_files(identifier)
 
-            item_model.files = files
+                query = insert(File).prefix_with('OR IGNORE')
+                values = []
 
-            self._shelf[key] = item_model
+                for filename, size in files:
+                    values.append({
+                        'ia_item_id': identifier,
+                        'filename': filename,
+                        'size': size,
+                    })
 
-        self._shelf.sync()
+                session.execute(query, values)
+
+                query = update(IAItem).where(IAItem.id == identifier)
+                session.execute(
+                    query,
+                    {'refresh_date': datetime.datetime.utcnow()}
+                )
+
+                session.commit()
 
     def populate_jobs(self):
-        for key, identifier in self.item_keys():
-            item_model = self._shelf[key]
+        with self._session() as session:
+            query = session.query(File.ia_item_id, File.filename, File.size)\
+                .filter_by(job_id=None)
 
-            if not item_model.files:
-                continue
+            for row in query:
+                ia_item_id, filename, size = row
 
-            for filename, size in item_model.files:
                 filename_info = parse_filename(filename)
 
                 if not filename_info:
@@ -132,149 +212,186 @@ class Database(object):
 
                 job_ident = filename_info['ident'] or \
                     '{}{}'.format(filename_info['date'], filename_info['time'])
-                job_key = 'job:{}'.format(job_ident)
 
-                if job_key not in self._shelf:
-                    self._shelf[job_key] = JobModel()
+                query = insert(Job).prefix_with('OR IGNORE')
+                value = {
+                    'id': job_ident,
+                    'domain': filename_info['domain'],
+                }
+                session.execute(query, [value])
 
-                job_model = self._shelf[job_key]
-
-                if not job_model.domain:
-                    job_model.domain = filename_info['domain']
-
-                if filename not in job_model.files:
-                    job_model.files[filename] = {
-                        'identifier': identifier,
-                        'size': size,
-                    }
+                values = {}
 
                 if filename_info['aborted']:
-                    job_model.aborts += 1
+                    values['aborts'] = Job.aborts + 1
 
                 if filename_info['extension'] == 'warc.gz':
-                    job_model.warcs += 1
-                    job_model.size += size
+                    values['warcs'] = Job.warcs + 1
+                    values['size'] = Job.size + size
                 elif filename_info['extension'] == 'json':
-                    job_model.jsons += 1
+                    values['jsons'] = Job.jsons + 1
 
-                self._shelf[job_key] = job_model
+                if values:
+                    query = update(Job).values(values)\
+                        .where(Job.id == job_ident)
+                    session.execute(query)
 
-        self._shelf.sync()
-
-    def populate_domains(self):
-        for key, identifier in self.job_keys():
-            job_model = self._shelf[key]
-
-            for filename in job_model.files:
-                filename_info = parse_filename(filename)
-
-                if not filename_info:
-                    continue
-
-                domain = filename_info['domain']
-                domain_key = 'domain:{}'.format(domain)
-
-                if domain_key not in self._shelf:
-                    self._shelf[domain_key] = DomainModel()
-
-                domain_model = self._shelf[domain_key]
-
-                if identifier not in domain_model.jobs:
-                    domain_model.jobs.add(identifier)
-
-                self._shelf[domain_key] = domain_model
-
-        self._shelf.sync()
+                query = update(File)\
+                    .values({'job_id': job_ident})\
+                    .where(File.ia_item_id == ia_item_id)\
+                    .where(File.filename == filename)
+                session.execute(query)
 
     def populate_daily_stats(self):
-        for key, identifier in self.item_keys():
-            item_model = self._shelf[key]
+        with self._session() as session:
+            query = delete(DailyStat)
+            session.execute(query)
 
-            if not item_model.files:
-                continue
+            query = session.query(IAItem.id, IAItem.public_date)
 
-            date = item_model.public_date.strftime('%Y%m%d')
-            stats_daily_key = 'stats-daily:{}'.format(date)
+            for ia_item_id, public_date in query:
+                date = public_date.date()
+                total_size = 0
 
-            if stats_daily_key not in self._shelf:
-                self._shelf[stats_daily_key] = StatsDailyModel()
+                rows = session.query(File.size)\
+                    .filter_by(ia_item_id=ia_item_id)\
+                    .filter(File.job_id.isnot(None))
 
-            stats_daily_model = self._shelf[stats_daily_key]
+                for size, in rows:
+                    total_size += size
 
-            if identifier in stats_daily_model.item_ids:
-                continue
+                session.execute(
+                    insert(DailyStat).prefix_with('OR IGNORE'),
+                    {'date': date}
+                )
 
-            stats_daily_model.item_ids.add(identifier)
+                query = update(DailyStat)\
+                    .values({'size': DailyStat.size + total_size})\
+                    .where(DailyStat.date == date)
+                session.execute(query)
 
-            for filename, size in item_model.files:
-                filename_info = parse_filename(filename)
+    @gen.coroutine
+    def populate_json_files(self):
+        with self._session() as session:
+            query = session.query(File.ia_item_id, File.filename, File.job_id)\
+                .filter(File.filename.endswith('.json'))\
+                .filter(File.job_id.isnot(None))
 
-                if not filename_info:
+            for identifier, filename, job_id in query:
+                json_id = filename.replace('.json', '')
+
+                if session.query(JSONMetadata.id).filter_by(id=json_id).scalar():
                     continue
 
-                stats_daily_model.size += size
+                response = yield self._api.download_item_file(identifier, filename)
 
-            self._shelf[stats_daily_key] = stats_daily_model
+                try:
+                    doc = json.loads(response.body.decode('utf-8', 'replace'))
+                except ValueError:
+                    _logger.exception('JSON error!')
+                    continue
 
-        self._shelf.sync()
+                url = doc.get('url')
 
-    def get_keys(self, namespace):
-        namespace_key = '{}:'.format(namespace)
-        for key in self._shelf.keys():
-            if key.startswith(namespace_key):
-                yield key, key[len(namespace_key):]
+                query = insert(JSONMetadata)
+                values = {
+                    'id': json_id,
+                    'job_id': job_id,
+                    'url': url,
+                    'started_by': doc.get('started_by')
+                }
+                session.execute(query, [values])
 
-    def iter_objects(self, namespace):
-        namespace_key = '{}:'.format(namespace)
-        for key in self._shelf.keys():
-            if key.startswith(namespace_key):
-                yield key[len(namespace_key):], self._shelf[key]
+                if job_id and url:
+                    query = update(Job)\
+                        .values({'url': url}).where(Job.id == job_id)
+                    session.execute(query)
 
-    def get_object(self, namespace, key):
-        return self._shelf['{}:{}'.format(namespace, key)]
+                session.commit()
 
-    def item_keys(self):
-        return self.get_keys('item')
+    def get_all_item_names(self):
+        with self._session() as session:
+            return [row.id for row in session.query(IAItem.id)]
 
-    def get_item(self, identifier):
-        return self.get_object('item', identifier)
+    def get_item_files(self, identifier):
+        with self._session() as session:
+            rows = session.query(File.filename, File.size, File.job_id)\
+                .filter_by(ia_item_id=identifier)
+            return rows
 
-    def job_keys(self):
-        return self.get_keys('job')
+    def get_all_jobs_starting_with(self, char):
+        with self._session() as session:
+            rows = session.query(Job.id, Job.domain, Job.url)\
+                .filter(Job.id.startswith(char))
+            return rows
 
-    def get_job(self, identifier):
-        return self.get_object('job', identifier)
+    def get_job_files(self, job_id):
+        with self._session() as session:
+            rows = session.query(File.ia_item_id, File.filename, File.size)\
+                .filter_by(job_id=job_id)
+            return rows
 
-    def domain_keys(self):
-        return self.get_keys('domain')
+    def get_job_url(self, job_id):
+        with self._session() as session:
+            return session.query(Job.url).filter_by(id=job_id).scalar()
 
-    def get_domain(self, domain):
-        return self.get_object('domain', domain)
+    def get_all_domains_starting_with(self, char):
+        with self._session() as session:
+            rows = session.query(Job.domain)\
+                .filter(Job.domain.startswith(char))\
+                .group_by(Job.domain)
+            return [row.domain for row in rows]
+
+    def get_jobs_by_domain(self, domain):
+        with self._session() as session:
+            rows = session.query(Job.id, Job.url)\
+                .filter_by(domain=domain)
+            return rows
+
+    def get_daily_stats(self):
+        with self._session() as session:
+            rows = session.query(DailyStat.date, DailyStat.size)
+            return rows
 
     def search(self, query):
         query = query.lower()
         query = re.sub(r'https?://|www\.|[^\w.-]', '', query)
         ident_query = query[:5]
 
-        for key, domain in self.domain_keys():
-            if query in domain:
-                yield 'domain', domain
+        with self._session() as session:
+            rows = session.query(Job.domain)\
+                .filter(Job.domain.contains(query))\
+                .group_by('domain')
 
-        for key, job_ident in self.job_keys():
-            if ident_query in job_ident:
-                yield 'job', job_ident
+            for row in rows:
+                yield 'domain', row.domain
+
+            rows = session.query(Job.id).filter_by(id=ident_query)
+
+            for row in rows:
+                yield 'job', row.id
 
     def get_no_json_jobs(self):
-        for key, job_ident in self.job_keys():
-            job_model = self.get_job(job_ident)
+        with self._session() as session:
+            rows = session.query(Job.id, Job.domain)\
+                .filter_by(jsons=0)
 
-            if job_model.jsons == 0:
-                yield job_ident, job_model
+            for row in rows:
+                yield row
+
+    def get_no_warc_jobs(self):
+        with self._session() as session:
+            rows = session.query(Job.id, Job.domain)\
+                .filter_by(warcs=0)
+
+            for row in rows:
+                yield row
 
 
 class API(object):
     SEARCH_URL = 'https://archive.org/advancedsearch.php'
     ITEM_URL = 'https://archive.org/details/'
+    DOWNLOAD_URL = 'https://archive.org/download/'
 
     def __init__(self):
         self._client = tornado.httpclient.AsyncHTTPClient()
@@ -286,14 +403,14 @@ class API(object):
         for page in itertools.count(1):
             url = tornado.httputil.url_concat(self.SEARCH_URL, {
                 'q': 'collection:archivebot',
-                'fl[]': 'identifier,publicdate',
+                'fl[]': 'identifier,publicdate,imagecount',
                 'sort[]': 'addeddate asc',
                 'output': 'json',
                 'rows': '100',
                 'page': str(page),
             })
 
-            _logger.debug('Fetch %s', url)
+            _logger.info('Fetch %s', url)
 
             response = yield self._client.fetch(url)
             response.rethrow()
@@ -306,7 +423,8 @@ class API(object):
 
             for result in results:
                 item_identifiers.append(
-                    (result['identifier'], result['publicdate'])
+                    (result['identifier'], result['publicdate'],
+                     result.get('imagecount'))
                 )
 
         raise gen.Return(item_identifiers)
@@ -318,7 +436,7 @@ class API(object):
             'output': 'json'
         })
 
-        _logger.debug('Fetch %s', url)
+        _logger.info('Fetch %s', url)
 
         response = yield self._client.fetch(url)
         response.rethrow()
@@ -332,8 +450,19 @@ class API(object):
 
         raise gen.Return(files)
 
+    @gen.coroutine
+    def download_item_file(self, identifier, filename):
+        url = '{}/{}/{}'.format(self.DOWNLOAD_URL, identifier, filename)
 
-JOB_FILENAME_RE = re.compile(r'([\w.-]+)-(inf|shallow)-(\d{8})-(\d{6})-?(\w{5})?-?(aborted)?.*\.(json|warc\.gz)')
+        _logger.info('Fetch %s', url)
+
+        response = yield self._client.fetch(url)
+        response.rethrow()
+
+        raise gen.Return(response)
+
+
+JOB_FILENAME_RE = re.compile(r'([\w. -]+)-(inf|shallow)-(\d{8})-(\d{6})-?(\w{5})?-?(aborted)?.*\.(json|warc\.gz)')
 
 
 def parse_filename(filename):

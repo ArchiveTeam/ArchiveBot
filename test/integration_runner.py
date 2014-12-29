@@ -107,6 +107,7 @@ def main():
 
     script_dir = os.path.dirname(__file__)
     bot_script = os.path.join(script_dir, 'run_bot.sh')
+    firehose_script = os.path.join(script_dir, 'run_firehose.sh')
     dashboard_script = os.path.join(script_dir, 'run_dashboard.sh')
     pipeline_script = os.path.join(script_dir, 'run_pipeline.sh')
     cogs_script = os.path.join(script_dir, 'run_cogs.sh')
@@ -124,6 +125,7 @@ def main():
     print()
 
     bot_proc = subprocess.Popen([bot_script], preexec_fn=os.setpgrp)
+    firehose_proc = subprocess.Popen([firehose_script], preexec_fn=os.setpgrp)
     dashboard_proc = subprocess.Popen([dashboard_script], preexec_fn=os.setpgrp)
     pipeline_proc = subprocess.Popen([pipeline_script], preexec_fn=os.setpgrp)
     cogs_proc = subprocess.Popen([cogs_script], preexec_fn=os.setpgrp)
@@ -131,7 +133,7 @@ def main():
         ['python3.4', '-m', 'huhhttp', '--port', '8866'],
         preexec_fn=os.setpgrp
     )
-    all_procs = [bot_proc, dashboard_proc, pipeline_proc, cogs_proc, web_proc]
+    all_procs = [bot_proc, firehose_proc, dashboard_proc, pipeline_proc, cogs_proc, web_proc]
 
     @atexit.register
     def cleanup():
@@ -159,6 +161,7 @@ def main():
         cogs_proc.poll()
 
         assert bot_proc.returncode is None, bot_proc.returncode
+        assert firehose_proc.returncode is None, firehose_proc.returncode
         assert dashboard_proc.returncode is None, dashboard_proc.returncode
         assert pipeline_proc.returncode is None, pipeline_proc.returncode
         assert web_proc.returncode is None, web_proc.returncode

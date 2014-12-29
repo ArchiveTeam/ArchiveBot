@@ -1,0 +1,37 @@
+#!/usr/bin/env ruby
+
+require File.expand_path('../lib/archive_bot/zmq_utils', __FILE__)
+
+require 'ffi-rzmq'
+
+include ArchiveBot::ZmqUtils
+
+if !ENV['FIREHOSE_SOCKET_URL']
+  abort 'FIREHOSE_SOCKET_URL is not set'
+end
+
+context = ZMQ::Context.create(1)
+raise 'unable to create ZeroMQ context' unless context
+
+socket = context.socket(ZMQ::SUB)
+zmq_error_check(socket.setsockopt(ZMQ::SUBSCRIBE, ''))
+zmq_error_check(socket.setsockopt(ZMQ::LINGER, 1))
+
+if !zmq_ok?(socket.connect(ENV['FIREHOSE_SOCKET_URL']))
+  raise "unable to connect to #{ENV['FIREHOSE_SOCKET_URL']}"
+end
+
+cleanup = ->(*){
+  zmq_error_check(socket.close)
+  context.terminate
+  exit 0
+}
+
+trap('TERM', &cleanup)
+trap('INT', &cleanup)
+
+loop do
+  buf = ''
+  rc = socket.recv_string(buf)
+  puts buf
+end

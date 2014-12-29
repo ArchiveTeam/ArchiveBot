@@ -1,7 +1,7 @@
 module CommandPatterns
   AC = %r{([^\s]+)(?:\s+(.+))?}
   IDENT = %r{[0-9a-z]+}
-  DELAY_SPEC = %r{[\d\.]+}
+  DELAY_SPEC = %r{[\d]+}
 
   ARCHIVE           = %r{\A(?:\!a|\!archive|\!firstworldproblems)(?!\s+<)\s+#{AC}\s*\Z}
   ARCHIVE_FILE      = %r{\A(?:\!a|\!archive|\!firstworldproblems)\s+<\s+#{AC}\s*\Z}

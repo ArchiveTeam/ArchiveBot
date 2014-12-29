@@ -259,17 +259,45 @@ http://docs.python.org/3/howto/regex.html#regex-howto
 
 http://docs.python.org/3/library/re.html#regular-expression-syntax
 
-To ignore everything on domain1.com, use pattern
-``^https?://domain1\.com/``
+Two strings, ``{primary_url}`` and ``{primary_netloc}``, have special meaning.
 
-To ignore everything on domain1.com and its subdomains, use pattern
-``^https?://([^/]+\.)?domain1\.com/``
+``{primary_url}`` expands to the top-level URL.  For ``!archive`` jobs, this is
+the initial URL.  For ``!archiveonly < FILE`` jobs, ``{primary_url}`` is the
+top-level URL that owns the descendant being archived.
 
-To ignore everything *except* URLs on domain1.com or domain2.com,
-use pattern ``^(?!https?://(domain1\.com|domain2\.com)/)``
+``{primary_netloc}`` is the auth/host/port section of ``{primary_url}``.
 
-To keep subdomains on domain1.com as well, use pattern
-``^(?!https?://(([^/]+\.)?domain1\.com|domain2\.com)/)``
+Examples
+++++++++
+
+1.  To ignore everything on domain1.com and its subdomains, use pattern
+    ``^https?://([^/]+\.)?domain1\.com/``
+
+2.  To ignore everything *except* URLs on domain1.com or domain2.com,
+    use pattern ``^(?!https?://(domain1\.com|domain2\.com)/)``
+
+3.  To keep subdomains on domain1.com as well, use pattern
+    ``^(?!https?://(([^/]+\.)?domain1\.com|domain2\.com)/)``
+
+4.  For ``!archive`` jobs on Tumblrs, the following pattern ignores all URLs
+    except the initial URL, sub-URLs of the initial URL, and Tumblr media/asset
+    servers:
+    ``^http://(?!({primary_netloc}|\d+\.media\.tumblr\.com|assets\.tumblr\.com)).*``
+
+5.  Say you have this URL file::
+
+        http://www.example.com/foo.html
+        http://www.bar.org:8080/qux.html
+
+    and you submit it as an ``!archiveonly < FILE`` job.
+
+    When retrieving requisites of ``http://www.example.com/foo.html``,
+    ``{primary_url}`` will be ``http://www.example.com/foo.html`` and
+    ``{primary_netloc}`` will be ``www.example.com``.
+
+    When retriving requisites of ``http://www.bar.org:8080/qux.html```,
+    ``{primary_url}`` will be ``http://www.bar.org:8080/qux.html`` and
+    ``{primary_netloc}`` will be ``www.bar.org:8080``.
 
 
 unignore

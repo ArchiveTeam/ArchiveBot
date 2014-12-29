@@ -11,10 +11,14 @@
     <table>
         <tr>
             <th>Job Identifier</th>
+            <th>Domain</th>
+            <th>URL</th>
         </tr>
-        {% for identifier in identifiers %}
+        {% for identifier, domain, url in rows %}
             <tr>
                 <td><a href="{{ reverse_url('job', identifier) }}">{{ identifier }}</a></td>
+                <td>{{ domain }}</td>
+                <td>{{ url or '' }}</td>
             </tr>
         {% end %}
     </table>

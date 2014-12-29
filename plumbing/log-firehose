@@ -2,14 +2,65 @@
 
 require File.expand_path('../lib/archive_bot/redis', __FILE__)
 require File.expand_path('../lib/archive_bot/log_aggregator', __FILE__)
+require File.expand_path('../lib/archive_bot/zmq_utils', __FILE__)
 
 require 'yajl'
+require 'ffi-rzmq'
+
+##
+# Wraps a ZeroMQ socket with operations expected by ArchiveBot::LogAggregator.
+class ZeroMQIO
+  def initialize(socket)
+    @socket = socket
+  end
+
+  def puts(string)
+    ret = @socket.send_string(string)
+    raise 'unable to publish log message' unless zmq_ok?(ret)
+  end
+
+  def flush
+  end
+end
 
 include ArchiveBot::Redis
+include ArchiveBot::ZmqUtils
+
+# ---------------------------------------------------------------------------
+# PUBLISH SOCKET
+# ---------------------------------------------------------------------------
+
+if !ENV['FIREHOSE_SOCKET_URL']
+  abort 'FIREHOSE_SOCKET_URL is not set'
+end
+
+context = ZMQ::Context.create(1)
+raise 'unable to create ZeroMQ context' unless context
+
+socket = context.socket(ZMQ::PUB)
+zmq_error_check(socket.setsockopt(ZMQ::LINGER, 1))
+
+if !zmq_ok?(socket.bind(ENV['FIREHOSE_SOCKET_URL']))
+  raise "unable to bind to #{ENV['FIREHOSE_SOCKET_URL']}"
+end
+
+cleanup = ->(*){
+  zmq_error_check(socket.close)
+  context.terminate
+  exit 0
+}
+
+trap('TERM', &cleanup)
+trap('INT', &cleanup)
+
+agg = ArchiveBot::LogAggregator.new(ZeroMQIO.new(socket))
+
+# ---------------------------------------------------------------------------
+# JSON PARSER / REDIS CONNECTION
+# ---------------------------------------------------------------------------
 
 r = make_redis
 
-agg = ArchiveBot::LogAggregator.new($stdout)
 p = Yajl::Parser.new
 p.on_parse_complete = agg.method(:output)
 
@@ -19,6 +70,10 @@ def unbroadcasted_log_entries(job, r)
 
   r.zrangebyscore(log_key, "(#{start}", '+inf', with_scores: true)
 end
+
+# ---------------------------------------------------------------------------
+# LOOP
+# ---------------------------------------------------------------------------
 
 $stdin.each_line do |line|
   job_key = line.chomp
