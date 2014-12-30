@@ -29,11 +29,19 @@ class TestIgnoracle(unittest.TestCase):
 
         self.assertEqual(result, pattern)
 
-    def test_honors_empty_brace_pairs(self):
+    def test_permits_empty_brace_pairs(self):
         pattern = '{primary_netloc}{}/foo\.css\?{}'
         self.oracle.set_patterns([pattern])
 
         result = self.oracle.ignores('http://www.example.com{}/foo.css?{}body=1', primary_netloc='www.example.com')
+
+        self.assertEqual(result, pattern)
+
+    def test_permits_empty_brace_pairs_and_regex_repetitions(self):
+        pattern = '{primary_netloc}{1}/foo\.css\?{}'
+        self.oracle.set_patterns([pattern])
+
+        result = self.oracle.ignores('http://www.example.com/foo.css?{}body=1', primary_netloc='www.example.com')
 
         self.assertEqual(result, pattern)
 
