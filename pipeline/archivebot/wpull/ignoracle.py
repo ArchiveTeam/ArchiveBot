@@ -52,7 +52,8 @@ class Ignoracle(object):
 
         for pattern in self.patterns:
             try:
-                expanded = pattern.format(*pos_placeholders, **D({'primary_url': pu, 'primary_netloc': ph}))
+                expanded = pattern.replace('{primary_url}', pu)
+                expanded = expanded.replace('{primary_netloc}', ph)
                 match = re.search(expanded, url)
 
                 if match:
