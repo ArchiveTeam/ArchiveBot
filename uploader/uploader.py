@@ -4,35 +4,17 @@ from __future__ import print_function
 
 import os
 import time
-import fcntl
-import errno
 import subprocess
 import sys
 
 WAIT = 10
 
-class CannotLock(Exception):
-    pass
 
-
-def acquire_lock(fname):
-    """
-    Acquires an exclusive lock on `fname`, which will be truncated to a
-    0-byte file.
-
-    To keep holding the lock, make sure you keep a reference to the
-    returned file object.
-    """
-    f = open(fname, 'wb')
+def try_mkdir(path):
     try:
-        fcntl.lockf(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
-    except OSError as e:
-        if e.errno not in (errno.EACCES, errno.EAGAIN):
-            # Error was not locking-related, so re-raise.
-            # See https://docs.python.org/3/library/fcntl.html#fcntl.lockf
-            raise
-        raise CannotLock(fname)
-    return f
+        os.mkdir(path)
+    except OSError:
+        pass
 
 
 def should_upload(basename):
@@ -58,12 +40,6 @@ def main():
             "remove files after uploading them, and you might be uploading "
             "to the same directory")
 
-    try:
-        # Do not remove this local even if pyflakes complains about it
-        lockfile = acquire_lock(os.path.join(directory, ".uploader.lock"))
-    except CannotLock:
-        raise RuntimeError("Another uploader is uploading from %s" % (directory,))
-
     print("CHECK THE UPLOAD TARGET: %s" % (url,))
     print()
     print("Upload target must reliably store data")
@@ -71,20 +47,31 @@ def main():
     print("Hit CTRL-C immediately if upload target is incorrect")
     print()
 
+    uploading_dir = os.path.join(directory, "_uploading")
+    try_mkdir(uploading_dir)
+
     while True:
         print("Waiting %d seconds" % (WAIT,))
         time.sleep(WAIT)
 
         fnames = sorted(list(f for f in os.listdir(directory) if should_upload(f)))
         if len(fnames):
-            fname = os.path.join(directory, fnames[0])
-            print("Uploading %r" % (fname,))
-            exit = subprocess.call([
-                "rsync", "-av", "--timeout=300", "--contimeout=300",
-                "--progress", fname, url])
-            if exit == 0:
-                print("Removing %r" % (fname,))
-                os.remove(fname)
+            basename = fnames[0]
+            fname_d = os.path.join(directory, basename)
+            fname_u = os.path.join(uploading_dir, basename)
+            assert not os.path.exists(fname_u), "%r already exists - this should not happen" % (fname_u,)
+            try:
+                os.rename(fname_d, fname_u)
+            except OSError:
+                print("Could not rename %r - another uploader probably grabbed it" % (fname_d,))
+            else:
+                print("Uploading %r" % (fname_u,))
+                exit = subprocess.call([
+                    "rsync", "-av", "--timeout=300", "--contimeout=300",
+                    "--progress", fname_u, url])
+                if exit == 0:
+                    print("Removing %r" % (fname_u,))
+                    os.remove(fname_u)
         else:
             print("Nothing to upload")
 
