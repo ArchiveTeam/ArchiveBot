@@ -58,9 +58,33 @@ class Job {
     public var r5xx: Int;
     public var rUnknown: Int;
     public var timestamp : Int;
+    public var responsePerSecond : Float;
+    public var totalResponses : Int;
+    public var totalItems : Int;
+
+    private var downloadCountBucket : Array<Int> = [for (dummy in 0...62) 0];
+    private var lastDownloadCount : Int;
+
 
     public function new(ident: String) {
         this.ident = ident;
+    }
+
+    public function fillDownloadCountBucket() {
+        var newDownloads = itemsDownloaded - lastDownloadCount;
+        lastDownloadCount = itemsDownloaded;
+
+        var currentSecond = Date.now().getSeconds();
+        downloadCountBucket[currentSecond] = newDownloads;
+    }
+
+    public function computeSpeed() : Float {
+        var sum = 0;
+        for (count in downloadCountBucket) {
+            sum += count;
+        }
+
+        return sum / 60.0;
     }
 }
 
@@ -306,9 +330,15 @@ class Dashboard {
         logLine.pattern = logEvent.pattern;
         logLine.wgetCode = logEvent.wget_code;
 
+        job.totalResponses = job.r1xx + job.r2xx + job.r3xx + job.r4xx + job.r1xx + job.errorCount;
+        job.totalItems = job.itemsDownloaded + job.itemsQueued;
+
         if (job.logLines.length >= maxScrollback) {
             job.logLines.shift();
         }
+
+        job.fillDownloadCountBucket();
+        job.responsePerSecond = job.computeSpeed();
 
         job.logLines.push(logLine);
     }

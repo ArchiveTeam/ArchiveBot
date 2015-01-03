@@ -6,12 +6,42 @@ LogLine.prototype = {
 	__class__: LogLine
 };
 var Job = function(ident) {
+	this.downloadCountBucket = (function($this) {
+		var $r;
+		var _g = [];
+		{
+			var _g1 = 0;
+			while(_g1 < 62) {
+				var dummy = _g1++;
+				_g.push(0);
+			}
+		}
+		$r = _g;
+		return $r;
+	}(this));
 	this.logLines = [];
 	this.ident = ident;
 };
 Job.__name__ = true;
 Job.prototype = {
-	__class__: Job
+	fillDownloadCountBucket: function() {
+		var newDownloads = this.itemsDownloaded - this.lastDownloadCount;
+		this.lastDownloadCount = this.itemsDownloaded;
+		var currentSecond = new Date().getSeconds();
+		this.downloadCountBucket[currentSecond] = newDownloads;
+	}
+	,computeSpeed: function() {
+		var sum = 0;
+		var _g = 0;
+		var _g1 = this.downloadCountBucket;
+		while(_g < _g1.length) {
+			var count = _g1[_g];
+			++_g;
+			sum += count;
+		}
+		return sum / 60.0;
+	}
+	,__class__: Job
 };
 var Dashboard = function(hostname,maxScrollback,showNicks) {
 	this.jobMap = new haxe.ds.StringMap();
@@ -200,7 +230,11 @@ Dashboard.prototype = {
 		logLine.message = logEvent.message;
 		logLine.pattern = logEvent.pattern;
 		logLine.wgetCode = logEvent.wget_code;
+		job.totalResponses = job.r1xx + job.r2xx + job.r3xx + job.r4xx + job.r1xx + job.errorCount;
+		job.totalItems = job.itemsDownloaded + job.itemsQueued;
 		if(job.logLines.length >= this.maxScrollback) job.logLines.shift();
+		job.fillDownloadCountBucket();
+		job.responsePerSecond = job.computeSpeed();
 		job.logLines.push(logLine);
 	}
 	,showError: function(message) {

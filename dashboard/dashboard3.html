@@ -44,7 +44,7 @@ html, body {
 }
 
 #dashboardTable {
-	table-layout: fixed; 
+	table-layout: fixed;
 }
 
 .tablesort {
@@ -106,6 +106,11 @@ a.job-log-line-url {
 .job-detail-handle-active {
 	border-bottom: 0.2em groove mediumaquamarine;
 	border-radius: 0.5em;
+}
+
+.job-progress {
+	height: 0.5em;
+	margin-bottom: 0.5em;
 }
 </style>
 </head>
@@ -190,39 +195,36 @@ a.job-log-line-url {
 						<p title="Speed">
 							<span ng-bind="job.concurrency"></span> with
 							{{ job.delayMin | number }}-{{ job.delayMax | number }} ms delay.
-							<!--  TODO speed goes here -->
+							{{ job.responsePerSecond | number }} resp/sec.
+							{{ job.suppressIgnoreReports ? 'Hiding' : 'Showing' }} ignores.
 						</p>
-						<p title="Ignore Reports">{{ job.suppressIgnoreReports ? 'Hiding' : 'Showing' }} ignores.</p>
 
-						<table class="table table-condensed table-striped table-bordered">
-							<tr>
-								<th>100s</th>
-								<td class="numeric" ng-bind="job.r1xx|number"></span>
-							</tr>
-							<tr>
-								<th>200s</th>
-								<td class="numeric" ng-bind="job.r2xx|number"></span>
-							</tr>
-							<tr>
-								<th>300s</th>
-								<td class="numeric" ng-bind="job.r3xx|number"></span>
-							</tr>
-							<tr>
-								<th>400s</th>
-								<td class="numeric" ng-bind="job.r4xx|number"></span>
-							</tr>
-							<tr>
-								<th>500s</th>
-								<td class="numeric" ng-bind="job.r4xx|number"></span>
-							</tr>
-							<tr>
-								<th>Errs</th>
-								<td class="numeric" ng-bind="job.errorCount|number"></span>
-							</tr>
-						</table>
+						<div class="progress job-progress" title="Progress">
+							<div class="progress-bar"
+								style="width: {{ job.r1xx / (job.totalResponses + job.itemsQueued) * 100 }}%;">
+							</div>
+							<div class="progress-bar progress-bar-success"
+								style="width: {{ job.r2xx / (job.totalResponses + job.itemsQueued) * 100 }}%;">
+							</div>
+							<div class="progress-bar progress-bar-info"
+								style="width: {{ job.r3xx / (job.totalResponses + job.itemsQueued) * 100 }}%;">
+							</div>
+							<div class="progress-bar progress-bar-warning"
+								style="width: {{ job.r4xx / (job.totalResponses + job.itemsQueued) * 100 }}%;">
+							</div>
+							<div class="progress-bar progress-bar-danger"
+								style="width: {{ job.r5xx / (job.totalResponses + job.itemsQueued) * 100 }}%;">
+							</div>
+							<div class="progress-bar progress-bar-danger progress-bar-striped"
+								style="width: {{ job.errorCount / (job.totalResponses + job.itemsQueued) * 100 }}%;">
+							</div>
+							<span class="sr-only">
+								{{ job.itemsDownloaded / job.totalItems * 100 | number}}% complete.
+							</span>
+						</div>
 
 						<p>
-							Queued <span ng-bind="::job.queuedAt * 1000|date:short"></span> 
+							Queued <span ng-bind="::job.queuedAt * 1000|date:'medium'"></span> 
 							<span ng-if="::showNicks">by <span ng-bind="::job.startedBy"></span></span>.
 						</p>
 					</div>
