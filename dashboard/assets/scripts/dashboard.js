@@ -13,13 +13,14 @@ Job.__name__ = true;
 Job.prototype = {
 	__class__: Job
 };
-var Dashboard = function(hostname,maxScrollback) {
+var Dashboard = function(hostname,maxScrollback,showNicks) {
 	this.jobMap = new haxe.ds.StringMap();
 	this.jobs = [];
 	this.angular = angular;
 	var _g = this;
 	this.hostname = hostname;
 	this.maxScrollback = maxScrollback;
+	this.showNicks = showNicks;
 	this.app = this.angular.module("dashboardApp",[]);
 	var appConfig = ["$compileProvider",function(compileProvider) {
 		compileProvider.debugInfoEnabled(false);
@@ -48,6 +49,7 @@ var Dashboard = function(hostname,maxScrollback) {
 		scope.hideDetails = false;
 		scope.paused = false;
 		scope.sortParam = "startedAt";
+		scope.showNicks = showNicks;
 		_g.dashboardControllerScopeApply = Reflect.field(scope,"$apply").bind(scope);
 		scope.filterOperator = function(job) {
 			var query = scope.filterQuery;
@@ -74,10 +76,11 @@ Dashboard.getQueryArgs = function() {
 Dashboard.main = function() {
 	var args = Dashboard.getQueryArgs();
 	var hostname;
-	var maxScrollback = 100;
+	var maxScrollback = 20;
+	var showNicks = args.exists("showNicks");
 	if(args.exists("host")) hostname = args.get("host"); else hostname = window.location.host;
-	if(window.navigator.userAgent.indexOf("Mobi") == -1) maxScrollback = 1000;
-	var dashboard = new Dashboard(hostname,maxScrollback);
+	if(window.navigator.userAgent.indexOf("Mobi") == -1) maxScrollback = 500;
+	var dashboard = new Dashboard(hostname,maxScrollback,showNicks);
 	dashboard.run();
 };
 Dashboard.parseInt = function(thing) {
@@ -94,6 +97,11 @@ Dashboard.prototype = {
 			_g.showError("Unable to load dashboard. Reload the page?");
 		};
 		request.onload = function(event1) {
+			if(request.status != 200) {
+				_g.showError("The server didn't respond correctly: " + request.status + " " + request.statusText);
+				return;
+			}
+			_g.showError(null);
 			var doc = JSON.parse(request.responseText);
 			var _g1 = 0;
 			while(_g1 < doc.length) {
@@ -101,7 +109,7 @@ Dashboard.prototype = {
 				++_g1;
 				_g.processLogEvent(logEvent);
 			}
-			_g.redraw();
+			_g.scheduleDraw();
 			_g.openWebSocket();
 		};
 		request.open("GET","http://" + this.hostname + "/logs/recent");
@@ -110,14 +118,40 @@ Dashboard.prototype = {
 	}
 	,openWebSocket: function() {
 		var _g = this;
+		if(this.websocket != null) return;
 		this.websocket = new WebSocket("ws://" + this.hostname + "/stream");
 		this.websocket.onmessage = function(message) {
+			_g.showError(null);
 			var doc = JSON.parse(message.data);
 			_g.processLogEvent(doc);
 		};
-		setInterval(function() {
-			if(!window.document.hidden && !_g.dashboardControllerScope.paused) _g.redraw();
-		},1000);
+		this.websocket.onclose = function(message1) {
+			if(_g.websocket == null) return;
+			_g.websocket = null;
+			_g.showError("Lost connection. Reconnecting...");
+			setTimeout(function() {
+				_g.openWebSocket();
+			},60000);
+		};
+		this.websocket.onerror = this.websocket.onclose;
+	}
+	,scheduleDraw: function(delayMS) {
+		if(delayMS == null) delayMS = 1000;
+		var _g = this;
+		this.drawTimerHandle = setTimeout(function() {
+			var delay = 1000;
+			if(!window.document.hidden && !_g.dashboardControllerScope.paused) {
+				var beforeDate = new Date();
+				_g.redraw();
+				var afterDate = new Date();
+				var difference = afterDate.getTime() - beforeDate.getTime();
+				if(difference > 10) {
+					delay += difference * 5;
+					delay = Math.min(delay,10000);
+				}
+			}
+			_g.scheduleDraw(delay);
+		},delayMS);
 	}
 	,processLogEvent: function(logEvent) {
 		var job;
@@ -152,6 +186,7 @@ Dashboard.prototype = {
 		job.startedAt = Dashboard.parseInt(jobData.started_at);
 		job.startedBy = jobData.started_by;
 		job.startedIn = jobData.started_in;
+		job.suppressIgnoreReports = jobData.suppress_ignore_reports;
 		job.timestamp = Dashboard.parseInt(logEvent.ts);
 		job.url = jobData.url;
 		job.warcSize = jobData.warc_size;
@@ -163,20 +198,24 @@ Dashboard.prototype = {
 		logLine.isWarning = logEvent.is_warning;
 		logLine.responseCode = logEvent.response_code;
 		logLine.message = logEvent.message;
+		logLine.pattern = logEvent.pattern;
 		logLine.wgetCode = logEvent.wget_code;
 		if(job.logLines.length >= this.maxScrollback) job.logLines.shift();
 		job.logLines.push(logLine);
 	}
 	,showError: function(message) {
-		if(message != null) console.log(message); else {
-		}
+		var element = window.document.getElementById("message_box");
+		if(message != null) {
+			element.style.display = "block";
+			element.innerText = message;
+		} else element.style.display = "none";
 	}
 	,redraw: function() {
 		this.dashboardControllerScopeApply();
 		this.scrollLogsToBottom();
 	}
 	,scrollLogsToBottom: function() {
-		var nodes = window.document.querySelectorAll(".job-log");
+		var nodes = window.document.querySelectorAll(".autoscroll");
 		var _g = 0;
 		while(_g < nodes.length) {
 			var node = nodes[_g];
@@ -430,6 +469,8 @@ Math.isNaN = function(i1) {
 String.prototype.__class__ = String;
 String.__name__ = true;
 Array.__name__ = true;
+Date.prototype.__class__ = Date;
+Date.__name__ = ["Date"];
 var Int = { __name__ : ["Int"]};
 var Dynamic = { __name__ : ["Dynamic"]};
 var Float = Number;

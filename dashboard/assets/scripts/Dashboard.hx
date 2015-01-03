@@ -10,6 +10,7 @@ import Reflect;
 import js.html.WebSocket;
 import js.html.Element;
 import Math;
+import Date;
 
 
 class LogLine {
@@ -21,6 +22,7 @@ class LogLine {
     public var timestamp : Int;
     public var responseCode : Int;
     public var message : String;
+    public var pattern: String;
 
     public function new() {
     }
@@ -73,10 +75,13 @@ class Dashboard {
     var dashboardControllerScopeApply : Dynamic;
     var maxScrollback : Int;
     var websocket : js.html.WebSocket;
+    var drawTimerHandle : Dynamic;
+    var showNicks : Bool;
 
-    public function new(hostname : String, maxScrollback : Int) {
+    public function new(hostname : String, maxScrollback : Int, showNicks : Bool) {
         this.hostname = hostname;
         this.maxScrollback = maxScrollback;
+        this.showNicks = showNicks;
 
         app = angular.module("dashboardApp", []);
 
@@ -114,6 +119,7 @@ class Dashboard {
                 scope.hideDetails = false;
                 scope.paused = false;
                 scope.sortParam = "startedAt";
+                scope.showNicks = showNicks;
                 dashboardControllerScopeApply = Reflect.field(scope, "$apply").bind(scope);
                 scope.filterOperator = function (job : Job) {
                     var query : String = scope.filterQuery;
@@ -144,7 +150,8 @@ class Dashboard {
     public static function main() {
         var args = getQueryArgs();
         var hostname;
-        var maxScrollback = 100;
+        var maxScrollback = 20;
+        var showNicks = args.exists("showNicks");
 
         if (args.exists("host")) {
             hostname = args.get("host");
@@ -153,10 +160,10 @@ class Dashboard {
         }
 
         if (Browser.navigator.userAgent.indexOf("Mobi") == -1) {
-            maxScrollback = 1000;
+            maxScrollback = 500;
         }
 
-        var dashboard = new Dashboard(hostname, maxScrollback);
+        var dashboard = new Dashboard(hostname, maxScrollback, showNicks);
         dashboard.run();
     }
 
@@ -172,14 +179,20 @@ class Dashboard {
         };
 
         request.onload = function (event : Dynamic) {
+            if (request.status != 200) {
+                showError('The server didn\'t respond correctly: ${request.status} ${request.statusText}');
+                return;
+            }
+
+            showError(null);
+
             var doc : Array<Dynamic> = Json.parse(request.responseText);
 
             for (logEvent in doc) {
                 processLogEvent(logEvent);
             }
 
-            redraw();
-
+            scheduleDraw();
             openWebSocket();
         };
 
@@ -189,20 +202,53 @@ class Dashboard {
     }
 
     private function openWebSocket() {
+        if (websocket != null) {
+            return;
+        }
+
         websocket = new WebSocket('ws://$hostname/stream');
 
         websocket.onmessage = function (message : Dynamic) {
+            showError(null);
+
             var doc : Dynamic = Json.parse(message.data);
             processLogEvent(doc);
         };
 
-        untyped __js__("setInterval")(function () {
-            if (!Browser.document.hidden && !dashboardControllerScope.paused) {
-                redraw();
+        websocket.onclose = function (message : Dynamic) {
+            if (websocket == null) {
+                return;
             }
-        }, 1000);
 
-        // TODO: handle reconnecting
+            websocket = null;
+            showError("Lost connection. Reconnecting...");
+
+            untyped __js__("setTimeout")(function () {
+                openWebSocket();
+            }, 60000);
+        }
+        websocket.onerror = websocket.onclose;
+    }
+
+    private function scheduleDraw(delayMS : Int = 1000) {
+        drawTimerHandle = untyped __js__("setTimeout")(function () {
+            var delay = 1000;
+
+            if (!Browser.document.hidden && !dashboardControllerScope.paused) {
+                var beforeDate = Date.now();
+                redraw();
+                var afterDate = Date.now();
+
+                var difference = afterDate.getTime() - beforeDate.getTime();
+
+                if (difference > 10) {
+                    delay += difference * 5;
+                    delay = Math.min(delay, 10000);
+                }
+            }
+
+            scheduleDraw(delay);
+        }, delayMS);
     }
 
     private function processLogEvent(logEvent : Dynamic) {
@@ -244,6 +290,7 @@ class Dashboard {
         job.startedAt = parseInt(jobData.started_at);
         job.startedBy = jobData.started_by;
         job.startedIn = jobData.started_in;
+        job.suppressIgnoreReports = jobData.suppress_ignore_reports;
         job.timestamp = parseInt(logEvent.ts);
         job.url = jobData.url;
         job.warcSize = jobData.warc_size;
@@ -256,6 +303,7 @@ class Dashboard {
         logLine.isWarning = logEvent.is_warning;
         logLine.responseCode = logEvent.response_code;
         logLine.message = logEvent.message;
+        logLine.pattern = logEvent.pattern;
         logLine.wgetCode = logEvent.wget_code;
 
         if (job.logLines.length >= maxScrollback) {
@@ -266,11 +314,13 @@ class Dashboard {
     }
 
     private function showError(message : String) {
-        // TODO: show errors somewhere
-        if (message != null) {
-            trace(message);
-        } else {
+        var element = Browser.document.getElementById("message_box");
 
+        if (message != null) {
+            element.style.display = "block";
+            element.innerText = message;
+        } else {
+            element.style.display = "none";
         }
     }
 
@@ -280,7 +330,7 @@ class Dashboard {
     }
 
     private function scrollLogsToBottom() {
-        var nodes = Browser.document.querySelectorAll(".job-log");
+        var nodes = Browser.document.querySelectorAll(".autoscroll");
         for (node in nodes) {
             var element : Element = cast(node, Element);
             element.scrollTop += 1000;
