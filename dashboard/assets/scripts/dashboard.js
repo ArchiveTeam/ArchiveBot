@@ -6,6 +6,7 @@ LogLine.prototype = {
 	__class__: LogLine
 };
 var Job = function(ident) {
+	this.pendingLogLines = 0;
 	this.downloadCountBucket = (function($this) {
 		var $r;
 		var _g = [];
@@ -23,6 +24,9 @@ var Job = function(ident) {
 	this.ident = ident;
 };
 Job.__name__ = true;
+Job.parseInt = function(thing) {
+	if(Type["typeof"](thing) == ValueType.TInt || Type["typeof"](thing) == ValueType.TFloat) return thing; else if(thing != null) return Std.parseInt(thing); else return null;
+};
 Job.prototype = {
 	fillDownloadCountBucket: function() {
 		var newDownloads = this.itemsDownloaded - this.lastDownloadCount;
@@ -41,9 +45,119 @@ Job.prototype = {
 		}
 		return sum / 60.0;
 	}
+	,consumeLogEvent: function(logEvent,maxScrollback) {
+		var jobData = logEvent.job_data;
+		this.aborted = jobData.aborted;
+		this.bytesDownloaded = Job.parseInt(jobData.bytes_downloaded);
+		this.concurrency = Job.parseInt(jobData.concurrency);
+		this.delayMax = Job.parseInt(jobData.delay_max);
+		this.delayMin = Job.parseInt(jobData.delay_min);
+		this.depth = jobData.depth;
+		this.errorCount = Job.parseInt(jobData.error_count);
+		this.finished = jobData.finished;
+		this.finishedAt = Job.parseInt(jobData.finished_at);
+		this.itemsDownloaded = Job.parseInt(jobData.items_downloaded);
+		this.itemsQueued = Job.parseInt(jobData.items_queued);
+		this.note = jobData.note;
+		this.pipelineId = jobData.pipeline_id;
+		this.queuedAt = Job.parseInt(jobData.queued_at);
+		this.r1xx = Job.parseInt(jobData.r1xx);
+		this.r2xx = Job.parseInt(jobData.r2xx);
+		this.r3xx = Job.parseInt(jobData.r3xx);
+		this.r4xx = Job.parseInt(jobData.r4xx);
+		this.r5xx = Job.parseInt(jobData.r5xx);
+		this.rUnknown = Job.parseInt(jobData.runk);
+		this.startedAt = Job.parseInt(jobData.started_at);
+		this.startedBy = jobData.started_by;
+		this.startedIn = jobData.started_in;
+		this.suppressIgnoreReports = jobData.suppress_ignore_reports;
+		this.timestamp = Job.parseInt(logEvent.ts);
+		this.url = jobData.url;
+		this.warcSize = jobData.warc_size;
+		var logLine = new LogLine();
+		logLine.type = logEvent.type;
+		logLine.url = logEvent.url;
+		logLine.timestamp = Job.parseInt(logEvent.ts);
+		logLine.isError = logEvent.is_error;
+		logLine.isWarning = logEvent.is_warning;
+		logLine.responseCode = logEvent.response_code;
+		logLine.message = logEvent.message;
+		logLine.pattern = logEvent.pattern;
+		logLine.wgetCode = logEvent.wget_code;
+		this.totalResponses = this.r1xx + this.r2xx + this.r3xx + this.r4xx + this.r1xx + this.errorCount;
+		this.queueRemaining = this.itemsQueued - this.itemsDownloaded;
+		if(this.logLines.length >= maxScrollback) this.logLines.shift();
+		this.fillDownloadCountBucket();
+		this.responsePerSecond = this.computeSpeed();
+		this.logLines.push(logLine);
+		this.pendingLogLines += 1;
+	}
+	,drawPendingLogLines: function() {
+		var logElement = window.document.getElementById("job-log-" + this.ident);
+		var numToTrim = logElement.childElementCount - this.logLines.length;
+		console.log(numToTrim);
+		if(numToTrim > 0) {
+			var _g = 0;
+			while(_g < numToTrim) {
+				var dummy = _g++;
+				logElement.firstElementChild.remove();
+			}
+		}
+		var _g1 = 0;
+		var _g11 = this.logLines.slice(-this.pendingLogLines);
+		while(_g1 < _g11.length) {
+			var logLine = _g11[_g1];
+			++_g1;
+			var logLineDiv;
+			var _this = window.document;
+			logLineDiv = _this.createElement("div");
+			logLineDiv.className = "job-log-line";
+			if(logLine.responseCode == 200) logLineDiv.classList.add("text-success"); else if(logLine.isWarning) logLineDiv.classList.add("bg-warning"); else if(logLine.isError) logLineDiv.classList.add("bg-danger"); else if(logLine.message != null || logLine.pattern != null) logLineDiv.classList.add("text-muted");
+			if(logLine.responseCode > 0 || logLine.wgetCode != null) {
+				var element;
+				var _this1 = window.document;
+				element = _this1.createElement("span");
+				if(logLine.responseCode > 0) element.innerText = "" + logLine.responseCode; else element.innerText = "" + logLine.wgetCode;
+				logLineDiv.appendChild(element);
+				logLineDiv.appendChild(window.document.createTextNode(" "));
+			}
+			if(logLine.url != null) {
+				var element1;
+				var _this2 = window.document;
+				element1 = _this2.createElement("a");
+				element1.href = logLine.url;
+				element1.innerText = logLine.url;
+				element1.className = "job-log-line-url";
+				logLineDiv.appendChild(element1);
+			}
+			if(logLine.pattern != null) {
+				var element2;
+				var _this3 = window.document;
+				element2 = _this3.createElement("span");
+				element2.innerText = logLine.pattern;
+				element2.className = "text-warning";
+				logLineDiv.appendChild(window.document.createTextNode(" "));
+				logLineDiv.appendChild(element2);
+			}
+			if(logLine.message != null) {
+				var element3;
+				var _this4 = window.document;
+				element3 = _this4.createElement("span");
+				element3.innerText = logLine.message;
+				element3.className = "job-log-line-message";
+				logLineDiv.appendChild(element3);
+			}
+			logElement.appendChild(logLineDiv);
+			logElement.classList.add("autoscroll-dirty");
+			this.pendingLogLines = 0;
+		}
+	}
 	,__class__: Job
 };
-var Dashboard = function(hostname,maxScrollback,showNicks) {
+var Dashboard = function(hostname,maxScrollback,showNicks,drawInterval) {
+	if(drawInterval == null) drawInterval = 1000;
+	if(showNicks == null) showNicks = false;
+	if(maxScrollback == null) maxScrollback = 500;
 	this.jobMap = new haxe.ds.StringMap();
 	this.jobs = [];
 	this.angular = angular;
@@ -51,6 +165,7 @@ var Dashboard = function(hostname,maxScrollback,showNicks) {
 	this.hostname = hostname;
 	this.maxScrollback = maxScrollback;
 	this.showNicks = showNicks;
+	this.drawInterval = drawInterval;
 	this.app = this.angular.module("dashboardApp",[]);
 	var appConfig = ["$compileProvider",function(compileProvider) {
 		compileProvider.debugInfoEnabled(false);
@@ -80,6 +195,7 @@ var Dashboard = function(hostname,maxScrollback,showNicks) {
 		scope.paused = false;
 		scope.sortParam = "startedAt";
 		scope.showNicks = showNicks;
+		scope.drawInterval = drawInterval;
 		_g.dashboardControllerScopeApply = Reflect.field(scope,"$apply").bind(scope);
 		scope.filterOperator = function(job) {
 			var query = scope.filterQuery;
@@ -112,9 +228,6 @@ Dashboard.main = function() {
 	if(window.navigator.userAgent.indexOf("Mobi") == -1) maxScrollback = 500;
 	var dashboard = new Dashboard(hostname,maxScrollback,showNicks);
 	dashboard.run();
-};
-Dashboard.parseInt = function(thing) {
-	if(Type["typeof"](thing) == ValueType.TInt || Type["typeof"](thing) == ValueType.TFloat) return thing; else if(thing != null) return Std.parseInt(thing); else return null;
 };
 Dashboard.prototype = {
 	run: function() {
@@ -169,14 +282,14 @@ Dashboard.prototype = {
 		if(delayMS == null) delayMS = 1000;
 		var _g = this;
 		this.drawTimerHandle = setTimeout(function() {
-			var delay = 1000;
+			var delay = _g.dashboardControllerScope.drawInterval;
 			if(!window.document.hidden && !_g.dashboardControllerScope.paused) {
 				var beforeDate = new Date();
 				_g.redraw();
 				var afterDate = new Date();
 				var difference = afterDate.getTime() - beforeDate.getTime();
 				if(difference > 10) {
-					delay += difference * 5;
+					delay += difference * 2;
 					delay = Math.min(delay,10000);
 				}
 			}
@@ -192,50 +305,7 @@ Dashboard.prototype = {
 			this.jobs.push(job);
 			console.log("Load job " + ident);
 		} else job = this.jobMap.get(ident);
-		var jobData = logEvent.job_data;
-		job.aborted = jobData.aborted;
-		job.bytesDownloaded = Dashboard.parseInt(jobData.bytes_downloaded);
-		job.concurrency = Dashboard.parseInt(jobData.concurrency);
-		job.delayMax = Dashboard.parseInt(jobData.delay_max);
-		job.delayMin = Dashboard.parseInt(jobData.delay_min);
-		job.depth = jobData.depth;
-		job.errorCount = Dashboard.parseInt(jobData.error_count);
-		job.finished = jobData.finished;
-		job.finishedAt = Dashboard.parseInt(jobData.finished_at);
-		job.itemsDownloaded = Dashboard.parseInt(jobData.items_downloaded);
-		job.itemsQueued = Dashboard.parseInt(jobData.items_queued);
-		job.note = jobData.note;
-		job.pipelineId = jobData.pipeline_id;
-		job.queuedAt = Dashboard.parseInt(jobData.queued_at);
-		job.r1xx = Dashboard.parseInt(jobData.r1xx);
-		job.r2xx = Dashboard.parseInt(jobData.r2xx);
-		job.r3xx = Dashboard.parseInt(jobData.r3xx);
-		job.r4xx = Dashboard.parseInt(jobData.r4xx);
-		job.r5xx = Dashboard.parseInt(jobData.r5xx);
-		job.rUnknown = Dashboard.parseInt(jobData.runk);
-		job.startedAt = Dashboard.parseInt(jobData.started_at);
-		job.startedBy = jobData.started_by;
-		job.startedIn = jobData.started_in;
-		job.suppressIgnoreReports = jobData.suppress_ignore_reports;
-		job.timestamp = Dashboard.parseInt(logEvent.ts);
-		job.url = jobData.url;
-		job.warcSize = jobData.warc_size;
-		var logLine = new LogLine();
-		logLine.type = logEvent.type;
-		logLine.url = logEvent.url;
-		logLine.timestamp = Dashboard.parseInt(logEvent.ts);
-		logLine.isError = logEvent.is_error;
-		logLine.isWarning = logEvent.is_warning;
-		logLine.responseCode = logEvent.response_code;
-		logLine.message = logEvent.message;
-		logLine.pattern = logEvent.pattern;
-		logLine.wgetCode = logEvent.wget_code;
-		job.totalResponses = job.r1xx + job.r2xx + job.r3xx + job.r4xx + job.r1xx + job.errorCount;
-		job.totalItems = job.itemsDownloaded + job.itemsQueued;
-		if(job.logLines.length >= this.maxScrollback) job.logLines.shift();
-		job.fillDownloadCountBucket();
-		job.responsePerSecond = job.computeSpeed();
-		job.logLines.push(logLine);
+		job.consumeLogEvent(logEvent,this.maxScrollback);
 	}
 	,showError: function(message) {
 		var element = window.document.getElementById("message_box");
@@ -246,10 +316,17 @@ Dashboard.prototype = {
 	}
 	,redraw: function() {
 		this.dashboardControllerScopeApply();
+		var _g = 0;
+		var _g1 = this.jobs;
+		while(_g < _g1.length) {
+			var job = _g1[_g];
+			++_g;
+			if(!job.logPaused) job.drawPendingLogLines();
+		}
 		this.scrollLogsToBottom();
 	}
 	,scrollLogsToBottom: function() {
-		var nodes = window.document.querySelectorAll(".autoscroll");
+		var nodes = window.document.querySelectorAll(".autoscroll.autoscroll-dirty");
 		var _g = 0;
 		while(_g < nodes.length) {
 			var node = nodes[_g];
@@ -257,6 +334,7 @@ Dashboard.prototype = {
 			var element;
 			element = js.Boot.__cast(node , Element);
 			element.scrollTop += 1000;
+			element.classList.remove("autoscroll-dirty");
 		}
 	}
 	,__class__: Dashboard
