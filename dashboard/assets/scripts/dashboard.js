@@ -94,20 +94,12 @@ Job.prototype = {
 	}
 	,drawPendingLogLines: function() {
 		var logElement = window.document.getElementById("job-log-" + this.ident);
-		var numToTrim = logElement.childElementCount - this.logLines.length;
-		console.log(numToTrim);
-		if(numToTrim > 0) {
-			var _g = 0;
-			while(_g < numToTrim) {
-				var dummy = _g++;
-				logElement.firstElementChild.remove();
-			}
-		}
-		var _g1 = 0;
-		var _g11 = this.logLines.slice(-this.pendingLogLines);
-		while(_g1 < _g11.length) {
-			var logLine = _g11[_g1];
-			++_g1;
+		if(logElement == null) return;
+		var _g = 0;
+		var _g1 = this.logLines.slice(-this.pendingLogLines);
+		while(_g < _g1.length) {
+			var logLine = _g1[_g];
+			++_g;
 			var logLineDiv;
 			var _this = window.document;
 			logLineDiv = _this.createElement("div");
@@ -117,7 +109,7 @@ Job.prototype = {
 				var element;
 				var _this1 = window.document;
 				element = _this1.createElement("span");
-				if(logLine.responseCode > 0) element.innerText = "" + logLine.responseCode; else element.innerText = "" + logLine.wgetCode;
+				if(logLine.responseCode > 0) element.textContent = "" + logLine.responseCode; else element.textContent = "" + logLine.wgetCode;
 				logLineDiv.appendChild(element);
 				logLineDiv.appendChild(window.document.createTextNode(" "));
 			}
@@ -126,7 +118,7 @@ Job.prototype = {
 				var _this2 = window.document;
 				element1 = _this2.createElement("a");
 				element1.href = logLine.url;
-				element1.innerText = logLine.url;
+				element1.textContent = logLine.url;
 				element1.className = "job-log-line-url";
 				logLineDiv.appendChild(element1);
 			}
@@ -134,7 +126,7 @@ Job.prototype = {
 				var element2;
 				var _this3 = window.document;
 				element2 = _this3.createElement("span");
-				element2.innerText = logLine.pattern;
+				element2.textContent = logLine.pattern;
 				element2.className = "text-warning";
 				logLineDiv.appendChild(window.document.createTextNode(" "));
 				logLineDiv.appendChild(element2);
@@ -143,14 +135,22 @@ Job.prototype = {
 				var element3;
 				var _this4 = window.document;
 				element3 = _this4.createElement("span");
-				element3.innerText = logLine.message;
+				element3.textContent = logLine.message;
 				element3.className = "job-log-line-message";
 				logLineDiv.appendChild(element3);
 			}
 			logElement.appendChild(logLineDiv);
-			logElement.classList.add("autoscroll-dirty");
-			this.pendingLogLines = 0;
 		}
+		var numToTrim = logElement.childElementCount - this.logLines.length;
+		if(numToTrim > 0) {
+			var _g2 = 0;
+			while(_g2 < numToTrim) {
+				var dummy = _g2++;
+				logElement.firstElementChild.remove();
+			}
+		}
+		logElement.classList.add("autoscroll-dirty");
+		this.pendingLogLines = 0;
 	}
 	,__class__: Job
 };
@@ -333,7 +333,7 @@ Dashboard.prototype = {
 			++_g;
 			var element;
 			element = js.Boot.__cast(node , Element);
-			element.scrollTop += 1000;
+			element.scrollTop = 99999;
 			element.classList.remove("autoscroll-dirty");
 		}
 	}

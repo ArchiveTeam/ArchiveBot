@@ -73,11 +73,6 @@ html, body {
 	word-wrap: break-word;
 }
 
-.job-detail-datatable td {
-	max-width: 5em;
-	word-wrap: break-word;
-}
-
 .job-ident-clicky {
 	border: none;
 	background: inherit;
@@ -100,6 +95,10 @@ html, body {
 
 a.job-log-line-url {
 	color: inherit;
+}
+
+.job-log-paused {
+	overflow: auto;
 }
 
 .job-detail-handle {
@@ -176,7 +175,7 @@ a.job-log-line-url {
 	<input type="checkbox" ng-model="paused" id="pauseCheckbox">
 	<label for="pauseCheckbox">Pause</label>
 	
-	<input type="checkbox" ng-model="drawInterval" ng-true-value=500" ng-false-value="1000" id="fastCheckbox">
+	<input type="checkbox" ng-model="drawInterval" ng-true-value="250" ng-false-value="1000" id="fastCheckbox">
 	<label for="fastCheckbox">Go fast</label>
 </div>
 
@@ -282,12 +281,15 @@ a.job-log-line-url {
 					</div>
 
 					<div class="col-sm-9">
-						<div id="job-log-{{ job.ident }}" class="job-log well well-sm" ng-class="{ 'height-limit-small': !job.fullview, 'autoscroll': !job.logPaused, 'height-limit-big': job.fullview }"></div>
+						<div id="job-log-{{ job.ident }}" class="job-log well well-sm" 
+						ng-class="{ 'height-limit-small': !job.fullview, 'height-limit-big': job.fullview, 'autoscroll': !job.logPaused, 'job-log-paused': job.logPaused }"
+						ng-mouseover="job.logPaused = true" ng-mouseleave="job.logPaused = false"
+						></div>
 						<div class="autoscroll-paused bg-info" ng-show="job.logPaused">Paused</div>
 					</div>
 				</div>
 
-				<button title="Toggle full detail view" class="job-detail-handle btn btn-block btn-xs" ng-click="job.fullview = !job.fullview ; job.logPaused = !job.logPaused" ng-class="{ 'job-detail-handle-active': job.fullview }">• • •</button>
+				<button title="Toggle full detail view" class="job-detail-handle btn btn-block btn-xs" ng-click="job.fullview = !job.fullview; job.logPaused = job.fullview;" ng-class="{ 'job-detail-handle-active': job.fullview }">• • •</button>
 
 			</div>
 		</td>
