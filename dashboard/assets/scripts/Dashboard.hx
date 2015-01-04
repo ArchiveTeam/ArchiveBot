@@ -60,17 +60,19 @@ class Job {
     public var timestamp : Int;
     public var responsePerSecond : Float;
     public var totalResponses : Int;
-    public var totalItems : Int;
+    public var queueRemaining : Int;
+    public var logPaused : Bool;
 
     private var downloadCountBucket : Array<Int> = [for (dummy in 0...62) 0];
     private var lastDownloadCount : Int;
+    private var pendingLogLines : Int = 0;
 
 
     public function new(ident: String) {
         this.ident = ident;
     }
 
-    public function fillDownloadCountBucket() {
+    private function fillDownloadCountBucket() {
         var newDownloads = itemsDownloaded - lastDownloadCount;
         lastDownloadCount = itemsDownloaded;
 
@@ -78,13 +80,146 @@ class Job {
         downloadCountBucket[currentSecond] = newDownloads;
     }
 
-    public function computeSpeed() : Float {
+    private function computeSpeed() : Float {
         var sum = 0;
         for (count in downloadCountBucket) {
             sum += count;
         }
 
         return sum / 60.0;
+    }
+
+    public function consumeLogEvent(logEvent : Dynamic, maxScrollback : Int) {
+        var jobData : Dynamic = logEvent.job_data;
+
+        aborted = jobData.aborted;
+        bytesDownloaded = parseInt(jobData.bytes_downloaded);
+        concurrency = parseInt(jobData.concurrency);
+        delayMax = parseInt(jobData.delay_max);
+        delayMin = parseInt(jobData.delay_min);
+        depth = jobData.depth;
+        errorCount = parseInt(jobData.error_count);
+        finished = jobData.finished;
+        finishedAt = parseInt(jobData.finished_at);
+        itemsDownloaded = parseInt(jobData.items_downloaded);
+        itemsQueued = parseInt(jobData.items_queued);
+        note = jobData.note;
+        pipelineId = jobData.pipeline_id;
+        queuedAt = parseInt(jobData.queued_at);
+        r1xx = parseInt(jobData.r1xx);
+        r2xx = parseInt(jobData.r2xx);
+        r3xx = parseInt(jobData.r3xx);
+        r4xx = parseInt(jobData.r4xx);
+        r5xx = parseInt(jobData.r5xx);
+        rUnknown = parseInt(jobData.runk);
+        startedAt = parseInt(jobData.started_at);
+        startedBy = jobData.started_by;
+        startedIn = jobData.started_in;
+        suppressIgnoreReports = jobData.suppress_ignore_reports;
+        timestamp = parseInt(logEvent.ts);
+        url = jobData.url;
+        warcSize = jobData.warc_size;
+
+        var logLine = new LogLine();
+        logLine.type = logEvent.type;
+        logLine.url = logEvent.url;
+        logLine.timestamp = parseInt(logEvent.ts);
+        logLine.isError = logEvent.is_error;
+        logLine.isWarning = logEvent.is_warning;
+        logLine.responseCode = logEvent.response_code;
+        logLine.message = logEvent.message;
+        logLine.pattern = logEvent.pattern;
+        logLine.wgetCode = logEvent.wget_code;
+
+        totalResponses = r1xx + r2xx + r3xx + r4xx + r1xx + errorCount;
+        queueRemaining = itemsQueued - itemsDownloaded;
+
+        if (logLines.length >= maxScrollback) {
+            logLines.shift();
+        }
+
+        fillDownloadCountBucket();
+        responsePerSecond = computeSpeed();
+
+        logLines.push(logLine);
+        pendingLogLines += 1;
+    }
+
+    public function drawPendingLogLines() {
+        var logElement = Browser.document.getElementById('job-log-${ident}');
+        var numToTrim = logElement.childElementCount - logLines.length;
+
+        trace(numToTrim);
+
+        if (numToTrim > 0) {
+            for (dummy in 0...numToTrim) {
+                logElement.firstElementChild.remove();
+            }
+        }
+
+        for (logLine in logLines.slice(-pendingLogLines)) {
+            var logLineDiv = Browser.document.createDivElement();
+
+            logLineDiv.className = "job-log-line";
+
+            if (logLine.responseCode == 200) {
+                logLineDiv.classList.add("text-success");
+            } else if (logLine.isWarning) {
+                logLineDiv.classList.add("bg-warning");
+            } else if (logLine.isError) {
+                logLineDiv.classList.add("bg-danger");
+            } else if (logLine.message != null || logLine.pattern != null) {
+                logLineDiv.classList.add("text-muted");
+            }
+
+            if (logLine.responseCode > 0 || logLine.wgetCode != null) {
+                var element = Browser.document.createSpanElement();
+
+                if (logLine.responseCode > 0) {
+                    element.innerText = '${logLine.responseCode}';
+                } else {
+                    element.innerText = '${logLine.wgetCode}';
+                }
+                logLineDiv.appendChild(element);
+                logLineDiv.appendChild(Browser.document.createTextNode(" "));
+            }
+            if (logLine.url != null) {
+                var element = Browser.document.createAnchorElement();
+                element.href = logLine.url;
+                element.innerText = logLine.url;
+                element.className = "job-log-line-url";
+                logLineDiv.appendChild(element);
+            }
+
+            if (logLine.pattern != null) {
+                var element = Browser.document.createSpanElement();
+                element.innerText = logLine.pattern;
+                element.className = "text-warning";
+                logLineDiv.appendChild(Browser.document.createTextNode(" "));
+                logLineDiv.appendChild(element);
+            }
+
+            if (logLine.message != null) {
+                var element = Browser.document.createSpanElement();
+                element.innerText = logLine.message;
+                element.className = "job-log-line-message";
+                logLineDiv.appendChild(element);
+            }
+
+            logElement.appendChild(logLineDiv);
+            logElement.classList.add("autoscroll-dirty");
+            pendingLogLines = 0;
+        }
+    }
+
+    private static function parseInt(thing : Dynamic) : Int {
+        if (Type.typeof(thing) == TInt || Type.typeof(thing) == TFloat) {
+            return thing;
+        } else if (thing != null) {
+            return Std.parseInt(thing);
+        } else {
+            return null;
+        }
     }
 }
 
@@ -101,11 +236,13 @@ class Dashboard {
     var websocket : js.html.WebSocket;
     var drawTimerHandle : Dynamic;
     var showNicks : Bool;
+    var drawInterval : Int;
 
-    public function new(hostname : String, maxScrollback : Int, showNicks : Bool) {
+    public function new(hostname : String, maxScrollback : Int = 500, showNicks : Bool = false, drawInterval : Int = 1000) {
         this.hostname = hostname;
         this.maxScrollback = maxScrollback;
         this.showNicks = showNicks;
+        this.drawInterval = drawInterval;
 
         app = angular.module("dashboardApp", []);
 
@@ -144,6 +281,7 @@ class Dashboard {
                 scope.paused = false;
                 scope.sortParam = "startedAt";
                 scope.showNicks = showNicks;
+                scope.drawInterval = drawInterval;
                 dashboardControllerScopeApply = Reflect.field(scope, "$apply").bind(scope);
                 scope.filterOperator = function (job : Job) {
                     var query : String = scope.filterQuery;
@@ -256,7 +394,7 @@ class Dashboard {
 
     private function scheduleDraw(delayMS : Int = 1000) {
         drawTimerHandle = untyped __js__("setTimeout")(function () {
-            var delay = 1000;
+            var delay : Int = dashboardControllerScope.drawInterval;
 
             if (!Browser.document.hidden && !dashboardControllerScope.paused) {
                 var beforeDate = Date.now();
@@ -266,7 +404,7 @@ class Dashboard {
                 var difference = afterDate.getTime() - beforeDate.getTime();
 
                 if (difference > 10) {
-                    delay += difference * 5;
+                    delay += difference * 2;
                     delay = Math.min(delay, 10000);
                 }
             }
@@ -289,58 +427,7 @@ class Dashboard {
             job = jobMap.get(ident);
         }
 
-        var jobData : Dynamic = logEvent.job_data;
-
-        job.aborted = jobData.aborted;
-        job.bytesDownloaded = parseInt(jobData.bytes_downloaded);
-        job.concurrency = parseInt(jobData.concurrency);
-        job.delayMax = parseInt(jobData.delay_max);
-        job.delayMin = parseInt(jobData.delay_min);
-        job.depth = jobData.depth;
-        job.errorCount = parseInt(jobData.error_count);
-        job.finished = jobData.finished;
-        job.finishedAt = parseInt(jobData.finished_at);
-        job.itemsDownloaded = parseInt(jobData.items_downloaded);
-        job.itemsQueued = parseInt(jobData.items_queued);
-        job.note = jobData.note;
-        job.pipelineId = jobData.pipeline_id;
-        job.queuedAt = parseInt(jobData.queued_at);
-        job.r1xx = parseInt(jobData.r1xx);
-        job.r2xx = parseInt(jobData.r2xx);
-        job.r3xx = parseInt(jobData.r3xx);
-        job.r4xx = parseInt(jobData.r4xx);
-        job.r5xx = parseInt(jobData.r5xx);
-        job.rUnknown = parseInt(jobData.runk);
-        job.startedAt = parseInt(jobData.started_at);
-        job.startedBy = jobData.started_by;
-        job.startedIn = jobData.started_in;
-        job.suppressIgnoreReports = jobData.suppress_ignore_reports;
-        job.timestamp = parseInt(logEvent.ts);
-        job.url = jobData.url;
-        job.warcSize = jobData.warc_size;
-
-        var logLine = new LogLine();
-        logLine.type = logEvent.type;
-        logLine.url = logEvent.url;
-        logLine.timestamp = parseInt(logEvent.ts);
-        logLine.isError = logEvent.is_error;
-        logLine.isWarning = logEvent.is_warning;
-        logLine.responseCode = logEvent.response_code;
-        logLine.message = logEvent.message;
-        logLine.pattern = logEvent.pattern;
-        logLine.wgetCode = logEvent.wget_code;
-
-        job.totalResponses = job.r1xx + job.r2xx + job.r3xx + job.r4xx + job.r1xx + job.errorCount;
-        job.totalItems = job.itemsDownloaded + job.itemsQueued;
-
-        if (job.logLines.length >= maxScrollback) {
-            job.logLines.shift();
-        }
-
-        job.fillDownloadCountBucket();
-        job.responsePerSecond = job.computeSpeed();
-
-        job.logLines.push(logLine);
+        job.consumeLogEvent(logEvent, maxScrollback);
     }
 
     private function showError(message : String) {
@@ -356,24 +443,22 @@ class Dashboard {
 
     private function redraw() {
         dashboardControllerScopeApply();
+
+        for (job in jobs) {
+            if (!job.logPaused) {
+                job.drawPendingLogLines();
+            }
+        }
+
         scrollLogsToBottom();
     }
 
     private function scrollLogsToBottom() {
-        var nodes = Browser.document.querySelectorAll(".autoscroll");
+        var nodes = Browser.document.querySelectorAll(".autoscroll.autoscroll-dirty");
         for (node in nodes) {
             var element : Element = cast(node, Element);
             element.scrollTop += 1000;
-        }
-    }
-
-    private static function parseInt(thing : Dynamic) : Int {
-        if (Type.typeof(thing) == TInt || Type.typeof(thing) == TFloat) {
-            return thing;
-        } else if (thing != null) {
-            return Std.parseInt(thing);
-        } else {
-            return null;
+            element.classList.remove("autoscroll-dirty");
         }
     }
 }

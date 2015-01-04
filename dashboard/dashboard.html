@@ -51,6 +51,10 @@ html, body {
 	cursor: pointer;
 }
 
+.clickable {
+	cursor: pointer;
+}
+
 .numeric {
 	text-align: right;
 }
@@ -112,6 +116,13 @@ a.job-log-line-url {
 	height: 0.5em;
 	margin-bottom: 0.5em;
 }
+
+.autoscroll-paused {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	opacity: 0.8;
+}
 </style>
 </head>
 <body ng-controller="DashboardController">
@@ -164,16 +175,19 @@ a.job-log-line-url {
 	
 	<input type="checkbox" ng-model="paused" id="pauseCheckbox">
 	<label for="pauseCheckbox">Pause</label>
+	
+	<input type="checkbox" ng-model="drawInterval" ng-true-value=500" ng-false-value="1000" id="fastCheckbox">
+	<label for="fastCheckbox">Go fast</label>
 </div>
 
 <table id="dashboardTable" class="table table-condensed table-striped table-bordered">
 	<tr>
-		<th class="col-sm-4 tablesort" ng-click="sortParam = 'url'">URL</th>
-		<th class="col-sm-1 tablesort" ng-click="sortParam = 'startedAt'">Started</th>
-		<th class="col-sm-1 tablesort" ng-click="sortParam = 'itemsDownloaded'">Fetched</th>
-		<th class="col-sm-1 tablesort" ng-click="sortParam = 'bytesDownloaded'">Size</th>
-		<th class="col-sm-1 tablesort" ng-click="sortParam = 'itemsQueued'">Queued</th>
-		<th class="col-sm-2 tablesort" ng-click="sortParam = 'ident'">Ident</th>
+		<th class="col-sm-4 tablesort" ng-click="sortParam = 'url'">URL<span class="caret" ng-if="sortParam == 'url'"></span></th>
+		<th class="col-sm-1 tablesort" ng-click="sortParam = 'startedAt'">Started<span class="caret" ng-if="sortParam == 'startedAt'"></span></th>
+		<th class="col-sm-1 tablesort" ng-click="sortParam = 'itemsDownloaded'">Fetched<span class="caret" ng-if="sortParam == 'itemsDownloaded'"></span></th>
+		<th class="col-sm-1 tablesort" ng-click="sortParam = 'bytesDownloaded'">Size<span class="caret" ng-if="sortParam == 'bytesDownloaded'"></span></th>
+		<th class="col-sm-1 tablesort" ng-click="sortParam = 'queueRemaining'">Remain<span class="caret" ng-if="sortParam == 'queueRemaining'"></span></th>
+		<th class="col-sm-2 tablesort" ng-click="sortParam = 'ident'">Ident<span class="caret" ng-if="sortParam == 'ident'"></span></th>
 	</tr>
 
 	<tr class="job-summary" ng-repeat-start="job in jobs | filter: filterOperator | orderBy:sortParam:true">
@@ -182,7 +196,7 @@ a.job-log-line-url {
 			title="{{:: job.startedAt * 1000|date:'medium'}}"></td>
 		<td ng-bind="job.itemsDownloaded|number" class="numeric"></td>
 		<td ng-bind="job.bytesDownloaded|bytes" class="numeric"></td>
-		<td ng-bind="job.itemsQueued|number" class="numeric"></td>
+		<td ng-bind="job.queueRemaining|number" class="numeric"></td>
 		<td><input class="job-ident-clicky" readonly spellcheck="false" type="text" value="{{ ::job.ident }}" size="28" onclick="this.select()"/></td>
 	</tr>
 
@@ -199,49 +213,81 @@ a.job-log-line-url {
 							{{ job.suppressIgnoreReports ? 'Hiding' : 'Showing' }} ignores.
 						</p>
 
-						<div class="progress job-progress" title="Progress">
+						<div class="progress job-progress clickable" ng-click="job.showResponseBreakdown = !job.showResponseBreakdown">
 							<div class="progress-bar"
-								style="width: {{ job.r1xx / (job.totalResponses + job.itemsQueued) * 100 }}%;">
+								style="width: {{ job.r1xx / (job.totalResponses + job.queueRemaining) * 100 }}%;">
 							</div>
 							<div class="progress-bar progress-bar-success"
-								style="width: {{ job.r2xx / (job.totalResponses + job.itemsQueued) * 100 }}%;">
+								style="width: {{ job.r2xx / (job.totalResponses + job.queueRemaining) * 100 }}%;">
 							</div>
 							<div class="progress-bar progress-bar-info"
-								style="width: {{ job.r3xx / (job.totalResponses + job.itemsQueued) * 100 }}%;">
+								style="width: {{ job.r3xx / (job.totalResponses + job.queueRemaining) * 100 }}%;">
 							</div>
 							<div class="progress-bar progress-bar-warning"
-								style="width: {{ job.r4xx / (job.totalResponses + job.itemsQueued) * 100 }}%;">
+								style="width: {{ job.r4xx / (job.totalResponses + job.queueRemaining) * 100 }}%;">
 							</div>
 							<div class="progress-bar progress-bar-danger"
-								style="width: {{ job.r5xx / (job.totalResponses + job.itemsQueued) * 100 }}%;">
+								style="width: {{ job.r5xx / (job.totalResponses + job.queueRemaining) * 100 }}%;">
 							</div>
 							<div class="progress-bar progress-bar-danger progress-bar-striped"
-								style="width: {{ job.errorCount / (job.totalResponses + job.itemsQueued) * 100 }}%;">
+								style="width: {{ job.errorCount / (job.totalResponses + job.queueRemaining) * 100 }}%;">
 							</div>
 							<span class="sr-only">
-								{{ job.itemsDownloaded / job.totalItems * 100 | number}}% complete.
+								{{ job.itemsDownloaded / job.queueRemaining * 100 | number}}% complete.
 							</span>
 						</div>
+						<table class="table table-condensed table-striped table-bordered" ng-if="job.showResponseBreakdown">
+							<tr>
+								<th>Done</th>
+								<td ng-bind="job.itemsDownloaded|number" class="numeric"></td>
+							</tr>
+							<tr>
+								<th>Total</th>
+								<td ng-bind="job.itemsQueued|number" class="numeric"></td>
+							</tr>
+							<tr>
+								<th>100s</th>
+								<td ng-bind="job.r1xx|number" class="numeric text-primary"></td>
+							</tr>
+							<tr>
+								<th>200s</th>
+								<td ng-bind="job.r2xx|number" class="numeric text-success"></td>
+							</tr>
+							<tr>
+								<th>300s</th>
+								<td ng-bind="job.r3xx|number" class="numeric text-info"></td>
+							</tr>
+							<tr>
+								<th>300s</th>
+								<td ng-bind="job.r3xx|number" class="numeric text-primary"></td>
+							</tr>
+							<tr>
+								<th>400s</th>
+								<td ng-bind="job.r4xx|number" class="numeric text-warning"></td>
+							</tr>
+							<tr>
+								<th>500s</th>
+								<td ng-bind="job.r5xx|number" class="numeric text-danger"></td>
+							</tr>
+							<tr>
+								<th>Errs</th>
+								<td ng-bind="job.errorCount|number" class="numeric text-danger"></td>
+							</tr>
+						</table>
 
 						<p>
 							Queued <span ng-bind="::job.queuedAt * 1000|date:'medium'"></span> 
 							<span ng-if="::showNicks">by <span ng-bind="::job.startedBy"></span></span>.
 						</p>
 					</div>
-	
-					<div class="job-log col-sm-9 well well-sm" ng-class="{ 'height-limit-small': !job.fullview, 'autoscroll': !job.fullview, 'height-limit-big': job.fullview }">
-						<div class="job-log-line"
-							ng-class=":: { 'text-muted': logLine.pattern, 'text-muted': logLine.message, 'bg-danger': logLine.isError, 'bg-warning': logLine.isWarning, 'text-success': logLine.responseCode == 200 }" 
-							ng-repeat="logLine in job.logLines | limitTo:(job.fullview ? 9999 : -10)">
-							<span ng-if=":: logLine.responseCode || logLine.wgetCode" ng-bind=":: logLine.responseCode || logLine.wgetCode"></span>
-							<a class="job-log-line-url" ng-if="::logLine.url" ng-href="{{ ::logLine.url }}" ng-bind="::logLine.url"></a>
-							<span title="Pattern" class="text-warning" ng-if="::logLine.pattern" ng-bind="::logLine.pattern"></span>
-							<span class="job-log-line-message" ng-if="::logLine.message" ng-bind="::logLine.message"></span>
-						</div>
+
+					<div class="col-sm-9">
+						<div id="job-log-{{ job.ident }}" class="job-log well well-sm" ng-class="{ 'height-limit-small': !job.fullview, 'autoscroll': !job.logPaused, 'height-limit-big': job.fullview }"></div>
+						<div class="autoscroll-paused bg-info" ng-show="job.logPaused">Paused</div>
 					</div>
 				</div>
 
-				<button title="Toggle full detail view" class="job-detail-handle btn btn-block btn-xs" ng-click="job.fullview = !job.fullview" ng-class="{ 'job-detail-handle-active': job.fullview }">• • •</button>
+				<button title="Toggle full detail view" class="job-detail-handle btn btn-block btn-xs" ng-click="job.fullview = !job.fullview ; job.logPaused = !job.logPaused" ng-class="{ 'job-detail-handle-active': job.fullview }">• • •</button>
 
 			</div>
 		</td>
