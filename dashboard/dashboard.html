@@ -103,7 +103,6 @@ a.job-log-line-url {
 
 .job-detail-handle {
 	text-align: center;
-	background-color: transparent;
 }
 
 .job-detail-handle-active {
@@ -166,6 +165,7 @@ a.job-log-line-url {
 <div>
 	<label for="filterBox">Filter:</label>
 	<input type="search" ng-model="filterQuery" id="filterBox" placeholder="URL or Ident">
+	<button class="btn btn-default" ng-click="applyFilterQuery('')"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Clear</button>
 </div>
 
 <div>
@@ -281,15 +281,23 @@ a.job-log-line-url {
 					</div>
 
 					<div class="col-sm-9">
-						<div id="job-log-{{ job.ident }}" class="job-log well well-sm" 
+						<div id="job-log-{{ job.ident }}" class="job-log well well-sm"
 						ng-class="{ 'height-limit-small': !job.fullview, 'height-limit-big': job.fullview, 'autoscroll': !job.logPaused, 'job-log-paused': job.logPaused }"
 						ng-mouseover="job.logPaused = true" ng-mouseleave="job.logPaused = false"
 						></div>
 						<div class="autoscroll-paused bg-info" ng-show="job.logPaused">Paused</div>
+						{{:: job.attachAntiScroll() }}
 					</div>
 				</div>
 
-				<button title="Toggle full detail view" class="job-detail-handle btn btn-block btn-xs" ng-click="job.fullview = !job.fullview; job.logPaused = job.fullview;" ng-class="{ 'job-detail-handle-active': job.fullview }">• • •</button>
+				<div class="row">
+					<div class="col-xs-1">
+						<button class="btn btn-block btn-default btn-xs" ng-click="applyFilterQuery(job.ident)"><span class="glyphicon glyphicon-filter" aria-label="Show only this job"></span></button>
+					</div>
+					<div class="col-xs-11">
+						<button class="job-detail-handle btn btn-default btn-block btn-xs" ng-click="job.fullview = !job.fullview; job.logPaused = job.fullview;" ng-class="{ 'job-detail-handle-active': job.fullview }" aria-label="Toggle detail full view">• • •</button>
+					</div>
+				</div>
 
 			</div>
 		</td>

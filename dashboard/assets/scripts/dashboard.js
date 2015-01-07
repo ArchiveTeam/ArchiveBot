@@ -25,7 +25,11 @@ var Job = function(ident) {
 };
 Job.__name__ = true;
 Job.parseInt = function(thing) {
-	if(Type["typeof"](thing) == ValueType.TInt || Type["typeof"](thing) == ValueType.TFloat) return thing; else if(thing != null) return Std.parseInt(thing); else return null;
+	if(thing != null) try {
+		return Std.parseInt(thing);
+	} catch( error ) {
+		return thing;
+	} else return null;
 };
 Job.prototype = {
 	fillDownloadCountBucket: function() {
@@ -152,6 +156,17 @@ Job.prototype = {
 		logElement.classList.add("autoscroll-dirty");
 		this.pendingLogLines = 0;
 	}
+	,attachAntiScroll: function() {
+		var logWindow = window.document.getElementById("job-log-" + this.ident);
+		if(logWindow == null) return;
+		if(logWindow.getAttribute("data-anti-scroll") == "attached") return;
+		logWindow.setAttribute("data-anti-scroll","attached");
+		if(!Job.isSafari) logWindow.onwheel = function(ev) {
+			if(ev.deltaY < 0 && logWindow.scrollTop == 0) ev.preventDefault(); else if(ev.deltaY > 0 && logWindow.scrollTop >= logWindow.scrollHeight - logWindow.offsetHeight) ev.preventDefault();
+		}; else logWindow.onmousewheel = function(ev1) {
+			if(ev1.wheelDeltaY > 0 && logWindow.scrollTop == 0) ev1.preventDefault(); else if(ev1.wheelDeltaY < 0 && logWindow.scrollTop >= logWindow.scrollHeight - logWindow.offsetHeight) ev1.preventDefault();
+		};
+	}
 	,__class__: Job
 };
 var Dashboard = function(hostname,maxScrollback,showNicks,drawInterval) {
@@ -202,6 +217,9 @@ var Dashboard = function(hostname,maxScrollback,showNicks,drawInterval) {
 			return StringTools.startsWith(job.ident,query) || job.url.indexOf(query) != -1;
 		};
 		_g.dashboardControllerScope = scope;
+		scope.applyFilterQuery = function(query1) {
+			scope.filterQuery = query1;
+		};
 	}];
 	this.app.controller("DashboardController",controllerArgs);
 };
@@ -255,7 +273,8 @@ Dashboard.prototype = {
 			_g.scheduleDraw();
 			_g.openWebSocket();
 		};
-		request.open("GET","http://" + this.hostname + "/logs/recent");
+		var cacheBustValue = new Date().getTime();
+		request.open("GET","http://" + this.hostname + "/logs/recent?cb=" + cacheBustValue);
 		request.setRequestHeader("Accept","application/json");
 		request.send("");
 	}
@@ -385,52 +404,6 @@ StringTools.startsWith = function(s,start) {
 };
 StringTools.replace = function(s,sub,by) {
 	return s.split(sub).join(by);
-};
-var ValueType = { __ename__ : true, __constructs__ : ["TNull","TInt","TFloat","TBool","TObject","TFunction","TClass","TEnum","TUnknown"] };
-ValueType.TNull = ["TNull",0];
-ValueType.TNull.__enum__ = ValueType;
-ValueType.TInt = ["TInt",1];
-ValueType.TInt.__enum__ = ValueType;
-ValueType.TFloat = ["TFloat",2];
-ValueType.TFloat.__enum__ = ValueType;
-ValueType.TBool = ["TBool",3];
-ValueType.TBool.__enum__ = ValueType;
-ValueType.TObject = ["TObject",4];
-ValueType.TObject.__enum__ = ValueType;
-ValueType.TFunction = ["TFunction",5];
-ValueType.TFunction.__enum__ = ValueType;
-ValueType.TClass = function(c) { var $x = ["TClass",6,c]; $x.__enum__ = ValueType; return $x; };
-ValueType.TEnum = function(e) { var $x = ["TEnum",7,e]; $x.__enum__ = ValueType; return $x; };
-ValueType.TUnknown = ["TUnknown",8];
-ValueType.TUnknown.__enum__ = ValueType;
-var Type = function() { };
-Type.__name__ = true;
-Type["typeof"] = function(v) {
-	var _g = typeof(v);
-	switch(_g) {
-	case "boolean":
-		return ValueType.TBool;
-	case "string":
-		return ValueType.TClass(String);
-	case "number":
-		if(Math.ceil(v) == v % 2147483648.0) return ValueType.TInt;
-		return ValueType.TFloat;
-	case "object":
-		if(v == null) return ValueType.TNull;
-		var e = v.__enum__;
-		if(e != null) return ValueType.TEnum(e);
-		var c;
-		if((v instanceof Array) && v.__enum__ == null) c = Array; else c = v.__class__;
-		if(c != null) return ValueType.TClass(c);
-		return ValueType.TObject;
-	case "function":
-		if(v.__name__ || v.__ename__) return ValueType.TObject;
-		return ValueType.TFunction;
-	case "undefined":
-		return ValueType.TNull;
-	default:
-		return ValueType.TUnknown;
-	}
 };
 var haxe = {};
 haxe.ds = {};
@@ -591,5 +564,6 @@ var Bool = Boolean;
 Bool.__ename__ = ["Bool"];
 var Class = { __name__ : ["Class"]};
 var Enum = { };
+Job.isSafari = window.navigator.userAgent.indexOf("Safari") != -1;
 Dashboard.main();
 })();

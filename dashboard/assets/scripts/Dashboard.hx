@@ -36,36 +36,38 @@ class Job {
     public var itemsDownloaded : Int;
     public var itemsQueued : Int;
     public var pipelineId : String;
-    public var depth : String;
-    public var errorCount : Int;
-    public var finished : Bool;
-    public var finishedAt : Int;
-    public var queuedAt : Int;
-    public var startedAt : Int;
-    public var startedBy : String;
-    public var startedIn : String;
-    public var url : String;
-    public var warcSize : Int;
-    public var suppressIgnoreReports : String;
-    public var concurrency : Int;
-    public var delayMin : Int;
-    public var delayMax : Int;
-    public var note : String;
+    public var depth:String;
+    public var errorCount:Int;
+    public var finished:Bool;
+    public var finishedAt:Int;
+    public var queuedAt:Int;
+    public var startedAt:Int;
+    public var startedBy:String;
+    public var startedIn:String;
+    public var url:String;
+    public var warcSize:Int;
+    public var suppressIgnoreReports:String;
+    public var concurrency:Int;
+    public var delayMin:Int;
+    public var delayMax:Int;
+    public var note:String;
     public var r1xx: Int;
     public var r2xx: Int;
     public var r3xx: Int;
     public var r4xx: Int;
     public var r5xx: Int;
     public var rUnknown: Int;
-    public var timestamp : Int;
-    public var responsePerSecond : Float;
-    public var totalResponses : Int;
-    public var queueRemaining : Int;
-    public var logPaused : Bool;
+    public var timestamp:Int;
+    public var responsePerSecond:Float;
+    public var totalResponses:Int;
+    public var queueRemaining:Int;
+    public var logPaused:Bool;
 
-    private var downloadCountBucket : Array<Int> = [for (dummy in 0...62) 0];
-    private var lastDownloadCount : Int;
-    private var pendingLogLines : Int = 0;
+    private var downloadCountBucket:Array<Int> = [for (dummy in 0...62) 0];
+    private var lastDownloadCount:Int;
+    private var pendingLogLines = 0;
+
+    private static var isSafari = Browser.navigator.userAgent.indexOf("Safari") != -1;
 
 
     public function new(ident: String) {
@@ -80,7 +82,7 @@ class Job {
         downloadCountBucket[currentSecond] = newDownloads;
     }
 
-    private function computeSpeed() : Float {
+    private function computeSpeed():Float {
         var sum = 0;
         for (count in downloadCountBucket) {
             sum += count;
@@ -89,8 +91,8 @@ class Job {
         return sum / 60.0;
     }
 
-    public function consumeLogEvent(logEvent : Dynamic, maxScrollback : Int) {
-        var jobData : Dynamic = logEvent.job_data;
+    public function consumeLogEvent(logEvent:Dynamic, maxScrollback:Int) {
+        var jobData:Dynamic = logEvent.job_data;
 
         aborted = jobData.aborted;
         bytesDownloaded = parseInt(jobData.bytes_downloaded);
@@ -216,11 +218,54 @@ class Job {
         pendingLogLines = 0;
     }
 
-    private static function parseInt(thing : Dynamic) : Int {
-        if (Type.typeof(thing) == TInt || Type.typeof(thing) == TFloat) {
-            return thing;
-        } else if (thing != null) {
-            return Std.parseInt(thing);
+    public function attachAntiScroll() {
+        var logWindow = Browser.document.getElementById('job-log-${ident}');
+
+        if (logWindow == null) {
+            return;
+        }
+
+        if (logWindow.getAttribute("data-anti-scroll") == "attached") {
+            return;
+        }
+
+        logWindow.setAttribute("data-anti-scroll", "attached");
+
+        // If you reach the end of a log window, the browser annoyingly
+        // starts to scroll the page instead.  We prevent this behavior here.
+        // If the user wants to scroll the page, they need to move their
+        // mouse outside a log window first.
+        if(!isSafari) {
+            Reflect.setField(logWindow, "onwheel", function (ev) {
+                // Note: offsetHeight is "wrong" by 2px but it doesn't matter
+                //trace(ev, logWindow.scrollTop, (logWindow.scrollHeight - logWindow.offsetHeight));
+                if (ev.deltaY < 0 && logWindow.scrollTop == 0) {
+                    ev.preventDefault();
+                } else if(ev.deltaY > 0 && logWindow.scrollTop >= (logWindow.scrollHeight - logWindow.offsetHeight)) {
+                    ev.preventDefault();
+                }
+            });
+        } else {
+            // Safari 7.0.5 can't preventDefault or stopPropagation an onwheel event,
+            // so use onmousewheel instead.
+            logWindow.onmousewheel = function (ev) {
+                //trace(ev, logWindow.scrollTop, (logWindow.scrollHeight - logWindow.offsetHeight));
+                if(ev.wheelDeltaY > 0 && logWindow.scrollTop == 0) {
+                    ev.preventDefault();
+                } else if(ev.wheelDeltaY < 0 && logWindow.scrollTop >= (logWindow.scrollHeight - logWindow.offsetHeight)) {
+                    ev.preventDefault();
+                }
+            }
+        }
+    }
+
+    private static function parseInt(thing:Dynamic):Int {
+        if (thing != null) {
+            try {
+                return Std.parseInt(thing);
+            } catch (error:Dynamic) {
+                return thing;
+            }
         } else {
             return null;
         }
@@ -230,19 +275,19 @@ class Job {
 
 class Dashboard {
     var angular = untyped __js__("angular");
-    var app : Dynamic;
-    var jobs : Array<Job> = [];
-    var jobMap : StringMap<Job> = new StringMap<Job>();
-    var hostname : String;
-    var dashboardControllerScope : Dynamic;
-    var dashboardControllerScopeApply : Dynamic;
-    var maxScrollback : Int;
-    var websocket : js.html.WebSocket;
-    var drawTimerHandle : Dynamic;
-    var showNicks : Bool;
-    var drawInterval : Int;
+    var app:Dynamic;
+    var jobs:Array<Job> = [];
+    var jobMap:StringMap<Job> = new StringMap<Job>();
+    var hostname:String;
+    var dashboardControllerScope:Dynamic;
+    var dashboardControllerScopeApply:Dynamic;
+    var maxScrollback:Int;
+    var websocket:js.html.WebSocket;
+    var drawTimerHandle:Dynamic;
+    var showNicks:Bool;
+    var drawInterval:Int;
 
-    public function new(hostname : String, maxScrollback : Int = 500, showNicks : Bool = false, drawInterval : Int = 1000) {
+    public function new(hostname:String, maxScrollback:Int = 500, showNicks:Bool = false, drawInterval:Int = 1000) {
         this.hostname = hostname;
         this.maxScrollback = maxScrollback;
         this.showNicks = showNicks;
@@ -250,7 +295,7 @@ class Dashboard {
 
         app = angular.module("dashboardApp", []);
 
-        var appConfig : Array<Dynamic> = [
+        var appConfig:Array<Dynamic> = [
         "$compileProvider",
             function (compileProvider) {
                 compileProvider.debugInfoEnabled(false);
@@ -260,7 +305,7 @@ class Dashboard {
         app.config(appConfig);
 
         app.filter("bytes", function () {
-            return function (num : Float) {
+            return function (num:Float) {
                 // http://stackoverflow.com/a/1094933/1524507
                 for (unit in ['B', 'KiB', 'MiB', 'GiB']) {
                     if (num < 1024 && num > -1024) {
@@ -276,7 +321,7 @@ class Dashboard {
             };
         });
 
-        var controllerArgs : Array<Dynamic> = [
+        var controllerArgs:Array<Dynamic> = [
             "$scope",
             function (scope) {
                 scope.jobs = this.jobs;
@@ -287,11 +332,14 @@ class Dashboard {
                 scope.showNicks = showNicks;
                 scope.drawInterval = drawInterval;
                 dashboardControllerScopeApply = Reflect.field(scope, "$apply").bind(scope);
-                scope.filterOperator = function (job : Job) {
-                    var query : String = scope.filterQuery;
+                scope.filterOperator = function (job:Job) {
+                    var query:String = scope.filterQuery;
                     return (job.ident.startsWith(query) || job.url.indexOf(query) != -1);
                 };
                 dashboardControllerScope = scope;
+                scope.applyFilterQuery = function (query:String) {
+                    scope.filterQuery = query;
+                }
             }
         ];
 
@@ -299,8 +347,8 @@ class Dashboard {
 
     }
 
-    public static function getQueryArgs() : StringMap<String> {
-        var query : String = Browser.location.search;
+    public static function getQueryArgs():StringMap<String> {
+        var query:String = Browser.location.search;
         var items = query.replace("?", "").split("&");
 
         var args = new StringMap<String>();
@@ -340,11 +388,11 @@ class Dashboard {
     private function loadRecentLogs() {
         var request = new XMLHttpRequest();
 
-        request.onerror = function(event : Dynamic) {
+        request.onerror = function(event:Dynamic) {
             showError("Unable to load dashboard. Reload the page?");
         };
 
-        request.onload = function (event : Dynamic) {
+        request.onload = function (event:Dynamic) {
             if (request.status != 200) {
                 showError('The server didn\'t respond correctly: ${request.status} ${request.statusText}');
                 return;
@@ -352,7 +400,7 @@ class Dashboard {
 
             showError(null);
 
-            var doc : Array<Dynamic> = Json.parse(request.responseText);
+            var doc:Array<Dynamic> = Json.parse(request.responseText);
 
             for (logEvent in doc) {
                 processLogEvent(logEvent);
@@ -361,8 +409,9 @@ class Dashboard {
             scheduleDraw();
             openWebSocket();
         };
+        var cacheBustValue = Date.now().getTime();
 
-        request.open("GET", 'http://$hostname/logs/recent');
+        request.open("GET", 'http://$hostname/logs/recent?cb=$cacheBustValue');
         request.setRequestHeader("Accept", "application/json");
         request.send("");
     }
@@ -374,14 +423,14 @@ class Dashboard {
 
         websocket = new WebSocket('ws://$hostname/stream');
 
-        websocket.onmessage = function (message : Dynamic) {
+        websocket.onmessage = function (message:Dynamic) {
             showError(null);
 
-            var doc : Dynamic = Json.parse(message.data);
+            var doc:Dynamic = Json.parse(message.data);
             processLogEvent(doc);
         };
 
-        websocket.onclose = function (message : Dynamic) {
+        websocket.onclose = function (message:Dynamic) {
             if (websocket == null) {
                 return;
             }
@@ -396,9 +445,9 @@ class Dashboard {
         websocket.onerror = websocket.onclose;
     }
 
-    private function scheduleDraw(delayMS : Int = 1000) {
+    private function scheduleDraw(delayMS:Int = 1000) {
         drawTimerHandle = untyped __js__("setTimeout")(function () {
-            var delay : Int = dashboardControllerScope.drawInterval;
+            var delay:Int = dashboardControllerScope.drawInterval;
 
             if (!Browser.document.hidden && !dashboardControllerScope.paused) {
                 var beforeDate = Date.now();
@@ -417,9 +466,9 @@ class Dashboard {
         }, delayMS);
     }
 
-    private function processLogEvent(logEvent : Dynamic) {
-        var job : Job;
-        var ident : String = logEvent.job_data.ident;
+    private function processLogEvent(logEvent:Dynamic) {
+        var job:Job;
+        var ident:String = logEvent.job_data.ident;
 
         if (!jobMap.exists(ident)) {
             job = new Job(ident);
@@ -434,7 +483,7 @@ class Dashboard {
         job.consumeLogEvent(logEvent, maxScrollback);
     }
 
-    private function showError(message : String) {
+    private function showError(message:String) {
         var element = Browser.document.getElementById("message_box");
 
         if (message != null) {
@@ -460,7 +509,7 @@ class Dashboard {
     private function scrollLogsToBottom() {
         var nodes = Browser.document.querySelectorAll(".autoscroll.autoscroll-dirty");
         for (node in nodes) {
-            var element : Element = cast(node, Element);
+            var element:Element = cast(node, Element);
             element.scrollTop = 99999;
             element.classList.remove("autoscroll-dirty");
         }
