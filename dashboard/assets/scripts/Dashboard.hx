@@ -1,7 +1,6 @@
 using StringTools;
 
 import Std;
-import Type;
 import haxe.ds.StringMap;
 import js.Browser;
 import js.html.XMLHttpRequest;
@@ -148,6 +147,10 @@ class Job {
     }
 
     public function drawPendingLogLines() {
+        if (pendingLogLines <= 0) {
+            return;
+        }
+
         var logElement = Browser.document.getElementById('job-log-${ident}');
 
         if (logElement == null) {
@@ -170,15 +173,13 @@ class Job {
             }
 
             if (logLine.responseCode > 0 || logLine.wgetCode != null) {
-                var element = Browser.document.createSpanElement();
-
+                var text;
                 if (logLine.responseCode > 0) {
-                    element.textContent = '${logLine.responseCode}';
+                    text = '${logLine.responseCode} ';
                 } else {
-                    element.textContent = '${logLine.wgetCode}';
+                    text = '${logLine.wgetCode} ';
                 }
-                logLineDiv.appendChild(element);
-                logLineDiv.appendChild(Browser.document.createTextNode(" "));
+                logLineDiv.appendChild(Browser.document.createTextNode(text));
             }
             if (logLine.url != null) {
                 var element = Browser.document.createAnchorElement();
@@ -186,21 +187,17 @@ class Job {
                 element.textContent = logLine.url;
                 element.className = "job-log-line-url";
                 logLineDiv.appendChild(element);
-            }
 
-            if (logLine.pattern != null) {
-                var element = Browser.document.createSpanElement();
-                element.textContent = logLine.pattern;
-                element.className = "text-warning";
-                logLineDiv.appendChild(Browser.document.createTextNode(" "));
-                logLineDiv.appendChild(element);
-            }
-
-            if (logLine.message != null) {
-                var element = Browser.document.createSpanElement();
-                element.textContent = logLine.message;
-                element.className = "job-log-line-message";
-                logLineDiv.appendChild(element);
+                if (logLine.pattern != null) {
+                    var element = Browser.document.createSpanElement();
+                    element.textContent = logLine.pattern;
+                    element.className = "text-warning";
+                    logLineDiv.appendChild(Browser.document.createTextNode(" "));
+                    logLineDiv.appendChild(element);
+                }
+            } else if (logLine.message != null) {
+                logLineDiv.textContent = logLine.message;
+                logLineDiv.classList.add("job-log-line-message");
             }
 
             logElement.appendChild(logLineDiv);
@@ -210,11 +207,14 @@ class Job {
 
         if (numToTrim > 0) {
             for (dummy in 0...numToTrim) {
-                logElement.firstElementChild.remove();
+                var child = logElement.firstChild;
+                if (child != null) {
+                    logElement.removeChild(child);
+                }
             }
         }
 
-        logElement.classList.add("autoscroll-dirty");
+        logElement.setAttribute("data-autoscroll-dirty", "true");
         pendingLogLines = 0;
     }
 
@@ -507,11 +507,17 @@ class Dashboard {
     }
 
     private function scrollLogsToBottom() {
-        var nodes = Browser.document.querySelectorAll(".autoscroll.autoscroll-dirty");
+        var nodes = Browser.document.querySelectorAll("[data-autoscroll-dirty].autoscroll");
+        var pending = new Array<Element>();
+
         for (node in nodes) {
             var element:Element = cast(node, Element);
+            element.removeAttribute("data-autoscroll-dirty");
+            pending.push(element);
+        }
+        for (element in pending) {
+            // Try to do layout in a tight loop
             element.scrollTop = 99999;
-            element.classList.remove("autoscroll-dirty");
         }
     }
 }
