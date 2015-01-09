@@ -190,8 +190,8 @@ a.job-log-line-url {
 	</tr>
 
 	<tr class="job-summary" ng-repeat-start="job in jobs | filter: filterOperator | orderBy:sortParam:true">
-		<td>!{{ :: job.depth == 'shallow' ? 'ao' : 'a' }} <a href="{{ ::job.url }}" ng-bind="::job.url"></span></td>
-		<td ng-bind=":: job.startedAt * 1000|date:'MM-dd'" 
+		<td>!{{ :: job.depth == 'shallow' ? 'ao' : 'a' }} <a href="{{ ::job.url }}" ng-bind="::job.url"></a></td>
+		<td ng-bind=":: job.startedAt * 1000|date:'MM-dd'"
 			title="{{:: job.startedAt * 1000|date:'medium'}}"></td>
 		<td ng-bind="job.itemsDownloaded|number" class="numeric"></td>
 		<td ng-bind="job.bytesDownloaded|bytes" class="numeric"></td>
@@ -281,7 +281,7 @@ a.job-log-line-url {
 					</div>
 
 					<div class="col-sm-9">
-						<div id="job-log-{{ job.ident }}" class="job-log well well-sm"
+						<div id="job-log-{{:: job.ident }}" class="job-log well well-sm"
 						ng-class="{ 'height-limit-small': !job.fullview, 'height-limit-big': job.fullview, 'autoscroll': !job.logPaused, 'job-log-paused': job.logPaused }"
 						ng-mouseover="job.logPaused = true" ng-mouseleave="job.logPaused = false"
 						></div>

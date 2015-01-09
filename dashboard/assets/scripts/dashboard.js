@@ -97,6 +97,7 @@ Job.prototype = {
 		this.pendingLogLines += 1;
 	}
 	,drawPendingLogLines: function() {
+		if(this.pendingLogLines <= 0) return;
 		var logElement = window.document.getElementById("job-log-" + this.ident);
 		if(logElement == null) return;
 		var _g = 0;
@@ -110,38 +111,30 @@ Job.prototype = {
 			logLineDiv.className = "job-log-line";
 			if(logLine.responseCode == 200) logLineDiv.classList.add("text-success"); else if(logLine.isWarning) logLineDiv.classList.add("bg-warning"); else if(logLine.isError) logLineDiv.classList.add("bg-danger"); else if(logLine.message != null || logLine.pattern != null) logLineDiv.classList.add("text-muted");
 			if(logLine.responseCode > 0 || logLine.wgetCode != null) {
-				var element;
-				var _this1 = window.document;
-				element = _this1.createElement("span");
-				if(logLine.responseCode > 0) element.textContent = "" + logLine.responseCode; else element.textContent = "" + logLine.wgetCode;
-				logLineDiv.appendChild(element);
-				logLineDiv.appendChild(window.document.createTextNode(" "));
+				var text;
+				if(logLine.responseCode > 0) text = "" + logLine.responseCode + " "; else text = "" + logLine.wgetCode + " ";
+				logLineDiv.appendChild(window.document.createTextNode(text));
 			}
 			if(logLine.url != null) {
-				var element1;
-				var _this2 = window.document;
-				element1 = _this2.createElement("a");
-				element1.href = logLine.url;
-				element1.textContent = logLine.url;
-				element1.className = "job-log-line-url";
-				logLineDiv.appendChild(element1);
-			}
-			if(logLine.pattern != null) {
-				var element2;
-				var _this3 = window.document;
-				element2 = _this3.createElement("span");
-				element2.textContent = logLine.pattern;
-				element2.className = "text-warning";
-				logLineDiv.appendChild(window.document.createTextNode(" "));
-				logLineDiv.appendChild(element2);
-			}
-			if(logLine.message != null) {
-				var element3;
-				var _this4 = window.document;
-				element3 = _this4.createElement("span");
-				element3.textContent = logLine.message;
-				element3.className = "job-log-line-message";
-				logLineDiv.appendChild(element3);
+				var element;
+				var _this1 = window.document;
+				element = _this1.createElement("a");
+				element.href = logLine.url;
+				element.textContent = logLine.url;
+				element.className = "job-log-line-url";
+				logLineDiv.appendChild(element);
+				if(logLine.pattern != null) {
+					var element1;
+					var _this2 = window.document;
+					element1 = _this2.createElement("span");
+					element1.textContent = logLine.pattern;
+					element1.className = "text-warning";
+					logLineDiv.appendChild(window.document.createTextNode(" "));
+					logLineDiv.appendChild(element1);
+				}
+			} else if(logLine.message != null) {
+				logLineDiv.textContent = logLine.message;
+				logLineDiv.classList.add("job-log-line-message");
 			}
 			logElement.appendChild(logLineDiv);
 		}
@@ -150,10 +143,11 @@ Job.prototype = {
 			var _g2 = 0;
 			while(_g2 < numToTrim) {
 				var dummy = _g2++;
-				logElement.firstElementChild.remove();
+				var child = logElement.firstChild;
+				if(child != null) logElement.removeChild(child);
 			}
 		}
-		logElement.classList.add("autoscroll-dirty");
+		logElement.setAttribute("data-autoscroll-dirty","true");
 		this.pendingLogLines = 0;
 	}
 	,attachAntiScroll: function() {
@@ -345,15 +339,22 @@ Dashboard.prototype = {
 		this.scrollLogsToBottom();
 	}
 	,scrollLogsToBottom: function() {
-		var nodes = window.document.querySelectorAll(".autoscroll.autoscroll-dirty");
+		var nodes = window.document.querySelectorAll("[data-autoscroll-dirty].autoscroll");
+		var pending = new Array();
 		var _g = 0;
 		while(_g < nodes.length) {
 			var node = nodes[_g];
 			++_g;
 			var element;
 			element = js.Boot.__cast(node , Element);
-			element.scrollTop = 99999;
-			element.classList.remove("autoscroll-dirty");
+			element.removeAttribute("data-autoscroll-dirty");
+			pending.push(element);
+		}
+		var _g1 = 0;
+		while(_g1 < pending.length) {
+			var element1 = pending[_g1];
+			++_g1;
+			element1.scrollTop = 99999;
 		}
 	}
 	,__class__: Dashboard
