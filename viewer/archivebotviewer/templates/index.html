@@ -8,9 +8,15 @@
         <input type="submit" value="Search">
     </form>
     {% if search_results %}
-        {% for result_type, result_key in search_results %}
-            <a href="{{ reverse_url(result_type, result_key) }}">{{ result_key }}</a>
-            <br>
+        {% for result_type, job_id, domain, url in search_results %}
+            {% if result_type == "domain" %}
+                 <a href="{{ reverse_url('domain', domain) }}">{{ domain }}</a>
+                 <i>{{ url or '' }}</i>
+             {% else %}
+                 <a href="{{ reverse_url('job', job_id) }}">{{ job_id }}</a>
+                 <i>{{ url or domain or '' }}</i>
+             {% end %}
+             <br>
         {% end %}
         <br>
     {% end %}

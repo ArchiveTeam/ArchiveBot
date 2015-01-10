@@ -2,7 +2,6 @@ import os
 
 from tornado.web import URLSpec as U
 import tornado.web
-from archivebotviewer.database import parse_filename
 
 
 class Application(tornado.web.Application):
@@ -28,9 +27,10 @@ class Application(tornado.web.Application):
             os.path.dirname(__file__), 'templates'
         )
 
-        super().__init__(handlers, static_path=static_path,
-                         template_path=template_path,
-                         debug=debug
+        super().__init__(
+            handlers, static_path=static_path,
+            template_path=template_path,
+            debug=debug
         )
 
 

@@ -5,15 +5,12 @@ import json
 import logging
 import os
 import re
-import shelve
 import time
 
 from sqlalchemy.engine import create_engine
 from sqlalchemy.orm.session import sessionmaker
 from sqlalchemy.pool import SingletonThreadPool
-from sqlalchemy.sql.elements import literal
-from sqlalchemy.sql.expression import insert, update, or_, delete, exists, \
-    select
+from sqlalchemy.sql.expression import insert, update, or_, delete
 from sqlalchemy.sql.schema import Column, ForeignKey
 from sqlalchemy.sql.sqltypes import Integer, String, DateTime, Date
 from tornado import gen
@@ -355,21 +352,23 @@ class Database(object):
 
     def search(self, query):
         query = query.lower()
-        query = re.sub(r'https?://|www\.|[^\w.-]', '', query)
+        query = re.sub(r'ftp://|https?://|www\.|[^/\w.-]', '', query)
+        query = query.partition('/')[0]
         ident_query = query[:5]
 
         with self._session() as session:
-            rows = session.query(Job.domain)\
+            rows = session.query(Job.id, Job.domain, Job.url)\
                 .filter(Job.domain.contains(query))\
                 .group_by('domain')
 
             for row in rows:
-                yield 'domain', row.domain
+                yield 'domain', row.id, row.domain, row.url
 
-            rows = session.query(Job.id).filter_by(id=ident_query)
+            rows = session.query(Job.id, Job.domain, Job.url)\
+                .filter_by(id=ident_query)
 
             for row in rows:
-                yield 'job', row.id
+                yield 'job', row.id, row.domain, row.url
 
     def get_no_json_jobs(self):
         with self._session() as session:
