@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %} Cost Shameboard {% end %}
+
+{% block body %}
+<h2>Cost Shameboard</h2>
+
+<table>
+    <tr>
+        <th>Who</th>
+        <th>Size (bytes)</th>
+        <th>Cost (USD)</th>
+    </tr>
+    {% for who, size in results %}
+        <tr>
+            <td>{{ who }}</td>
+            <td>{{ size }}</td>
+            <td>{{ int(size / 1099511627776 * 2000) }}</td>
+        </tr>
+    {% end %}
+</table>
+
+{% end %}
