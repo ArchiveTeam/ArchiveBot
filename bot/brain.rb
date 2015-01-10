@@ -127,6 +127,7 @@ class Brain
 
   def request_status_by_url(m, url)
     job = Job.new(URI(url), redis)
+    host = URI(url).host
 
     if !job.exists?
       rep = []
@@ -165,7 +166,8 @@ class Brain
             rep << "However, there have been #{child_attempts} download attempts on child URLs."
           end
 
-          rep << "More info: http://archivebot.at.ninjawedding.org:4567/#/histories/#{url}"
+          # TODO: this shouldn't be a hardcoded URL
+          rep << "More info: http://archive.fart.website/archivebot/viewer/?q=#{host}"
         end
       end
 
