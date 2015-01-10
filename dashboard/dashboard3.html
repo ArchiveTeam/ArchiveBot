@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en" ng-app="dashboardApp">
+<head>
+<meta charset="UTF-8">
+<meta name="referrer" content="never">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<base target="_blank">
+<link rel="alternate" type="application/rss+xml" title="RSS Feed" href="/feed/archivebot.rss">
+<link rel="alternate" type="application/atom+xml" title="Atom Feed" href="/feed/archivebot.atom">
+<link rel="icon" type="image/png" href="/assets/favicon.png">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+<title>ArchiveBot dashboard 3.0</title>
+<style>
+html {
+	/* Always show scrollbar to prevent jumpiness when filtering */
+	overflow-y: scroll;
+}
+
+html, body {
+	background-color: ghostwhite;
+	padding-left: 1em;
+	padding-right: 1em;
+}
+
+.top_level_block {
+	margin-top: 1em;
+	margin-bottom: 1em;
+}
+
+#dashboardTable {
+	max-width: 99vw;
+	table-layout: fixed; 
+}
+
+.numeric {
+	text-align: right;
+}
+
+.height-limit-small {
+	overflow: hidden;
+	height: 10em;
+}
+
+.height-limit-big {
+	overflow: auto;
+	height: 20em;
+}
+
+.job-summary td {
+	word-wrap: break-word;
+}
+
+.job-detail td {
+	max-width: 5em;
+	word-wrap: break-word;
+}
+
+.job-ident-clicky {
+	border: none;
+	background: inherit;
+	color: inherit;
+}
+
+.job-log {
+	white-space: nowrap;
+}
+
+.job-log-line-message {
+	white-space: pre;
+}
+
+a.job-log-line-url {
+	color: inherit;
+}
+
+.job-detail-handle {
+	text-align: center;
+}
+
+.job-detail-handle-active {
+	box-shadow: inset 0em 0em 0.2em 0.1em lightcyan;
+}
+</style>
+</head>
+<body ng-controller="DashboardController">
+<noscript>
+	<p class="bg-warning">Yo buddy! You're gonna need JavaScript (ES5+) and WebSocket -&gt; TCP:4567 in order to view this fancy dashboard.</p>
+</noscript>
+
+<div class="top_level_block">
+	<a href="http://archiveteam.org/index.php?title=ArchiveBot" class="underlined-a">ArchiveBot</a>
+	tracking ~<span id="num-crawls" ng-bind="jobs.length"></span> crawls.
+	See also <a href="pipelines" class="underlined-a">pipeline</a> or <a href="logs/recent" class="underlined-a">job</a> reports.
+	<button ng-click="helpVisible = true" class="btn btn-default" ng-hide="helpVisible">Help!</button>
+</div>
+
+<div id="help" ng-show="helpVisible" class="top_level_block">
+	<p>
+		This page shows all of the crawls that <a href="http://archiveteam.org/index.php?title=ArchiveBot">ArchiveBot</a> is currently running.
+	</p>
+	<!-- <p>
+		To pause scrolling, move your mouse inside a log window.
+	</p>-->
+	<!-- <p>
+		To show just one job, click anywhere on its stats.
+	</p>-->
+	<p>
+		To clear all finished jobs, reload the page.
+	</p>
+	<!-- <p>
+		Mouse over the job start date or the response count for additional information.
+	</p>-->
+	<p>
+		If your adblocker is enabled for this domain, you will see slower performance, and some URLs will not be displayed.
+	</p>
+	<p>
+		To use ArchiveBot, drop by <a href="http://chat.efnet.org:9090/?nick=&channels=%23archivebot&Login=Login">#archivebot</a> on EFNet.  <a href="http://archivebot.readthedocs.org/en/latest/">Issue commands</a> by typing them into the channel.  You will need channel operator (@) or voice (+) status to issue archiving jobs; just ask for help or leave a message with the website you want to archive.
+	</p>
+	<p>
+		These <a href="https://github.com/ArchiveTeam/ArchiveBot/tree/master/db/ignore_patterns">ignore sets</a> are available for crawls.  The <a href="https://github.com/ArchiveTeam/ArchiveBot/blob/master/db/ignore_patterns/global.json">global</a> ignore set automatically applies to all crawls.
+	</p>
+	<p>
+		GitHub: <a href="https://github.com/ArchiveTeam/ArchiveBot">ArchiveBot</a>.
+	</p>
+	<p><button ng-click="helpVisible = false" class="btn btn-primary">OK!</button>
+</div>
+
+<div class="top_level_block">
+	<label for="filterBox">Filter:</label>
+	<input type="text" ng-model="filterQuery" id="filterBox" placeholder="URL or Ident">
+</div>
+
+<div class="top_level_block">
+	<input type="checkbox" ng-model="hideDetails" id="detailsCheckbox">
+	<label for="detailsCheckbox">Hide Details</label>
+	
+	<input type="checkbox" ng-model="paused" id="pauseCheckbox">
+	<label for="pauseCheckbox">Pause</label>
+</div>
+
+<table id="dashboardTable" class="table table-condensed table-striped table-bordered top_level_block">
+	<tr>
+		<th class="col-sm-4" ng-click="sortParam = 'url'">URL</th>
+		<th class="col-sm-1" ng-click="sortParam = 'startedAt'">Started</th>
+		<th class="col-sm-1" ng-click="sortParam = 'itemsDownloaded'">Downloaded</th>
+		<th class="col-sm-1" ng-click="sortParam = 'bytesDownloaded'">Size</th>
+		<th class="col-sm-1" ng-click="sortParam = 'itemsQueued'">Queued</th>
+		<th class="col-sm-2" ng-click="sortParam = 'ident'">Ident</th>
+	</tr>
+
+	<tr class="job-summary" ng-repeat-start="job in jobs | filter: filterOperator | orderBy:sortParam:true">
+		<td><a href={{ job.url }} ng-bind="job.url"></span></td>
+		<td ng-bind="job.startedAt * 1000|date:'MM-dd'" 
+			title="{{job.startedAt * 1000|date:'medium'}}"></td>
+		<td ng-bind="job.itemsDownloaded|number" class="numeric"></td>
+		<td ng-bind="job.bytesDownloaded|bytes" class="numeric"></td>
+		<td ng-bind="job.itemsQueued|number" class="numeric"></td>
+		<td><input class="job-ident-clicky" readonly spellcheck="false" type="text" value="{{ job.ident }}" size="28" onclick="this.select()"/></td>
+	</tr>
+
+	<tr class="job-detail" ng-repeat-end ng-hide="hideDetails">
+		<td colspan="6">
+			<div class="job-detail-container container-fluid">
+				<div class="row">
+					<div class="job-detail-datatable col-sm-3" ng-class="{ 'height-limit-small': !job.fullview, 'height-limit-big': job.fullview }">
+						<table class="table table-condensed table-striped table-bordered">
+							<tr>
+								<th>Note</th>
+								<td ng-bind="job.note"></td>
+							</tr>
+							<tr>
+								<th>Con</th>
+								<td ng-bind="job.concurrency"></td>
+							</tr>
+							<tr>
+								<th>Delay</th>
+								<td>{{ job.delayMin | number }}-{{ job.delayMax | number }} ms</td>
+							</tr>
+							<tr>
+								<th>100s</th>
+								<td ng-bind="job.r1xx|number"></td>
+							</tr>
+							<tr>
+								<th>200s</th>
+								<td ng-bind="job.r2xx|number"></td>
+							</tr>
+							<tr>
+								<th>300s</th>
+								<td ng-bind="job.r3xx|number"></td>
+							</tr>
+							<tr>
+								<th>400s</th>
+								<td ng-bind="job.r4xx|number"></td>
+							</tr>
+							<tr>
+								<th>500s</th>
+								<td ng-bind="job.r5xx|number"></td>
+							</tr>
+							<tr>
+								<th>Errors</th>
+								<td ng-bind="job.rUnknown|number"></td>
+							</tr>
+							<tr>
+								<th>Who</th>
+								<td ng-bind="job.startedBy"></td>
+							</tr>
+							<!--  TODO speed goes here -->
+						</table>
+					</div>
+	
+					<div class="job-log col-sm-9" ng-class="{ 'height-limit-small': !job.fullview, 'height-limit-big': job.fullview }">
+						<div class="job-log-line container-fluid"
+							ng-class="{ 'text-muted': logLine.message, 'bg-danger': logLine.isError, 'bg-warning': logLine.isWarning, 'bg-success': logLine.responseCode == 200 }" 
+							ng-repeat="logLine in job.logLines">
+							<span ng-bind="logLine.responseCode || logLine.wgetCode "></span>
+							<a ng-href="{{ logLine.url }}" class="job-log-line-url" ng-bind="logLine.url"></a>
+							<span class="job-log-line-message" ng-bind="logLine.message"></span>
+							<!--  TODO ignore message type and show an ignore on/off indicator-->
+						</div>
+					</div>
+				</div>
+
+				<div class="job-detail-handle btn-link" ng-click="job.fullview = !job.fullview" ng-class="{ 'job-detail-handle-active': job.fullview }">...</div>
+
+			</div>
+		</td>
+	</tr>
+
+</table>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.8/angular.min.js"></script>
+<script src="assets/scripts/dashboard.js"></script>
+</body>
+</html>
