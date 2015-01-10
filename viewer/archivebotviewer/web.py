@@ -18,6 +18,7 @@ class Application(tornado.web.Application):
             U(prefix + r'item/([\w-]+)', ItemHandler, name='item'),
             U(prefix + r'jobs/(\w?)', JobsHandler, name='jobs'),
             U(prefix + r'job/([\w-]+)', JobHandler, name='job'),
+            U(prefix + r'costs', CostLeaderboardHandler, name='costs'),
         )
 
         static_path = os.path.join(
@@ -114,3 +115,9 @@ class StatsHandler(BaseHandler):
         database = self.application.database
         daily_stats = tuple(sorted(database.get_daily_stats()))
         self.render('stats.html', daily_stats=daily_stats)
+
+
+class CostLeaderboardHandler(BaseHandler):
+    def get(self):
+        database = self.application.database
+        self.render('cost_leaderboard.html', results=database.get_cost_leaderboard())

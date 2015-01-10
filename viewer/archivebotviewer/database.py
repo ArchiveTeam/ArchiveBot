@@ -18,6 +18,7 @@ import dateutil.parser
 import sqlalchemy.event
 import sqlalchemy.ext.declarative
 import tornado.httpclient
+from sqlalchemy.sql.functions import func
 
 
 _logger = logging.getLogger(__name__)
@@ -385,6 +386,18 @@ class Database(object):
 
             for row in rows:
                 yield row
+
+    def get_cost_leaderboard(self):
+        with self._session() as session:
+            sum_size = func.sum(Job.size).label('sum_size')
+            nick = func.substr(JSONMetadata.started_by, 1, 4).label('nick')
+            rows = session.query(nick, sum_size)\
+                .filter(Job.id == JSONMetadata.job_id)\
+                .group_by(nick)\
+                .order_by(sum_size.desc())
+
+            for row in rows:
+                yield row.nick, row.sum_size
 
 
 class API(object):
