@@ -13,8 +13,8 @@
     {% for who, size in results %}
         <tr>
             <td>{{ who }}</td>
-            <td>{{ size }}</td>
-            <td>{{ int(size / 1099511627776 * 2000) }}</td>
+            <td class="numeric">{{ '{:,}'.format(size) }}</td>
+            <td class="numeric">{{ '{:,.2f}'.format(size / 1099511627776 * 2000) }}</td>
         </tr>
     {% end %}
 </table>
