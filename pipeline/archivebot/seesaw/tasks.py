@@ -6,12 +6,36 @@ import os
 import shutil
 import time
 import requests
+import socket
 
 from seesaw.task import Task, SimpleTask
 from tornado.ioloop import IOLoop
 import tornado.ioloop
 
 from archivebot.control import ConnectionError
+
+
+class CheckIP(SimpleTask):
+    def __init__(self):
+        SimpleTask.__init__(self, "CheckIP")
+
+    def process(self, item):
+        item.log_output('Checking IP address.')
+        ip_set = set()
+
+        ip_set.add(socket.gethostbyname('twitter.com'))
+        ip_set.add(socket.gethostbyname('facebook.com'))
+        ip_set.add(socket.gethostbyname('youtube.com'))
+        ip_set.add(socket.gethostbyname('microsoft.com'))
+        ip_set.add(socket.gethostbyname('icanhas.cheezburger.com'))
+        ip_set.add(socket.gethostbyname('archiveteam.org'))
+
+        if len(ip_set) != 6:
+            item.log_output('Got IP addresses: {0}'.format(ip_set))
+            item.log_output(
+                'Are you behind a firewall/proxy? That is a big no-no!')
+            raise Exception(
+                'Are you behind a firewall/proxy? That is a big no-no!')
 
 
 class RetryableTask(Task):
