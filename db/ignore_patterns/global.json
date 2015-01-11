@@ -165,7 +165,7 @@
         "^https?://(edge|pixel)\\.quantserve\\.com/",
         "^https?://b\\.scorecardresearch\\.com/",
         "^https?://www\\.projectwonderful\\.com/",
-        "^https?://aax.amazon-adsystem.com/e/dtb/bid"
+        "^https?://aax\\.amazon-adsystem\\.com/e/dtb/bid"
         "^https?://(www|ssl)\\.google-analytics\\.com/ga\\.js",
         "^https?://(www|ssl)\\.google-analytics\\.com/__utm\\.gif",
         "^https?://gads\\.pubmatic\\.com/AdServer/AdCallAggregator",
