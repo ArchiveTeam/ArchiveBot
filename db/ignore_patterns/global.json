@@ -45,6 +45,7 @@
         "^https?://(127|10)\\.\\d+\\.\\d+\\.\\d+(:\\d+)?/",
         "^https?://172\\.(1[6-9]|2\\d|3[01])\\.\\d+\\.\\d+(:\\d+)?/",
         "^https?://192\\.168\\.\\d+\\.\\d+(:\\d+)?/",
+        "^https?://ipv4\\.google\\.com/sorry/CaptchaRedirect"
         "^https?://www\\.google\\.com/recaptcha/api",
         "^https?://accounts\\.google\\.com/ServiceLogin",
         "^https?://((s-)?static\\.ak\\.fbcdn\\.net|(connect\\.|www\\.)?facebook\\.com)/connect\\.php/js/.*rsrc\\.php",
