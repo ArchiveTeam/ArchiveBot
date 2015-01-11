@@ -1,8 +1,8 @@
 {
     "name": "miiverse",
     "patterns": [
-        "^https?://id\.nintendo\.net/oauth",
-        "^https?://www\.nintendo\.com/"
+        "^https?://id\\.nintendo\\.net/oauth",
+        "^https?://www\\.nintendo\\.com/"
     ],
     "type": "ignore_patterns"
 }
