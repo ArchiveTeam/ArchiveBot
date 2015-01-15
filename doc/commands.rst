@@ -489,3 +489,18 @@ For an ident or URL identifying a job that was aborted::
     > !status 43z7a11vo6of3a7i173441dtc
     < Job aborted
     < Eligible for rearchival in 00h 00m 45s
+
+whereis
+=======
+
+``!whereis IDENT``, ``!w IDENT``
+    display which pipeline the given job is running on::
+
+        > !whereis 1q2qydhkeh3gfnrcxuf6py70b
+        < Job 1q2qydhkeh3gfnrcxuf6py70b is on pipeline
+          "pipeline-foobar-1" (pipeline:abcdef1234567890).
+
+For jobs not yet on a pipeline::
+
+    > !status 43z7a11vo6of3a7i173441dtc
+    < Job 43z7a11vo6of3a7i173441dtc is not on a pipeline.
