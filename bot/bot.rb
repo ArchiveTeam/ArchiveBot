@@ -134,6 +134,10 @@ bot = Cinch::Bot.new do
   on :message, /\A!ex(?:plain)? (#{CommandPatterns::IDENT}) (.+)\Z/ do |m, ident, note|
     brain.find_job(ident, m) { |j| brain.add_note(m, j, note) }
   end
+
+  on :message, CommandPatterns::WHEREIS do |m, ident|
+    brain.find_job(ident, m) { |j| brain.whereis(m, j) }
+  end
 end
 
 bot.start

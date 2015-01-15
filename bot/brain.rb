@@ -1,6 +1,7 @@
 require 'uri'
 
 require File.expand_path('../../lib/job', __FILE__)
+require File.expand_path('../../lib/pipeline_info', __FILE__)
 require File.expand_path('../summary', __FILE__)
 require File.expand_path('../post_registration_hook', __FILE__)
 require File.expand_path('../add_ignore_sets', __FILE__)
@@ -202,6 +203,16 @@ class Brain
     job.add_note(note)
 
     reply m, %Q{Added note "#{note}" to job #{job.ident}.}
+  end
+
+  def whereis(m, job)
+    pipeline = PipelineInfo.new(job.redis).from_pipeline_id(job.pipeline_id)
+
+    if pipeline.nickname.nil?
+      reply m, %Q{Job #{job.ident} is not on a pipeline.}
+    else
+      reply m, %Q{Job #{job.ident} is on pipeline "#{pipeline.nickname}" (#{pipeline.id}).}
+    end
   end
 
   def initiate_abort(m, job)
