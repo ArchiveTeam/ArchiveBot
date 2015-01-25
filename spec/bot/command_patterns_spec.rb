@@ -217,4 +217,20 @@ describe CommandPatterns do
       md[2].should == '8'
     end
   end
+
+  describe '!whereis command' do
+    let(:regex) { CommandPatterns::WHEREIS }
+
+    it 'recognizes !whereis IDENT' do
+      md = regex.match '!whereis f4pg9usx4j96ki3zczwlczu51'
+
+      md[1].should == 'f4pg9usx4j96ki3zczwlczu51'
+    end
+
+    it 'recognizes !w IDENT' do
+      md = regex.match '!w f4pg9usx4j96ki3zczwlczu51'
+
+      md[1].should == 'f4pg9usx4j96ki3zczwlczu51'
+    end
+  end
 end

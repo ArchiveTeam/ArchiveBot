@@ -59,7 +59,9 @@ def main():
             basename = fnames[0]
             fname_d = os.path.join(directory, basename)
             fname_u = os.path.join(uploading_dir, basename)
-            assert not os.path.exists(fname_u), "%r already exists - this should not happen" % (fname_u,)
+            if os.path.exists(fname_u):
+                print("%r already exists - another uploader probably grabbed it" % (fname_u,))
+                continue
             try:
                 os.rename(fname_d, fname_u)
             except OSError:

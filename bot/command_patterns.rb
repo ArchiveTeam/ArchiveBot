@@ -11,4 +11,5 @@ module CommandPatterns
   SET_CONCURRENCY   = %r{\A\!con(?:currency)?\s+(#{IDENT})\s+(\d+)}
   IGNORE            = %r{\A!ig(?:nore)?\s+(#{IDENT})\s+([^\s]+)\s*\Z}
   UNIGNORE          = %r{\A!unig(?:nore)?\s+(#{IDENT})\s+([^\s]+)\s*\Z}
+  WHEREIS           = %r{\A!w(?:hereis)?\s+(#{IDENT})\s*\Z}
 end

@@ -17,7 +17,12 @@ archive
     < Use !status 43z7a11vo6of3a7i173441dtc for updates, !abort
       43z7a11vo6of3a7i173441dtc to abort.
 
-ArchiveBot does not ascend to parent links.
+ArchiveBot does not ascend to parent links. This means that everything
+under the ``litpacks`` directory will be downloaded. For example,
+``/litpacks/hello.html`` will be downloaded but not ``/hello.html``.
+
+If you leave out the trailing slash, eg ``/litpacks``, it will consider
+that to be a file and download everything under ``/``.
 
 
 Accepted parameters
@@ -47,12 +52,12 @@ Accepted parameters
     as all linked pages and their requisites.  This is often useful
     for preserving a page's context in time.  However, this can
     sometimes result in an undesirably large archive.  Specifying
-    --no-offsite-links preserves recursive retrieval but does not
+    ``--no-offsite-links preserves`` recursive retrieval but does not
     follow links to offsite hosts.
 
     Please note that ArchiveBot considers www.example.com and
     example.com to be different hosts, so if you have a website that
-    uses both, you should not specify --no-offsite-links.
+    uses both, you should not specify ``--no-offsite-links``.
 
 ``--user-agent-alias ALIAS``
     specify a user-agent to use::
@@ -79,6 +84,9 @@ Accepted parameters
         < Use !status 5sid4pgxkiu6zynhbt3q1gi2s for updates, !abort
           5sid4pgxkiu6zynhbt3q1gi2s to abort.
 
+    This option is for advanced users only. Do not pick pipelines
+    from a list! Your job may be lost if you use this option.
+
 ``--phantomjs``
     access pages via PhantomJS
 
@@ -90,15 +98,15 @@ Accepted parameters
 
 ``--no-phantomjs-smart-scroll``
     disable PhantomJS' end-of-page
-    detection and always scroll --phantomjs-scroll number of
+    detection and always scroll ``--phantomjs-scroll`` number of
     times; off by default
 
-    PhantomJS mode is enabled if any of the --*phantomjs* options are
+    PhantomJS mode is enabled if any of the ``--*phantomjs*`` options are
     passed.
 
 .. tip::
-  If you're feeling snarky or realist, you can also invoke !archive as
-  !firstworldproblems.
+  If you're feeling snarky or realist, you can also invoke ``!archive`` 
+  as ``!firstworldproblems.``
 
 
 abort
@@ -172,10 +180,10 @@ Accepted parameters
 
 ``--no-phantomjs-smart-scroll``
     disable PhantomJS' end-of-page
-    detection and always scroll --phantomjs-scroll number of
+    detection and always scroll ``--phantomjs-scroll`` number of
     times; off by default
 
-PhantomJS mode is enabled if any of the --*phantomjs* options are
+PhantomJS mode is enabled if any of the ``--*phantomjs*`` options are
 passed.
 
 
@@ -239,7 +247,7 @@ Accepted parameters
 
 ``--no-phantomjs-smart-scroll``
     disable PhantomJS' end-of-page
-    detection and always scroll --phantomjs-scroll number of
+    detection and always scroll ``--phantomjs-scroll`` number of
     times; off by default
 
 ignore
@@ -255,9 +263,8 @@ ignore
 The pattern must be expressed as regular expressions.  For more
 information, see:
 
-http://docs.python.org/3/howto/regex.html#regex-howto
-
-http://docs.python.org/3/library/re.html#regular-expression-syntax
+* http://docs.python.org/3/howto/regex.html#regex-howto
+* http://docs.python.org/3/library/re.html#regular-expression-syntax
 
 Two strings, ``{primary_url}`` and ``{primary_netloc}``, have special meaning.
 
@@ -383,12 +390,12 @@ yahoo
 =====
 
 ``!yahoo IDENT``
-    set zero second delays, crank concurrency to 11::
+    set zero second delays, crank concurrency to 4::
 
        > !yahoo 1q2qydhkeh3gfnrcxuf6py70b
        < Inter-request delay for job 1q2qydhkeh3gfnrcxuf6py70b set to
          [0, 0] ms.
-       < Job 1q2qydhkeh3gfnrcxuf6py70b set to use 11 workers.
+       < Job 1q2qydhkeh3gfnrcxuf6py70b set to use 4 workers.
 
 Only recommended for use when archiving data from hosts with gobs of
 bandwidth and processing power (e.g. Yahoo, Google, Amazon).  Keep in
@@ -426,28 +433,6 @@ status
 
         > !status
         < Job status: 0 completed, 0 aborted, 0 in progress, 0 pending
-
-
-pending
-=======
-
-``!pending``
-    send pending queue in private message::
-
-        > !pending
-        < [privmsg] 2 pending jobs:
-        < [privmsg] 1. http://artscene.textfiles.com/litpacks/
-                       (43z7a11vo6of3a7i173441dtc)
-        < [privmsg] 2. http://example.blogspot.com/ncr
-                       (5sid4pgxkiu6zynhbt3q1gi2s)
-
-Jobs are listed in the order that they'll be worked on.
-This command lists only the global queue; it doesn't yet show the
-status of any pipeline-specific queues.
-
-
-status
-======
 
 ``!status IDENT``, ``!status URL``
     print information about a job or URL
@@ -489,3 +474,38 @@ For an ident or URL identifying a job that was aborted::
     > !status 43z7a11vo6of3a7i173441dtc
     < Job aborted
     < Eligible for rearchival in 00h 00m 45s
+
+
+pending
+=======
+
+``!pending``
+    send pending queue in private message::
+
+        > !pending
+        < [privmsg] 2 pending jobs:
+        < [privmsg] 1. http://artscene.textfiles.com/litpacks/
+                       (43z7a11vo6of3a7i173441dtc)
+        < [privmsg] 2. http://example.blogspot.com/ncr
+                       (5sid4pgxkiu6zynhbt3q1gi2s)
+
+Jobs are listed in the order that they'll be worked on.
+This command lists only the global queue; it doesn't yet show the
+status of any pipeline-specific queues.
+
+
+whereis
+=======
+
+``!whereis IDENT``, ``!w IDENT``
+    display which pipeline the given job is running on::
+
+        > !whereis 1q2qydhkeh3gfnrcxuf6py70b
+        < Job 1q2qydhkeh3gfnrcxuf6py70b is on pipeline
+          "pipeline-foobar-1" (pipeline:abcdef1234567890).
+
+For jobs not yet on a pipeline::
+
+    > !status 43z7a11vo6of3a7i173441dtc
+    < Job 43z7a11vo6of3a7i173441dtc is not on a pipeline.
+
