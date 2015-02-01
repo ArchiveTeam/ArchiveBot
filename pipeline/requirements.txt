@@ -1,4 +1,4 @@
-seesaw==0.7
+seesaw>=0.7,<0.9
 psutil
 pyyaml
 redis==2.10.3
