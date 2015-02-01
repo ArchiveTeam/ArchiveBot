@@ -48,6 +48,8 @@ def make_args(item, default_user_agent, wpull_exe, phantomjs_exe, finished_warcs
         '--python-script', 'wpull_hooks.py',
         '--phantomjs-exe', phantomjs_exe,
         '--debug-manhole',
+        '--strip-session-id',
+        '--escaped-fragment',
     ]
 
     # -----------------------------------------------------------------------
