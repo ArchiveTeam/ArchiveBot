@@ -3,9 +3,10 @@ psutil
 pyyaml
 redis==2.10.3
 trollius>=1.0.2
-git+https://github.com/ludios/wpull.git@hax-26#egg=wpull
+wpull==0.1006
 sqlalchemy
 hiredis
 requests
 manhole
 lxml
+lmdb

@@ -1,4 +1,7 @@
-import subprocess
+import os.path
+
+import archivebot.wpull
+
 
 def add_args(args, names, item):
     for name in names:
@@ -11,6 +14,10 @@ def make_args(item, default_user_agent, wpull_exe, phantomjs_exe, finished_warcs
     # BASE ARGUMENTS
     # -----------------------------------------------------------------------
     user_agent = item.get('user_agent') or default_user_agent
+    plugin_path = os.path.join(
+        os.path.dirname(archivebot.wpull.__file__),
+        'plugin.py'
+    )
 
     args = [wpull_exe,
         '-U', user_agent,
@@ -19,7 +26,8 @@ def make_args(item, default_user_agent, wpull_exe, phantomjs_exe, finished_warcs
         '-o', '%(item_dir)s/wpull.log' % item,
         '--database', '%(item_dir)s/wpull.db' % item,
         '--html-parser', 'libxml2-lxml',
-        '--dupes-db', '%(item_dir)s/dupes_db' % item,
+        '--plugin-script', plugin_path,
+        '--plugin-args', ' --dupes-db %(item_dir)s/dupes_db' % item,
         '--save-cookies', '%(cookie_jar)s' % item,
         '--no-check-certificate',
         '--delete-after',
