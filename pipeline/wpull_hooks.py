@@ -121,7 +121,7 @@ def dequeued_url(url_info, record_info):
 def handle_result(url_info, record_info, error_info=None, http_info=None):
   global last_age
 
-  if http_info:
+  if http_info and http_info['body']:
     # Update the traffic counters.
     control.update_bytes_downloaded(ident, http_info['body']['content_size'])
 
