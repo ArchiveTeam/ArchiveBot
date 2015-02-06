@@ -191,6 +191,12 @@ describe CommandPatterns do
 
       md.should be_nil
     end
+
+    it "does not recognize exceedingly large delays" do
+      md = regex.match "#{cmd} f4pg9usx4j96ki3zczwlczu51 0 10000000"
+
+      md.should be_nil
+    end
   end
 
   describe 'Set delay command' do
