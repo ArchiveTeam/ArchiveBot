@@ -216,6 +216,12 @@ describe CommandPatterns do
       md[1].should == 'f4pg9usx4j96ki3zczwlczu51'
       md[2].should == '8'
     end
+
+    it 'does not recognize an accidental !delay mix up' do
+      md = regex.match '!con f4pg9usx4j96ki3zczwlczu51 9000 300000'
+
+      md.should be_nil
+    end
   end
 
   describe '!whereis command' do
