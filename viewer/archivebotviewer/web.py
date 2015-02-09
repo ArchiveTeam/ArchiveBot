@@ -1,4 +1,5 @@
 import os
+import urllib.parse
 
 from tornado.web import URLSpec as U
 import tornado.web
@@ -13,7 +14,7 @@ class Application(tornado.web.Application):
             U(prefix + r'audit', AuditHandler, name='audit'),
             U(prefix + r'stats', StatsHandler, name='stats'),
             U(prefix + r'domains/(\w?)', DomainsHandler, name='domains'),
-            U(prefix + r'domain/([\w.-]+)', DomainHandler, name='domain'),
+            U(prefix + r'domain/([\w.%-]+)', DomainHandler, name='domain'),
             U(prefix + r'items/', ItemsHandler, name='items'),
             U(prefix + r'item/([\w-]+)', ItemHandler, name='item'),
             U(prefix + r'jobs/(\w?)', JobsHandler, name='jobs'),
@@ -93,6 +94,7 @@ class DomainsHandler(BaseHandler):
 
 class DomainHandler(BaseHandler):
     def get(self, domain):
+        domain = urllib.parse.unquote(domain)
         rows = self.application.database.get_jobs_by_domain(domain)
 
         self.render('domain.html', rows=rows)
