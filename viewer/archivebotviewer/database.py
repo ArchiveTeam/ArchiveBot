@@ -390,7 +390,9 @@ class Database(object):
     def get_cost_leaderboard(self):
         with self._session() as session:
             sum_size = func.sum(Job.size).label('sum_size')
-            nick = func.substr(JSONMetadata.started_by, 1, 4).label('nick')
+            nick = func.lower(
+                func.substr(JSONMetadata.started_by, 1, 4)
+                ).label('nick')
             rows = session.query(nick, sum_size)\
                 .filter(Job.id == JSONMetadata.job_id)\
                 .group_by(nick)\
