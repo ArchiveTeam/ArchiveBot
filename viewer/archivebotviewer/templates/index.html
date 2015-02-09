@@ -10,7 +10,7 @@
     {% if search_results %}
         {% for result_type, job_id, domain, url in search_results %}
             {% if result_type == "domain" %}
-                 <a href="{{ reverse_url('domain', domain) }}">{{ domain }}</a>
+                 <a href="{{ reverse_url('domain', url_escape(domain, plus=False)) }}">{{ domain }}</a>
                  <i>{{ url or '' }}</i>
              {% else %}
                  <a href="{{ reverse_url('job', job_id) }}">{{ job_id }}</a>

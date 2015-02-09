@@ -14,7 +14,7 @@
         </tr>
         {% for domain in domains %}
             <tr>
-                <td><a href="{{ reverse_url('domain', url_escape(domain)) }}">{{ domain }}</a></td>
+                <td><a href="{{ reverse_url('domain', url_escape(domain, plus=False)) }}">{{ domain }}</a></td>
             </tr>
         {% end %}
     </table>
