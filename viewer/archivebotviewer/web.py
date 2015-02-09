@@ -1,7 +1,7 @@
 import os
 import urllib.parse
 
-from tornado.web import URLSpec as U
+from tornado.web import URLSpec as U, HTTPError
 import tornado.web
 
 
@@ -78,7 +78,11 @@ class JobsHandler(BaseHandler):
 
 class JobHandler(BaseHandler):
     def get(self, identifier):
-        rows = self.application.database.get_job_files(identifier)
+        rows = tuple(self.application.database.get_job_files(identifier))
+
+        if not rows:
+            raise HTTPError(404)
+
         url = self.application.database.get_job_url(identifier)
 
         self.render('job.html', rows=rows, url=url)
@@ -95,7 +99,10 @@ class DomainsHandler(BaseHandler):
 class DomainHandler(BaseHandler):
     def get(self, domain):
         domain = urllib.parse.unquote(domain)
-        rows = self.application.database.get_jobs_by_domain(domain)
+        rows = tuple(self.application.database.get_jobs_by_domain(domain))
+
+        if not rows:
+            raise HTTPError(404)
 
         self.render('domain.html', rows=rows)
 
