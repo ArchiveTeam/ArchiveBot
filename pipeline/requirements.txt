@@ -3,7 +3,7 @@ psutil
 pyyaml
 redis==2.10.3
 trollius>=1.0.2
-git+https://github.com/chfoo/wpull@277ea4bf35cb5f11db8eaf2ae13831cbab2d3bd3#egg=wpull
+wpull==0.1006.1
 sqlalchemy
 hiredis
 requests
