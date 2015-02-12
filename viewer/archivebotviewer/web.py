@@ -20,6 +20,8 @@ class Application(tornado.web.Application):
             U(prefix + r'jobs/(\w?)', JobsHandler, name='jobs'),
             U(prefix + r'job/([\w-]+)', JobHandler, name='job'),
             U(prefix + r'costs', CostLeaderboardHandler, name='costs'),
+
+            U(prefix + r'api/v1/search.json', ApiSearchHandler, name='api-search'),
         )
 
         static_path = os.path.join(
@@ -39,21 +41,38 @@ class Application(tornado.web.Application):
 class BaseHandler(tornado.web.RequestHandler):
     pass
 
+class SearchHandler(BaseHandler):
+    def do_search(self):
+        '''
+        Runs a search against the viewer's database, using the q query
+        parameter as the criteria.
 
-class IndexHandler(BaseHandler):
-    def get(self):
-        search_results = tuple(self._search() or ())
-
-        self.render('index.html', search_results=search_results)
-
-    def _search(self):
+        If the query is omitted or there are no matches, returns ().
+        '''
         query = self.get_argument('q', None)
 
         if not query:
-            return
+            return ()
 
-        return self.application.database.search(query)
+        return (self.application.database.search(query) or ())
 
+class IndexHandler(SearchHandler):
+    def get(self):
+        self.render('index.html', search_results=self.do_search())
+
+class ApiSearchHandler(SearchHandler):
+    def get(self):
+        results = self.do_search()
+
+        def make_result(result):
+            return dict(
+                result_type=result[0],
+                job_id=result[1],
+                domain=result[2],
+                url=result[3]
+            )
+
+        self.write(dict(results=[make_result(r) for r in results]))
 
 class ItemsHandler(BaseHandler):
     def get(self):
