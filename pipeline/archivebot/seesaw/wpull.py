@@ -53,6 +53,10 @@ def make_args(item, default_user_agent, wpull_exe, phantomjs_exe, finished_warcs
         '--escaped-fragment',
     ]
 
+    if item['url'].startswith("http://www.reddit.com/") or \
+       item['url'].startswith("https://www.reddit.com/"):
+        add_args(args, ['--header', 'Cookie: over18=1'], item)
+
     # -----------------------------------------------------------------------
     # !ao < FILE
     # -----------------------------------------------------------------------
