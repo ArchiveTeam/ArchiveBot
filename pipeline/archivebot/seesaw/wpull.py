@@ -51,7 +51,6 @@ def make_args(item, default_user_agent, wpull_exe, phantomjs_exe, finished_warcs
         '--debug-manhole',
         '--strip-session-id',
         '--escaped-fragment',
-        '--session-timeout', '21600',
     ]
 
     if item['url'].startswith("http://www.reddit.com/") or \
