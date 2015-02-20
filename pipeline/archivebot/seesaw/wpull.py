@@ -86,8 +86,8 @@ def make_args(item, default_user_agent, wpull_exe, phantomjs_exe, finished_warcs
 
         phantomjs_args = [
             '--phantomjs',
-            '--phantomjs-scroll', item.get('phantomjs_scroll'),
-            '--phantomjs-wait', item.get('phantomjs_wait')
+            '--phantomjs-scroll', item['phantomjs_scroll'],
+            '--phantomjs-wait', item['phantomjs_wait']
         ]
 
         if item.get('no_phantomjs_smart_scroll'):
