@@ -24,6 +24,7 @@ from archivebot import control
 from archivebot import shared_config
 from archivebot.seesaw import extensions
 from archivebot.seesaw import monitoring
+from archivebot.seesaw.preflight import check_wpull_args
 from archivebot.seesaw.wpull import WpullArgs
 from archivebot.seesaw.tasks import GetItemFromQueue, StartHeartbeat, \
     SetFetchDepth, PreparePaths, WriteInfo, DownloadUrlFile, \
@@ -106,6 +107,12 @@ DEFAULT_USER_AGENT = \
 
 _, _, _, pipeline_id = monitoring.pipeline_id()
 
+wpull_args = WpullArgs(
+    default_user_agent=DEFAULT_USER_AGENT, wpull_exe=WPULL_EXE,
+    phantomjs_exe=PHANTOMJS, 
+    finished_warcs_dir=os.environ["FINISHED_WARCS_DIR"]
+)
+
 pipeline = Pipeline(
     CheckIP(),
     GetItemFromQueue(control, pipeline_id, ao_only=env.get('AO_ONLY')),
@@ -115,8 +122,7 @@ pipeline = Pipeline(
     WriteInfo(),
     DownloadUrlFile(control),
     WgetDownload(
-        WpullArgs(default_user_agent=DEFAULT_USER_AGENT, wpull_exe=WPULL_EXE,
-                  phantomjs_exe=PHANTOMJS, finished_warcs_dir=os.environ["FINISHED_WARCS_DIR"]),
+        wpull_args,
         accept_on_exit_code=AcceptAny(),
         env={
             'ITEM_IDENT': ItemInterpolation('%(ident)s'),
@@ -151,6 +157,8 @@ pipeline.on_cleanup += stop_control
 
 # Activate system monitoring.
 monitoring.start(pipeline, control, VERSION, downloader)
+
+check_wpull_args(wpull_args)
 
 print('*' * 60)
 print('Pipeline ID: %s' % pipeline_id)
