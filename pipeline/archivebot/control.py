@@ -24,6 +24,23 @@ def conn(controller):
         controller.disconnect()
         raise ConnectionError(str(e)) from e
 
+def candidate_queues(named_queues, pipeline_nick, ao_only):
+    '''
+    Generates names of queues that this pipeline will check for work.
+    '''
+
+    def applies(q):
+        return q.replace('pending:', '') in pipeline_nick
+
+    if ao_only:
+        return ['pending-ao']
+    else:
+        matches = [q for q in named_queues if applies(q)]
+        matches.append('pending-ao')
+        matches.append('pending')
+
+        return matches
+
 class Control(object):
     '''
     Handles communication to and from the ArchiveBot control server.
@@ -63,16 +80,18 @@ class Control(object):
         self.mark_aborted_script = self.redis.register_script(MARK_ABORTED_SCRIPT)
         self.log_script = self.redis.register_script(LOGGER_SCRIPT)
 
-    def reserve_job(self, pipeline_id, ao_only):
-        candidates = [
-            'pending:%s' % pipeline_id,
-            'pending-ao'
-        ]
+    def all_named_pending_queues(self):
+        pipelines = set()
 
-        if not ao_only:
-            candidates.append('pending')
+        for name in self.redis.scan_iter('pending:*'):
+            pipelines.add(name)
 
-        for queue in candidates:
+        return pipelines
+
+    def reserve_job(self, pipeline_id, pipeline_nick, ao_only):
+        named_queues = self.all_named_pending_queues()
+
+        for queue in candidate_queues(named_queues, pipeline_nick, ao_only):
             ident = self.dequeue_item(queue)
 
             if ident:

@@ -115,7 +115,7 @@ wpull_args = WpullArgs(
 
 pipeline = Pipeline(
     CheckIP(),
-    GetItemFromQueue(control, pipeline_id, ao_only=env.get('AO_ONLY')),
+    GetItemFromQueue(control, pipeline_id, downloader, ao_only=env.get('AO_ONLY')),
     StartHeartbeat(control),
     SetFetchDepth(),
     PreparePaths(),
