@@ -166,13 +166,13 @@ Accepted parameters
     useful for archiving sites that (still) do user-agent detection.
     See db/user_agents for a list of recognized aliases.
 
-``--pipeline PIPELINE_ID``
+``--pipeline TAG``
     specify pipeline to use::
 
         > !archiveonly http://example.blogspot.com/
-            --pipeline=pipeline:1234567890abcdef
+            --pipeline=superfast
         < Archiving http://example.blogspot.com/.
-        < Job will run on pipeline pipeline:1234567890abcdef.
+        < Job will run on a pipeline whose name contains "superfast".
         < Use !status 5sid4pgxkiu6zynhbt3q1gi2s for updates, !abort
           5sid4pgxkiu6zynhbt3q1gi2s to abort.
 
@@ -240,7 +240,7 @@ Accepted parameters
 ``--user-agent-alias ALIAS``
     specify a user-agent to use
 
-``--pipeline PIPELINE_ID``
+``--pipeline TAG``
     specify pipeline to use
 
 ``--phantomjs``
