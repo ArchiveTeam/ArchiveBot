@@ -4,7 +4,7 @@ module PipelineOptions
 
     if params[:pipeline]
       pipeline = params[:pipeline]
-      reply m, "Job will run on pipeline #{pipeline}."
+      reply m, %Q{Job will run on a pipeline whose name contains "#{pipeline}".}
     end
 
     phantomjs_triggers = [
