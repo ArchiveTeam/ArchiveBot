@@ -74,18 +74,25 @@ Accepted parameters
     useful for archiving sites that (still) do user-agent detection.
     See db/user_agents for a list of recognized aliases.
 
-``--pipeline PIPELINE_ID:``
+``--pipeline TAG``
     specify pipeline to use::
 
         > !archive http://example.blogspot.com/ncr
-            --pipeline=pipeline:1234567890abcdef
+            --pipeline=superfast
         < Archiving http://example.blogspot.com/ncr.
-        < Job will run on pipeline pipeline:1234567890abcdef.
+        < Job will run on a pipeline whose name contains "superfast".
         < Use !status 5sid4pgxkiu6zynhbt3q1gi2s for updates, !abort
           5sid4pgxkiu6zynhbt3q1gi2s to abort.
 
-    This option is for advanced users only. Do not pick pipelines
-    from a list! Your job may be lost if you use this option.
+    Pipeline operators assign nicknames to pipelines.  Oftentimes, these
+    nicknames describe the pipeline: datacenter, special modifications, etc.
+    This option can be used to load jobs onto those pipelines.
+
+    In the above example, the following pipeline nicks would match the given
+    tag:
+
+    * superfast
+    * ovhca1-superfast-47
 
 ``--phantomjs``
     access pages via PhantomJS
