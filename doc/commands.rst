@@ -293,10 +293,10 @@ Examples
 3.  To keep subdomains on domain1.com as well, use pattern
     ``^(?!https?://(([^/]+\.)?domain1\.com|domain2\.com)/)``
 
-4.  For ``!archive`` jobs on Tumblrs, the following pattern ignores all URLs
-    except the initial URL, sub-URLs of the initial URL, and Tumblr media/asset
-    servers:
-    ``^http://(?!({primary_netloc}|\d+\.media\.tumblr\.com|assets\.tumblr\.com)).*``
+4.  For ``!archive`` jobs on subdomain blogs (such as Tumblr), the
+    following pattern ignores all URLs except the initial URL, sub-URLs
+    of the initial URL, and media/asset servers:
+    ``^http://(?!({primary_netloc}|\d+\.media\.example\.com|assets\.example\.com)).*``
 
 5.  Say you have this URL file::
 
