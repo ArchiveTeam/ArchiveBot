@@ -1,6 +1,7 @@
 import argparse
 import functools
 import hashlib
+import sys
 
 from wpull.database.sqltable import SQLiteURLTable
 from wpull.document.html import HTMLReader
@@ -37,6 +38,7 @@ class DupSpottingProcessingRule(wpull.processor.rule.ProcessingRule):
                 # Don't extract links from pages we've already seen
                 # to avoid loops that descend a directory endlessly
                 print("  DUPE {}\n      OF {}".format(response.request.url, dupe_of))
+                sys.stdout.flush()
                 return
             else:
                 if dupes_db is not None:
