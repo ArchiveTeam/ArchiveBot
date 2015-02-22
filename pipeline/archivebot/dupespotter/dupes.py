@@ -48,6 +48,7 @@ class DupesOnDisk(object):
             return txn.put(digest, url.encode("utf-8"))
 
     def fs_supports_sparse_files(self):
+        # http://stackoverflow.com/a/3212102/1524507
         with tempfile.NamedTemporaryFile(dir=os.getcwd()) as file:
             file.truncate(1000000)
 
