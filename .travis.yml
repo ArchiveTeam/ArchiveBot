@@ -19,8 +19,8 @@ install:
   - bundle install --jobs=3 --retry=3 --deployment
   - sudo apt-get install ircd-hybrid python3.4 python3.4-dev rsync
   - sudo python3.4 get-pip.py
-  - python3.4 -m pip install -r pipeline/requirements.txt --user
-  - python3.4 -m pip install nose irc --user
+  - for i in 1 2 3; do python3.4 -m pip install -r pipeline/requirements.txt --user && break || sleep 20; done
+  - for i in 1 2 3; do python3.4 -m pip install nose irc --user && break || sleep 20; done
   - sudo cp test/example_rsyncd.conf /etc/rsyncd.conf
   - python3.4 -m pip install git+https://github.com/chfoo/huhhttp#egg=huhhttp --user
 
