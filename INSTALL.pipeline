@@ -30,7 +30,6 @@ As user archivebot:
     cd ArchiveBot
     git submodule update --init
     pip3 install --user -r pipeline/requirements.txt
-    pip3 install --user wpull
 
 As user archivebot, in first tmux session:
 
@@ -79,6 +78,5 @@ To gracefully stop the uploader, hit ctrl-c in its tmux session.
 To upgrade, run:
 
     pip3 install --user --upgrade -r pipeline/requirements.txt
-    pip3 install --user --upgrade wpull
 
  vim:ts=2:sw=2:tw=72:et
