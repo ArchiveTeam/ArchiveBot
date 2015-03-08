@@ -17,7 +17,7 @@ before_install:
 
 install:
   - bundle install --jobs=3 --retry=3 --deployment
-  - sudo apt-get -qq install ircd-hybrid python3.4 python3.4-dev rsync
+  - sudo apt-get -qq install ircd-hybrid python3.4 python3.4-dev rsync libzmq3-dev
   - sudo python3.4 get-pip.py
   - travis_retry python3.4 -m pip install -q -r pipeline/requirements.txt --user
   - travis_retry python3.4 -m pip install -q nose irc --user
