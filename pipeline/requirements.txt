@@ -3,7 +3,7 @@ psutil
 pyyaml
 redis==2.10.3
 trollius>=1.0.2
-wpull==0.1008,==0.1009
+wpull>=0.1008,<=0.1009
 sqlalchemy
 hiredis
 requests
