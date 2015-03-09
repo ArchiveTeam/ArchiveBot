@@ -2,9 +2,9 @@ To run the pipeline, you will need:
 
 - a Python 3.3+ installation
 - Pip (for Python 3.3+)
-- seesaw
+- seesaw (automatically installed by Pip)
 - rsync
-- wpull
+- wpull (automatically installed by Pip)
 - PhantomJS 1.9.8
 
 Quick install, for Debian and Debian-esque systems:
@@ -14,6 +14,10 @@ Quick install, for Debian and Debian-esque systems:
       libxml2-dev libxslt-dev zlib1g-dev libssl-dev libsqlite3-dev \
       libffi-dev git tmux fontconfig-config fonts-dejavu-core \
       libfontconfig1 libjpeg-turbo8 libjpeg8
+
+(If your distro does not have a recent Python, try deadsnakes ppa for
+Ubuntu or compile it easily with yyuu's pyenv. You may also want to use
+virtualenv to micromanage your Python dependencies.)
 
 Set up a dedicated account:
 

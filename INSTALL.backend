@@ -2,13 +2,16 @@ To run the backend, you will need:
 
 - a Redis 2.8+ server
 - a CouchDB server
-- a Ruby 1.9 installation
+- a Ruby 1.9 installation (use of rvm is suggested)
 - ZeroMQ 4.0.5 (earlier API-compatible versions may work, but they have not been tested)
 - Bundler
 - ExecJS supported runtime (for the dashboard)
   (see https://github.com/sstephenson/execjs)
 
-(Little known fact: ArchiveBot is made to be as hard as possible to set up.)
+(Little known fact: ArchiveBot is made to be as hard as possible to set
+up. If you have trouble with these instructions, drop by in IRC for
+help, file an issue, or submit improvements through a pull request. You
+can also take a look at the .travis.yml integration test config file.)
 
 Quick install, for Debian and Debian-esque systems:
 
