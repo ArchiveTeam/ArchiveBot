@@ -12,4 +12,6 @@ module CommandPatterns
   IGNORE            = %r{\A!ig(?:nore)?\s+(#{IDENT})\s+([^\s]+)\s*\Z}
   UNIGNORE          = %r{\A!unig(?:nore)?\s+(#{IDENT})\s+([^\s]+)\s*\Z}
   WHEREIS           = %r{\A!w(?:hereis)?\s+(#{IDENT})\s*\Z}
+  SUSPEND           = %r{\A!susp(?:end)?\s+(#{IDENT})\s*\Z}
+  RESUME            = %r{\A!res(?:ume)?\s+(#{IDENT})\s*\Z}
 end

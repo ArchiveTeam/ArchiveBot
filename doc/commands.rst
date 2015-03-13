@@ -116,6 +116,46 @@ Accepted parameters
   as ``!firstworldproblems.``
 
 
+suspend
+=======
+
+``!suspend IDENT``, ``!susp IDENT``
+    suspend a job::
+
+        > !suspend 1q2qydhkeh3gfnrcxuf6py70b
+        < Initiating suspend for job 1q2qydhkeh3gfnrcxuf6py70b.
+        (some time passes...)
+        < Job 1q2qydhkeh3gfnrcxuf6py70b suspended.
+
+Suspending a job finishes outstanding requests for the job, prepares the WARC
+for upload, and stores the fetch database, job settings, and job ignore
+patterns in a remote cache.  The job can be later resumed with ``!resume``.
+
+
+resume
+======
+
+``!resume IDENT``, ``!res IDENT``
+    resume a job::
+
+        > !resume 1q2qydhkeh3gfnrcxuf6py70b
+        > Resuming job 1q2qydhkeh3gfnrcxuf6py70b.
+
+Running !resume on an unknown job has no effect.
+
+Resuming a job downloads that job's settings, ignore patterns, and fetch
+database from the remote cache, and then starts the grab.
+
+Accepted parameters
++++++++++++++++++++
+
+``--pipeline TAG``
+    specify pipeline to use::
+
+        > !resume 1q2qydhkeh3gfnrcxuf6py70b --pipeline=superfast
+        < Resuming job 1q2qydhkeh3gfnrcxuf6py70b on pipeline "superfast".
+
+
 abort
 =====
 
