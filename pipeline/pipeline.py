@@ -93,10 +93,6 @@ def wpull_version():
 
     return output.decode('utf-8').strip()
 
-class AcceptAny:
-    def __contains__(self, item):
-        return True
-
 DEFAULT_USER_AGENT = \
     'ArchiveTeam ArchiveBot/%s (wpull %s) and not Mozilla/5.0 ' \
     '(Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) ' \
@@ -120,7 +116,8 @@ pipeline = Pipeline(
     DownloadUrlFile(control),
     WgetDownload(
         wpull_args,
-        accept_on_exit_code=AcceptAny(),
+        max_tries=1,
+        accept_on_exit_code=[0,4,5,6,7,8],
         env={
             'ITEM_IDENT': ItemInterpolation('%(ident)s'),
             'LOG_KEY': ItemInterpolation('%(log_key)s'),
