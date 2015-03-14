@@ -32,7 +32,7 @@ from archivebot.seesaw.tasks import GetItemFromQueue, StartHeartbeat, \
     MarkItemAsDone, CheckIP
 
 
-VERSION = "20150311.02"
+VERSION = "20150314.01"
 PHANTOMJS_VERSION = '1.9.8'
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
 WPULL_EXE = find_executable('Wpull', None, [ './wpull' ])
@@ -50,9 +50,6 @@ assert PHANTOMJS, 'PhantomJS %s was not found.' % PHANTOMJS_VERSION
 assert 'RSYNC_URL' in env, 'RSYNC_URL not set.'
 assert 'REDIS_URL' in env, 'REDIS_URL not set.'
 assert 'FINISHED_WARCS_DIR' in env, 'FINISHED_WARCS_DIR not set.'
-
-assert 'TMUX' in env or 'STY' in env or env.get('NO_SCREEN') == "1", \
-        "Refusing to start outside of screen or tmux, set NO_SCREEN=1 to override"
 
 assert 'TMUX' in env or 'STY' in env or env.get('NO_SCREEN') == "1", \
         "Refusing to start outside of screen or tmux, set NO_SCREEN=1 to override"
