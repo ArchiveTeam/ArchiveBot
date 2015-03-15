@@ -278,6 +278,11 @@ class Job < Struct.new(:uri, :redis)
 
   def abort
     redis.hset(ident, 'aborted', true)
+
+    # We keep abort_requested around for older pipelines.  Remove this when all
+    # pipelines are running a recent enough version.
+    redis.hset(ident, 'abort_requested', true)
+
     job_parameters_changed
   end
 
