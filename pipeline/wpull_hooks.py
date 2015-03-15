@@ -170,17 +170,8 @@ def handle_result(url_info, record_info, error_info=None, http_info=None):
   control.flush_item_counts(ident)
 
   # Should we abort?
-  if settings.abort_requested():
-    print_log("Wget terminating on bot command")
-
-    while True:
-      try:
-        control.mark_aborted(ident)
-        break
-      except ConnectionError:
-        time.sleep(5)
-        pass
-
+  if settings.aborted():
+    print_log("Abort received, stopping job ", ident)
     return wpull_hook.actions.STOP
 
   # All clear.

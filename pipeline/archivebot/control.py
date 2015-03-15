@@ -208,7 +208,7 @@ class Control(object):
             data = self.redis.hmget(ident, 'delay_min', 'delay_max',
                     'concurrency',
                     'settings_age',
-                    'abort_requested',
+                    'aborted',
                     'suppress_ignore_reports',
                     'ignore_patterns_set_key')
 
@@ -217,7 +217,7 @@ class Control(object):
                     delay_max=data[1],
                     concurrency=data[2],
                     age=data[3],
-                    abort_requested=data[4],
+                    aborted=data[4],
                     suppress_ignore_reports=data[5]
                     )
 

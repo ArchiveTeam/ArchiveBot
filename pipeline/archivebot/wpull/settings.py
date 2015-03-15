@@ -20,7 +20,7 @@ class Settings(object):
     settings = dict(
             age=None,
             concurrency=None,
-            abort_requested=None,
+            aborted=None,
             delay_min=None,
             delay_max=None,
             suppress_ignore_reports=False
@@ -35,7 +35,7 @@ class Settings(object):
             self.settings['delay_max'] = int_or_none(new_settings['delay_max'])
             self.settings['age'] = int_or_none(new_settings['age'])
             self.settings['concurrency'] = int_or_none(new_settings['concurrency'])
-            self.settings['abort_requested'] = new_settings['abort_requested']
+            self.settings['aborted'] = new_settings['aborted']
             self.settings['suppress_ignore_reports'] = new_settings['suppress_ignore_reports']
 
             self.ignoracle.set_patterns(new_settings['ignore_patterns'])
@@ -52,13 +52,13 @@ class Settings(object):
 
         return self.ignoracle.ignores(url, **parameters)
 
-    def abort_requested(self):
+    def aborted(self):
         '''
-        Returns True if job abort was requested, False otherwise.
+        Returns True if the job is marked as aborted, False otherwise.
         '''
 
         with self.settings_lock:
-            return self.settings['abort_requested']
+            return self.settings['aborted']
 
     def delay_time_range(self):
         '''
