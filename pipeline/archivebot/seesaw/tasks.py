@@ -8,6 +8,7 @@ import time
 import requests
 import socket
 
+from seesaw.externalprocess import WgetDownload
 from seesaw.task import Task, SimpleTask
 from tornado.ioloop import IOLoop
 import tornado.ioloop
@@ -38,14 +39,9 @@ class CheckIP(SimpleTask):
                 'Are you behind a firewall/proxy? That is a big no-no!')
 
 
-class RetryableTask(Task):
+class RetryMixin(object):
     retry_delay = 5
     cancelable = False
-
-    def enqueue(self, item):
-        self.start_item(item)
-        item.log_output('Starting %s for %s' % (self, item.description()))
-        self.process(item)
 
     def schedule_retry(self, item):
         item.may_be_canceled = self.cancelable
@@ -65,6 +61,15 @@ class RetryableTask(Task):
    
     def notify_connection_error(self, item):
         self.notify_retry('Lost connection to ArchiveBot controller', item)
+
+class RetryableTask(Task, RetryMixin):
+    retry_delay = 5
+    cancelable = False
+
+    def enqueue(self, item):
+        self.start_item(item)
+        item.log_output('Starting %s for %s' % (self, item.description()))
+        self.process(item)
 
 # ------------------------------------------------------------------------------
 
@@ -180,6 +185,25 @@ class PreparePaths(SimpleTask, TargetPathMixin):
         item['cookie_jar'] = '%(item_dir)s/cookies.txt' % item
 
         self.set_target_paths(item)
+
+# ------------------------------------------------------------------------------
+
+class WpullDownload(WgetDownload, RetryMixin):
+    def __init__(self, control, *args, **kwargs):
+        WgetDownload.__init__(self, *args, **kwargs)
+
+        self.control = control
+
+    def process(self, item):
+        try:
+            if self.control.is_aborted(item['ident']):
+                item.log_output('%(ident)s aborted, not starting wpull' % item)
+                self.complete_item(item)
+            else:
+                WgetDownload.process(self, item)
+        except ConnectionError:
+            self.notify_connection_error(item)
+            self.schedule_retry(item)
 
 # ------------------------------------------------------------------------------
 

@@ -6,7 +6,7 @@ import subprocess
 import sys
 
 import seesaw
-from seesaw.externalprocess import WgetDownload, RsyncUpload
+from seesaw.externalprocess import RsyncUpload
 from seesaw.item import ItemInterpolation, ItemValue
 from seesaw.pipeline import Pipeline
 from seesaw.project import Project
@@ -28,8 +28,8 @@ from archivebot.seesaw.preflight import check_wpull_args
 from archivebot.seesaw.wpull import WpullArgs
 from archivebot.seesaw.tasks import GetItemFromQueue, StartHeartbeat, \
     SetFetchDepth, PreparePaths, WriteInfo, DownloadUrlFile, \
-    RelabelIfAborted, MoveFiles, SetWarcFileSizeInRedis, StopHeartbeat, \
-    MarkItemAsDone, CheckIP
+    WpullDownload, RelabelIfAborted, MoveFiles, SetWarcFileSizeInRedis, \
+    StopHeartbeat, MarkItemAsDone, CheckIP
 
 
 VERSION = "20150405.03"
@@ -114,10 +114,11 @@ pipeline = Pipeline(
     PreparePaths(),
     WriteInfo(),
     DownloadUrlFile(control),
-    WgetDownload(
+    WpullDownload(
+        control,
         wpull_args,
-        max_tries=1,
         accept_on_exit_code=[0,4,5,6,7,8],
+        max_tries=None,
         env={
             'ITEM_IDENT': ItemInterpolation('%(ident)s'),
             'LOG_KEY': ItemInterpolation('%(log_key)s'),
