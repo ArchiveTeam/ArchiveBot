@@ -81,12 +81,13 @@ class Control(object):
         self.log_script = self.redis.register_script(LOGGER_SCRIPT)
 
     def all_named_pending_queues(self):
-        pipelines = set()
+        with conn(self):
+            pipelines = set()
 
-        for name in self.redis.scan_iter('pending:*'):
-            pipelines.add(name)
+            for name in self.redis.scan_iter('pending:*'):
+                pipelines.add(name)
 
-        return pipelines
+            return pipelines
 
     def reserve_job(self, pipeline_id, pipeline_nick, ao_only):
         named_queues = self.all_named_pending_queues()
