@@ -32,7 +32,6 @@ group :dashboard do
   gem 'webmachine', :git => 'https://github.com/seancribbs/webmachine-ruby.git'
   gem 'webmachine-sprockets', :git => 'https://github.com/lgierth/webmachine-sprockets.git'
   gem 'erubis'
-  gem 'ffi-rzmq'
 end
 
 group :development do
