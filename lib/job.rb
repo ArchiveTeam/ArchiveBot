@@ -337,7 +337,11 @@ class Job < Struct.new(:uri, :redis)
 
       silently do
         set_delay(250, 375)
-        set_concurrency(3)
+        if url.start_with?("ftp://")
+          set_concurrency(1)
+        else
+          set_concurrency(3)
+        end
       end
     end
 
