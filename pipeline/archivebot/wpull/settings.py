@@ -5,7 +5,6 @@ import threading
 import time
 
 from .ignoracle import Ignoracle, parameterize_record_info
-from .. import pattern_conversion
 from .. import shared_config
 from ..control import ConnectionError
 from redis.exceptions import ConnectionError as RedisConnectionError
@@ -224,8 +223,6 @@ class ListenerWorkerThread(threading.Thread):
         self.settings.update_settings(new_settings)
 
 # ---------------------------------------------------------------------------
-
-pattern_conversion_enabled = os.environ.get('LUA_PATTERN_CONVERSION')
 
 def int_or_none(v):
     if v:
