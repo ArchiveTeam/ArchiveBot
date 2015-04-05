@@ -36,7 +36,6 @@ def make_args(item, default_user_agent, wpull_exe, phantomjs_exe, finished_warcs
         '--no-parent',
         '--sitemaps',
         '--inet4-only',
-        '--no-skip-getaddrinfo',
         '--timeout', '20',
         '--tries', '3',
         '--waitretry', '5',
