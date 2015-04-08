@@ -1,7 +1,7 @@
 source "https://rubygems.org"
 
 gem 'analysand', '~> 3.0.2', git: 'https://github.com/yipdw/analysand.git'
-gem 'cinch', '~> 2.0.9'
+gem 'cinch', '~> 2.2.0'
 gem 'celluloid'
 gem 'celluloid-redis'
 gem 'listen', '~> 2.0'
