@@ -10,3 +10,4 @@ requests
 manhole
 lxml
 lmdb
+youtube-dl
