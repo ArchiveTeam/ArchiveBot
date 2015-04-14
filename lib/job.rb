@@ -56,11 +56,6 @@ class Job < Struct.new(:uri, :redis)
   # Returns a boolean.
   attr_reader :aborted
 
-  # Whether an abort was requested.
-  #
-  # Returns a boolean.
-  attr_reader :abort_requested
-
   # The fetch depth for this job.
   #
   # Returns a string.  Typical return values are "inf" (infinite depth) and
@@ -249,7 +244,6 @@ class Job < Struct.new(:uri, :redis)
     ts = ->(v) { v.to_i if v }
 
     @aborted = h['aborted']
-    @abort_requested = h['abort_requested']
     @depth = h['fetch_depth']
     @bytes_downloaded = h['bytes_downloaded'].to_i
     @items_downloaded = h['items_downloaded'].to_i
@@ -283,7 +277,12 @@ class Job < Struct.new(:uri, :redis)
   end
 
   def abort
+    redis.hset(ident, 'aborted', true)
+
+    # We keep abort_requested around for older pipelines.  Remove this when all
+    # pipelines are running a recent enough version.
     redis.hset(ident, 'abort_requested', true)
+
     job_parameters_changed
   end
 
