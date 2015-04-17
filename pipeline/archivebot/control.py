@@ -120,13 +120,6 @@ class Control(object):
         except ConnectionError:
             pass
 
-    def set_warc_size(self, ident, *warc_path):
-        with conn(self):
-            sz = 0
-            for path in warc_path:
-                sz += os.stat(path).st_size
-            self.redis.hset(ident, 'warc_size', sz)
-
     def is_aborted(self, ident):
         with conn(self):
             return self.redis.hget(ident, 'aborted')

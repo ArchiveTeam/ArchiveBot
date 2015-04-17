@@ -314,22 +314,6 @@ class DownloadUrlFile(RetryableTask):
 
 # ------------------------------------------------------------------------------
 
-class SetWarcFileSizeInRedis(RetryableTask):
-    def __init__(self, control):
-        RetryableTask.__init__(self, 'SetWarcFileSizeInRedis')
-        self.control = control
-
-    def process(self, item):
-        try:
-            self.control.set_warc_size(item['ident'],
-                    *item['target_warc_files'])
-            self.complete_item(item)
-        except ConnectionError:
-            self.notify_connection_error(item)
-            self.schedule_retry(item)
-
-# ------------------------------------------------------------------------------
-
 class StopHeartbeat(SimpleTask):
     def __init__(self):
         SimpleTask.__init__(self, 'StopHeartbeat')

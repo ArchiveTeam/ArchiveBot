@@ -28,11 +28,9 @@ from archivebot.seesaw.preflight import check_wpull_args
 from archivebot.seesaw.wpull import WpullArgs
 from archivebot.seesaw.tasks import GetItemFromQueue, StartHeartbeat, \
     SetFetchDepth, PreparePaths, WriteInfo, DownloadUrlFile, \
-    RelabelIfAborted, MoveFiles, SetWarcFileSizeInRedis, StopHeartbeat, \
-    MarkItemAsDone, CheckIP
+    RelabelIfAborted, MoveFiles, StopHeartbeat, MarkItemAsDone, CheckIP
 
-
-VERSION = "20150415.01"
+VERSION = "20150417.01"
 PHANTOMJS_VERSION = '1.9.8'
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
 WPULL_EXE = find_executable('Wpull', None, [ './wpull' ])
@@ -131,7 +129,6 @@ pipeline = Pipeline(
     RelabelIfAborted(control),
     WriteInfo(),
     MoveFiles(),
-    SetWarcFileSizeInRedis(control),
     LimitConcurrent(2,
         RsyncUpload(
             target = RSYNC_URL,
