@@ -74,7 +74,11 @@ html, body {
 	align-items: flex-end;
 	justify-content: space-between;
 	flex-flow: row nowrap;
-	cursor: pointer;
+	cursor: default;
+}
+
+.stats-elements:hover {
+	background-color: #D8CBBC;
 }
 
 .job-info {
@@ -199,6 +203,7 @@ html, body {
 }
 
 .line-normal {
+	display: block;
 	white-space: pre;
 	width: 100%;
 	padding: 0 0 0 5px;
@@ -206,6 +211,7 @@ html, body {
 }
 
 .line-error {
+	display: block;
 	white-space: pre;
 	width: 100%;
 	background-color: #FFB9B9;
@@ -214,6 +220,7 @@ html, body {
 }
 
 .line-warning {
+	display: block;
 	white-space: pre;
 	width: 100%;
 	background-color: #F7DB7D;
@@ -222,6 +229,7 @@ html, body {
 }
 
 .line-redirect {
+	display: block;
 	white-space: pre;
 	width: 100%;
 	background-color: #E7CEEA;
@@ -282,7 +290,44 @@ a.ignore {
 .undisplayed {
 	display: none;
 }
+
+#context-menu {
+	padding: 2px 0 2px 0;
+	background-color: white;
+	border: 1px solid #BABABA;
+	box-shadow: 2px 2px 3px #8E8E8E;
+	position: fixed;
+	left: 0;
+	top: 0;
+	display: none;
+}
+
+.context-menu-entry {
+	display: block;
+	height: 26px;
+	line-height: 26px;
+	padding-left: 26px;
+	padding-right: 26px;
+	font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
+	font-size: 12px;
+	cursor: default;
+}
+
+.context-menu-entry:hover {
+	background-color: #4281F4;
+	color: #fff;
+}
+
+#clipboard-scratchpad {
+	height: 1px;
+	width: 1px;
+	padding: 0;
+	border: 0;
+	position: absolute;
+	top: 0;
+}
 </style>
+<div id="context-menu"></div>
 <div class="padded-page">
 	<div class="header">
 		<div>
@@ -323,6 +368,7 @@ a.ignore {
 				<li><kbd>a</kbd> - show all job windows
 				<li><kbd>n</kbd> - hide all job windows
 				<li><kbd>f</kbd> - move focus to filter box
+				<li><kbd>v</kbd> - open the job URL of the first-shown job window
 				<li><kbd>?</kbd> - show/hide help text
 			</ul>
 			<p>
@@ -409,6 +455,8 @@ var h = function(elem, attrs, thing) {
 		for(var attr in attrs) {
 			if(attr == "spellcheck" || attr == "readonly") {
 				e.setAttribute(attr, attrs[attr]);
+			} else if(attr == "class") {
+				throw new Error("Did you mean className?");
 			} else {
 				e[attr] = attrs[attr];
 			}
@@ -425,6 +473,12 @@ var href = function(href, text) {
 	a.href = href;
 	a.textContent = text;
 	return a;
+};
+
+var removeChildren = function(elem) {
+	while(elem.firstChild) {
+		elem.removeChild(elem.firstChild);
+	}
 };
 
 var prettyJson = function(obj) {
@@ -494,7 +548,12 @@ var getQueryArgs = function() {
 	return intoObject(pairs.map(function(e) { return split(e, "=", 1); }));
 };
 
-var isSafari = navigator.userAgent.indexOf("Safari") != -1;
+var getChromeMajorVersion = function() {
+	return Number(navigator.userAgent.match(/Chrome\/(\d+)/)[1]);
+};
+
+var isChrome = navigator.userAgent.indexOf("Chrome/") != -1;
+var isSafari = !isChrome && navigator.userAgent.indexOf("Safari") != -1;
 var isFirefox = navigator.userAgent.indexOf("Firefox") != -1;
 
 var addAnyChangeListener = function(elem, func) {
@@ -626,10 +685,6 @@ var JobRenderInfo = function(logWindow, logSegment, statsElements, jobNote, line
 
 
 var Reusable = {
-	obj_className_line_normal: {"className": "line-normal"},
-	obj_className_line_error: {"className": "line-error"},
-	obj_className_line_warning: {"className": "line-warning"},
-	obj_className_line_redirect: {"className": "line-redirect"},
 	obj_className_line_ignore: {"className": "line-ignore"},
 	obj_className_line_stdout: {"className": "line-stdout"},
 	obj_className_bold: {"className": "bold"}
@@ -672,7 +727,7 @@ var getSummaryResponses = function(jobData) {
 
 
 
-var JobsRenderer = function(container, filterBox, historyLines, showNicks) {
+var JobsRenderer = function(container, filterBox, historyLines, showNicks, contextMenuRenderer) {
 	this.container = container;
 	this.filterBox = filterBox;
 	addAnyChangeListener(this.filterBox, this.applyFilter.bind(this));
@@ -682,6 +737,7 @@ var JobsRenderer = function(container, filterBox, historyLines, showNicks) {
 	}
 	this.historyLines = historyLines;
 	this.showNicks = showNicks;
+	this.contextMenuRenderer = contextMenuRenderer;
 	this.linesPerSegment = Math.max(1, Math.round(this.historyLines / 10));
 	this.jobs = new JobsTracker();
 	// ident -> JobRenderInfo
@@ -720,8 +776,18 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 			ev.target.classList.add('log-window-stopped');
 		}.bind(this),
 		"onmouseleave": function(ev) {
-			this.mouseInside = null;
-			ev.target.classList.remove('log-window-stopped');
+			var leave = function() {
+				this.mouseInside = null;
+				ev.target.classList.remove('log-window-stopped');
+			}.bind(this);
+			// When our custom context menu pops up, it causes onmouseleave on the
+			// log window, so make our leave callback fire only after the context
+			// menu is closed.
+			if(this.contextMenuRenderer.visible) {
+				this.contextMenuRenderer.callAfterBlur(leave);
+			} else {
+				leave();
+			}
 		}.bind(this)
 	}
 
@@ -772,6 +838,7 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 			// Clicking anywhere in this area will set the filter to a regexp that
 			// matches only this job URL, thus hiding everything but this job.
 			h("span", {
+				"className": "stats-elements",
 				"onclick": function() {
 					if(window.getSelection().toString().length > 1) {
 						// Set the filter on clicks, but not on text selections (unless just one character).
@@ -839,18 +906,17 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 
 JobsRenderer.prototype._renderDownloadLine = function(data, logSegment) {
 	if(data["is_warning"]) {
-		var attrs = Reusable.obj_className_line_warning;
+		var attrs = {"className": "line-warning", "href": data["url"]};
 	} else if(data["is_error"]) {
-		var attrs = Reusable.obj_className_line_error;
+		var attrs = {"className": "line-error", "href": data["url"]};
 	} else if(data["response_code"] && data["response_code"] >= 300 && data["response_code"] < 400) {
-		var attrs = Reusable.obj_className_line_redirect;
+		var attrs = {"className": "line-redirect", "href": data["url"]};
 	} else {
-		var attrs = Reusable.obj_className_line_normal;
+		var attrs = {"className": "line-normal", "href": data["url"]};
 	}
-	logSegment.appendChild(h("div", attrs, [
-		data["response_code"] + " " + data["wget_code"] + " ",
-		href(data["url"], data["url"])
-	]));
+	logSegment.appendChild(
+		h("a", attrs, data["response_code"] + " " + data["wget_code"] + " " + data["url"])
+	);
 	return 1;
 };
 
@@ -1052,7 +1118,7 @@ JobsRenderer.prototype.applyFilter = function() {
 			matches += 1;
 			matchedWindows.push(w);
 			if(this.firstFilterMatch == null) {
-				this.firstFilterMatch = job["ident"];
+				this.firstFilterMatch = job;
 			}
 		}
 	}
@@ -1078,9 +1144,14 @@ JobsRenderer.prototype.applyFilter = function() {
 };
 
 JobsRenderer.prototype.showNextPrev = function(offset) {
-	var idx = findInArray(this.jobs.sorted, function(el, i) {
-		return el["ident"] == this.firstFilterMatch;
-	}.bind(this));
+	var idx;
+	if(this.firstFilterMatch == null) {
+		idx = null;
+	} else {
+		idx = findInArray(this.jobs.sorted, function(el, i) {
+			return el["ident"] == this.firstFilterMatch["ident"];
+		}.bind(this));
+	}
 	if(idx == null) {
 		// If no job windows are shown, set up index to make j show the first job window,
 		// k the last job window.
@@ -1116,6 +1187,109 @@ JobsRenderer.prototype.updateAlign = function() {
 JobsRenderer.prototype.toggleAlign = function() {
 	this.aligned = !this.aligned;
 	this.updateAlign();
+};
+
+
+
+/**
+ * This context menu pops up when you right-click on a URL in
+ * a log window, helping you copy an !ig command based on the URL
+ * you right-clicked.
+ */
+var ContextMenuRenderer = function() {
+	this.visible = false;
+	this.callAfterBlurFns = [];
+	this.element = byId('context-menu');
+};
+
+/**
+ * Returns true if the event target is a URL in a log window
+ */
+ContextMenuRenderer.prototype.clickedOnLogWindowURL = function(ev) {
+	var cn = ev.target.className;
+	return cn == "line-normal" || cn == "line-error" || cn == "line-warning" || cn == "line-redirect";
+};
+
+ContextMenuRenderer.prototype.makeCopyTextFn = function(text) {
+	return function() {
+		var clipboardScratchpad = byId('clipboard-scratchpad');
+		clipboardScratchpad.value = text;
+		clipboardScratchpad.focus();
+		clipboardScratchpad.select();
+		document.execCommand('copy');
+	}.bind(this);
+};
+
+ContextMenuRenderer.prototype.getSuggestedCommands = function(ident, url) {
+	// TODO:
+	// !d IDENT 180000 180000 (if !d is currently low)
+	// !d IDENT 250 375 (if !d is currently high)
+	// !con IDENT 1 (if > 1)
+	// !con IDENT 3 (if < 3)
+	var domain = url.split('/')[2];
+	return [
+		 "!ig " + ident + " ^https?://" + regExpEscape(domain) + "/"
+		,"!d " + ident + " 180000 180000"
+		,"!con " + ident + " 1"
+	]
+};
+
+ContextMenuRenderer.prototype.makeEntries = function(ident, url) {
+	var commands = this.getSuggestedCommands(ident, url).map(function(c) {
+		return h(
+			'span',
+			{'onclick': this.makeCopyTextFn(c)},
+			"Copy " + c.replace(" " + ident + " ", " … ")
+		);
+	}.bind(this));
+	return [
+		// Unfortunately, this does not open it in a background tab
+		// like the real context menu does.
+		 h('a', {'href': url}, "Open link in new tab")
+		,h('span', {'onclick': this.makeCopyTextFn(url)}, "Copy link address")
+	].concat(commands);
+};
+
+ContextMenuRenderer.prototype.onContextMenu = function(ev) {
+	//console.log(ev);
+	if(!this.clickedOnLogWindowURL(ev)) {
+		this.blur();
+		return;
+	}
+	ev.preventDefault();
+	this.visible = true;
+	this.element.style.display = "block";
+	this.element.style.left = ev.clientX + "px";
+	this.element.style.top = ev.clientY + "px";
+
+	removeChildren(this.element);
+	// We put the clipboard-scratchpad in the fixed-positioned
+	// context menu instead of elsewhere on the page, because
+	// we must focus the input box to automatically copy its text,
+	// and the focus operation scrolls to the element on the page,
+	// and we want to avoid such scrolling.
+	appendAny(this.element, h('input', {'type': 'text', 'id': 'clipboard-scratchpad'}));
+
+	var url = ev.target.href;
+	var ident = ev.target.parentNode.parentNode.id.match(/^log-window-(.*)/)[1];
+	var entries = this.makeEntries(ident, url);
+	for(var i=0; i < entries.length; i++) {
+		var entry = entries[i];
+		entry.classList.add('context-menu-entry');
+		appendAny(this.element, entry);
+	}
+};
+
+ContextMenuRenderer.prototype.blur = function() {
+	this.visible = false;
+	this.element.style.display = "none";
+	this.callAfterBlurFns.map(function(fn) { fn(); });
+	this.callAfterBlurFns = [];
+};
+
+// TODO: decouple - fire an onblur event instead
+ContextMenuRenderer.prototype.callAfterBlur = function(fn) {
+	this.callAfterBlurFns.push(fn);
 };
 
 
@@ -1198,13 +1372,35 @@ var Dashboard = function() {
 		args["promo"] ?
 			Boolean(Number(args["promo"])) :
 			true;
+	var contextMenu =
+		args["contextMenu"] ?
+			Boolean(Number(args["contextMenu"])) :
+			/**
+			 * The context menu is useless without document.execCommand('copy'),
+			 * which is available in Chrome 43+ and IE10+
+			 * (also in Firefox if you paste capability settings into your prefs.js?)
+			 */
+			(isChrome && getChromeMajorVersion() >= 43);
 	this.host = args["host"] ? args["host"] : location.host;
 	this.dumpTraffic = args["dumpMax"] && Number(args["dumpMax"]) > 0;
 	if(this.dumpTraffic) {
 		this.dumpMax = Number(args["dumpMax"]);
 	}
+
+	this.contextMenuRenderer = new ContextMenuRenderer(document);
+	if(contextMenu) {
+		document.oncontextmenu = this.contextMenuRenderer.onContextMenu.bind(this.contextMenuRenderer);
+		document.onclick = this.contextMenuRenderer.blur.bind(this.contextMenuRenderer);
+		// onkeydown picks up ESC, onkeypress doesn't (tested Chrome 44)
+		document.onkeydown = function(ev) {
+			if(ev.keyCode == 27) { // ESC
+				this.contextMenuRenderer.blur();
+			}
+		}.bind(this);
+	}
+
 	this.jobsRenderer = new JobsRenderer(
-		byId('logs'), byId('filter-box'), historyLines, showNicks);
+		byId('logs'), byId('filter-box'), historyLines, showNicks, this.contextMenuRenderer);
 
 	var batchTimeWhenHidden = 5000;
 
@@ -1261,6 +1457,8 @@ Dashboard.prototype.keyPress = function(ev) {
 		ev.preventDefault();
 		byId('filter-box').focus();
 		byId('filter-box').select();
+	} else if(ev.which == 118) { // v
+		window.open(this.jobsRenderer.firstFilterMatch["url"]);
 	} else if(ev.which == 63) { // ?
 		ds.toggleHelp();
 	}
