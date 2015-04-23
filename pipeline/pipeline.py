@@ -30,7 +30,7 @@ from archivebot.seesaw.tasks import GetItemFromQueue, StartHeartbeat, \
     SetFetchDepth, PreparePaths, WriteInfo, DownloadUrlFile, \
     RelabelIfAborted, MoveFiles, StopHeartbeat, MarkItemAsDone, CheckIP
 
-VERSION = "20150417.01"
+VERSION = "20150423.01"
 PHANTOMJS_VERSION = '1.9.8'
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
 WPULL_EXE = find_executable('Wpull', None, [ './wpull' ])
@@ -42,6 +42,12 @@ version_integer = (sys.version_info.major * 10) + sys.version_info.minor
 assert version_integer >= 33, \
         "This pipeline requires Python >= 3.3.  You are running %s." % \
         sys.version
+
+if not os.environ.get('NO_SEGFAULT_340'):
+    assert sys.version_info[:3] != (3, 4, 0), \
+        "Python 3.4.0 should not be used. It may segfault. " \
+        "Set NO_SEGFAULT_340=1 if your Python is patched. " \
+        "See https://bugs.python.org/issue21435"
 
 assert WPULL_EXE, 'No usable Wpull found.'
 assert PHANTOMJS, 'PhantomJS %s was not found.' % PHANTOMJS_VERSION
