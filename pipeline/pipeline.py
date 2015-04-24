@@ -30,7 +30,7 @@ from archivebot.seesaw.tasks import GetItemFromQueue, StartHeartbeat, \
     SetFetchDepth, PreparePaths, WriteInfo, DownloadUrlFile, \
     RelabelIfAborted, MoveFiles, StopHeartbeat, MarkItemAsDone, CheckIP
 
-VERSION = "20150423.01"
+VERSION = "20150424.01"
 PHANTOMJS_VERSION = '1.9.8'
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
 WPULL_EXE = find_executable('Wpull', None, [ './wpull' ])
@@ -104,7 +104,7 @@ class AcceptAny:
 DEFAULT_USER_AGENT = \
     'ArchiveTeam ArchiveBot/%s (wpull %s) and not Mozilla/5.0 ' \
     '(Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) ' \
-    'Chrome/39.0.2171.95 Safari/537.36' % (VERSION, wpull_version())
+    'Chrome/42.0.2311.90 Safari/537.36' % (VERSION, wpull_version())
 
 _, _, _, pipeline_id = monitoring.pipeline_id()
 
