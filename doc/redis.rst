@@ -46,6 +46,8 @@ pid                 Integer         The PID of the pipeline process
 python              String          The version of Python running the pipeline
 ts                  UNIX timestamp  The last time this pipeline record was updated
 version             String          The pipeline's version
+=================   =============== ============================================
+
 
 ``IDENT`` (i.e. ``[a-z0-9]{25,}``)
 ==================================
@@ -107,6 +109,7 @@ suppress_ignore_reports       Boolean           Whether ignore pattern matches s
 ts                            UNIX ts w/ frac   Last update received from a pipeline for this job
 url                           String            The URL for this job: either the target or a URL file (for !ao < and !a <)
 user_agent                    String            The user-agent to spoof; null if we should use the default agent
+===========================   ===============   ===========================================================
 
 [1]: The expected relationship between these values is
 
