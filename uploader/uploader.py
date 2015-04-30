@@ -74,6 +74,10 @@ def main():
                 if exit == 0:
                     print("Removing %r" % (fname_u,))
                     os.remove(fname_u)
+                else:
+                    # Move it out of the _uploading directory so that this
+                    # uploader (or another one) can try again.
+                    os.rename(fname_u, fname_d)
         else:
             print("Nothing to upload")
 
