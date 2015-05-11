@@ -2,9 +2,11 @@ module PipelineOptions
   def run_post_registration_hooks(m, job, params)
     return unless authorized?(m)
 
+    messages = []
+
     if params[:pipeline]
       pipeline = params[:pipeline]
-      reply m, %Q{Job will run on a pipeline whose name contains "#{pipeline}".}
+      messages << "pipeline: /#{pipeline}/"
     end
 
     phantomjs_triggers = [
@@ -18,19 +20,20 @@ module PipelineOptions
       job.use_phantomjs(params[:phantomjs_scroll], params[:phantomjs_wait],
                         params[:no_phantomjs_smart_scroll])
 
-      reply m, "Job will run using PhantomJS."
-      reply m, "PhantomJS settings: #{job.phantomjs_info}"
+      messages << "phantomjs: yes, #{job.phantomjs_info}"
     end
 
     if params[:youtube_dl]
       job.use_youtube_dl
+      messages << 'youtube-dl: yes'
     end
 
     if params[:no_offsite_links]
       job.no_offsite_links!
-
-      reply m, 'Offsite links will not be grabbed.'
+      messages << 'offsite links: no'
     end
+
+    reply m, "Options: #{messages.join('; ')}"
 
     super
   end
