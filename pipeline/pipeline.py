@@ -36,6 +36,7 @@ EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
 WPULL_EXE = find_executable('Wpull', None, [ './wpull' ])
 PHANTOMJS = find_executable('PhantomJS', PHANTOMJS_VERSION,
         ['phantomjs', './phantomjs', '../phantomjs'], '-v')
+YOUTUBE_DL = find_executable('youtube-dl', None, ['youtube-dl'], '--version')
 
 version_integer = (sys.version_info.major * 10) + sys.version_info.minor
 
@@ -51,6 +52,7 @@ if not os.environ.get('NO_SEGFAULT_340'):
 
 assert WPULL_EXE, 'No usable Wpull found.'
 assert PHANTOMJS, 'PhantomJS %s was not found.' % PHANTOMJS_VERSION
+assert YOUTUBE_DL, 'No usable youtube-dl found.'
 assert 'RSYNC_URL' in env, 'RSYNC_URL not set.'
 assert 'REDIS_URL' in env, 'REDIS_URL not set.'
 assert 'FINISHED_WARCS_DIR' in env, 'FINISHED_WARCS_DIR not set.'

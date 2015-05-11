@@ -26,6 +26,11 @@ class TestWpullArgs(unittest.TestCase):
 
         self.assertIn('-U Frobinator/20.1', joined(self.args.realize(self.item)))
 
+    def test_youtube_dl_activation(self):
+        self.item['youtube_dl'] = True
+
+        self.assertIn('--youtube-dl', joined(self.args.realize(self.item)))
+
     def test_uses_default_user_agent(self):
         self.assertIn('-U Default/1', joined(self.args.realize(self.item)))
 

@@ -102,6 +102,12 @@ def make_args(item, default_user_agent, wpull_exe, phantomjs_exe, finished_warcs
         item.log_output('Setting PhantomJS args: %s' % phantomjs_args)
         args.extend(phantomjs_args)
 
+    # -----------------------------------------------------------------------
+    # YOUTUBE-DL
+    # -----------------------------------------------------------------------
+    if item.get('youtube_dl'):
+        args.append('--youtube-dl')
+
     return args
 
 # ---------------------------------------------------------------------------

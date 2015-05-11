@@ -100,6 +100,7 @@ class GetItemFromQueue(RetryableTask):
                 item['grabber'] = job_data.get('grabber')
                 item['user_agent'] = job_data.get('user_agent')
                 item['no_offsite_links'] = job_data.get('no_offsite_links')
+                item['youtube_dl'] = job_data.get('youtube_dl')
                 item['phantomjs_wait'] = job_data.get('phantomjs_wait')
                 item['phantomjs_scroll'] = job_data.get('phantomjs_scroll')
                 item['no_phantomjs_smart_scroll'] = \
