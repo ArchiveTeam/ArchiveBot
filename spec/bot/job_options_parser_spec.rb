@@ -37,6 +37,10 @@ describe JobOptionsParser do
     parser.parse('--user-agent-alias=firefox')[:user_agent_alias].should == 'firefox'
   end
 
+  it 'recognizes --youtube-dl' do
+    expect(parser.parse('--youtube-dl')[:youtube_dl]).to eq(true)
+  end
+
   describe 'when unknown options are present' do
     it 'raises UnknownOptionError' do
       lambda { parser.parse('--foo=bar') }.should raise_error(JobOptionsParser::UnknownOptionError)

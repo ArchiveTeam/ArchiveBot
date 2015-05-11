@@ -372,6 +372,10 @@ class Job < Struct.new(:uri, :redis)
     redis.hset(ident, 'note', note)
   end
 
+  def use_youtube_dl
+    redis.hset(ident, 'youtube_dl', true)
+  end
+
   def no_offsite_links!
     redis.hset(ident, 'no_offsite_links', true)
   end

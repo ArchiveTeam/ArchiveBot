@@ -8,6 +8,7 @@ class JobOptionsParser
       opt :phantomjs_wait, 'Seconds to wait between page interactions', :type => :float
       opt :no_phantomjs_smart_scroll, 'Always scroll the page to the specified scroll count'
       opt :no_offsite_links, 'Do not fetch offsite links'
+      opt :youtube_dl, 'Use youtube-dl on grabbed pages'
       opt :ignore_sets, 'Ignore sets to apply', :type => :string
       opt :pipeline, 'Run job on this pipeline', :type => :string
       opt :user_agent_alias, 'Use this user agent for the job', :type => :string

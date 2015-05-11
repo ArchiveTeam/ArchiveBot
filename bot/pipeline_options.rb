@@ -22,6 +22,10 @@ module PipelineOptions
       reply m, "PhantomJS settings: #{job.phantomjs_info}"
     end
 
+    if params[:youtube_dl]
+      job.use_youtube_dl
+    end
+
     if params[:no_offsite_links]
       job.no_offsite_links!
 
