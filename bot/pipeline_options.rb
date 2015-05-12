@@ -33,7 +33,9 @@ module PipelineOptions
       messages << 'offsite links: no'
     end
 
-    reply m, "Options: #{messages.join('; ')}"
+    if !messages.empty?
+      reply m, "Options: #{messages.join('; ')}"
+    end
 
     super
   end
