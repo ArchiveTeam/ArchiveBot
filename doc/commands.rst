@@ -174,20 +174,20 @@ Accepted parameters
           5sid4pgxkiu6zynhbt3q1gi2s to abort.
 
 ``--youtube-dl``
-    attempt to download videos using youtube-dl (experimental)::
-
     .. warning::
       This is a new feature; not all pipelines support it.  To find a pipeline
       that supports youtube-dl, use the `ArchiveBot pipeline monitor page
       <http://dashboard.at.ninjawedding.org/pipelines>`_ and look for a
       pipeline whose version is newer than 20150512.01.
 
-        > !archiveonly https://example.website/fun-video-38214 --youtube-dl
-        < Queued https://example.website/fun-video-38214 for archival without
-          recursion.
-        < Options: youtube-dl: yes
-        < Use !status dma5g7xcy0r3gbmisqshkpkoe for updates, !abort
-          dma5g7xcy0r3gbmisqshkpkoe to abort.
+    attempt to download videos using youtube-dl (experimental)::
+
+      > !archiveonly https://example.website/fun-video-38214 --youtube-dl
+      < Queued https://example.website/fun-video-38214 for archival without
+        recursion.
+      < Options: youtube-dl: yes
+      < Use !status dma5g7xcy0r3gbmisqshkpkoe for updates, !abort
+        dma5g7xcy0r3gbmisqshkpkoe to abort.
 
     When --youtube-dl is passed, ArchiveBot will attempt to download videos
     embedded in HTML pages it encounters in the crawl using youtube-dl
