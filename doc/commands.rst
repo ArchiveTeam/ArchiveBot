@@ -235,7 +235,6 @@ explain
    asynchronous, people can be impatient, and a rationale can usually be summed
    up very concisely.
 
-   Your note must be 32 characters or less.
 
 archiveonly < FILE
 ==================
