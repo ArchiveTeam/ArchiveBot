@@ -66,6 +66,13 @@ class Brain
       return
     end
 
+    # Recursive retrieval with youtube-dl is bad juju.
+    if h[:youtube_dl] && depth == :inf
+      reply m, 'Sorry, recursive retrieval with youtube-dl is not supported at this time.'
+      reply m, 'Please consider making a list of URLs to video pages and using !ao < URL.'
+      return
+    end
+
     # Is the URI in our list of recognized schemes?
     if !schemes.include?(uri.scheme)
       reply m, "Sorry, I can only handle #{schemes.join(', ')}."
