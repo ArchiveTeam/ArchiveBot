@@ -24,13 +24,12 @@ under the ``litpacks`` directory will be downloaded. For example,
 If you leave out the trailing slash, eg ``/litpacks``, it will consider
 that to be a file and download everything under ``/``.
 
-
 Accepted parameters
 +++++++++++++++++++
 
 ``--ignore-sets SET1,...,SETN``
     specify sets of URL patterns to ignore::
-    
+
        > !archive http://example.blogspot.com/ncr --ignore-sets=blogs,forums
        < Archiving http://example.blogspot.com/ncr.
        < 14 ignore patterns loaded.
@@ -112,9 +111,8 @@ Accepted parameters
     passed.
 
 .. tip::
-  If you're feeling snarky or realist, you can also invoke ``!archive`` 
+  If you're feeling snarky or realist, you can also invoke ``!archive``
   as ``!firstworldproblems.``
-
 
 abort
 =====
@@ -124,7 +122,6 @@ abort
 
         > !abort 1q2qydhkeh3gfnrcxuf6py70b
         < Initiating abort for job 1q2qydhkeh3gfnrcxuf6py70b.
-
 
 archiveonly
 ===========
@@ -223,7 +220,6 @@ Accepted parameters
 PhantomJS mode is enabled if any of the ``--*phantomjs*`` options are
 passed.
 
-
 explain
 =======
 
@@ -240,7 +236,6 @@ explain
    up very concisely.
 
    Your note must be 32 characters or less.
-
 
 archiveonly < FILE
 ==================
@@ -345,7 +340,6 @@ Examples
     ``{primary_url}`` will be ``http://www.bar.org:8080/qux.html`` and
     ``{primary_netloc}`` will be ``www.bar.org:8080``.
 
-
 unignore
 ========
 
@@ -355,7 +349,6 @@ unignore
         > !unig 1q2qydhkeh3gfnrcxuf6py70b obnoxious\?foo=\d+
         < Removed ignore pattern obnoxious\?foo=\d+ from job
           1q2qydhkeh3gfnrcxuf6py70b.
-
 
 ignoreset
 =========
@@ -375,7 +368,6 @@ are, well, ignored::
 
 Ignore set definitions can be found under db/ignore_patterns/.
 
-
 ignorereports
 =============
 
@@ -384,7 +376,7 @@ ignorereports
 
         > !igrep 1q2qydhkeh3gfnrcxuf6py70b on
         < Showing ignore pattern reports for job 1q2qydhkeh3gfnrcxuf6py70b.
-        
+
         > !igrep 1q2qydhkeh3gfnrcxuf6py70b off
         < Suppressing ignore pattern reports for job
           1q2qydhkeh3gfnrcxuf6py70b.
@@ -395,7 +387,6 @@ the dashboard job log and the speed of the job.
 
 This command is aliased as ``!igoff IDENT`` and ``!igon IDENT``.  !igoff
 suppresses reports; !igon shows reports.
-
 
 delay
 =====
@@ -410,7 +401,6 @@ delay
 Delays may be any non-negative number, and are interpreted as
 milliseconds.  The default inter-request delay range is [250, 375] ms.
 
-
 concurrency
 ===========
 
@@ -423,7 +413,6 @@ concurrency
 Adding additional workers may speed up grabs if the target site has
 capacity to spare, but it also puts additional pressure on the target.
 Use wisely.
-
 
 yahoo
 =====
@@ -440,7 +429,6 @@ Only recommended for use when archiving data from hosts with gobs of
 bandwidth and processing power (e.g. Yahoo, Google, Amazon).  Keep in
 mind that this is likely to trigger any rate limiters that the target
 may have.
-
 
 expire
 ======
@@ -462,7 +450,6 @@ affect the given job::
     < Job 5sid4pgxkiu6zynhbt3q1gi2s does not yet have an expiry timer.
 
 This is intended to prevent expiration of active jobs.
-
 
 status
 ======
@@ -488,14 +475,14 @@ For a URL that hasn't been archived::
 
 For a URL that hasn't been archived, but has children that have been
 processed before (either succesfully or unsuccessfully)::
-    
+
     > !status http://artscene.textfiles.com/
     < http://artscene.textfiles.com/ has not been archived.
     < However, there have been 5 download attempts on child URLs.
     < More info: http://www.example.com/#/prefixes/http://artscene.textfiles.com/
 
 For an ident or URL that's in progress::
-    
+
     > !status 43z7a11vo6of3a7i173441dtc
     <
     < Downloaded 10.01 MB, 2 errors encountered
@@ -503,17 +490,16 @@ For an ident or URL that's in progress::
 
 For an ident or URL that has been successfully archived within the
 past 48 hours::
-    
+
     > !status 43z7a11vo6of3a7i173441dtc
     < Archived to http://www.example.com/site.warc.gz
     < Eligible for rearchival in 30h 25m 07s
 
 For an ident or URL identifying a job that was aborted::
-    
+
     > !status 43z7a11vo6of3a7i173441dtc
     < Job aborted
     < Eligible for rearchival in 00h 00m 45s
-
 
 pending
 =======
@@ -532,7 +518,6 @@ Jobs are listed in the order that they'll be worked on.
 This command lists only the global queue; it doesn't yet show the
 status of any pipeline-specific queues.
 
-
 whereis
 =======
 
@@ -547,4 +532,3 @@ For jobs not yet on a pipeline::
 
     > !status 43z7a11vo6of3a7i173441dtc
     < Job 43z7a11vo6of3a7i173441dtc is not on a pipeline.
-
