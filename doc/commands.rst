@@ -176,6 +176,12 @@ Accepted parameters
 ``--youtube-dl``
     attempt to download videos using youtube-dl (experimental)::
 
+    .. warning::
+      This is a new feature; not all pipelines support it.  To find a pipeline
+      that supports youtube-dl, use the `ArchiveBot pipeline monitor page
+      <http://dashboard.at.ninjawedding.org/pipelines>`_ and look for a
+      pipeline whose version is newer than 20150512.01.
+
         > !archiveonly https://example.website/fun-video-38214 --youtube-dl
         < Queued https://example.website/fun-video-38214 for archival without
           recursion.
@@ -187,12 +193,6 @@ Accepted parameters
     embedded in HTML pages it encounters in the crawl using youtube-dl
     (http://rg3.github.io/youtube-dl/).  youtube-dl can recognize many
     different embedding formats, but success is not guaranteed.
-
-    .. warning::
-      This is a new feature; not all pipelines support it.  To find a pipeline
-      that supports youtube-dl, use the `ArchiveBot pipeline monitor page
-      <http://dashboard.at.ninjawedding.org/pipelines>`_ and look for a
-      pipeline whose version is newer than 20150512.01.
 
     If you are going to use this option, please watch your job's progress on
     the dashboard.  If you see MP4 or WebM files in the download log, your
