@@ -176,6 +176,36 @@ Accepted parameters
         < Use !status 5sid4pgxkiu6zynhbt3q1gi2s for updates, !abort
           5sid4pgxkiu6zynhbt3q1gi2s to abort.
 
+``--youtube-dl``
+    attempt to download videos using youtube-dl (experimental)::
+
+        > !archiveonly https://example.website/fun-video-38214 --youtube-dl
+        < Queued https://example.website/fun-video-38214 for archival without
+          recursion.
+        < Options: youtube-dl: yes
+        < Use !status dma5g7xcy0r3gbmisqshkpkoe for updates, !abort
+          dma5g7xcy0r3gbmisqshkpkoe to abort.
+
+    When --youtube-dl is passed, ArchiveBot will attempt to download videos
+    embedded in HTML pages it encounters in the crawl using youtube-dl
+    (http://rg3.github.io/youtube-dl/).  youtube-dl can recognize many
+    different embedding formats, but success is not guaranteed.
+
+    If you are going to use this option, please watch your job's progress on
+    the dashboard.  If you see MP4 or WebM files in the download log, your
+    videos were probably saved.  (You can click on links in the download log to
+    confirm.)
+
+    Video playback is not yet well-supported in web archive playback tools.
+    As of May 2015:
+
+    - pywb v0.9 (https://github.com/ikreymer/pywb) is known to work.
+    - https://github.com/ikreymer/webarchiveplayer is based on pywb 0.8, and
+      might work.
+    - The Internet Archive's Wayback Machine does not present videos in
+      ArchiveBot WARCs.  (Wayback may not support the record convention used by
+      ArchiveBot and/or may not support video playback at all.)
+
 ``--phantomjs``
     access pages via PhantomJS
 
@@ -227,12 +257,11 @@ archiveonly < FILE
    The text file should list one URL per line.  Both UNIX and Windows line
    endings are accepted.
 
-
 Accepted parameters
 +++++++++++++++++++
 
-``!archiveonly < URL`` accepts the same parameters as ``!archive`` and
-``!archiveonly``.  A quick reference:
+``!archiveonly < URL`` accepts the same parameters as ``!archiveonly``.  A
+quick reference:
 
 ``--ignore-sets SET1,...,SETN``
     specify sets of URL patterns to ignore
@@ -242,6 +271,9 @@ Accepted parameters
 
 ``--pipeline TAG``
     specify pipeline to use
+
+``--youtube-dl``
+    attempt to download videos using youtube-dl
 
 ``--phantomjs``
     access pages via PhantomJS
