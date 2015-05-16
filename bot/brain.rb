@@ -125,8 +125,11 @@ class Brain
       reply m, "Use !status #{job.ident} for updates, !abort #{job.ident} to abort."
 
       run_post_registration_hooks(m, job, h)
-      add_ignore_sets(m, job, ['global'])
-      toggle_ignores(m, job, false)
+
+      silence do
+        add_ignore_sets(m, job, ['global'])
+        toggle_ignores(m, job, false)
+      end
 
       pipeline = h[:pipeline]
       job.queue(pipeline)
@@ -379,9 +382,24 @@ class Brain
     end
   end
 
+  def silence
+    c = Thread.current
+
+    begin
+      c[:silent] = true
+      yield
+    ensure
+      c[:silent] = false
+    end
+  end
+
   def reply(m, *args)
-    if Thread.current[:batch_mode]
-      Thread.current[:buf] += args
+    c = Thread.current
+
+    return if c[:silent]
+
+    if c[:batch_mode]
+      c[:buf] += args
     else
       args.each { |msg| m.safe_reply(msg, true) }
     end
