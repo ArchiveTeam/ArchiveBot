@@ -60,6 +60,9 @@ def make_args(item, default_user_agent, wpull_exe, phantomjs_exe, finished_warcs
        item['url'].startswith("https://www.reddit.com/"):
         add_args(args, ['--header', 'Cookie: over18=1'], item)
 
+    if 'blogspot.' in item['url']:
+        add_args(args, ['--header', 'Cookie: NCR=1'], item)
+
     # -----------------------------------------------------------------------
     # !ao < FILE
     # -----------------------------------------------------------------------
