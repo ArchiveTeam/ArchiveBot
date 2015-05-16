@@ -25,7 +25,7 @@ module PipelineOptions
 
     if params[:youtube_dl]
       job.use_youtube_dl
-      messages << 'youtube-dl: yes'
+      messages << 'youtube-dl: yes (please read https://git.io/vUjC0)'
     end
 
     if params[:no_offsite_links]
