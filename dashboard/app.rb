@@ -10,6 +10,7 @@ require File.expand_path('../resources/dashboard', __FILE__)
 require File.expand_path('../resources/feed', __FILE__)
 require File.expand_path('../resources/pipeline', __FILE__)
 require File.expand_path('../resources/recent', __FILE__)
+require File.expand_path('../resources/ignores', __FILE__)
 
 opts = Trollop.options do
   opt :url, 'URL to bind to', :default => 'http://localhost:4567'
@@ -21,6 +22,7 @@ bind_uri = URI.parse(opts[:url])
 R = Redis.new(:url => opts[:redis], :driver => :hiredis)
 
 Pipeline.redis = R
+Ignores.redis = R
 Recent.redis = R
 Feed.redis = R
 
@@ -48,7 +50,8 @@ App = Webmachine::Application.new do |app|
     add [], Dashboard
     add ['beta'], DashboardBeta
     add ['logs', 'recent'], Recent
-    add ['pipelines'], Pipeline
+    add ['ignores', '*'], Ignores
+    add ['pipelines', '*'], Pipeline
     add ['assets', '*'], resource
     add ['feed', 'archivebot.rss'], RssFeed
     add ['feed', 'archivebot.atom'], AtomFeed
