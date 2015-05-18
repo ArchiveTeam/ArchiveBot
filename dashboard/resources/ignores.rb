@@ -18,7 +18,7 @@ class Ignores < Webmachine::Resource
       end
     end
 
-    buffer.sort_by!(&:last).map! { |p| p.join("\t") }.join("\n")
+    buffer.sort_by! { |p| p.reverse }.map! { |p| p.join("\t") }.join("\n")
   end
 
   private
