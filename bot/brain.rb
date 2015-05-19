@@ -1,4 +1,4 @@
-require 'uri'
+require 'addressable/uri'
 
 require File.expand_path('../../lib/job', __FILE__)
 require File.expand_path('../../lib/pipeline_info', __FILE__)
@@ -47,13 +47,7 @@ class Brain
       return unless op?(m)
     end
 
-    # Do we have a valid URI?
-    begin
-      uri = URI.parse(target)
-    rescue URI::InvalidURIError => e
-      reply m, "Sorry, that doesn't look like a URL to me."
-      return
-    end
+    uri = Addressable::URI.parse(target).normalize
 
     # Parse parameters.  If we run into an unknown option, report it and don't
     # run the job.
@@ -137,8 +131,9 @@ class Brain
   end
 
   def request_status_by_url(m, url)
-    job = Job.new(URI(url), redis)
-    host = URI(url).host
+    uri = Addressable::URI.parse(url).normalize
+    job = Job.new(uri, redis)
+    host = uri.host
 
     if !job.exists?
       rep = []

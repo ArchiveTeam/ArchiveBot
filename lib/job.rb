@@ -1,4 +1,4 @@
-require 'uri'
+require 'addressable/uri'
 require 'uuidtools'
 require 'json'
 
@@ -181,7 +181,7 @@ class Job < Struct.new(:uri, :redis)
     url = redis.hget(ident, 'url')
     return unless url
 
-    new(URI.parse(url), redis).tap(&:amplify)
+    new(Addressable::URI.parse(url).normalize, redis).tap(&:amplify)
   end
 
   def self.working_job_idents(redis)

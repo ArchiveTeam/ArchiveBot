@@ -1,6 +1,7 @@
 source "https://rubygems.org"
 
 gem 'analysand', '~> 3.0.2', git: 'https://github.com/yipdw/analysand.git'
+gem 'addressable'
 gem 'cinch', '~> 2.2.0'
 gem 'celluloid'
 gem 'celluloid-redis'
