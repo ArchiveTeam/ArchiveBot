@@ -1,7 +1,5 @@
 module PipelineOptions
   def run_post_registration_hooks(m, job, params)
-    return unless authorized?(m)
-
     messages = []
 
     if params[:pipeline]

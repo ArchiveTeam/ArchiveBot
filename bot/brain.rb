@@ -39,12 +39,13 @@ class Brain
   end
 
   def request_archive(m, target, params, depth=:inf, url_file=false)
-    # Is the user authorized?
-    return unless authorized?(m)
-
-    # Lock !a < FILE to ops for now: it's a very niche thing.
-    if depth == :inf && url_file
-      return unless op?(m)
+    # Check only !a; allow !ao even without voice or op
+    if depth == :inf
+      return unless authorized?(m)
+      # Lock !a < FILE to ops for now: it's a very niche thing.
+      if url_file
+        return unless op?(m)
+      end
     end
 
     uri = Addressable::URI.parse(target).normalize
