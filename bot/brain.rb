@@ -122,7 +122,7 @@ class Brain
       run_post_registration_hooks(m, job, h)
 
       silence do
-        add_ignore_sets(m, job, ['global'])
+        add_ignore_sets(m, job, ['global'], false)
         toggle_ignores(m, job, false)
       end
 
@@ -236,8 +236,6 @@ class Brain
   end
 
   def toggle_ignores(m, job, enabled)
-    return unless authorized?(m)
-
     job.toggle_ignores(enabled)
 
     if enabled
@@ -247,8 +245,10 @@ class Brain
     end
   end
 
-  def add_ignore_sets(m, job, names)
-    return unless authorized?(m)
+  def add_ignore_sets(m, job, names, need_authorization=true)
+    if need_authorization
+      return unless authorized?(m)
+    end
 
     if !names.respond_to?(:each)
       names = names.split(',').map(&:strip)
