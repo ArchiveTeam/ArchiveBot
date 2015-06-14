@@ -9,7 +9,7 @@ require 'uri'
 include ArchiveBot::Redis
 
 r = make_redis
-uri = URI(ARGV[1])
+uri = URI(ARGV[0])
 db = Analysand::Database.new(uri)
 
 $stdin.each_line do |line|
