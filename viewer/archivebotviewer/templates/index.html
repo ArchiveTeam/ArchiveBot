@@ -2,6 +2,8 @@
 {% block title %} Homepage {% end %}
 
 {% block body %}
+    {% set has_search_results = False %}
+
     <p>Browse an index of the archives.</p>
     <form method="get" action="{{ reverse_url('index') }}">
         <input type="search" name="q" id="form-query" value="{{ handler.get_argument('q', '') }}">
@@ -9,6 +11,7 @@
     </form>
     {% if search_results %}
         {% for result_type, job_id, domain, url in search_results %}
+            {% set has_search_results = True %}
             {% if result_type == "domain" %}
                  <a href="{{ reverse_url('domain', url_escape(domain, plus=False)) }}">{{ domain }}</a>
                  <i>{{ url or '' }}</i>
@@ -20,7 +23,7 @@
         {% end %}
         <br>
     {% end %}
-    {% if handler.get_argument('q', None) and not search_results %}
+    {% if handler.get_argument('q', None) and not has_search_results %}
     <p><em>No search results.</em></p>
     {% end %}
     <br>
