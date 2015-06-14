@@ -10,6 +10,7 @@
         <tr>
            <th>Filename</th>
            <th>Size</th>
+           <th></th>
         </tr>
         {% for filename, size, job_ident in sorted(rows) %}
             <tr>
@@ -23,6 +24,13 @@
                     {% end %}
                 </td>
                 <td class="numeric">{{ size }}</td>
+                <td>
+                    <a href="https://archive.org/download/{{ identifier }}/{{ filename }}">download</a>
+                    {% if job_ident %}
+                        &nbsp;
+                        <a href="{{ reverse_url('job', job_ident) }}">job</a>
+                    {% end %}
+                </td>
             </tr>
         {% end %}
     </table>

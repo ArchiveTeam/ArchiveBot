@@ -12,7 +12,11 @@
         </tr>
         {% for ia_item_id, filename, size in sorted(rows) %}
             <tr>
-                <td>{{ filename }}</td>
+                <td>
+                    <a href="https://archive.org/download/{{ ia_item_id }}/{{ filename }}">
+                        {{ filename }}
+                    </a>
+                </td>
                 <td>{{ size }}</td>
                 <td>
                     <a href="{{ reverse_url('item', ia_item_id) }}">
