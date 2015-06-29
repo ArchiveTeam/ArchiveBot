@@ -162,12 +162,12 @@ pipeline.running_status = "Running"
 def status_running():
     pipeline.running_status = "Running"
 
-pipeline.on_stop_canceled += status_running()
+pipeline.on_stop_canceled += status_running
 
 def status_stopping():
     pipeline.running_status = "Stopping"
 
-pipeline.on_stop_requested += status_stopping()
+pipeline.on_stop_requested += status_stopping
 
 # Activate system monitoring.
 monitoring.start(pipeline, control, VERSION, downloader)
