@@ -44,6 +44,7 @@ def start(pipeline, control, version, nickname):
             'load_average_15m': load_avg[2],
             'ts': int(time.time()),
             'python': sys.version,
+            'status': pipeline.running_status,
         }
 
         control.pipeline_report(pipe_id, process_report)
