@@ -40,9 +40,7 @@ class TwitterTweeter
 
     message = nil
 
-    if job.aborted?
-      message = "Aborted archiving of #{job.url}"
-    elsif job.in_progress?
+    if job.in_progress?
       message = "Archiving #{job.url}"
     end
 
