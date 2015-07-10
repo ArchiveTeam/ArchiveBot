@@ -24,6 +24,9 @@ under the ``litpacks`` directory will be downloaded. For example,
 If you leave out the trailing slash, eg ``/litpacks``, it will consider
 that to be a file and download everything under ``/``.
 
+URLs are treated as case-sensitive. ``/litpacks`` is different from
+``/LitPacks``.
+
 Accepted parameters
 +++++++++++++++++++
 
