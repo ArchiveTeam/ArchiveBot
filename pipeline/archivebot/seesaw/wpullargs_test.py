@@ -17,7 +17,9 @@ class TestWpullArgs(unittest.TestCase):
         }
 
         self.args = WpullArgs(default_user_agent='Default/1',
-                wpull_exe='/bin/wpull', phantomjs_exe='/usr/bin/phantomjs',
+                wpull_exe='/bin/wpull',
+                youtube_dl_exe='/usr/bin/youtube-dl',
+                phantomjs_exe='/usr/bin/phantomjs',
                 finished_warcs_dir='/lost+found/'
             )
 
