@@ -9,7 +9,7 @@ def add_args(args, names, item):
         if value:
             args.append(value)
 
-def make_args(item, default_user_agent, wpull_exe, phantomjs_exe, finished_warcs_dir):
+def make_args(item, default_user_agent, wpull_exe, youtube_dl_exe, phantomjs_exe, finished_warcs_dir):
     # -----------------------------------------------------------------------
     # BASE ARGUMENTS
     # -----------------------------------------------------------------------
@@ -54,6 +54,7 @@ def make_args(item, default_user_agent, wpull_exe, phantomjs_exe, finished_warcs
         '--monitor-disk', '500m',
         '--monitor-memory', '50m',
         '--max-redirect', '8',
+        '--youtube-dl-exe', youtube_dl_exe
     ]
 
     if item['url'].startswith("http://www.reddit.com/") or \
@@ -113,14 +114,15 @@ def make_args(item, default_user_agent, wpull_exe, phantomjs_exe, finished_warcs
 # ---------------------------------------------------------------------------
 
 class WpullArgs(object):
-    def __init__(self, *, default_user_agent, wpull_exe, phantomjs_exe, finished_warcs_dir):
+    def __init__(self, *, default_user_agent, wpull_exe, youtube_dl_exe, phantomjs_exe, finished_warcs_dir):
         self.default_user_agent = default_user_agent
         self.wpull_exe = wpull_exe
+        self.youtube_dl_exe = youtube_dl_exe
         self.phantomjs_exe = phantomjs_exe
         self.finished_warcs_dir = finished_warcs_dir
 
     def realize(self, item):
         return make_args(item, self.default_user_agent, self.wpull_exe,
-                         self.phantomjs_exe, self.finished_warcs_dir)
+            self.youtube_dl_exe, self.phantomjs_exe, self.finished_warcs_dir)
 
 # vim:ts=4:sw=4:et:tw=78

@@ -30,7 +30,7 @@ from archivebot.seesaw.tasks import GetItemFromQueue, StartHeartbeat, \
     SetFetchDepth, PreparePaths, WriteInfo, DownloadUrlFile, \
     RelabelIfAborted, MoveFiles, StopHeartbeat, MarkItemAsDone, CheckIP
 
-VERSION = "20150701.01"
+VERSION = "20150715.01"
 PHANTOMJS_VERSION = '1.9.8'
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
 WPULL_EXE = find_executable('Wpull', None, ['./wpull'])
@@ -111,8 +111,10 @@ DEFAULT_USER_AGENT = \
 _, _, _, pipeline_id = monitoring.pipeline_id()
 
 wpull_args = WpullArgs(
-    default_user_agent=DEFAULT_USER_AGENT, wpull_exe=WPULL_EXE,
-    phantomjs_exe=PHANTOMJS, 
+    default_user_agent=DEFAULT_USER_AGENT,
+    wpull_exe=WPULL_EXE,
+    youtube_dl_exe=YOUTUBE_DL,
+    phantomjs_exe=PHANTOMJS,
     finished_warcs_dir=os.environ["FINISHED_WARCS_DIR"]
 )
 
