@@ -277,7 +277,7 @@ class Brain
   end
 
   def expire(m, job)
-    return unless authorized?(m)
+    return unless authorized?(m) && op?(m)
 
     if job.ttl < 0
       reply m, "Job #{job.ident} does not yet have an expiry timer."
