@@ -16,6 +16,7 @@ class JobOptionsParser
       opt :delay, 'inter-request delay, in milliseconds', :type => :integer
       opt :min_delay, 'minimum inter-request delay, in milliseconds', :type => :integer
       opt :max_delay, 'maximum inter-request delay, in milliseconds', :type => :integer
+      opt :concurrency, 'number of workers', :type => :integer
     end
   end
 

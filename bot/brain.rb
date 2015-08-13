@@ -143,6 +143,10 @@ class Brain
         set_delay(job, h[:min_delay], h[:max_delay], m)
       end
 
+      if h[:concurrency]
+        set_concurrency(job, h[:concurrency], m)
+      end
+
       run_post_registration_hooks(m, job, h)
 
       silence do
