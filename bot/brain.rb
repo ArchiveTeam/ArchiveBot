@@ -61,21 +61,6 @@ class Brain
       return
     end
 
-    if h[:delay] && ( h[:min_delay] || h[:max_delay] )
-      reply m, "Pass either --delay OR --min_delay AND --max_delay, not both."
-      return
-    end
-
-    if (h[:min_delay] && !h[:max_delay]) || (!h[:min_delay] && h[:max_delay])
-      reply m, "Pass --min_delay AND --max_delay, not just one."
-      return
-    end
-
-    if h[:delay]
-      h[:min_delay] = h[:delay]
-      h[:max_delay] = h[:delay]
-    end
-
     # Recursive retrieval with youtube-dl is bad juju.
     if h[:youtube_dl] && depth == :inf
       reply m, 'Sorry, recursive retrieval with youtube-dl is not supported at this time.'
@@ -113,7 +98,6 @@ class Brain
 
       if !user_agent
         reply m, %Q{Sorry, I don't know what the user agent "#{ua_alias}" is.}
-        #' #Fix Emacs ofont-lock's inability to recognize unusual quoting.
         return
       end
     end
@@ -139,8 +123,8 @@ class Brain
         add_note(m, job, h[:explain])
       end
 
-      if h[:min_delay]
-        set_delay(job, h[:min_delay], h[:max_delay], m)
+      if h[:delay]
+        set_delay(job, h[:delay], h[:delay], m)
       end
 
       if h[:concurrency]

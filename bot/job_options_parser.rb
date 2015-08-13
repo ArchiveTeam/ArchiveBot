@@ -14,8 +14,6 @@ class JobOptionsParser
       opt :user_agent_alias, 'Use this user agent for the job', :type => :string
       opt :explain, 'Short note explaining archive purpose', :type => :string
       opt :delay, 'inter-request delay, in milliseconds', :type => :integer
-      opt :min_delay, 'minimum inter-request delay, in milliseconds', :type => :integer
-      opt :max_delay, 'maximum inter-request delay, in milliseconds', :type => :integer
       opt :concurrency, 'number of workers', :type => :integer
     end
   end

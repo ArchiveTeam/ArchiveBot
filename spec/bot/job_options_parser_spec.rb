@@ -41,6 +41,22 @@ describe JobOptionsParser do
     expect(parser.parse('--youtube-dl')[:youtube_dl]).to eq(true)
   end
 
+  it 'recognizes --explain=Stuff' do
+    parser.parse('--explain=Stuff')[:explain].should == 'Stuff'
+  end
+
+  it 'recognizes --explain="Double quoted stuff with spaces"' do
+    parser.parse('--explain="Double quoted stuff with spaces"')[:explain].should == 'Double quoted stuff with spaces'
+  end
+
+  it 'parses --delay=12 to an integer' do
+    parser.parse('--delay=12')[:delay].should == 12
+  end
+
+  it 'parses --concurrency=4 to an integer' do
+    parser.parse('--concurrency=4')[:concurrency].should == 4
+  end
+
   describe 'when unknown options are present' do
     it 'raises UnknownOptionError' do
       lambda { parser.parse('--foo=bar') }.should raise_error(JobOptionsParser::UnknownOptionError)

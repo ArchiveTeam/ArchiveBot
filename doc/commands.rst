@@ -113,6 +113,19 @@ Accepted parameters
     PhantomJS mode is enabled if any of the ``--*phantomjs*`` options are
     passed.
 
+
+``--explain``
+    alias for ``!explain``
+    adds a short note explaining the purpose of the archiving job
+
+``--delay``
+    alias for ``!delay`` (in milliseconds)
+    only allows a single value; to provide a range, use ``!delay``
+
+``--concurrency``
+    alias for ``!concurrency``
+    sets number of workers for job (use with care!)
+
 .. tip::
   If you're feeling snarky or realist, you can also invoke ``!archive``
   as ``!firstworldproblems.``
