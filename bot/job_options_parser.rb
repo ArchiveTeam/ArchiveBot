@@ -12,6 +12,7 @@ class JobOptionsParser
       opt :ignore_sets, 'Ignore sets to apply', :type => :string
       opt :pipeline, 'Run job on this pipeline', :type => :string
       opt :user_agent_alias, 'Use this user agent for the job', :type => :string
+      opt :explain, 'Short note explaining archive purpose', :type => :string
     end
   end
 

@@ -98,6 +98,7 @@ class Brain
 
       if !user_agent
         reply m, %Q{Sorry, I don't know what the user agent "#{ua_alias}" is.}
+        #' #Fix Emacs ofont-lock's inability to recognize unusual quoting.
         return
       end
     end
@@ -119,6 +120,9 @@ class Brain
 
       reply m, "Use !status #{job.ident} for updates, !abort #{job.ident} to abort."
 
+      if h[:explain]
+        add_note(m, job, h[:explain])
+      end
       run_post_registration_hooks(m, job, h)
 
       silence do
@@ -205,6 +209,7 @@ class Brain
   end
 
   def add_note(m, job, note)
+    # aka !explain
     return unless authorized?(m)
     job.add_note(note)
 
