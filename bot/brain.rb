@@ -61,6 +61,21 @@ class Brain
       return
     end
 
+    if h[:delay] && ( h[:min_delay] || h[:max_delay] )
+      reply m, "Pass either --delay OR --min_delay AND --max_delay, not both."
+      return
+    end
+
+    if (h[:min_delay] && !h[:max_delay]) || (!h[:min_delay] && h[:max_delay])
+      reply m, "Pass --min_delay AND --max_delay, not just one."
+      return
+    end
+
+    if h[:delay]
+      h[:min_delay] = h[:delay]
+      h[:max_delay] = h[:delay]
+    end
+
     # Recursive retrieval with youtube-dl is bad juju.
     if h[:youtube_dl] && depth == :inf
       reply m, 'Sorry, recursive retrieval with youtube-dl is not supported at this time.'
@@ -123,6 +138,11 @@ class Brain
       if h[:explain]
         add_note(m, job, h[:explain])
       end
+
+      if h[:min_delay]
+        set_delay(job, h[:min_delay], h[:max_delay], m)
+      end
+
       run_post_registration_hooks(m, job, h)
 
       silence do
