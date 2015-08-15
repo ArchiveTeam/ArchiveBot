@@ -1,3 +1,4 @@
+require 'shellwords'
 require 'trollop'
 
 class JobOptionsParser
@@ -20,7 +21,7 @@ class JobOptionsParser
 
   def parse(str)
     begin
-      @parser.parse((str || '').split(/\s+/)).tap do |h|
+      @parser.parse(Shellwords.split(str || '')).tap do |h|
         if h[:ignore_sets]
           h[:ignore_sets] = h[:ignore_sets].split(',')
         end
