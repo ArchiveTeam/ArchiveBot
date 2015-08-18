@@ -58,10 +58,14 @@ If that works, you should get this back as a response each time:
 Now, go to the db/design_docs folder in ArchiveBot (full link: https://github.com/ArchiveTeam/ArchiveBot/tree/master/db/design_docs ).  You might have installed it somewhere like /home/archivebot/ArchiveBot/db/design_docs .  The four design documents in there need to be uploaded to the new archivebot database you just created. You can use CURL or you can use the Futon web interface at http://localhost:5984/_utils/index.html where you can copy and paste the content of the JSON files into new documents manually.  If you want to use CURL instead, do this:
 
     cd /home/archivebot/ArchiveBot/db/design_docs   (or wherever you put your files)
-    curl -X PUT http://127.0.0.1:5984/archivebot/_design/archive_urls -d @archive_urls.json
-    curl -X PUT http://127.0.0.1:5984/archivebot/_design/ignore_patterns -d @ignore_patterns.json
-    curl -X PUT http://127.0.0.1:5984/archivebot/_design/jobs -d @jobs.json
-    curl -X PUT http://127.0.0.1:5984/archivebot/_design/user_agents -d @user_agents.json
+    grep -v _rev archive_urls.json > /tmp/archive_urls.json
+    grep -v _rev ignore_patterns.json > /tmp/ignore_patterns.json
+    grep -v _rev jobs.json > /tmp/jobs.json
+    grep -v _rev user_agents.json > /tmp/user_agents.json
+    curl -X PUT http://127.0.0.1:5984/archivebot/_design/archive_urls -d @/tmp/archive_urls.json
+    curl -X PUT http://127.0.0.1:5984/archivebot/_design/ignore_patterns -d @/tmp/ignore_patterns.json
+    curl -X PUT http://127.0.0.1:5984/archivebot/_design/jobs -d @/tmp/jobs.json
+    curl -X PUT http://127.0.0.1:5984/archivebot/_design/user_agents -d @/tmp/user_agents.json
 
 Finally, you're going to need to install an IRC server (until such time as the ArchiveBot code is changed to allow for alternate ways of sending it instructions, such as Twitter).  On Debian/Ubuntu, do this:
 
