@@ -39,6 +39,8 @@ Accepted parameters
        < Use !status 5sid4pgxkiu6zynhbt3q1gi2s for updates, !abort
          5sid4pgxkiu6zynhbt3q1gi2s to abort.
 
+    Known sets are listed in `db/ignore_patterns/ <https://github.com/ArchiveTeam/ArchiveBot/tree/master/db/ignore_patterns>`_.
+
 ``--no-offsite-links``
     do not download links to offsite pages::
 
@@ -162,6 +164,8 @@ Accepted parameters
         < 14 ignore patterns loaded.
         < Use !status 5sid4pgxkiu6zynhbt3q1gi2s for updates, !abort
           5sid4pgxkiu6zynhbt3q1gi2s to abort.
+
+    Known sets are listed in `db/ignore_patterns/ <https://github.com/ArchiveTeam/ArchiveBot/tree/master/db/ignore_patterns>`_.
 
 ``--user-agent-alias ALIAS``
     specify a user-agent to use::
@@ -387,7 +391,7 @@ are, well, ignored::
    < Added 17 ignore patterns to job 1q2qydhkeh3gfnrcxuf6py70b.
    < The following sets are unknown: other
 
-Ignore set definitions can be found under db/ignore_patterns/.
+Ignore set definitions can be found under `db/ignore_patterns/ <https://github.com/ArchiveTeam/ArchiveBot/tree/master/db/ignore_patterns>`_.
 
 ignorereports
 =============
