@@ -56,11 +56,11 @@ Accepted parameters
     as all linked pages and their requisites.  This is often useful
     for preserving a page's context in time.  However, this can
     sometimes result in an undesirably large archive.  Specifying
-    ``--no-offsite-links preserves`` recursive retrieval but does not
+    ``--no-offsite-links`` preserves recursive retrieval but does not
     follow links to offsite hosts.
 
-    Please note that ArchiveBot considers www.example.com and
-    example.com to be different hosts, so if you have a website that
+    Please note that ArchiveBot considers ``www.example.com`` and
+    ``example.com`` to be different hosts, so if you have a website that
     uses both, you should not specify ``--no-offsite-links``.
 
 ``--user-agent-alias ALIAS``
@@ -76,7 +76,7 @@ Accepted parameters
 
     This option makes the job present the given user-agent.  It can be
     useful for archiving sites that (still) do user-agent detection.
-    See db/user_agents for a list of recognized aliases.
+    See `db/user_agents <https://github.com/ArchiveTeam/ArchiveBot/tree/master/db/user_agents>`_ for a list of recognized aliases.
 
 ``--pipeline TAG``
     specify pipeline to use::
@@ -181,7 +181,7 @@ Accepted parameters
 
     This option makes the job present the given user-agent.  It can be
     useful for archiving sites that (still) do user-agent detection.
-    See db/user_agents for a list of recognized aliases.
+    See `db/user_agents <https://github.com/ArchiveTeam/ArchiveBot/tree/master/db/user_agents>`_ for a list of recognized aliases.
 
 ``--pipeline TAG``
     specify pipeline to use::
