@@ -19,11 +19,21 @@ Quick install, for Debian and Debian-esque systems:
 Ubuntu or compile it easily with yyuu's pyenv. You may also want to use
 virtualenv to micromanage your Python dependencies.)
 
-Set up a dedicated account:
+If you want to also add support for youtube-dl, which is a command line 
+program for downloading videos from YouTube and other video websites, 
+you should also do these steps, so that wpull can optionally grab the 
+video files embedded into web pages:
+
+    sudo apt-get install python-pip
+    pip install --upgrade youtube_dl
+
+
+After you've installed all the software, set up a dedicated account
+for ArchiveBot:
 
   adduser archivebot
 
-As user archivebot:
+Log out of the server and log back in as user archivebot. Then do:
 
     ssh-keygen
       [keep hitting Enter]
