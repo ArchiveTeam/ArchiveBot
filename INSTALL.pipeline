@@ -1,11 +1,15 @@
-To run the pipeline, you will need:
+** STEP 1: INSTALL EVERYTHING **
 
+To run the pipeline, you will need:
 - a Python 3.3+ installation
 - Pip (for Python 3.3+)
 - seesaw (automatically installed by Pip)
 - rsync
 - wpull (automatically installed by Pip)
 - PhantomJS 1.9.8
+
+NOTE: For compatability reasons, Ubuntu 15.10 is not recommended at 
+this time. Stick with Ubuntu 14.
 
 Quick install, for Debian and Debian-esque systems:
 
@@ -19,14 +23,39 @@ Quick install, for Debian and Debian-esque systems:
 Ubuntu or compile it easily with yyuu's pyenv. You may also want to use
 virtualenv to micromanage your Python dependencies.)
 
-If you want to also add support for youtube-dl, which is a command line 
-program for downloading videos from YouTube and other video websites, 
-you should also do these steps, so that wpull can optionally grab the 
-video files embedded into web pages:
+** STEP 1a: TROUBLESHOOTING YOUTUBE-DL INSTALLATION **
+
+youtube-dl is is a command line program that is used for downloading 
+videos from YouTube, Vimeo, and other websites that feature embedded videos.  
+It is supposed to be installed on your system automatically through 
+requirements.txt, but just in case that doesn't work, here's how you can 
+get it installed:
+
+    sudo apt-get install python3-pip
+    pip3 install --upgrade youtube_dl
+
+Or, for older versions of Python:
 
     sudo apt-get install python-pip
     pip install --upgrade youtube_dl
 
+** STEP 1b: TROUBLESHOOTING PHANTOMJS INSTALLATION **
+
+PhantomJS is a command line program that can more fully evaluate webpages, 
+including the javascript, and scrape the page content in a way that is more 
+like a human looking at it, rather than a bot.  This is especially 
+important if the page has comments or other features that are activated 
+only by scrolling down the page (such as Twitter timelines). Right now, 
+ArchiveBot requires PhantomJS version 1.9.8, although the newest version is 
+2.0. In case it doesn't install or work for you automatically, here's a link to 
+a Gist containing instructions for forcing 1.9.8 to install on your system:
+
+https://gist.github.com/julionc/7476620
+
+Note that this Gist assumes that your user has sudo privileges.
+
+
+** STEP 2: CREATE THE ARCHIVEBOT USER **
 
 After you've installed all the software, set up a dedicated account
 for ArchiveBot:
@@ -38,17 +67,38 @@ Log out of the server and log back in as user archivebot. Then do:
     ssh-keygen
       [keep hitting Enter]
     cat ~/.ssh/id_rsa.pub
-      [send the public key to yipdw]
+
+At this point, copy the public key output from your screen (it should start 
+with "ssh-rsa" followed by a bunch of letters and numbers), and put it in 
+an e-mail to David Yip (yipdw), letting him know that you're setting up a new 
+ArchiveBot pipeline, and that this is your new server's public key. Also let 
+him know a username you'd like for yourself, if you don't already have one. 
+He will set things up so your new pipeline server can coordinate with the 
+others, and will be allowed to upload finished WARC's to the Internet Archive.
+
+
+** STEP 3: FINALLY, IT'S TIME TO INSTALL ARCHIVEBOT CODE **
+
+Okay, back to the server stuff:
+
     cd ~/
     git clone https://github.com/ArchiveTeam/ArchiveBot
     cd ArchiveBot
     git submodule update --init
     pip3 install --user -r pipeline/requirements.txt
+    
+If you get any error messages at this point, you should try to 
+fix them before continuing on, as there may be incompatabilities 
+between the things that ArchiveBot is expectibg and what your server 
+actually has.
+    
+
+** STEP 4: START IT UP **
 
 As user archivebot, in first tmux session:
 
     ssh -C -L 127.0.0.1:16379:127.0.0.1:6379 \
-      yourusername@archivebot.at.ninjawedding.org -N
+      YOUR-USERNAME-GOES-HERE@archivebot.at.ninjawedding.org -N
 
 As user archivebot, in second tmux session:
 
@@ -57,23 +107,30 @@ As user archivebot, in second tmux session:
     export RSYNC_URL=rsync://fos.textfiles.com/archivebot/
     export REDIS_URL=redis://127.0.0.1:16379/0
     export FINISHED_WARCS_DIR=$HOME/warcs4fos
+
+Now, think up a name for this new ArchiveBot pipeline.  It will 
+appear on the publicly available pipeline status dashboard. It will 
+go in the command you enter next:
+
     ~/.local/bin/run-pipeline3 pipeline.py --disable-web-server \
-      --concurrent 2 NAME 2>&1 | \
+      --concurrent 2 YOUR-PIPELINE-NAME-GOES-HERE 2>&1 | \
       tee "pipeline-$(date -u +"%Y-%m-%dT%H_%M_%SZ").log"
 
-Adjust --concurrent as needed.
+You can adjust the number of jobs your server can handle in 
+--concurrent as needed.
 
 If you want your pipeline to only handle !ao/!archiveonly jobs, run it
 with the AO_ONLY environment variable set:
 
     AO_ONLY=1 ~/.local/bin/run-pipeline3 pipeline.py \
-      --disable-web-server --concurrent 2 NAME
+      --disable-web-server --concurrent 2 \ 
+      YOUR-PIPELINE-NAME-GOES-HERE
 
 or
 
     export AO_ONLY=1
     ~/.local/bin/run-pipeline3 pipeline.py --disable-web-server \
-      --concurrent 2 NAME
+      --concurrent 2 YOUR-PIPELINE-NAME-GOES-HERE
 
 As user archivebot, in third tmux session:
 
@@ -82,6 +139,14 @@ As user archivebot, in third tmux session:
 
 If you start multiple pipelines, you can safely point them to the
 same FINISHED_WARCS_DIR and run just one uploader.
+
+Check out the ArchiveBot dashboard to make sure everything is 
+working like it ought to:
+
+http://dashboard.at.ninjawedding.org/
+
+
+** STEP 5: MISCELLANEOUS **
 
 To gracefully stop the pipeline:
 
