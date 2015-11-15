@@ -2,7 +2,7 @@ module JobStatusGeneration
   def to_status
     rep = []
 
-    rep << "Job #{ident} ( #{url} ):"
+    rep << "Job #{ident} <#{url}>:"
 
     if started_by
       if note
