@@ -7,7 +7,7 @@
     <p>Browse an index of the archives.</p>
     <form method="get" action="{{ reverse_url('index') }}">
         <input type="search" name="q" id="form-query" value="{{ handler.get_argument('q', '') }}">
-        <input type="submit" value="Search">
+        <input type="submit" value="Search"> (Only searches the domain name, NOT the path.)
     </form>
     {% if search_results %}
         {% for result_type, job_id, domain, url in search_results %}
