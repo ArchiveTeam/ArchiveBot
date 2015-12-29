@@ -41,6 +41,8 @@ Accepted parameters
 
     Known sets are listed in `db/ignore_patterns/ <https://github.com/ArchiveTeam/ArchiveBot/tree/master/db/ignore_patterns>`_.
 
+    Aliases: ``--ignoresets``, ``--ignore_sets``, ``--ignoreset``, ``--ignore-set``, ``--ignore_set``, ``--ig-set``, ``--igset``
+
 ``--no-offsite-links``
     do not download links to offsite pages::
 
@@ -63,6 +65,8 @@ Accepted parameters
     ``example.com`` to be different hosts, so if you have a website that
     uses both, you should not specify ``--no-offsite-links``.
 
+    Aliases: ``--nooffsitelinks``, ``--no-offsite``, ``--nooffsite``
+
 ``--user-agent-alias ALIAS``
     specify a user-agent to use::
 
@@ -76,7 +80,10 @@ Accepted parameters
 
     This option makes the job present the given user-agent.  It can be
     useful for archiving sites that (still) do user-agent detection.
+
     See `db/user_agents <https://github.com/ArchiveTeam/ArchiveBot/tree/master/db/user_agents>`_ for a list of recognized aliases.
+
+    Aliases: ``--useragentalias``, ``--user-agent``, ``--useragent``
 
 ``--pipeline TAG``
     specify pipeline to use::
