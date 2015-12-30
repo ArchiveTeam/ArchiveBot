@@ -6,7 +6,7 @@ describe JobOptionsParser do
   let(:parser) { JobOptionsParser.new }
 
   it 'recognizes --phantomjs' do
-    expect(parser.parse('--phantomjs')[:phantomjs]).to eq(true)
+    parser.parse('--phantomjs')[:phantomjs].should eq(true)
   end
 
   it 'parses --phantomjs-scroll=10 to an integer' do
@@ -18,15 +18,23 @@ describe JobOptionsParser do
   end
 
   it 'recognizes --no-phantomjs-smart-scroll' do
-    expect(parser.parse('--no-phantomjs-smart-scroll')[:no_phantomjs_smart_scroll]).to eq(true)
+    parser.parse('--no-phantomjs-smart-scroll')[:no_phantomjs_smart_scroll].should eq(true)
   end
 
   it 'recognizes --no-offsite-links' do
-    expect(parser.parse('--no-offsite-links')[:no_offsite_links]).to eq(true)
+    parser.parse('--no-offsite-links')[:no_offsite_links].should eq(true)
+  end
+
+  it 'recognizes alias --nooffsite' do
+    parser.parse('--nooffsite')[:no_offsite_links].should eq(true)
   end
 
   it 'parses --ignore-sets=A,B to an array' do
     parser.parse('--ignore-sets=A,B')[:ignore_sets].should == ['A', 'B']
+  end
+
+  it 'parses alias --ignoreset=A,B to an array' do
+    parser.parse('--ignoreset=A,B')[:ignore_sets].should == ['A', 'B']
   end
 
   it 'recognizes --pipeline=ID' do
@@ -37,8 +45,12 @@ describe JobOptionsParser do
     parser.parse('--user-agent-alias=firefox')[:user_agent_alias].should == 'firefox'
   end
 
+  it 'recognizes alias --user-agent=firefox' do
+    parser.parse('--user-agent=firefox')[:user_agent_alias].should == 'firefox'
+  end
+
   it 'recognizes --youtube-dl' do
-    expect(parser.parse('--youtube-dl')[:youtube_dl]).to eq(true)
+    parser.parse('--youtube-dl')[:youtube_dl].should eq(true)
   end
 
   it 'recognizes --explain=Stuff' do
