@@ -21,7 +21,7 @@ class JobOptionsParser
 
   def parse(str)
     begin
-      args = Shellwords.split((str || '').gsub(/(--[a-z_-]+)=/, '\1=')).map do |a|
+      args = Shellwords.split((str || '')).map do |a|
         b=a.split('=')
         b[0] = (case b[0]
                when '--ignoresets','--ignore_sets','--ignoreset','--ignore-set','--ignore_set','--ig-set','--igset' then '--ignore-sets'
