@@ -21,13 +21,15 @@ class JobOptionsParser
 
   def parse(str)
     begin
-      args = Shellwords.split(str || '').map do |a|
-        case a
-          when '--ignoresets','--ignore_sets','--ignoreset','--ignore-set','--ignore_set','--ig-set','--igset' then '--ignore-sets'
-          when '--nooffsitelinks','--no-offsite','--nooffsite' then '--no-offsite-links'
-          when '--useragentalias','--user-agent','--useragent' then '--user-agent-alias'
-          else a
-          end
+      args = Shellwords.split((str || '')).map do |a|
+        b=a.split('=')
+        b[0] = (case b[0]
+               when '--ignoresets','--ignore_sets','--ignoreset','--ignore-set','--ignore_set','--ig-set','--igset' then '--ignore-sets'
+               when '--nooffsitelinks','--no-offsite','--nooffsite' then '--no-offsite-links'
+               when '--useragentalias','--user-agent','--useragent' then '--user-agent-alias'
+               else b[0]
+               end)
+        b.join('=')
       end
       @parser.parse(args).tap do |h|
         if h[:ignore_sets]
