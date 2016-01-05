@@ -980,6 +980,7 @@ JobsRenderer.prototype._renderIgnoreLine = function(data, logSegment) {
 	logSegment.appendChild(h("div", attrs, [
 		h('span', null, " IGNOR "),
 		h('a', {"href": data["url"], "className": "ignore"}, data["url"]),
+		data["source"],
 		h('span', Reusable.obj_className_bold, " by "),
 		data["pattern"]
 	]));
