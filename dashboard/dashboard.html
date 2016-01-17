@@ -977,8 +977,17 @@ JobsRenderer.prototype._moreDomRenderDownloadLine = function(data, logSegment) {
 
 JobsRenderer.prototype._renderIgnoreLine = function(data, logSegment) {
 	var attrs = Reusable.obj_className_line_ignore;
+	var source = data["source"];
+	var ignoreSpan;
+
+	if (source != null) {
+		ignoreSpan = h('span', null, " IGNOR (" + source + "): ");
+	} else {
+		ignoreSpan = h('span', null, " IGNOR ");
+	}
+
 	logSegment.appendChild(h("div", attrs, [
-		h('span', null, " IGNOR (" + data["source"] + "): "),
+		ignoreSpan,
 		h('a', {"href": data["url"], "className": "ignore"}, data["url"]),
 		h('span', Reusable.obj_className_bold, " by "),
 		data["pattern"]
