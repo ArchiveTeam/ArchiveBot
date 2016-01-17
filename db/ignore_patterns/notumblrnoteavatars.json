@@ -1,0 +1,7 @@
+{
+    "name": "notumblrnoteavatars",
+    "patterns": [
+        "^https?://\\d+\\.media\\.tumblr\\.com\\avatar_.*_16\\.png$"
+    ],
+    "type": "ignore_patterns"
+}
