@@ -30,7 +30,7 @@ from archivebot.seesaw.tasks import GetItemFromQueue, StartHeartbeat, \
     SetFetchDepth, PreparePaths, WriteInfo, DownloadUrlFile, \
     RelabelIfAborted, MoveFiles, StopHeartbeat, MarkItemAsDone, CheckIP
 
-VERSION = "20150715.01"
+VERSION = "20160117.01"
 PHANTOMJS_VERSION = '1.9.8'
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
 WPULL_EXE = find_executable('Wpull', None, ['./wpull'])
