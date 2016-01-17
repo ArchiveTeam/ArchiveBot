@@ -27,20 +27,21 @@ last_age = 0
 logger = logging.getLogger('archivebot.pipeline.wpull_hooks')
 
 
-def log_ignore(url, pattern):
+def log_ignore(url, pattern, source):
   packet = dict(
     ts=time.time(),
     url=url,
     pattern=pattern,
-    type='ignore'
+    type='ignore',
+    source=source,
   )
 
   control.log(packet, ident, log_key)
 
-
-def maybe_log_ignore(url, pattern):
+# source is a string identifying what caused the ignore
+def maybe_log_ignore(url, pattern, source):
   if not settings.suppress_ignore_reports():
-    log_ignore(url, pattern)
+    log_ignore(url, pattern, source)
 
   logger.info('Ignore %s using pattern %s', url, pattern)
 
@@ -101,7 +102,7 @@ def accept_url(url_info, record_info, verdict, reasons):
   pattern = settings.ignore_url_p(url, record_info)
 
   if pattern:
-    maybe_log_ignore(url, pattern)
+    maybe_log_ignore(url, pattern, 'accept_url')
     return False
 
   # If we get here, none of our ignores apply.  Return the original verdict.
@@ -131,7 +132,7 @@ def handle_result(url_info, record_info, error_info=None, http_info=None):
   pattern = settings.ignore_url_p(url_info['url'], record_info)
 
   if pattern:
-    maybe_log_ignore(url_info['url'], pattern)
+    maybe_log_ignore(url_info['url'], pattern, 'handle_result')
     return wpull_hook.actions.FINISH
 
   if http_info:
@@ -215,19 +216,19 @@ def handle_pre_response(url_info, url_record, response_info):
 
   # Check if server version starts with ICY
   if response_info.get('version', '') == 'ICY':
-    maybe_log_ignore(url, '[icy version]')
+    maybe_log_ignore(url, '[icy version]', 'handle_pre_response')
 
     return wpull_hook.actions.FINISH
 
   # Loop through all the server headers for matches
   for field, value in response_info.get('fields', []):
     if ICY_FIELD_PATTERN.match(field):
-      maybe_log_ignore(url, '[icy field]')
+      maybe_log_ignore(url, '[icy field]', 'handle_pre_response')
 
       return wpull_hook.actions.FINISH
 
     if field == 'Server' and ICY_VALUE_PATTERN.match(value):
-      maybe_log_ignore(url, '[icy server]')
+      maybe_log_ignore(url, '[icy server]', 'handle_pre_response')
 
       return wpull_hook.actions.FINISH
 
