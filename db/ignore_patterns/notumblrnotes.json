@@ -1,0 +1,7 @@
+{
+    "name": "notumblrnotes",
+    "patterns": [
+        "^https?://{primary_netloc}/notes/[0-9]+/"
+    ],
+    "type": "ignore_patterns"
+}
