@@ -27,7 +27,11 @@
         "/editpost\\.php\\?",
         "/\\?view=getlastpost$",
         "/index\\.php\\?sharelink=",
-        "/ucp\\.php\\?mode=delete_cookies"
+        "/ucp\\.php\\?mode=delete_cookies",
+        "/new_reply_form\\.asp\\?",
+        "/pm_buddy_list\\.asp\\?",
+        "/pm_new_message_form\\.asp\\?",
+        "/search_form\\.asp\\?"
     ],
     "type": "ignore_patterns"
 }
