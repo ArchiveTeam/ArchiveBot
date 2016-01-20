@@ -27,12 +27,20 @@ User's guide: http://archivebot.readthedocs.org/en/latest/
 Control node installation guide: INSTALL.backend
 Crawler installation guide: INSTALL.pipeline
 
-3. License
+3. Local use
+
+ArchiveBot was originally written as a set of separate programs for
+deployment on a server.  This means it has a poor distribution story.
+However, Ivan Kozik (@ivan) has taken the ArchiveBot pipeline,
+dashboard, ignores, and control system and created a package intended for
+personal use.  You can find it at https://github.com/ludios/grab-site.
+
+4. License
 
 Copyright 2013 David Yip; made available under the MIT license.  See
 LICENSE for details.
 
-4. Acknowledgments
+5. Acknowledgments
 
 Thanks to Alard (@alard), who added WARC generation and Lua scripting to
 GNU Wget.  Wget+lua was the first web crawler used by ArchiveBot.
@@ -52,7 +60,7 @@ Other thanks go to the following projects:
 * Redis <http://redis.io/>
 * Seesaw <https://github.com/ArchiveTeam/seesaw-kit>
 
-5. Special thanks
+6. Special thanks
 
 Dragonette, Barnaby Bright, Vienna Teng, NONONO.
 
