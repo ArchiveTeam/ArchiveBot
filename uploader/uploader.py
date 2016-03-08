@@ -133,7 +133,8 @@ def main():
                         "--header", "x-archive-meta-mediatype:web",
                         "--header", "x-archive-meta-title:" + ia_item_title +
                         ' ' + item['dns'] + ' ' + item['date'],
-                        "--header", "x-archive-meta-date:" + item['date'],
+                        "--header", "x-archive-meta-date:" + item['date'][0:4] + '-' +
+                        item['date'][4:6] + '-' + item['date'][6:8],
                         "--header", "x-archive-size-hint:" + size_hint,
                         "--header", "authorization: LOW " + ia_auth,
                         "--upload-file", fname_u,
