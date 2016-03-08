@@ -122,7 +122,7 @@ def main():
                              re.sub(r'[^0-9a-zA-Z-]+', '_',
                                     ia_item_prefix + '_' + item['dns'] + '_' +
                                     item['date']) + '/' + \
-                             re.sub(r'[^0-9a-zA-Z-]+', '_', basename)
+                             re.sub(r'[^0-9a-zA-Z-.]+', '_', basename)
 
                     exit_code = subprocess.call([
                         "curl", "-v", "--location", "--fail",
@@ -138,6 +138,7 @@ def main():
                         item['date'][4:6] + '-' + item['date'][6:8],
                         "--header", "x-archive-size-hint:" + size_hint,
                         "--header", "authorization: LOW " + ia_auth,
+                        "-o", "/dev/stdout",
                         "--upload-file", fname_u,
                         target])
 
