@@ -131,6 +131,7 @@ def main():
                         "--header", "x-amz-auto-make-bucket:1",
                         "--header", "x-archive-meta-collection:" + ia_collection,
                         "--header", "x-archive-meta-mediatype:web",
+                        "--header", "x-archive-meta-subject:archivebot",
                         "--header", "x-archive-meta-title:" + ia_item_title +
                         ' ' + item['dns'] + ' ' + item['date'],
                         "--header", "x-archive-meta-date:" + item['date'][0:4] + '-' +
