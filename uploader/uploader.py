@@ -117,7 +117,13 @@ def main():
                         "--progress", fname_u, url])
                 else: #mode=='s3'
                     item = parse_name(basename)
-                    size_hint = os.stat(fname_u).st_size
+                    size_hint = str(os.stat(fname_u).st_size)
+                    target = url + '/' + \
+                             re.sub(r'[^0-9a-zA-Z-]+', '_',
+                                    ia_item_prefix + '_' + item['dns'] + '_' +
+                                    item['date']) + '/' + \
+                             re.sub(r'[^0-9a-zA-Z-]+', '_', basename)
+
                     exit_code = subprocess.call([
                         "curl", "-v", "--location", "--fail",
                         "--speed-limit", "1", "--speed-time", "900",
@@ -131,9 +137,7 @@ def main():
                         "--header", "x-archive-size-hint:" + size_hint,
                         "--header", "authorization: LOW " + ia_auth,
                         "--upload-file", fname_u,
-                        url + "/" + ia_item_prefix +
-                        re.sub(r'[^0-9a-zA-Z-]+', '_', item['dns']) +
-                        '_' + item['date'] + "/" + basename])
+                        target])
 
                 if exit_code == 0:
                     print("Removing %r" % (fname_u,))
