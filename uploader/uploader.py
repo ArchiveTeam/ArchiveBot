@@ -8,6 +8,8 @@ import subprocess
 import sys
 import re
 import datetime
+import json
+import requests
 
 WAIT = 5
 
@@ -30,6 +32,19 @@ def parse_name(basename):
 
     return {'dns': k[1], 'date': k[2]}
 
+def ia_upload_allowed(s3_url, accesskey):
+    resp = requests.get(url=(s3_url + '/?check_limit=1&accesskey=' + accesskey))
+    data = json.loads(resp.text)
+    if 'over_limit' in data and data['over_limit'] is not 0:
+        print('IA S3 API notifies us we are being throttled (over_limit)')
+        return False
+
+    if 'detail' in data and 'rationing_engaged' in data['detail'] \
+       and data['detail']['rationing_engaged'] is not 0:
+        print('IA S3 API notifies us rationing is engaged; waiting')
+        return False
+
+    return True
 
 def main():
     if len(sys.argv) > 1:
@@ -83,6 +98,11 @@ def main():
                                '(hint: archiveteam_archivebot_go_$pipeline_name'
                                '_}')
 
+        ia_access = os.environ.get('IA_ACCESS')
+        if ia_access is None:
+            raise RuntimeError('Must specify IA_ACCESS if using IA S3 '
+                               '(hint: your access key)')
+
     print("CHECK THE UPLOAD TARGET: %s as %s endpoint" % (url, mode))
     print()
     print("Upload target must reliably store data")
@@ -115,7 +135,7 @@ def main():
                     exit_code = subprocess.call([
                         "rsync", "-av", "--timeout=300", "--contimeout=300",
                         "--progress", fname_u, url])
-                else: #mode=='s3'
+                elif ia_upload_allowed(url, ia_access): #mode=='s3' and IA is not throttling
                     item = parse_name(basename)
                     size_hint = str(os.stat(fname_u).st_size)
                     target = url + '/' + \
@@ -134,13 +154,17 @@ def main():
                         "--header", "x-archive-meta-subject:archivebot",
                         "--header", "x-archive-meta-title:" + ia_item_title +
                         ' ' + item['dns'] + ' ' + item['date'],
-                        "--header", "x-archive-meta-date:" + item['date'][0:4] + '-' +
-                        item['date'][4:6] + '-' + item['date'][6:8],
+                        "--header", "x-archive-meta-date:" +
+                        item['date'][0:4] + '-' +
+                        item['date'][4:6] + '-' +
+                        item['date'][6:8],
                         "--header", "x-archive-size-hint:" + size_hint,
                         "--header", "authorization: LOW " + ia_auth,
                         "-o", "/dev/stdout",
                         "--upload-file", fname_u,
                         target])
+                else: #no upload mechanism available
+                    exit_code = 1
 
                 if exit_code == 0:
                     print("Removing %r" % (fname_u,))
