@@ -33,8 +33,13 @@ def parse_name(basename):
     return {'dns': k[1], 'date': k[2]}
 
 def ia_upload_allowed(s3_url, accesskey):
-    resp = requests.get(url=(s3_url + '/?check_limit=1&accesskey=' + accesskey))
-    data = json.loads(resp.text)
+    try:
+        resp = requests.get(url=(s3_url + '/?check_limit=1&accesskey=' + accesskey))
+        data = json.loads(resp.text)
+    except Exception as err:
+        print('Could not get throttling status - assuming IA is down')
+        return False
+
     if 'over_limit' in data and data['over_limit'] is not 0:
         print('IA S3 API notifies us we are being throttled (over_limit)')
         return False
