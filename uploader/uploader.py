@@ -32,9 +32,9 @@ def parse_name(basename):
 
     return {'dns': k[1], 'date': k[2]}
 
-def ia_upload_allowed(s3_url, accesskey):
+def ia_upload_allowed(s3_url, accesskey, bucket = ''):
     try:
-        resp = requests.get(url=(s3_url + '/?check_limit=1&accesskey=' + accesskey))
+        resp = requests.get(url=(s3_url + '/?check_limit=1&accesskey={}&bucket={}'.format(accesskey, bucket)))
         data = json.loads(resp.text)
     except Exception as err:
         print('Could not get throttling status - assuming IA is down')
@@ -46,8 +46,19 @@ def ia_upload_allowed(s3_url, accesskey):
 
     if 'detail' in data and 'rationing_engaged' in data['detail'] \
        and data['detail']['rationing_engaged'] is not 0:
-        print('IA S3 API notifies us rationing is engaged; waiting')
-        return False
+        quota_our_remaining = data['detail']['accesskey_ration'] - data['detail']['accesskey_tasks_queued']
+        quota_global_remaining = data['detail']['total_global_limit'] - data['detail']['total_tasks_queued']
+        quota_bucket_remaining = data['detail']['bucket_ration'] - data['detail']['bucket_tasks_queued']
+        if quota_our_remaining < 10 or quota_global_remaining < 10 or quota_bucket_remaining < 5:
+            print('IA S3 API notifies us rationing is engaged with little room for new work!')
+            print('Our outstanding jobs:   {}'.format(data['detail']['accesskey_tasks_queued']))
+            print('Our remaining quota:    {}'.format(quota_our_remaining))
+            print('Global remaining quota: {}'.format(quota_global_remaining))
+            print('Limit reason given: {}'.format(data['detail']['limit_reason']))
+            return False
+        else:
+            print('IA S3 API notifies us rationing is engaged but we have '
+                  'room for another job.')
 
     return True
 
@@ -136,17 +147,18 @@ def main():
                 print("Could not rename %r - another uploader probably grabbed it" % (fname_d,))
             else:
                 print("Uploading %r" % (fname_u,))
+
+                item = parse_name(basename)
+                ia_upload_bucket = re.sub(r'[^0-9a-zA-Z-]+', '_', ia_item_prefix + '_' + item['dns'] + '_' + item['date'])
+
                 if mode == 'rsync':
                     exit_code = subprocess.call([
                         "rsync", "-av", "--timeout=300", "--contimeout=300",
                         "--progress", fname_u, url])
-                elif ia_upload_allowed(url, ia_access): #mode=='s3' and IA is not throttling
-                    item = parse_name(basename)
+                elif ia_upload_allowed(url, ia_access, ia_upload_bucket): #mode=='s3' and IA is not throttling
+                    # At some point, an ambitious person could try a file belonging in a different bucket if ia_upload_allowed denied this one
                     size_hint = str(os.stat(fname_u).st_size)
-                    target = url + '/' + \
-                             re.sub(r'[^0-9a-zA-Z-]+', '_',
-                                    ia_item_prefix + '_' + item['dns'] + '_' +
-                                    item['date']) + '/' + \
+                    target = url + '/' + ia_upload_bucket + '/' + \
                              re.sub(r'[^0-9a-zA-Z-.]+', '_', basename)
 
                     exit_code = subprocess.call([
