@@ -6,7 +6,7 @@ To run the pipeline, you will need:
 - seesaw (automatically installed by Pip)
 - rsync
 - wpull (automatically installed by Pip)
-- PhantomJS 1.9.8
+- PhantomJS 1.9.8 or 2.1.1
 
 NOTE: For compatability reasons, Ubuntu 15.10 is not recommended at 
 this time. Stick with Ubuntu 14.
