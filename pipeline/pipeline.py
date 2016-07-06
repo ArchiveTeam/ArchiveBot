@@ -57,6 +57,11 @@ assert 'RSYNC_URL' in env, 'RSYNC_URL not set.'
 assert 'REDIS_URL' in env, 'REDIS_URL not set.'
 assert 'FINISHED_WARCS_DIR' in env, 'FINISHED_WARCS_DIR not set.'
 
+if 'WARC_MAX_SIZE' in env:
+    WARC_MAX_SIZE = env['WARC_MAX_SIZE']
+else:
+    WARC_MAX_SIZE = '5368709120'
+
 assert 'TMUX' in env or 'STY' in env or env.get('NO_SCREEN') == "1", \
         "Refusing to start outside of screen or tmux, set NO_SCREEN=1 to override"
 
@@ -115,7 +120,8 @@ wpull_args = WpullArgs(
     wpull_exe=WPULL_EXE,
     youtube_dl_exe=YOUTUBE_DL,
     phantomjs_exe=PHANTOMJS,
-    finished_warcs_dir=os.environ["FINISHED_WARCS_DIR"]
+    finished_warcs_dir=os.environ["FINISHED_WARCS_DIR"],
+    warc_max_size=WARC_MAX_SIZE
 )
 
 pipeline = Pipeline(
