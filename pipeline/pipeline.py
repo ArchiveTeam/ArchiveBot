@@ -30,11 +30,11 @@ from archivebot.seesaw.tasks import GetItemFromQueue, StartHeartbeat, \
     SetFetchDepth, PreparePaths, WriteInfo, DownloadUrlFile, \
     RelabelIfAborted, MoveFiles, StopHeartbeat, MarkItemAsDone, CheckIP
 
-VERSION = "20160117.01"
-PHANTOMJS_VERSION = '1.9.8'
+VERSION = "20160604.01"
+PHANTOMJS_VERSIONS = ('1.9.8', '2.1.1')
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
 WPULL_EXE = find_executable('Wpull', None, ['./wpull'])
-PHANTOMJS = find_executable('PhantomJS', PHANTOMJS_VERSION,
+PHANTOMJS = find_executable('PhantomJS', PHANTOMJS_VERSIONS,
         ['phantomjs', './phantomjs', '../phantomjs'], '-v')
 YOUTUBE_DL = find_executable('youtube-dl', None, ['./youtube-dl'], '--version')
 
