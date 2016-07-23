@@ -65,15 +65,15 @@ bot = Cinch::Bot.new do
     brain.request_archive(m, target, params, :shallow, true)
   end
 
-  on :message, /\A\!status\Z/ do |m|
+  on :message, /\A\!status\s*\Z/ do |m|
     brain.request_summary(m)
   end
 
-  on :message, /\A!status (#{CommandPatterns::IDENT})\Z/ do |m, ident|
+  on :message, /\A!status (#{CommandPatterns::IDENT})\s*\Z/ do |m, ident|
     brain.find_job(ident, m) { |j| brain.request_status(m, j) }
   end
 
-  on :message, /\A!status (#{brain.url_pattern})\Z/ do |m, url|
+  on :message, /\A!status (#{brain.url_pattern})\s*\Z/ do |m, url|
     brain.request_status_by_url(m, url)
   end
 
@@ -89,7 +89,7 @@ bot = Cinch::Bot.new do
     brain.find_job(ident, m) { |j| brain.add_ignore_sets(m, j, sets) }
   end
 
-  on :message, /\A!expire (#{CommandPatterns::IDENT})\Z/ do |m, ident|
+  on :message, /\A!expire (#{CommandPatterns::IDENT})\s*\Z/ do |m, ident|
     brain.find_job(ident, m) { |j| brain.expire(m, j) }
   end
 
@@ -101,33 +101,33 @@ bot = Cinch::Bot.new do
     brain.find_job(ident, m) { |j| brain.set_concurrency(j, level, m) }
   end
 
-  on :message, /\A!yahoo (#{CommandPatterns::IDENT})\Z/ do |m, ident|
+  on :message, /\A!yahoo (#{CommandPatterns::IDENT})\s*\Z/ do |m, ident|
     brain.find_job(ident, m) { |j| brain.yahoo(j, m) }
   end
 
-  on :message, /\A!abort (#{CommandPatterns::IDENT})\Z/ do |m, ident|
+  on :message, /\A!abort (#{CommandPatterns::IDENT})\s*\Z/ do |m, ident|
     brain.find_job(ident, m) { |j| brain.initiate_abort(m, j) }
   end
 
-  on :message, /\A(?:!igrep|!ignorereports) (#{CommandPatterns::IDENT}) (on|off)\Z/ do |m, ident, mode|
+  on :message, /\A(?:!igrep|!ignorereports) (#{CommandPatterns::IDENT})\s+(on|off)\s*\Z/ do |m, ident, mode|
     brain.find_job(ident, m) do |j|
       brain.toggle_ignores(m, j, mode == 'on' ? true : false)
     end
   end
 
-  on :message, /\A!igoff (#{CommandPatterns::IDENT})\Z/ do |m, ident|
+  on :message, /\A!igoff (#{CommandPatterns::IDENT})\s*\Z/ do |m, ident|
     brain.find_job(ident, m) { |j| brain.toggle_ignores(m, j, false) }
   end
 
-  on :message, /\A!igon (#{CommandPatterns::IDENT})\Z/ do |m, ident|
+  on :message, /\A!igon (#{CommandPatterns::IDENT})\s*\Z/ do |m, ident|
     brain.find_job(ident, m) { |j| brain.toggle_ignores(m, j, true) }
   end
 
-  on :message, /\A!pending\Z/ do |m|
+  on :message, /\A!pending\s*\Z/ do |m|
     brain.show_pending(m)
   end
 
-  on :message, /\A!stanbush (.+)\Z/ do |m, nick|
+  on :message, /\A!stanbush (.+)\s*\Z/ do |m, nick|
     m.channel.send "#{nick}: http://youtu.be/AZKpByV5764?t=3s"
   end
 
