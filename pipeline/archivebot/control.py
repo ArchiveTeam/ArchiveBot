@@ -1,5 +1,4 @@
 import json
-import os
 import redis
 import time
 
@@ -55,7 +54,6 @@ class Control(object):
     def __init__(self, redis_url, log_channel, pipeline_channel):
         self.log_channel = log_channel
         self.pipeline_channel = pipeline_channel
-        self.bytes_outstanding = 0
         self.items_downloaded_outstanding = 0
         self.items_queued_outstanding = 0
         self.redis_url = redis_url
@@ -142,14 +140,10 @@ class Control(object):
             self.mark_aborted_script(keys=[ident], args=[self.log_channel])
 
     def update_bytes_downloaded(self, ident, size):
-        try:
-            with conn(self):
-                self.bytes_outstanding += size
-                self.redis.hincrby(ident, 'bytes_downloaded',
-                        self.bytes_outstanding)
-                self.bytes_outstanding = 0
-        except ConnectionError:
-            pass
+        self.log_queue.put({'type': 'bytes_downloaded',
+                            'ident': ident,
+                            'bytes': size
+                          })
 
     def update_items_downloaded(self, count):
         self.items_downloaded_outstanding += count
@@ -158,17 +152,14 @@ class Control(object):
         self.items_queued_outstanding += count
 
     def flush_item_counts(self, ident):
-        try:
-            with conn(self):
-                self.redis.hincrby(ident, 'items_downloaded',
-                        self.items_downloaded_outstanding)
-                self.items_downloaded_outstanding = 0
-
-                self.redis.hincrby(ident, 'items_queued',
-                        self.items_queued_outstanding)
-                self.items_queued_outstanding = 0
-        except ConnectionError:
-            pass
+        self.log_queue.put({'type': 'item_counts',
+                            'ident': ident,
+                            'items_downloaded':
+                                self.items_downloaded_outstanding,
+                            'items_queued': self.items_queued_outstanding
+                          })
+        self.items_downloaded_outstanding = 0
+        self.items_queued_outstanding = 0
 
     def pipeline_report(self, pipeline_id, report):
         try:
@@ -193,17 +184,38 @@ class Control(object):
     def ship_logs(self):
         while True:
             entry = self.log_queue.get() #infinite blocking
-            try:
-                with conn(self):
-                    self.log_script(keys=entry['keys'], args=entry['args'])
-            except ConnectionError:
-                pass
+
+            if entry['type'] is 'log':
+                try:
+                    with conn(self):
+                        self.log_script(keys=entry['keys'], args=entry['args'])
+                except ConnectionError:
+                    pass
+
+            elif entry['type'] is 'bytes_downloaded':
+                try:
+                    with conn(self):
+                        self.redis.hincrby(entry['ident'], 'bytes_downloaded',
+                                entry['bytes'])
+                except ConnectionError:
+                    pass
+
+            elif entry['type'] is 'item_counts':
+                try:
+                    with conn(self):
+                        self.redis.hincrby(entry['ident'], 'items_downloaded',
+                                entry['items_downloaded'])
+                        self.redis.hincrby(entry['ident'], 'items_queued',
+                                entry['items_queued'])
+                except ConnectionError:
+                    pass
 
             self.log_queue.task_done()
 
 
     def log(self, packet, ident, log_key):
-        self.log_queue.put({'keys': [ident],
+        self.log_queue.put({'type': 'log',
+                            'keys': [ident],
                             'args': [json.dumps(packet), self.log_channel, log_key]
                           })
 
