@@ -63,7 +63,7 @@ class Control(object):
 
         self.connect()
 
-        log_thread = Thread(target=self.ship_logs, args=(self,))
+        log_thread = Thread(target=self.ship_logs)
         log_thread.daemon = True
         log_thread.start()
 
