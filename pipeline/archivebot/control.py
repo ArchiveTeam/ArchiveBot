@@ -3,6 +3,8 @@ import os
 import redis
 import time
 
+from queue import Queue
+from threading import Thread
 from contextlib import contextmanager
 from redis.exceptions import ConnectionError as RedisConnectionError
 
@@ -57,8 +59,13 @@ class Control(object):
         self.items_downloaded_outstanding = 0
         self.items_queued_outstanding = 0
         self.redis_url = redis_url
+        self.log_queue = Queue()
 
         self.connect()
+
+        log_thread = Thread(target=self.ship_logs, args=self)
+        log_thread.daemon = True
+        log_thread.start()
 
     def connected(self):
         return self.redis is not None
@@ -181,13 +188,24 @@ class Control(object):
         except ConnectionError:
             pass
 
+    # This function is a thread used to asynchronously ship logs to redis for
+    # this job, in a daemonic thread
+    def ship_logs(self):
+        while True:
+            entry = self.log_queue.get() #infinite blocking
+            try:
+                with conn(self):
+                    self.log_script(keys=entry.keys, args=entry.args)
+            except ConnectionError:
+                pass
+
+            self.log_queue.task_done()
+
+
     def log(self, packet, ident, log_key):
-        try:
-            with conn(self):
-                self.log_script(keys=[ident], args=[json.dumps(packet),
-                    self.log_channel, log_key])
-        except ConnectionError:
-            pass
+        self.log_queue.put({'keys': [ident],
+                       'args': [json.dumps(packet), self.log_channel, log_key]
+                      })
 
     def get_url_file(self, ident):
         try:
