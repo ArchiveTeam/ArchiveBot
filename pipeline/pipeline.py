@@ -51,7 +51,7 @@ if not os.environ.get('NO_SEGFAULT_340'):
         "See https://bugs.python.org/issue21435"
 
 assert WPULL_EXE, 'No usable Wpull found.'
-assert PHANTOMJS, 'PhantomJS %s was not found.' % PHANTOMJS_VERSION
+assert PHANTOMJS, 'PhantomJS %s was not found.' % PHANTOMJS_VERSIONS
 assert YOUTUBE_DL, 'No usable youtube-dl found.'
 assert 'RSYNC_URL' in env, 'RSYNC_URL not set.'
 assert 'REDIS_URL' in env, 'REDIS_URL not set.'
