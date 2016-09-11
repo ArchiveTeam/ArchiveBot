@@ -63,9 +63,9 @@ class Control(object):
 
         self.connect()
 
-        log_thread = Thread(target=self.ship_logs)
-        log_thread.daemon = True
-        log_thread.start()
+        self.log_thread = Thread(target=self.ship_logs)
+        self.log_thread.daemon = True
+        self.log_thread.start()
 
     def connected(self):
         return self.redis is not None
@@ -195,7 +195,7 @@ class Control(object):
             entry = self.log_queue.get() #infinite blocking
             try:
                 with conn(self):
-                    self.log_script(keys=entry.keys, args=entry.args)
+                    self.log_script(keys=entry['keys'], args=entry['args'])
             except ConnectionError:
                 pass
 
@@ -204,8 +204,8 @@ class Control(object):
 
     def log(self, packet, ident, log_key):
         self.log_queue.put({'keys': [ident],
-                       'args': [json.dumps(packet), self.log_channel, log_key]
-                      })
+                            'args': [json.dumps(packet), self.log_channel, log_key]
+                          })
 
     def get_url_file(self, ident):
         try:
