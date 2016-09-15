@@ -149,37 +149,40 @@ def main():
                 print("Uploading %r" % (fname_u,))
 
                 item = parse_name(basename)
-                ia_upload_bucket = re.sub(r'[^0-9a-zA-Z-]+', '_', ia_item_prefix + '_' + item['dns'] + '_' + item['date'])
 
                 if mode == 'rsync':
                     exit_code = subprocess.call([
                         "rsync", "-av", "--timeout=300", "--contimeout=300",
                         "--progress", fname_u, url])
-                elif ia_upload_allowed(url, ia_access, ia_upload_bucket): #mode=='s3' and IA is not throttling
-                    # At some point, an ambitious person could try a file belonging in a different bucket if ia_upload_allowed denied this one
-                    size_hint = str(os.stat(fname_u).st_size)
-                    target = url + '/' + ia_upload_bucket + '/' + \
-                             re.sub(r'[^0-9a-zA-Z-.]+', '_', basename)
+                elif mode == 's3':
+                    ia_upload_bucket = re.sub(r'[^0-9a-zA-Z-]+', '_', ia_item_prefix + '_' + item['dns'] + '_' + item['date'])
+                    if ia_upload_allowed(url, ia_access, ia_upload_bucket): # IA is not throttling
+                        # At some point, an ambitious person could try a file belonging in a different bucket if ia_upload_allowed denied this one
+                        size_hint = str(os.stat(fname_u).st_size)
+                        target = url + '/' + ia_upload_bucket + '/' + \
+                                 re.sub(r'[^0-9a-zA-Z-.]+', '_', basename)
 
-                    exit_code = subprocess.call([
-                        "curl", "-v", "--location", "--fail",
-                        "--speed-limit", "1", "--speed-time", "900",
-                        "--header", "x-archive-queue-derive:1",
-                        "--header", "x-amz-auto-make-bucket:1",
-                        "--header", "x-archive-meta-collection:" + ia_collection,
-                        "--header", "x-archive-meta-mediatype:web",
-                        "--header", "x-archive-meta-subject:archivebot",
-                        "--header", "x-archive-meta-title:" + ia_item_title +
-                        ' ' + item['dns'] + ' ' + item['date'],
-                        "--header", "x-archive-meta-date:" +
-                        item['date'][0:4] + '-' +
-                        item['date'][4:6] + '-' +
-                        item['date'][6:8],
-                        "--header", "x-archive-size-hint:" + size_hint,
-                        "--header", "authorization: LOW " + ia_auth,
-                        "-o", "/dev/stdout",
-                        "--upload-file", fname_u,
-                        target])
+                        exit_code = subprocess.call([
+                            "curl", "-v", "--location", "--fail",
+                            "--speed-limit", "1", "--speed-time", "900",
+                            "--header", "x-archive-queue-derive:1",
+                            "--header", "x-amz-auto-make-bucket:1",
+                            "--header", "x-archive-meta-collection:" + ia_collection,
+                            "--header", "x-archive-meta-mediatype:web",
+                            "--header", "x-archive-meta-subject:archivebot",
+                            "--header", "x-archive-meta-title:" + ia_item_title +
+                            ' ' + item['dns'] + ' ' + item['date'],
+                            "--header", "x-archive-meta-date:" +
+                            item['date'][0:4] + '-' +
+                            item['date'][4:6] + '-' +
+                            item['date'][6:8],
+                            "--header", "x-archive-size-hint:" + size_hint,
+                            "--header", "authorization: LOW " + ia_auth,
+                            "-o", "/dev/stdout",
+                            "--upload-file", fname_u,
+                            target])
+                    else: # Cannot upload now, try again later
+                        exit_code = 1
                 else: #no upload mechanism available
                     exit_code = 1
 
