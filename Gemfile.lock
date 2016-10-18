@@ -70,7 +70,7 @@ GEM
       http_parser.rb
     http_parser.rb (0.6.0)
     i18n (0.6.9)
-    json (1.8.1)
+    json (1.8.3)
     json-stream (0.2.1)
     listen (2.4.0)
       celluloid (>= 0.15.2)
@@ -371,3 +371,6 @@ DEPENDENCIES
   uuidtools
   webmachine!
   webmachine-sprockets!
+
+BUNDLED WITH
+   1.13.4
