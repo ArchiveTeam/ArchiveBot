@@ -10,7 +10,7 @@ RUN apt-get install -yqq libzmq3-dev
 RUN apt-get install -yqq vim git traceroute jq
 
 RUN adduser --home /home/archivebot --shell /bin/bash \
-	--uid 1000 archivebot --quiet --disabled-password
+	--uid 500 archivebot --quiet --disabled-password
 
 VOLUME /home/archivebot/ArchiveBot
 
