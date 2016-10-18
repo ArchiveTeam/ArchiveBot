@@ -1,0 +1,23 @@
+#!/bin/sh -x
+
+ARCHIVEBOT_CODE=$HOME/ArchiveBot
+ARCHIVEBOT_BUNDLE=$HOME/bundle-ArchiveBot
+IMAGE=yipdw/archiveteam-archivebot-backend:0.1.0
+
+docker_run() {
+	docker run --rm \
+		-v $ARCHIVEBOT_CODE:/home/archivebot/ArchiveBot \
+		-v $ARCHIVEBOT_BUNDLE:/usr/local/bundle \
+		-i $IMAGE \
+		$*
+}
+
+
+# Prepare the Ruby environment
+docker_run bundle install
+docker_run bash -c 'cd plumbing && bundle install'
+
+# We need Redis
+docker pull redis:latest
+
+# TODO: network, other components
