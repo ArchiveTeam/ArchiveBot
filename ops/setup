@@ -1,23 +1,118 @@
 #!/bin/sh -x
 
 ARCHIVEBOT_CODE=$HOME/ArchiveBot
-ARCHIVEBOT_BUNDLE=$HOME/bundle-ArchiveBot
-IMAGE=yipdw/archiveteam-archivebot-backend:0.1.0
+ARCHIVEBOT_NETWORK=archivebot
 
-docker_run() {
-	docker run --rm \
-		-v $ARCHIVEBOT_CODE:/home/archivebot/ArchiveBot \
-		-v $ARCHIVEBOT_BUNDLE:/usr/local/bundle \
-		-i $IMAGE \
-		$*
+ARCHIVEBOT_BUNDLE_MOUNT=$HOME/bundle-ArchiveBot
+REDIS_STATE_MOUNT=$HOME/state-redis
+COUCHDB_STATE_MOUNT=$HOME/state-couchdb
+
+IMAGE=yipdw/archiveteam-archivebot-backend:0.1.1
+
+BIND_FIREHOSE_SOCKET_URL=tcp://0.0.0.0:31337
+CONNECT_FIREHOSE_SOCKET_URL=tcp://firehose:31337
+UPDATES_CHANNEL=updates
+
+ab_docker_run() {
+        docker run \
+                -e COUCHDB_URL=http://couchdb:5984/archivebot \
+                -e REDIS_URL=redis://redis:6379/0 \
+                --link couchdb \
+                --link redis \
+                --net $ARCHIVEBOT_NETWORK \
+                -v $ARCHIVEBOT_BUNDLE_MOUNT:/usr/local/bundle \
+                -v $ARCHIVEBOT_CODE:/home/archivebot/ArchiveBot \
+                $*
 }
 
 
-# Prepare the Ruby environment
-docker_run bundle install
-docker_run bash -c 'cd plumbing && bundle install'
+# Ensure the state mounts exist
+mkdir -p $ARCHIVEBOT_BUNDLE_MOUNT
+mkdir -p $REDIS_STATE_MOUNT
+mkdir -p $COUCHDB_STATE_MOUNT
 
-# We need Redis
+# We need Redis and CouchDB
 docker pull redis:latest
+docker pull couchdb:latest
 
-# TODO: network, other components
+# Create a Docker network for the ArchiveBot components
+docker network create --driver bridge $ARCHIVEBOT_NETWORK
+
+# Instantiate Redis and CouchDB
+docker run -d \
+        --net=$ARCHIVEBOT_NETWORK \
+        --name redis \
+        -v $REDIS_STATE_MOUNT:/data \
+        redis:latest \
+        redis-server --appendonly yes
+
+docker run -d \
+        --net=$ARCHIVEBOT_NETWORK \
+        --name couchdb \
+        -v $COUCHDB_STATE_MOUNT:/usr/local/var/lib/couchdb \
+        couchdb:latest \
+        couchdb
+
+# Prepare the Ruby environment
+ab_docker_run --rm $IMAGE bundle install
+ab_docker_run -w /home/archivebot/ArchiveBot/plumbing --rm $IMAGE bundle install
+
+plumbing_docker_run() {
+        ab_docker_run -d -w /home/archivebot/ArchiveBot/plumbing $*
+}
+
+# Start the firehose
+plumbing_docker_run \
+        -e FIREHOSE_SOCKET_URL=$BIND_FIREHOSE_SOCKET_URL \
+        -e UPDATES_CHANNEL=$UPDATES_CHANNEL \
+        --expose 31337 \
+        --name firehose \
+        --publish 31337:31337/tcp \
+        $IMAGE ./start-firehose
+
+# Start the log analyzer
+plumbing_docker_run \
+        -e FIREHOSE_SOCKET_URL=$CONNECT_FIREHOSE_SOCKET_URL \
+        -e UPDATES_CHANNEL=$UPDATES_CHANNEL \
+        --link firehose \
+        --name analyzer \
+        $IMAGE ./analyzer
+
+# Start the log trimmer
+plumbing_docker_run \
+        -e FIREHOSE_SOCKET_URL=$CONNECT_FIREHOSE_SOCKET_URL \
+        -e UPDATES_CHANNEL=$UPDATES_CHANNEL \
+        --link firehose \
+        --name trimmer \
+        $IMAGE ./trimmer
+
+# Start the job recorder
+plumbing_docker_run \
+        -e FIREHOSE_SOCKET_URL=$CONNECT_FIREHOSE_SOCKET_URL \
+        -e UPDATES_CHANNEL=$UPDATES_CHANNEL \
+        --link firehose \
+        --name recorder \
+        $IMAGE ./recorder
+
+# Set up the bot
+ab_docker_run \
+        -d \
+        --name bot \
+        -w /home/archivebot/ArchiveBot/bot \
+        $IMAGE \
+        bundle exec ruby bot.rb --server irc://irc.inet.tele.dk:6667/ --nick Major2 --channels '#archivebot-test'
+
+# Start the dashboard
+ab_docker_run \
+        -d \
+        -e FIREHOSE_SOCKET_URL=$CONNECT_FIREHOSE_SOCKET_URL \
+        -e UPDATES_CHANNEL=$UPDATES_CHANNEL \
+        --expose 4567 \
+        --link firehose \
+        --name dashboard \
+        --publish 80:4567/tcp \
+        -w /home/archivebot/ArchiveBot/dashboard \
+        $IMAGE ./run-dashboard
+
+# TODO: Set up cogs
+
