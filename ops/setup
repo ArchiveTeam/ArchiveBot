@@ -6,6 +6,7 @@ ARCHIVEBOT_NETWORK=archivebot
 ARCHIVEBOT_BUNDLE_MOUNT=$HOME/bundle-ArchiveBot
 REDIS_STATE_MOUNT=$HOME/state-redis
 COUCHDB_STATE_MOUNT=$HOME/state-couchdb
+COGS_STATE_MOUNT=$HOME/state-cogs
 
 IMAGE=yipdw/archiveteam-archivebot-backend:0.1.1
 
@@ -30,6 +31,7 @@ ab_docker_run() {
 mkdir -p $ARCHIVEBOT_BUNDLE_MOUNT
 mkdir -p $REDIS_STATE_MOUNT
 mkdir -p $COUCHDB_STATE_MOUNT
+mkdir -p $COGS_STATE_MOUNT
 
 # We need Redis and CouchDB
 docker pull redis:latest
@@ -114,5 +116,11 @@ ab_docker_run \
         -w /home/archivebot/ArchiveBot/dashboard \
         $IMAGE ./run-dashboard
 
-# TODO: Set up cogs
+# Start the cogs
+ab_docker_run \
+    -d \
+    -v $COGS_STATE_MOUNT:/home/archivebot/state-cogs \
+    -w /home/archivebot/ArchiveBot/cogs \
+    $IMAGE bundle exec ruby start.rb -t /home/archivebot/state-cogs/twitter_conf.json
 
+# vim:ts=4:sw=4:et:
