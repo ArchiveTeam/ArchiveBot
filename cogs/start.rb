@@ -14,8 +14,6 @@ opts = Trollop.options do
   opt :redis, 'URL of Redis server', :default => ENV['REDIS_URL'] || 'redis://localhost:6379/0'
   opt :db, 'URL of CouchDB history database', :default => ENV['COUCHDB_URL'] || 'http://localhost:5984/archivebot'
   opt :db_credentials, 'Credentials for history database (USERNAME:PASSWORD)', :type => String, :default => nil
-  opt :log_db, 'URL of CouchDB log database', :default => ENV['LOGDB_URL'] || 'http://localhost:5984/archivebot_logs'
-  opt :log_db_credentials, 'Credentials for log database (USERNAME:PASSWORD)', :type => String, :default => nil
   opt :twitter_config, 'Filename containing Twitter key config', :type => String, :default => nil
 end
 
