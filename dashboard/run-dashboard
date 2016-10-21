@@ -1,0 +1,4 @@
+#!/bin/bash
+
+MYDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+$MYDIR/../plumbing/firehose-client | bundle exec ruby app.rb -u 'http://0.0.0.0:4567'
