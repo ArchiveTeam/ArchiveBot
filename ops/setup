@@ -119,6 +119,7 @@ ab_docker_run \
 # Start the cogs
 ab_docker_run \
     -d \
+    --name cogs \
     -v $COGS_STATE_MOUNT:/home/archivebot/state-cogs \
     -w /home/archivebot/ArchiveBot/cogs \
     $IMAGE bundle exec ruby start.rb -t /home/archivebot/state-cogs/twitter_conf.json
