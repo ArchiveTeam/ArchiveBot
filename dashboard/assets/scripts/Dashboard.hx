@@ -398,7 +398,7 @@ class Dashboard {
         };
         var cacheBustValue = Date.now().getTime();
 
-        request.open("GET", 'http://$hostname/logs/recent?cb=$cacheBustValue');
+        request.open("GET", '//$hostname/logs/recent?cb=$cacheBustValue');
         request.setRequestHeader("Accept", "application/json");
         request.send("");
     }
@@ -408,7 +408,9 @@ class Dashboard {
             return;
         }
 
-        websocket = new WebSocket('ws://$hostname/stream');
+        var wsProto = Browser.location.protocol == "https:" ? "wss:" : "ws:";
+
+        websocket = new WebSocket('$wsProto//$hostname/stream');
 
         websocket.onmessage = function (message:Dynamic) {
             showError(null);
