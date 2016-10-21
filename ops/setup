@@ -21,6 +21,7 @@ ab_docker_run() {
                 --link couchdb \
                 --link redis \
                 --net $ARCHIVEBOT_NETWORK \
+                --restart unless-stopped \
                 -v $ARCHIVEBOT_BUNDLE_MOUNT:/usr/local/bundle \
                 -v $ARCHIVEBOT_CODE:/home/archivebot/ArchiveBot \
                 $*
