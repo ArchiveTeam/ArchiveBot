@@ -21,7 +21,6 @@ ab_docker_run() {
                 --link couchdb \
                 --link redis \
                 --net $ARCHIVEBOT_NETWORK \
-                --restart unless-stopped \
                 -v $ARCHIVEBOT_BUNDLE_MOUNT:/usr/local/bundle \
                 -v $ARCHIVEBOT_CODE:/home/archivebot/ArchiveBot \
                 $*
@@ -45,6 +44,7 @@ docker network create --driver bridge $ARCHIVEBOT_NETWORK
 docker run -d \
         --net=$ARCHIVEBOT_NETWORK \
         --name redis \
+        --restart unless-stopped \
         -v $REDIS_STATE_MOUNT:/data \
         redis:latest \
         redis-server --appendonly yes
@@ -52,6 +52,7 @@ docker run -d \
 docker run -d \
         --net=$ARCHIVEBOT_NETWORK \
         --name couchdb \
+        --restart unless-stopped \
         -v $COUCHDB_STATE_MOUNT:/usr/local/var/lib/couchdb \
         couchdb:latest \
         couchdb
@@ -70,6 +71,7 @@ plumbing_docker_run \
         -e UPDATES_CHANNEL=$UPDATES_CHANNEL \
         --expose 31337 \
         --name firehose \
+        --restart unless-stopped \
         --publish 31337:31337/tcp \
         $IMAGE ./start-firehose
 
@@ -79,6 +81,7 @@ plumbing_docker_run \
         -e UPDATES_CHANNEL=$UPDATES_CHANNEL \
         --link firehose \
         --name analyzer \
+        --restart unless-stopped \
         $IMAGE ./analyzer
 
 # Start the log trimmer
@@ -87,6 +90,7 @@ plumbing_docker_run \
         -e UPDATES_CHANNEL=$UPDATES_CHANNEL \
         --link firehose \
         --name trimmer \
+        --restart unless-stopped \
         $IMAGE ./trimmer
 
 # Start the job recorder
@@ -95,12 +99,14 @@ plumbing_docker_run \
         -e UPDATES_CHANNEL=$UPDATES_CHANNEL \
         --link firehose \
         --name recorder \
+        --restart unless-stopped \
         $IMAGE ./recorder
 
 # Set up the bot
 ab_docker_run \
         -d \
         --name bot \
+        --restart unless-stopped \
         -w /home/archivebot/ArchiveBot/bot \
         $IMAGE \
         bundle exec ruby bot.rb --server irc://irc.inet.tele.dk:6667/ --nick Major2 --channels '#archivebot-test'
@@ -113,6 +119,7 @@ ab_docker_run \
         --expose 4567 \
         --link firehose \
         --name dashboard \
+        --restart unless-stopped \
         --publish 80:4567/tcp \
         -w /home/archivebot/ArchiveBot/dashboard \
         $IMAGE ./run-dashboard
@@ -121,6 +128,7 @@ ab_docker_run \
 ab_docker_run \
     -d \
     --name cogs \
+    --restart unless-stopped \
     -v $COGS_STATE_MOUNT:/home/archivebot/state-cogs \
     -w /home/archivebot/ArchiveBot/cogs \
     $IMAGE bundle exec ruby start.rb -t /home/archivebot/state-cogs/twitter_conf.json
