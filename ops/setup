@@ -3,10 +3,10 @@
 ARCHIVEBOT_CODE=$HOME/ArchiveBot
 ARCHIVEBOT_NETWORK=archivebot
 
-ARCHIVEBOT_BUNDLE_MOUNT=$HOME/bundle-ArchiveBot
-REDIS_STATE_MOUNT=$HOME/state-redis
-COUCHDB_STATE_MOUNT=$HOME/state-couchdb
-COGS_STATE_MOUNT=$HOME/state-cogs
+ARCHIVEBOT_BUNDLE_MOUNT=$HOME/state/bundle
+REDIS_STATE_MOUNT=$HOME/state/redis
+COUCHDB_STATE_MOUNT=$HOME/state/couchdb
+COGS_STATE_MOUNT=$HOME/state/cogs
 
 IMAGE=yipdw/archiveteam-archivebot-backend:0.1.1
 
