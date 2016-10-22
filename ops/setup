@@ -117,6 +117,10 @@ ab_docker_run \
         -e FIREHOSE_SOCKET_URL=$CONNECT_FIREHOSE_SOCKET_URL \
         -e UPDATES_CHANNEL=$UPDATES_CHANNEL \
         --expose 4567 \
+        --health-cmd /home/archivebot/ArchiveBot/dashboard/healthcheck.py \
+        --health-interval 30s \
+        --health-retries 1 \
+        --health-timeout 5s \
         --link firehose \
         --name dashboard \
         --restart unless-stopped \
