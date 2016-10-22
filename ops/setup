@@ -120,7 +120,6 @@ ab_docker_run \
         --link firehose \
         --name dashboard \
         --restart unless-stopped \
-        --publish 80:4567/tcp \
         -w /home/archivebot/ArchiveBot/dashboard \
         $IMAGE ./run-dashboard
 
