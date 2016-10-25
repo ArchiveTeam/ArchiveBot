@@ -1,4 +1,10 @@
-(function () { "use strict";
+(function (console, $global) { "use strict";
+function $extend(from, fields) {
+	function Inherit() {} Inherit.prototype = from; var proto = new Inherit();
+	for (var name in fields) proto[name] = fields[name];
+	if( fields.toString !== Object.prototype.toString ) proto.toString = fields.toString;
+	return proto;
+}
 var LogLine = function() {
 };
 LogLine.__name__ = true;
@@ -28,6 +34,7 @@ Job.parseInt = function(thing) {
 	if(thing != null) try {
 		return Std.parseInt(thing);
 	} catch( error ) {
+		if (error instanceof js__$Boot_HaxeError) error = error.val;
 		return thing;
 	} else return null;
 };
@@ -155,10 +162,8 @@ Job.prototype = {
 		if(logWindow == null) return;
 		if(logWindow.getAttribute("data-anti-scroll") == "attached") return;
 		logWindow.setAttribute("data-anti-scroll","attached");
-		if(!Job.isSafari) logWindow.onwheel = function(ev) {
+		logWindow.onwheel = function(ev) {
 			if(ev.deltaY < 0 && logWindow.scrollTop == 0) ev.preventDefault(); else if(ev.deltaY > 0 && logWindow.scrollTop >= logWindow.scrollHeight - logWindow.offsetHeight) ev.preventDefault();
-		}; else logWindow.onmousewheel = function(ev1) {
-			if(ev1.wheelDeltaY > 0 && logWindow.scrollTop == 0) ev1.preventDefault(); else if(ev1.wheelDeltaY < 0 && logWindow.scrollTop >= logWindow.scrollHeight - logWindow.offsetHeight) ev1.preventDefault();
 		};
 	}
 	,__class__: Job
@@ -167,7 +172,7 @@ var Dashboard = function(hostname,maxScrollback,showNicks,drawInterval) {
 	if(drawInterval == null) drawInterval = 1000;
 	if(showNicks == null) showNicks = false;
 	if(maxScrollback == null) maxScrollback = 500;
-	this.jobMap = new haxe.ds.StringMap();
+	this.jobMap = new haxe_ds_StringMap();
 	this.jobs = [];
 	this.angular = angular;
 	var _g = this;
@@ -221,7 +226,7 @@ Dashboard.__name__ = true;
 Dashboard.getQueryArgs = function() {
 	var query = window.location.search;
 	var items = StringTools.replace(query,"?","").split("&");
-	var args = new haxe.ds.StringMap();
+	var args = new haxe_ds_StringMap();
 	var _g = 0;
 	while(_g < items.length) {
 		var item = items[_g];
@@ -235,8 +240,9 @@ Dashboard.main = function() {
 	var args = Dashboard.getQueryArgs();
 	var hostname;
 	var maxScrollback = 20;
-	var showNicks = args.exists("showNicks");
-	if(args.exists("host")) hostname = args.get("host"); else hostname = window.location.host;
+	var showNicks;
+	if(__map_reserved.showNicks != null) showNicks = args.existsReserved("showNicks"); else showNicks = args.h.hasOwnProperty("showNicks");
+	if(__map_reserved.host != null?args.existsReserved("host"):args.h.hasOwnProperty("host")) hostname = __map_reserved.host != null?args.getReserved("host"):args.h["host"]; else hostname = window.location.host;
 	if(window.navigator.userAgent.indexOf("Mobi") == -1) maxScrollback = 500;
 	var dashboard = new Dashboard(hostname,maxScrollback,showNicks);
 	dashboard.run();
@@ -268,14 +274,16 @@ Dashboard.prototype = {
 			_g.openWebSocket();
 		};
 		var cacheBustValue = new Date().getTime();
-		request.open("GET","http://" + this.hostname + "/logs/recent?cb=" + cacheBustValue);
+		request.open("GET","//" + this.hostname + "/logs/recent?cb=" + cacheBustValue);
 		request.setRequestHeader("Accept","application/json");
 		request.send("");
 	}
 	,openWebSocket: function() {
 		var _g = this;
 		if(this.websocket != null) return;
-		this.websocket = new WebSocket("ws://" + this.hostname + "/stream");
+		var wsProto;
+		if(window.location.protocol == "https:") wsProto = "wss:"; else wsProto = "ws:";
+		this.websocket = new WebSocket("" + wsProto + "//" + this.hostname + "/stream");
 		this.websocket.onmessage = function(message) {
 			_g.showError(null);
 			var doc = JSON.parse(message.data);
@@ -340,13 +348,13 @@ Dashboard.prototype = {
 	}
 	,scrollLogsToBottom: function() {
 		var nodes = window.document.querySelectorAll("[data-autoscroll-dirty].autoscroll");
-		var pending = new Array();
+		var pending = [];
 		var _g = 0;
 		while(_g < nodes.length) {
 			var node = nodes[_g];
 			++_g;
 			var element;
-			element = js.Boot.__cast(node , Element);
+			element = js_Boot.__cast(node , HTMLElement);
 			element.removeAttribute("data-autoscroll-dirty");
 			pending.push(element);
 		}
@@ -375,8 +383,6 @@ HxOverrides.substr = function(s,pos,len) {
 	} else if(len < 0) len = s.length + len - pos;
 	return s.substr(pos,len);
 };
-var IMap = function() { };
-IMap.__name__ = true;
 Math.__name__ = true;
 var Reflect = function() { };
 Reflect.__name__ = true;
@@ -384,13 +390,14 @@ Reflect.field = function(o,field) {
 	try {
 		return o[field];
 	} catch( e ) {
+		if (e instanceof js__$Boot_HaxeError) e = e.val;
 		return null;
 	}
 };
 var Std = function() { };
 Std.__name__ = true;
 Std.string = function(s) {
-	return js.Boot.__string_rec(s,"");
+	return js_Boot.__string_rec(s,"");
 };
 Std.parseInt = function(x) {
 	var v = parseInt(x,10);
@@ -406,32 +413,61 @@ StringTools.startsWith = function(s,start) {
 StringTools.replace = function(s,sub,by) {
 	return s.split(sub).join(by);
 };
-var haxe = {};
-haxe.ds = {};
-haxe.ds.StringMap = function() {
+var haxe_IMap = function() { };
+haxe_IMap.__name__ = true;
+var haxe_ds_StringMap = function() {
 	this.h = { };
 };
-haxe.ds.StringMap.__name__ = true;
-haxe.ds.StringMap.__interfaces__ = [IMap];
-haxe.ds.StringMap.prototype = {
+haxe_ds_StringMap.__name__ = true;
+haxe_ds_StringMap.__interfaces__ = [haxe_IMap];
+haxe_ds_StringMap.prototype = {
 	set: function(key,value) {
-		this.h["$" + key] = value;
+		if(__map_reserved[key] != null) this.setReserved(key,value); else this.h[key] = value;
 	}
 	,get: function(key) {
-		return this.h["$" + key];
+		if(__map_reserved[key] != null) return this.getReserved(key);
+		return this.h[key];
 	}
 	,exists: function(key) {
-		return this.h.hasOwnProperty("$" + key);
+		if(__map_reserved[key] != null) return this.existsReserved(key);
+		return this.h.hasOwnProperty(key);
 	}
-	,__class__: haxe.ds.StringMap
+	,setReserved: function(key,value) {
+		if(this.rh == null) this.rh = { };
+		this.rh["$" + key] = value;
+	}
+	,getReserved: function(key) {
+		if(this.rh == null) return null; else return this.rh["$" + key];
+	}
+	,existsReserved: function(key) {
+		if(this.rh == null) return false;
+		return this.rh.hasOwnProperty("$" + key);
+	}
+	,__class__: haxe_ds_StringMap
 };
-var js = {};
-js.Boot = function() { };
-js.Boot.__name__ = true;
-js.Boot.getClass = function(o) {
-	if((o instanceof Array) && o.__enum__ == null) return Array; else return o.__class__;
+var js__$Boot_HaxeError = function(val) {
+	Error.call(this);
+	this.val = val;
+	this.message = String(val);
+	if(Error.captureStackTrace) Error.captureStackTrace(this,js__$Boot_HaxeError);
 };
-js.Boot.__string_rec = function(o,s) {
+js__$Boot_HaxeError.__name__ = true;
+js__$Boot_HaxeError.__super__ = Error;
+js__$Boot_HaxeError.prototype = $extend(Error.prototype,{
+	__class__: js__$Boot_HaxeError
+});
+var js_Boot = function() { };
+js_Boot.__name__ = true;
+js_Boot.getClass = function(o) {
+	if((o instanceof Array) && o.__enum__ == null) return Array; else {
+		var cl = o.__class__;
+		if(cl != null) return cl;
+		var name = js_Boot.__nativeClassName(o);
+		if(name != null) return js_Boot.__resolveNativeClass(name);
+		return null;
+	}
+};
+js_Boot.__string_rec = function(o,s) {
 	if(o == null) return "null";
 	if(s.length >= 5) return "<...>";
 	var t = typeof(o);
@@ -441,24 +477,24 @@ js.Boot.__string_rec = function(o,s) {
 		if(o instanceof Array) {
 			if(o.__enum__) {
 				if(o.length == 2) return o[0];
-				var str = o[0] + "(";
+				var str2 = o[0] + "(";
 				s += "\t";
 				var _g1 = 2;
 				var _g = o.length;
 				while(_g1 < _g) {
-					var i = _g1++;
-					if(i != 2) str += "," + js.Boot.__string_rec(o[i],s); else str += js.Boot.__string_rec(o[i],s);
+					var i1 = _g1++;
+					if(i1 != 2) str2 += "," + js_Boot.__string_rec(o[i1],s); else str2 += js_Boot.__string_rec(o[i1],s);
 				}
-				return str + ")";
+				return str2 + ")";
 			}
 			var l = o.length;
-			var i1;
+			var i;
 			var str1 = "[";
 			s += "\t";
 			var _g2 = 0;
 			while(_g2 < l) {
 				var i2 = _g2++;
-				str1 += (i2 > 0?",":"") + js.Boot.__string_rec(o[i2],s);
+				str1 += (i2 > 0?",":"") + js_Boot.__string_rec(o[i2],s);
 			}
 			str1 += "]";
 			return str1;
@@ -467,14 +503,15 @@ js.Boot.__string_rec = function(o,s) {
 		try {
 			tostr = o.toString;
 		} catch( e ) {
+			if (e instanceof js__$Boot_HaxeError) e = e.val;
 			return "???";
 		}
-		if(tostr != null && tostr != Object.toString) {
+		if(tostr != null && tostr != Object.toString && typeof(tostr) == "function") {
 			var s2 = o.toString();
 			if(s2 != "[object Object]") return s2;
 		}
 		var k = null;
-		var str2 = "{\n";
+		var str = "{\n";
 		s += "\t";
 		var hasp = o.hasOwnProperty != null;
 		for( var k in o ) {
@@ -484,12 +521,12 @@ js.Boot.__string_rec = function(o,s) {
 		if(k == "prototype" || k == "__class__" || k == "__super__" || k == "__interfaces__" || k == "__properties__") {
 			continue;
 		}
-		if(str2.length != 2) str2 += ", \n";
-		str2 += s + k + " : " + js.Boot.__string_rec(o[k],s);
+		if(str.length != 2) str += ", \n";
+		str += s + k + " : " + js_Boot.__string_rec(o[k],s);
 		}
 		s = s.substring(1);
-		str2 += "\n" + s + "}";
-		return str2;
+		str += "\n" + s + "}";
+		return str;
 	case "function":
 		return "<function>";
 	case "string":
@@ -498,7 +535,7 @@ js.Boot.__string_rec = function(o,s) {
 		return String(o);
 	}
 };
-js.Boot.__interfLoop = function(cc,cl) {
+js_Boot.__interfLoop = function(cc,cl) {
 	if(cc == null) return false;
 	if(cc == cl) return true;
 	var intf = cc.__interfaces__;
@@ -508,12 +545,12 @@ js.Boot.__interfLoop = function(cc,cl) {
 		while(_g1 < _g) {
 			var i = _g1++;
 			var i1 = intf[i];
-			if(i1 == cl || js.Boot.__interfLoop(i1,cl)) return true;
+			if(i1 == cl || js_Boot.__interfLoop(i1,cl)) return true;
 		}
 	}
-	return js.Boot.__interfLoop(cc.__super__,cl);
+	return js_Boot.__interfLoop(cc.__super__,cl);
 };
-js.Boot.__instanceof = function(o,cl) {
+js_Boot.__instanceof = function(o,cl) {
 	if(cl == null) return false;
 	switch(cl) {
 	case Int:
@@ -532,7 +569,9 @@ js.Boot.__instanceof = function(o,cl) {
 		if(o != null) {
 			if(typeof(cl) == "function") {
 				if(o instanceof cl) return true;
-				if(js.Boot.__interfLoop(js.Boot.getClass(o),cl)) return true;
+				if(js_Boot.__interfLoop(js_Boot.getClass(o),cl)) return true;
+			} else if(typeof(cl) == "object" && js_Boot.__isNativeObj(cl)) {
+				if(o instanceof cl) return true;
 			}
 		} else return false;
 		if(cl == Class && o.__name__ != null) return true;
@@ -540,17 +579,19 @@ js.Boot.__instanceof = function(o,cl) {
 		return o.__enum__ == cl;
 	}
 };
-js.Boot.__cast = function(o,t) {
-	if(js.Boot.__instanceof(o,t)) return o; else throw "Cannot cast " + Std.string(o) + " to " + Std.string(t);
+js_Boot.__cast = function(o,t) {
+	if(js_Boot.__instanceof(o,t)) return o; else throw new js__$Boot_HaxeError("Cannot cast " + Std.string(o) + " to " + Std.string(t));
 };
-Math.NaN = Number.NaN;
-Math.NEGATIVE_INFINITY = Number.NEGATIVE_INFINITY;
-Math.POSITIVE_INFINITY = Number.POSITIVE_INFINITY;
-Math.isFinite = function(i) {
-	return isFinite(i);
+js_Boot.__nativeClassName = function(o) {
+	var name = js_Boot.__toStr.call(o).slice(8,-1);
+	if(name == "Object" || name == "Function" || name == "Math" || name == "JSON") return null;
+	return name;
 };
-Math.isNaN = function(i1) {
-	return isNaN(i1);
+js_Boot.__isNativeObj = function(o) {
+	return js_Boot.__nativeClassName(o) != null;
+};
+js_Boot.__resolveNativeClass = function(name) {
+	return $global[name];
 };
 String.prototype.__class__ = String;
 String.__name__ = true;
@@ -565,6 +606,7 @@ var Bool = Boolean;
 Bool.__ename__ = ["Bool"];
 var Class = { __name__ : ["Class"]};
 var Enum = { };
+var __map_reserved = {}
 Job.isSafari = window.navigator.userAgent.indexOf("Safari") != -1;
-Dashboard.main();
-})();
+js_Boot.__toStr = {}.toString;
+})(typeof console != "undefined" ? console : {log:function(){}}, typeof window != "undefined" ? window : typeof global != "undefined" ? global : typeof self != "undefined" ? self : this);

@@ -34,6 +34,13 @@ html, body {
 	background-color: #D0C0AE;
 	font-family: Tahoma, Arial, sans-serif;
 	font-size: 13px;
+	/**
+	 * Opt out of Chrome's Scroll Anchoring, which causes this page to
+	 * incorrectly scroll up as new lines appear in log windows.
+	 * https://bugs.chromium.org/p/chromium/issues/detail?id=650017
+	 * https://github.com/WICG/interventions/blob/0063fe5d3d0e086d4f963c8bd612d12b57db0784/scroll-anchoring/explainer.md#exclusion--opt-out-api
+	 */
+	overflow-anchor: none;
 }
 
 #filter-box {
@@ -1544,7 +1551,7 @@ var Dashboard = function() {
 			}
 		}.bind(this), false);
 	}.bind(this);
-	xhr.open("GET", "http://" + this.host + "/logs/recent?cb=" + Date.now() + Math.random());
+	xhr.open("GET", "//" + this.host + "/logs/recent?cb=" + Date.now() + Math.random());
 	xhr.setRequestHeader('Accept', 'application/json');
 	xhr.send("");
 
@@ -1592,7 +1599,9 @@ Dashboard.prototype.handleData = function(data) {
 };
 
 Dashboard.prototype.connectWebSocket = function() {
-	this.ws = new WebSocket("ws://" + this.host + "/stream");
+	var wsproto = window.location.protocol === "https:" ? "wss:" : "ws:";
+
+	this.ws = new WebSocket(wsproto + "//" + this.host + "/stream");
 
 	this.ws.onmessage = function(ev) {
 		this.queue.push(ev["data"]);

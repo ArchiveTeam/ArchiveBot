@@ -235,28 +235,15 @@ class Job {
         // starts to scroll the page instead.  We prevent this behavior here.
         // If the user wants to scroll the page, they need to move their
         // mouse outside a log window first.
-        if(!isSafari) {
-            Reflect.setField(logWindow, "onwheel", function (ev) {
-                // Note: offsetHeight is "wrong" by 2px but it doesn't matter
-                //trace(ev, logWindow.scrollTop, (logWindow.scrollHeight - logWindow.offsetHeight));
-                if (ev.deltaY < 0 && logWindow.scrollTop == 0) {
-                    ev.preventDefault();
-                } else if(ev.deltaY > 0 && logWindow.scrollTop >= (logWindow.scrollHeight - logWindow.offsetHeight)) {
-                    ev.preventDefault();
-                }
-            });
-        } else {
-            // Safari 7.0.5 can't preventDefault or stopPropagation an onwheel event,
-            // so use onmousewheel instead.
-            logWindow.onmousewheel = function (ev) {
-                //trace(ev, logWindow.scrollTop, (logWindow.scrollHeight - logWindow.offsetHeight));
-                if(ev.wheelDeltaY > 0 && logWindow.scrollTop == 0) {
-                    ev.preventDefault();
-                } else if(ev.wheelDeltaY < 0 && logWindow.scrollTop >= (logWindow.scrollHeight - logWindow.offsetHeight)) {
-                    ev.preventDefault();
-                }
+        Reflect.setField(logWindow, "onwheel", function (ev) {
+            // Note: offsetHeight is "wrong" by 2px but it doesn't matter
+            //trace(ev, logWindow.scrollTop, (logWindow.scrollHeight - logWindow.offsetHeight));
+            if (ev.deltaY < 0 && logWindow.scrollTop == 0) {
+                ev.preventDefault();
+            } else if(ev.deltaY > 0 && logWindow.scrollTop >= (logWindow.scrollHeight - logWindow.offsetHeight)) {
+                ev.preventDefault();
             }
-        }
+        });
     }
 
     private static function parseInt(thing:Dynamic):Int {
@@ -411,7 +398,7 @@ class Dashboard {
         };
         var cacheBustValue = Date.now().getTime();
 
-        request.open("GET", 'http://$hostname/logs/recent?cb=$cacheBustValue');
+        request.open("GET", '//$hostname/logs/recent?cb=$cacheBustValue');
         request.setRequestHeader("Accept", "application/json");
         request.send("");
     }
@@ -421,7 +408,9 @@ class Dashboard {
             return;
         }
 
-        websocket = new WebSocket('ws://$hostname/stream');
+        var wsProto = Browser.location.protocol == "https:" ? "wss:" : "ws:";
+
+        websocket = new WebSocket('$wsProto//$hostname/stream');
 
         websocket.onmessage = function (message:Dynamic) {
             showError(null);
