@@ -155,12 +155,12 @@ def main():
                         "rsync", "-av", "--timeout=300", "--contimeout=300",
                         "--progress", fname_u, url])
                 elif mode == 's3':
-                    ia_upload_bucket = re.sub(r'[^0-9a-zA-Z-]+', '_', ia_item_prefix + '_' + item['dns'][-32:] + '_' + item['date'])
+                    ia_upload_bucket = re.sub(r'[^0-9a-zA-Z-]+', '_', ia_item_prefix + '_' + item['dns'][-64:] + '_' + item['date'])
                     if ia_upload_allowed(url, ia_access, ia_upload_bucket): # IA is not throttling
                         # At some point, an ambitious person could try a file belonging in a different bucket if ia_upload_allowed denied this one
                         size_hint = str(os.stat(fname_u).st_size)
                         target = url + '/' + ia_upload_bucket + '/' + \
-                                 re.sub(r'[^0-9a-zA-Z-.]+', '_', basename)[-32:]
+                                 re.sub(r'[^0-9a-zA-Z-.]+', '_', basename)[-64:]
 
                         exit_code = subprocess.call([
                             "curl", "-v", "--location", "--fail",
