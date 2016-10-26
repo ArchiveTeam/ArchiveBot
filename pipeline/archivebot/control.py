@@ -7,6 +7,14 @@ from threading import Thread
 from contextlib import contextmanager
 from redis.exceptions import ConnectionError as RedisConnectionError
 
+class ConnectionError(Exception):
+    '''
+    Represents connection errors that can occur when talking to the ArchiveBot
+    control node, Redis or otherwise.
+    '''
+
+    pass
+
 @contextmanager
 def conn(controller):
     try:
