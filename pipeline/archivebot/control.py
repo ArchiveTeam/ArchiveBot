@@ -202,6 +202,7 @@ class Control(object):
                         entry = self.log_queue.get(timeout=5)
                         with conn(self):
                             self.log_script(keys=entry['keys'], args=entry['args'], client=pipe)
+                            shipping_count += 1
                         self.log_queue.task_done()
                     except Empty:
                         pass
