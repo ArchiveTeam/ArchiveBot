@@ -140,6 +140,7 @@ class Control(object):
                                                               item['log_key']])
 
     def mark_aborted(self, ident):
+        self.finish_logging()
         with conn(self):
             self.mark_aborted_script(keys=[ident], args=[self.log_channel])
 
@@ -197,6 +198,7 @@ class Control(object):
                        self.log_queue.empty() and
                        self.bytes_downloaded_queue.empty() and
                        self.item_count_queue.empty()):
+
                 try:
                     # Ship a log entry
                     try:
