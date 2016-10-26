@@ -133,6 +133,7 @@ class Control(object):
             return self.redis.hget(ident, 'aborted')
 
     def mark_done(self, item, expire_time):
+        self.finish_logging()
         with conn(self):
             self.mark_done_script(keys=[item['ident']], args=[expire_time,
                 self.log_channel, int(time.time()), json.dumps(item['info']),
