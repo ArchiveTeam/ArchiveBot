@@ -161,6 +161,7 @@ pipeline = Pipeline(
 )
 
 def stop_control():
+    control.finish_logging()
     control.unregister_pipeline(pipeline_id)
 
 pipeline.on_cleanup += stop_control
