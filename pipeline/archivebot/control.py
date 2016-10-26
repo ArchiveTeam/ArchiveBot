@@ -239,11 +239,11 @@ class Control(object):
                     # selected such that about that many log entries might be shipped every
                     # round-trip to the dashboard, under congested conditions
                     if self.log_queue.empty() or shipping_count >= 64:
-                        for ident, count in bytes_entries:
+                        for ident, count in bytes_entries.iteritems():
                             pipe.hincrby(ident, 'bytes_downloaded', count)
                             bytes_entries = {}
 
-                        for ident, data in counts_entries:
+                        for ident, data in counts_entries.iteritems():
                             pipe.hincrby(ident, 'items_downloaded', data[0])
                             pipe.hincrby(ident, 'items_queued', data[1])
                             counts_entries = {}
