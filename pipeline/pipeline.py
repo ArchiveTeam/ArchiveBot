@@ -161,7 +161,7 @@ pipeline = Pipeline(
 )
 
 def stop_control():
-    control.finish_logging()
+    #control.flag_logging_thread_for_termination()
     control.unregister_pipeline(pipeline_id)
 
 pipeline.on_cleanup += stop_control

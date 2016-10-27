@@ -26,6 +26,8 @@ last_age = 0
 
 logger = logging.getLogger('archivebot.pipeline.wpull_hooks')
 
+logger.info('wpull initialization complete for job ID {}'.format(ident))
+
 
 def log_ignore(url, pattern, source):
   packet = dict(
@@ -124,7 +126,7 @@ def handle_result(url_info, record_info, error_info=None, http_info=None):
 
   if http_info and http_info['body']:
     # Update the traffic counters.
-    control.update_bytes_downloaded(ident, http_info['body']['content_size'])
+    control.update_bytes_downloaded(http_info['body']['content_size'])
 
   error = 'OK'
   statcode = 0
@@ -167,9 +169,6 @@ def handle_result(url_info, record_info, error_info=None, http_info=None):
   # One last thing about settings: make sure the listener is online.
   settings_listener.check()
 
-  # Flush queued/downloaded updates.
-  control.flush_item_counts(ident)
-
   # Should we abort?
   if settings.abort_requested():
     print_log("Wget terminating on bot command")
@@ -204,6 +203,8 @@ def finish_statistics(start_time, end_time, num_urls, bytes_downloaded):
   print_log(" ", bytes_downloaded, "bytes.")
 
 def exit_status(exit_code):
+  logger.info('Advising control task {} and settings listener to stop pending termination for ident {}'.format(control, ident))
+  control.advise_exiting()
   settings_listener.stop()
   return exit_code
 

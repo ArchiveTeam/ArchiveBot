@@ -1,11 +1,16 @@
 import json
 import redis
 import time
+import os
+import logging
+import threading
 
+from sys import stderr
 from queue import Queue, Empty
-from threading import Thread
 from contextlib import contextmanager
 from redis.exceptions import ConnectionError as RedisConnectionError
+
+logger = logging.getLogger('archivebot.control')
 
 class ConnectionError(Exception):
     '''
@@ -56,22 +61,31 @@ class Control(object):
         self.pipeline_channel = pipeline_channel
         self.items_downloaded_outstanding = 0
         self.items_queued_outstanding = 0
+        self.bytes_downloaded_outstanding = 0
         self.redis_url = redis_url
         self.log_queue = Queue()
-        self.bytes_downloaded_queue = Queue()
-        self.item_count_queue = Queue()
 
-        self.connect()
+        # if ITEM_IDENT is set, we are running inside a wpull process
+        self.ident = os.getenv('ITEM_IDENT')
+        logger.info('Started new control process with ident={}, thread={}, this={}'.format(self.ident, threading.get_ident(), self))
+        # and as such this lock will be used to manage count concurrency
+        self.countslock = threading.Lock()
 
-        #log_thread is joined in finish_logging()
+        self.redis = self.connect()
+
         self.ending = False
-        self.log_thread = Thread(target=self.ship_logs)
+        self.log_thread = threading.Thread(target=self.ship_logs)
+
+        # At some point it would be preferable to not use a daemonic thread
+        # but I dare you to try and ever join it.
+        self.log_thread.setDaemon(True)
         self.log_thread.start()
 
     def connected(self):
         return self.redis is not None
 
     def connect(self):
+        logger.info('Attempting to connect to redis with ident={}, thread={}'.format(self.ident, threading.get_ident()))
         if self.redis_url is None:
             raise ConnectionError('self.redis_url not set')
 
@@ -79,6 +93,7 @@ class Control(object):
                                                 decode_responses=True)
 
         self.register_scripts()
+        logger.info('Redis connection successful with ident={}, thread={}'.format(self.ident, threading.get_ident()))
 
     def disconnect(self):
         self.redis = None
@@ -132,36 +147,47 @@ class Control(object):
         with conn(self):
             return self.redis.hget(ident, 'aborted')
 
-    def mark_done(self, item, expire_time):
-        self.finish_logging()
+    def flag_logging_thread_for_termination(self):
+        logger.info('Attempting to set semaphore to close logger with id {} from thread {}'.format(log_thread.ident, threading.get_ident()))
+
+        #self.ending = True
+
+        logger.info('State update complete with id {} from thread {}; joining'.format(log_thread.ident, threading.get_ident()))
+        # self.log_thread.join()
+        logger.info('Logger thread joined to thread {}'.format(threading.get_ident()))
+
+    def mark_done(self, item, expire_time): # used from main controller
         with conn(self):
             self.mark_done_script(keys=[item['ident']], args=[expire_time,
                 self.log_channel, int(time.time()), json.dumps(item['info']),
                                                               item['log_key']])
 
-    def mark_aborted(self, ident):
+    def mark_aborted(self, ident): # used when in wpull subprocess
+        #self.flag_logging_thread_for_termination()
         with conn(self):
             self.mark_aborted_script(keys=[ident], args=[self.log_channel])
 
-    def update_bytes_downloaded(self, ident, size):
-        self.bytes_downloaded_queue.put({'ident': ident,
-                                         'bytes': size
-                                        })
+    def advise_exiting(self): # used when in wpull subprocess
+        logger.info('Got exit advice with ident={}, thread={}'.format(self.ident, threading.get_ident()))
+        #self.flag_logging_thread_for_termination()
+
+    def update_bytes_downloaded(self, size):
+        #logger.info('Acquiring counts lock for bytes with ident={}, thread={}'.format(self.ident, threading.get_ident()))
+        with self.countslock:
+            self.bytes_downloaded_outstanding += size
+        #logger.info('Released counts lock for bytes with ident={}, thread={}'.format(self.ident, threading.get_ident()))
 
     def update_items_downloaded(self, count):
-        self.items_downloaded_outstanding += count
+        #logger.info('Acquiring counts lock for items downloaded with ident={}, thread={}'.format(self.ident, threading.get_ident()))
+        with self.countslock:
+            self.items_downloaded_outstanding += count
+        #logger.info('Released counts lock for items downloaded with ident={}, thread={}'.format(self.ident, threading.get_ident()))
 
     def update_items_queued(self, count):
-        self.items_queued_outstanding += count
-
-    def flush_item_counts(self, ident):
-        self.item_count_queue.put({'ident': ident,
-                                   'items_downloaded':
-                                       self.items_downloaded_outstanding,
-                                   'items_queued': self.items_queued_outstanding
-                                  })
-        self.items_downloaded_outstanding = 0
-        self.items_queued_outstanding = 0
+        #logger.info('Acquiring counts lock for items queued with ident={}, thread={}'.format(self.ident, threading.get_ident()))
+        with self.countslock:
+            self.items_queued_outstanding += count
+        #logger.info('Released counts lock for items queued with ident={}, thread={}'.format(self.ident, threading.get_ident()))
 
     def pipeline_report(self, pipeline_id, report):
         try:
@@ -171,10 +197,6 @@ class Control(object):
                 self.redis.publish(self.pipeline_channel, pipeline_id)
         except ConnectionError:
             pass
-
-    def finish_logging(self):
-        self.ending = True
-        self.log_thread.join()
 
     def unregister_pipeline(self, pipeline_id):
         try:
@@ -188,73 +210,83 @@ class Control(object):
     # This function is a thread used to asynchronously ship logs to redis for
     # this job, in a daemonic thread
     def ship_logs(self):
-        bytes_entries = {}
-        counts_entries = {}
         shipping_count = 0
 
-        with self.redis.pipeline(transaction=False) as pipe:
-            while not (self.ending and
-                       self.log_queue.empty() and
-                       self.bytes_downloaded_queue.empty() and
-                       self.item_count_queue.empty()):
-                try:
-                    # Ship a log entry
+        logger.info('Started log shipper thread with ident={}, thread={}'.format(self.ident, threading.get_ident()))
+
+        with conn(self):
+            with self.redis.pipeline(transaction=False) as pipe:
+                #logger.info('Log shipper about to enter main loop with ident={}, thread={}'.format(self.ident, threading.get_ident()))
+                while not (self.ending and self.log_queue.empty()):
+                    #logger.info('Log shipper iterates main loop having ending={} and queue size={} with ident={}, thread={}'.format(self.ending, self.log_queue.qsize(), self.ident, threading.get_ident()))
+
                     try:
-                        entry = self.log_queue.get(timeout=5)
-                        with conn(self):
-                            self.log_script(keys=entry['keys'], args=entry['args'], client=pipe)
+                        # Ship a log entry
+                        try:
+                            #logger.info('Log shipper trying to dequeue a log entry with ident={}, thread={}'.format(self.ident, threading.get_ident()))
+                            entry = self.log_queue.get(timeout=5)
+                            #logger.info('Log shipper got a line and trying to send with ident={}, thread={}'.format(self.ident, threading.get_ident()))
+                            with conn(self):
+                                    self.log_script(keys=entry['keys'], args=entry['args'], client=pipe)
+
                             shipping_count += 1
-                        self.log_queue.task_done()
-                    except Empty:
-                        pass
-                    except ConnectionError as exception: # If we can't ship the log entry, discard
-                        self.log_queue.task_done()
-                        raise exception
+                            self.log_queue.task_done()
+                        except Empty:
+                            #logger.info('Log shipper found no logs to send with ident={}, thread={}'.format(self.ident, threading.get_ident()))
+                            pass
+                        except ConnectionError as exception: # If we can't ship the log entry, discard
+                            #logger.info('Log shipper experienced connection error with ident={}, thread={}'.format(self.ident, threading.get_ident()))
+                            self.log_queue.task_done()
+                            raise exception
 
-                    # Aggregate counts to ship when logs do
-                    try:
-                        entry = self.bytes_downloaded_queue.get(block=False)
-                        if entry['ident'] in bytes_entries:
-                            bytes_entries[entry['ident']] += int(entry['bytes'])
-                        else:
-                            bytes_entries[entry['ident']] = int(entry['bytes'])
-                        self.bytes_downloaded_queue.task_done()
-                    except Empty:
-                        pass
+                        #logger.info('Log shipper sent log entry with ident={}, thread={}'.format(self.ident, threading.get_ident()))
 
-                    try:
-                        entry = self.item_count_queue.get(block=False)
-                        if entry['ident'] in counts_entries:
-                            counts_entries[entry['ident']][0] += int(entry['items_downloaded'])
-                            counts_entries[entry['ident']][1] += int(entry['items_queued'])
-                        else:
-                            counts_entries[entry['ident']] = [
-                                int(entry['items_downloaded']),
-                                int(entry['items_queued'])
-                            ]
-                        self.item_count_queue.task_done()
-                    except Empty:
-                        pass
+                        # If we have accreted enough or the queue is empty, commit logs and counts
+                        # The magic constant against which to compare shipping_count should be
+                        # selected such that about that many log entries might be shipped every
+                        # round-trip to the dashboard, under congested conditions
+                        if self.log_queue.empty() or shipping_count >= 64:
+                            lockcheck = False
+                            with conn(self):
+                                # This locking structure is necessary to avoid a deadlock that happens when
+                                # redis is trying to send while another thread is trying to acquire the lock
+                                #logger.info('Log shipper acquiring count lock with ident={}, thread={}'.format(self.ident, threading.get_ident()))
+                                with self.countslock:
+                                    #logger.info('Log shipper acquired count lock with ident={}, thread={}'.format(self.ident, threading.get_ident()))
+                                    t_bytes_downloaded = self.bytes_downloaded_outstanding
+                                    self.bytes_downloaded_outstanding = 0
+                                    t_items_downloaded = self.items_downloaded_outstanding
+                                    self.items_downloaded_outstanding = 0
+                                    t_items_queued = self.items_queued_outstanding
+                                    self.items_queued_outstanding = 0
 
-                    # If we have accreted enough or the queue is empty, commit logs and counts
-                    # The magic constant against which to compare shipping_count should be
-                    # selected such that about that many log entries might be shipped every
-                    # round-trip to the dashboard, under congested conditions
-                    if self.log_queue.empty() or shipping_count >= 64:
-                        for ident, count in bytes_entries.items():
-                            pipe.hincrby(ident, 'bytes_downloaded', count)
-                            bytes_entries = {}
+                                #logger.info('Log shipper released count lock and will now ship counts with ident={}, thread={}'.format(self.ident, threading.get_ident()))
 
-                        for ident, data in counts_entries.items():
-                            pipe.hincrby(ident, 'items_downloaded', data[0])
-                            pipe.hincrby(ident, 'items_queued', data[1])
-                            counts_entries = {}
+                                try:
+                                    if t_bytes_downloaded > 0:
+                                        #logger.info('Log shipper about to send bytes with ident={}, thread={}'.format(self.ident, threading.get_ident()))
+                                        pipe.hincrby(self.ident, 'bytes_downloaded', t_bytes_downloaded)
+                                    if t_items_downloaded > 0:
+                                        #logger.info('Log shipper about to send items downloaded with ident={}, thread={}'.format(self.ident, threading.get_ident()))
+                                        pipe.hincrby(self.ident, 'items_downloaded', t_items_downloaded)
+                                    if t_items_queued > 0:
+                                        #logger.info('Log shipper about to send items queued with ident={}, thread={}'.format(self.ident, threading.get_ident()))
+                                        pipe.hincrby(self.ident, 'items_queued', t_items_queued)
+                                    #logger.info('Log shipper done sending counts with ident={}, thread={}'.format(self.ident, threading.get_ident()))
+                                except ConnectionError:
+                                    pass
 
-                        pipe.execute()
-                        shipping_count = 0
+                                #logger.info('Log shipper about to commit entries with ident={}, thread={}'.format(self.ident, threading.get_ident()))
+                                pipe.execute()
+                                #logger.info('Log shipper committed entries with ident={}, thread={}'.format(self.ident, threading.get_ident()))
+                           
+                            shipping_count = 0
 
-                except ConnectionError:
-                    pass
+                    except ConnectionError:
+                        logger.info('Log shipper got connection error while incrementing counts or committing logs with ident={}, thread={}'.format(self.ident, threading.get_ident()))
+
+        logger.info('Log shipper exiting with ident={}, thread={}'.format(self.ident, threading.get_ident()))
+        return True
 
     def log(self, packet, ident, log_key):
         self.log_queue.put({'keys': [ident],
