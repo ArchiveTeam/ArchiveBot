@@ -1,0 +1,14 @@
+{
+    "name": "dreamwidth",
+    "patterns": [
+        "replyto=",
+        "mode=reply",
+        "/inbox/compose",
+        "/manage/tracking/",
+        "/manage/circle/",
+        "/shop/account",
+        "/tools/tellafriend",
+        "/tools/memadd"
+    ],
+    "type": "ignore_patterns"
+}
