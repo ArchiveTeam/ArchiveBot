@@ -146,8 +146,7 @@ class Brain
   def request_status_by_url(m, url)
     uri = Addressable::URI.parse(url).normalize
     host = uri.host
-    rep << "See http://archive.fart.website/archivebot/viewer/?q=#{host}"
-    reply m, *rep
+    reply m, "See http://archive.fart.website/archivebot/viewer/?q=#{host}"
   end
 
   def request_status(m, job)
