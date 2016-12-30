@@ -147,13 +147,16 @@ class Control(object):
             return self.redis.hget(ident, 'aborted')
 
     def flag_logging_thread_for_termination(self):
-        logger.info('Attempting to set semaphore to close logger with id {} from thread {}'.format(log_thread.ident, threading.get_ident()))
+        #TODO: alas, this results in deadlock for no apparent reason
+        pass
+
+        #logger.info('Attempting to set semaphore to close logger with id {} from thread {}'.format(log_thread.ident, threading.get_ident()))
 
         #self.ending = True
 
-        logger.info('State update complete with id {} from thread {}; joining'.format(log_thread.ident, threading.get_ident()))
+        #logger.info('State update complete with id {} from thread {}; joining'.format(log_thread.ident, threading.get_ident()))
         # self.log_thread.join()
-        logger.info('Logger thread joined to thread {}'.format(threading.get_ident()))
+        #logger.info('Logger thread joined to thread {}'.format(threading.get_ident()))
 
     def mark_done(self, item, expire_time): # used from main controller
         with conn(self):
@@ -171,22 +174,16 @@ class Control(object):
         #self.flag_logging_thread_for_termination()
 
     def update_bytes_downloaded(self, size):
-        #logger.info('Acquiring counts lock for bytes with ident={}, thread={}'.format(self.ident, threading.get_ident()))
         with self.countslock:
             self.bytes_downloaded_outstanding += size
-        #logger.info('Released counts lock for bytes with ident={}, thread={}'.format(self.ident, threading.get_ident()))
 
     def update_items_downloaded(self, count):
-        #logger.info('Acquiring counts lock for items downloaded with ident={}, thread={}'.format(self.ident, threading.get_ident()))
         with self.countslock:
             self.items_downloaded_outstanding += count
-        #logger.info('Released counts lock for items downloaded with ident={}, thread={}'.format(self.ident, threading.get_ident()))
 
     def update_items_queued(self, count):
-        #logger.info('Acquiring counts lock for items queued with ident={}, thread={}'.format(self.ident, threading.get_ident()))
         with self.countslock:
             self.items_queued_outstanding += count
-        #logger.info('Released counts lock for items queued with ident={}, thread={}'.format(self.ident, threading.get_ident()))
 
     def pipeline_report(self, pipeline_id, report):
         try:
@@ -215,43 +212,32 @@ class Control(object):
 
         with conn(self):
             with self.redis.pipeline(transaction=False) as pipe:
-                #logger.info('Log shipper about to enter main loop with ident={}, thread={}'.format(self.ident, threading.get_ident()))
                 while not (self.ending and self.log_queue.empty()):
-                    #logger.info('Log shipper iterates main loop having ending={} and queue size={} with ident={}, thread={}'.format(self.ending, self.log_queue.qsize(), self.ident, threading.get_ident()))
 
                     try:
                         # Ship a log entry
                         try:
-                            #logger.info('Log shipper trying to dequeue a log entry with ident={}, thread={}'.format(self.ident, threading.get_ident()))
                             entry = self.log_queue.get(timeout=5)
-                            #logger.info('Log shipper got a line and trying to send with ident={}, thread={}'.format(self.ident, threading.get_ident()))
                             with conn(self):
                                     self.log_script(keys=entry['keys'], args=entry['args'], client=pipe)
 
                             shipping_count += 1
                             self.log_queue.task_done()
                         except Empty:
-                            #logger.info('Log shipper found no logs to send with ident={}, thread={}'.format(self.ident, threading.get_ident()))
                             pass
                         except ConnectionError as exception: # If we can't ship the log entry, discard
-                            #logger.info('Log shipper experienced connection error with ident={}, thread={}'.format(self.ident, threading.get_ident()))
                             self.log_queue.task_done()
                             raise exception
 
-                        #logger.info('Log shipper sent log entry with ident={}, thread={}'.format(self.ident, threading.get_ident()))
 
                         # If we have accreted enough or the queue is empty, commit logs and counts
-                        # The magic constant against which to compare shipping_count should be
-                        # selected such that about that many log entries might be shipped every
-                        # round-trip to the dashboard, under congested conditions
+                        # The magic constant is necessary to resolve a race condition that might prevent shipping
                         if self.log_queue.empty() or shipping_count >= 64:
                             lockcheck = False
                             with conn(self):
                                 # This locking structure is necessary to avoid a deadlock that happens when
                                 # redis is trying to send while another thread is trying to acquire the lock
-                                #logger.info('Log shipper acquiring count lock with ident={}, thread={}'.format(self.ident, threading.get_ident()))
                                 with self.countslock:
-                                    #logger.info('Log shipper acquired count lock with ident={}, thread={}'.format(self.ident, threading.get_ident()))
                                     t_bytes_downloaded = self.bytes_downloaded_outstanding
                                     self.bytes_downloaded_outstanding = 0
                                     t_items_downloaded = self.items_downloaded_outstanding
@@ -259,25 +245,17 @@ class Control(object):
                                     t_items_queued = self.items_queued_outstanding
                                     self.items_queued_outstanding = 0
 
-                                #logger.info('Log shipper released count lock and will now ship counts with ident={}, thread={}'.format(self.ident, threading.get_ident()))
-
                                 try:
                                     if t_bytes_downloaded > 0:
-                                        #logger.info('Log shipper about to send bytes with ident={}, thread={}'.format(self.ident, threading.get_ident()))
                                         pipe.hincrby(self.ident, 'bytes_downloaded', t_bytes_downloaded)
                                     if t_items_downloaded > 0:
-                                        #logger.info('Log shipper about to send items downloaded with ident={}, thread={}'.format(self.ident, threading.get_ident()))
                                         pipe.hincrby(self.ident, 'items_downloaded', t_items_downloaded)
                                     if t_items_queued > 0:
-                                        #logger.info('Log shipper about to send items queued with ident={}, thread={}'.format(self.ident, threading.get_ident()))
                                         pipe.hincrby(self.ident, 'items_queued', t_items_queued)
-                                    #logger.info('Log shipper done sending counts with ident={}, thread={}'.format(self.ident, threading.get_ident()))
                                 except ConnectionError:
                                     pass
 
-                                #logger.info('Log shipper about to commit entries with ident={}, thread={}'.format(self.ident, threading.get_ident()))
                                 pipe.execute()
-                                #logger.info('Log shipper committed entries with ident={}, thread={}'.format(self.ident, threading.get_ident()))
                            
                             shipping_count = 0
 
