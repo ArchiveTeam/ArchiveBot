@@ -49,6 +49,7 @@ App = Webmachine::Application.new do |app|
   app.routes do
     add [], Dashboard
     add ['beta'], DashboardBeta
+    add ['3'], DashboardBeta
     add ['logs', 'recent'], Recent
     add ['ignores', '*'], Ignores
     add ['pipelines', '*'], Pipeline

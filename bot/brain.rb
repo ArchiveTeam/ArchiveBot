@@ -145,56 +145,8 @@ class Brain
 
   def request_status_by_url(m, url)
     uri = Addressable::URI.parse(url).normalize
-    job = Job.new(uri, redis)
     host = uri.host
-
-    if !job.exists?
-      rep = []
-
-      # Was there a successful attempt in the past?
-      doc = couchdb.latest_job_record(url)
-
-      if doc
-        queued_time = if doc['queued_at']
-                        Time.at(doc['queued_at']).to_s
-                      else
-                        '(unknown)'
-                      end
-
-        rep << "#{url}:"
-
-        if doc['finished']
-          rep << "Job finished; last ran at #{queued_time}."
-          rep << "Eligible for re-archiving."
-        elsif doc['aborted']
-          rep << "Job aborted; last ran at #{queued_time}."
-          rep << "Eligible for re-archiving."
-        else
-          rep << "Hmm...I've seen #{url} before, but I can't figure out its status :("
-        end
-      else
-        rep << "#{url} has not been archived."
-
-        # Were there any attempts on child URLs?
-        child_attempts = couchdb.attempts_on_children(url)
-
-        if child_attempts > 0
-          if child_attempts == 1
-            rep << "However, there has been #{child_attempts} download attempt on child URLs."
-          else
-            rep << "However, there have been #{child_attempts} download attempts on child URLs."
-          end
-
-          # TODO: this shouldn't be a hardcoded URL
-          rep << "More info: http://archive.fart.website/archivebot/viewer/?q=#{host}"
-        end
-      end
-
-      reply m, *rep
-    else
-      job.amplify
-      reply m, *job.to_status
-    end
+    reply m, "See http://archive.fart.website/archivebot/viewer/?q=#{host}"
   end
 
   def request_status(m, job)

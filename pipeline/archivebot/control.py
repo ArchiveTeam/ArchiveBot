@@ -4,9 +4,8 @@ import time
 import os
 import logging
 import threading
-
-from sys import stderr
 from queue import Queue, Empty
+from sys import stderr
 from contextlib import contextmanager
 from redis.exceptions import ConnectionError as RedisConnectionError
 
@@ -289,7 +288,8 @@ class Control(object):
         return True
 
     def log(self, packet, ident, log_key):
-        self.log_queue.put({'keys': [ident],
+        self.log_queue.put({'type': 'log',
+                            'keys': [ident],
                             'args': [json.dumps(packet), self.log_channel, log_key]
                            })
 

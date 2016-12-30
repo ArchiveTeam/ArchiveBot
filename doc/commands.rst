@@ -135,10 +135,6 @@ Accepted parameters
     alias for ``!concurrency``
     sets number of workers for job (use with care!)
 
-.. tip::
-  If you're feeling snarky or realist, you can also invoke ``!archive``
-  as ``!firstworldproblems.``
-
 abort
 =====
 
