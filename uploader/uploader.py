@@ -10,6 +10,7 @@ import re
 import datetime
 import json
 import requests
+import hashlib
 
 WAIT = 5
 
@@ -61,6 +62,14 @@ def ia_upload_allowed(s3_url, accesskey, bucket = ''):
                   'room for another job.')
 
     return True
+
+def file_md5(fname):
+    md5 = hashlib.md5()
+    with open(fname, "rb") as f:
+        for block in iter(lambda: f.read(16384), b""):
+            md5.update(block)
+
+    return md5.hexdigest()
 
 def main():
     if len(sys.argv) > 1:
@@ -162,9 +171,12 @@ def main():
                         target = url + '/' + ia_upload_bucket + '/' + \
                                  re.sub(r'[^0-9a-zA-Z-.]+', '_', basename)[-64:]
 
+                        md5sum = file_md5(fname)
+
                         exit_code = subprocess.call([
                             "curl", "-v", "--location", "--fail",
                             "--speed-limit", "1", "--speed-time", "900",
+                            "--header", "Content-MD5: " + md5sum,
                             "--header", "x-archive-queue-derive:1",
                             "--header", "x-amz-auto-make-bucket:1",
                             "--header", "x-archive-meta-collection:" + ia_collection,
