@@ -171,7 +171,7 @@ def main():
                         target = url + '/' + ia_upload_bucket + '/' + \
                                  re.sub(r'[^0-9a-zA-Z-.]+', '_', basename)[-64:]
 
-                        md5sum = file_md5(fname)
+                        md5sum = file_md5(fname_u)
 
                         exit_code = subprocess.call([
                             "curl", "-v", "--location", "--fail",
