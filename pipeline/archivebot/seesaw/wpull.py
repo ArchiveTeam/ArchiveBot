@@ -14,10 +14,6 @@ def make_args(item, default_user_agent, wpull_exe, youtube_dl_exe, phantomjs_exe
     # BASE ARGUMENTS
     # -----------------------------------------------------------------------
     user_agent = item.get('user_agent') or default_user_agent
-    plugin_path = os.path.join(
-        os.path.dirname(archivebot.wpull.__file__),
-        'plugin.py'
-    )
 
     args = [wpull_exe,
         '-U', user_agent,
@@ -26,8 +22,6 @@ def make_args(item, default_user_agent, wpull_exe, youtube_dl_exe, phantomjs_exe
         '-o', '%(item_dir)s/wpull.log' % item,
         '--database', '%(item_dir)s/wpull.db' % item,
         '--html-parser', 'libxml2-lxml',
-        '--plugin-script', plugin_path,
-        '--plugin-args', ' --dupes-db %(item_dir)s/dupes_db' % item,
         '--save-cookies', '%(cookie_jar)s' % item,
         '--no-check-certificate',
         '--delete-after',
@@ -45,7 +39,8 @@ def make_args(item, default_user_agent, wpull_exe, youtube_dl_exe, phantomjs_exe
         '--warc-header', 'downloaded-by: ArchiveBot',
         '--warc-header', 'archivebot-job-ident: %(ident)s' % item,
         '--warc-move', finished_warcs_dir,
-        '--python-script', 'wpull_hooks.py',
+        '--plugin-script', 'archive_bot_plugin.py',
+        '--plugin-args', ' --dupes-db %(item_dir)s/dupes_db' % item,
         '--phantomjs-exe', phantomjs_exe,
         '--debug-manhole',
         '--strip-session-id',

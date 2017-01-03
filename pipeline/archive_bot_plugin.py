@@ -29,6 +29,8 @@ from archivebot import shared_config
 from archivebot.control import Control
 from archivebot.wpull import settings as mod_settings
 
+# dupespotter plugin:
+import archivebot.wpull.plugin
 
 def _extract_response_code(item_session: ItemSession) -> int:
     statcode = 0
@@ -163,7 +165,6 @@ class ArchiveBotPlugin(WpullPlugin):
         return Actions.NORMAL
 
     def activate(self):
-
         self.ident = os.environ['ITEM_IDENT']
         self.redis_url = os.environ['REDIS_URL']
         self.log_key = os.environ['LOG_KEY']
@@ -180,6 +181,10 @@ class ArchiveBotPlugin(WpullPlugin):
         self.logger = logging.getLogger('archivebot.pipeline.wpull_plugin')
 
         self.logger.info('wpull plugin initialization complete for job ID '
+                         '{}'.format(self.ident))
+
+        archivebot.wpull.plugin.activate(self.app_session)
+        self.logger.info('wpull dupespotter subsystem loaded for job ID '
                          '{}'.format(self.ident))
 
 

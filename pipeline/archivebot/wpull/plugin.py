@@ -46,22 +46,24 @@ class DupSpottingProcessingRule(wpull.processor.rule.ProcessingRule):
 
         super().scrape_document(request, response, url_item)
 
+def activate(app_session):
+    arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument(
+        '--dupes-db',
+        metavar='DIR',
+        default=':memory:',
+        help='save dupes db into DIR instead of memory',
+    )
+    args = arg_parser.parse_args(app_session.args)
 
-arg_parser = argparse.ArgumentParser()
-arg_parser.add_argument(
-    '--dupes-db',
-    metavar='DIR',
-    default=':memory:',
-    help='save dupes db into DIR instead of memory',
-)
-args = arg_parser.parse_args(wpull_plugin.plugin_args.split())
+    if args.dupes_db == ':memory:':
+        dupes_db = DupesInMemory()
+    else:
+        dupes_db = DupesOnDisk(args.dupes_db)
 
-if args.dupes_db == ':memory:':
-    dupes_db = DupesInMemory()
-else:
-    dupes_db = DupesOnDisk(args.dupes_db)
+    app_session.factory.class_map['URLTableImplementation'] = NoFsyncSQLTable
+    app_session.factory.class_map['ProcessingRule'] = functools.partial(
+        DupSpottingProcessingRule, dupes_db=dupes_db
+    )
 
-wpull_plugin.factory.class_map['URLTableImplementation'] = NoFsyncSQLTable
-wpull_plugin.factory.class_map['ProcessingRule'] = functools.partial(
-    DupSpottingProcessingRule, dupes_db=dupes_db
-)
+# vim: ts=4:sw=4:et:tw=78
