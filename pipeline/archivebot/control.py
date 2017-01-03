@@ -5,7 +5,6 @@ import os
 import logging
 import threading
 from queue import Queue, Empty
-from sys import stderr
 from contextlib import contextmanager
 from redis.exceptions import ConnectionError as RedisConnectionError
 
@@ -66,7 +65,8 @@ class Control(object):
 
         # if ITEM_IDENT is set, we are running inside a wpull process
         self.ident = os.getenv('ITEM_IDENT')
-        logger.info('Started new control process with ident={}, thread={}, this={}'.format(self.ident, threading.get_ident(), self))
+        logger.info('Started new control process with ident={}, thread={}, this={}'.format(
+            self.ident, threading.get_ident(), self))
         # and as such this lock will be used to manage count concurrency
         self.countslock = threading.Lock()
 
@@ -84,7 +84,8 @@ class Control(object):
         return self.redis is not None
 
     def connect(self):
-        logger.info('Attempting to connect to redis with ident={}, thread={}'.format(self.ident, threading.get_ident()))
+        logger.info('Attempting to connect to redis with ident={}, thread={}'.format(
+            self.ident, threading.get_ident()))
         if self.redis_url is None:
             raise ConnectionError('self.redis_url not set')
 
@@ -92,7 +93,8 @@ class Control(object):
                                                 decode_responses=True)
 
         self.register_scripts()
-        logger.info('Redis connection successful with ident={}, thread={}'.format(self.ident, threading.get_ident()))
+        logger.info('Redis connection successful with ident={}, thread={}'.format(
+            self.ident, threading.get_ident()))
 
     def disconnect(self):
         self.redis = None
@@ -219,7 +221,7 @@ class Control(object):
                         try:
                             entry = self.log_queue.get(timeout=5)
                             with conn(self):
-                                    self.log_script(keys=entry['keys'], args=entry['args'], client=pipe)
+                                self.log_script(keys=entry['keys'], args=entry['args'], client=pipe)
 
                             shipping_count += 1
                             self.log_queue.task_done()

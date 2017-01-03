@@ -44,13 +44,11 @@ class Settings(object):
         with self.settings_lock:
             return self.settings['age'] or 0
 
-    def ignore_url_p(self, url, record_info):
+    def ignore_url(self, record_info: wpull.pipeline.item.URLProperties):
         '''
         Returns whether a URL should be ignored.
         '''
-        parameters = parameterize_record_info(record_info)
-
-        return self.ignoracle.ignores(url, **parameters)
+        return self.ignoracle.ignores(record_info)
 
     def abort_requested(self):
         '''
