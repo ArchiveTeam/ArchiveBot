@@ -1,10 +1,10 @@
-import os
-import re
 import redis
 import threading
 import time
 
-from .ignoracle import Ignoracle, parameterize_record_info
+import wpull
+
+from .ignoracle import Ignoracle
 from .. import shared_config
 from ..control import ConnectionError
 from redis.exceptions import ConnectionError as RedisConnectionError
@@ -18,12 +18,12 @@ class Settings(object):
     ignoracle = Ignoracle()
 
     settings = dict(
-            age=None,
-            concurrency=None,
-            abort_requested=None,
-            delay_min=None,
-            delay_max=None,
-            suppress_ignore_reports=False
+        age=None,
+        concurrency=None,
+        abort_requested=None,
+        delay_min=None,
+        delay_max=None,
+        suppress_ignore_reports=False
     )
 
     def update_settings(self, new_settings):
@@ -167,6 +167,7 @@ class ListenerWorkerThread(threading.Thread):
         self.job_ident = ident
         self.running = True
         self.reconnect_timeout = 5.0
+        self.last_run = 0.0
 
     def stop(self):
         self.running = False
@@ -193,7 +194,8 @@ class ListenerWorkerThread(threading.Thread):
             # We catch both RedisConnectionError and ConnectionError because
             # the former may be raised directly from pubsub.
             except (RedisConnectionError, ConnectionError) as e:
-                print('Settings listener disconnected (cause: %s).  Reconnecting in %s seconds.' % (str(e), self.reconnect_timeout))
+                print('Settings listener disconnected (cause: %s).'
+                      'Reconnecting in %s seconds.' % (str(e), self.reconnect_timeout))
                 r = None
                 p = None
                 time.sleep(self.reconnect_timeout)
