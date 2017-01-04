@@ -51,6 +51,12 @@ def _extract_response_code(item_session: ItemSession) -> int:
 
     return statcode
 
+def _extract_item_size(item_session: ItemSession) -> int:
+    try:
+        return ItemSession.response.body.size
+    except (AttributeError, KeyError):
+        return 0
+
 def is_error(statcode, err):
     '''
     Determines whether a given status code/error code combination should be
@@ -67,7 +73,7 @@ def is_error(statcode, err):
     # Could be an error, but we don't know it as such
     return False
 
-def is_warning(statcode, err):
+def is_warning(statcode):
     '''
     Determines whether a given status code/error code combination should be
     flagged as a warning.
@@ -108,12 +114,12 @@ class ArchiveBotPlugin(WpullPlugin):
 
     def log_result(self, url, statcode, error):
         packet = dict(
-            ts=time.time,
+            ts=time.time(),
             url=url,
             response_code=statcode,
             wget_code=error,
             is_error=is_error(statcode, error),
-            is_warning=is_warning(statcode, error),
+            is_warning=is_warning(statcode),
             type='download'
         )
 
@@ -130,6 +136,8 @@ class ArchiveBotPlugin(WpullPlugin):
         error = 'OK'
         statcode = _extract_response_code(item_session)
 
+        self.control.update_bytes_downloaded(_extract_item_size(item_session))
+
         # Check raw and normalized URL against ignore list
         pattern = self.settings.ignore_url(item_session.url_record)
         if pattern:
@@ -137,7 +145,7 @@ class ArchiveBotPlugin(WpullPlugin):
             return Actions.FINISH
 
         if error_info:
-            error = error_info['error']
+            error = str(error_info)
 
         self.log_result(item_session.url_record.url, statcode, error)
 
@@ -145,7 +153,7 @@ class ArchiveBotPlugin(WpullPlugin):
         if self.last_age < settings_age:
             self.last_age = settings_age
             self.print_log("Settings updated: ", self.settings.inspect())
-            self.app_session.factory.get('Pipeline').concurrency = self.settings.concurrency()
+            self.app_session.factory['PipelineSeries'].concurrency = self.settings.concurrency()
 
         # See that the settings listener is online
         self.settings_listener.check()
@@ -157,7 +165,9 @@ class ArchiveBotPlugin(WpullPlugin):
                 try:
                     self.control.mark_aborted(self.ident)
                     break
-                except ConnectionError:
+                except ConnectionError as err:
+                    self.print_log("Failed to mark job aborted in controller:"
+                        " {}".format(err))
                     time.sleep(5)
 
             return Actions.STOP
@@ -204,10 +214,10 @@ class ArchiveBotPlugin(WpullPlugin):
         url = item_session.url_record.url_info
 
         if (url.scheme not in ['https', 'http', 'ws', 'wss', 'ftp', 'gopher']
-                or url.path in [None, '/']):
+                or url.path in [None, '/', '']):
             return False
 
-        pattern = self.settings.ignore_url(url.raw)
+        pattern = self.settings.ignore_url(item_session.url_record)
         if pattern:
             self.maybe_log_ignore(url.raw, pattern, 'accept_url')
             return False
@@ -268,7 +278,7 @@ class ArchiveBotPlugin(WpullPlugin):
     def finishing_statistics(self,
                              app_session: AppSession,
                              statistics: Statistics):
-        self.print_log(" ", statistics.bytes, "bytes.")
+        self.print_log(" ", statistics.size, "bytes.")
 
     @hook(PluginFunctions.exit_status)
     def exit_status(self, app_session: AppSession, exit_code: int):

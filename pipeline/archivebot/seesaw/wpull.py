@@ -40,7 +40,7 @@ def make_args(item, default_user_agent, wpull_exe, youtube_dl_exe, phantomjs_exe
         '--warc-header', 'archivebot-job-ident: %(ident)s' % item,
         '--warc-move', finished_warcs_dir,
         '--plugin-script', 'archive_bot_plugin.py',
-        '--plugin-args', ' --dupes-db %(item_dir)s/dupes_db' % item,
+        '--plugin-args', '%(item_dir)s/dupes_db' % item,
         '--phantomjs-exe', phantomjs_exe,
         '--debug-manhole',
         '--strip-session-id',

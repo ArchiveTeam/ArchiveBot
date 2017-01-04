@@ -8,16 +8,13 @@ from urllib.parse import urlparse
 
 import wpull
 
-def parameterize_record_info(record_info):
+def parameterize_record_info(record_info: wpull.pipeline.item.URLRecord):
     '''
     Given a wpull record_info dict, generates a dict with primary_url and
     primary_netloc keys.  This is meant to be used in Ignoracle.ignores.
 
-    The primary_url key is:
-
-    1. record_info['top_url'], or
-    2. record_info['url'] if record_info['level'] is zero, or
-    3. None otherwise.
+    The primary_url key is generally the URL the job was started with, or a
+    URL from a URL list.
 
     If primary_url is a valid URL, the primary_netloc key is the network
     location component of primary_url (i.e. for HTTP,
@@ -72,7 +69,7 @@ class Ignoracle(object):
 
             self.patterns.append(string)
 
-    def ignores(self, url_record: wpull.pipeline.item.URLProperties):
+    def ignores(self, url_record: wpull.pipeline.item.URLRecord):
         '''
         If an ignore pattern matches the given URL, returns that pattern as a string.
         Otherwise, returns False.
