@@ -54,7 +54,7 @@ def _extract_response_code(item_session: ItemSession) -> int:
 def _extract_item_size(item_session: ItemSession) -> int:
     try:
         return item_session.response.body.size()
-    except (AttributeError, KeyError):
+    except (Exception):
         return 0
 
 def is_error(statcode, err):
