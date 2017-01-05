@@ -164,6 +164,8 @@ class ArchiveBotPlugin(WpullPlugin):
             while True:
                 try:
                     self.control.mark_aborted(self.ident)
+                    #Since wpull does not call .deactivate() as at 2.0.1:
+                    self.settings_listener.stop()
                     break
                 except ConnectionError as err:
                     self.print_log("Failed to mark job aborted in controller:"
@@ -203,6 +205,10 @@ class ArchiveBotPlugin(WpullPlugin):
 
     def deactivate(self):
         super().deactivate()
+
+        self.logger.info('stopping settings listener')
+        self.settings_listener.stop()
+
         self.logger.info('wpull plugin deactivated')
 
     @hook(PluginFunctions.accept_url)

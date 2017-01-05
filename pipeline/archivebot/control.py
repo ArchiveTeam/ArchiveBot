@@ -1,11 +1,12 @@
 import json
-import redis
 import time
 import os
 import logging
 import threading
 from queue import Queue, Empty
 from contextlib import contextmanager
+
+import redis
 from redis.exceptions import ConnectionError as RedisConnectionError
 
 logger = logging.getLogger('archivebot.control')
@@ -98,6 +99,11 @@ class Control(object):
 
     def disconnect(self):
         self.redis = None
+
+    def stop(self):
+        logger.info('Control subsystem got immediate stop')
+        self.disconnect()
+        self.ending = True
 
     def register_scripts(self):
         self.mark_done_script = self.redis.register_script(MARK_DONE_SCRIPT)
@@ -235,7 +241,6 @@ class Control(object):
                         # If we have accreted enough or the queue is empty, commit logs and counts
                         # The magic constant is necessary to resolve a race condition that might prevent shipping
                         if self.log_queue.empty() or shipping_count >= 64:
-                            lockcheck = False
                             with conn(self):
                                 # This locking structure is necessary to avoid a deadlock that happens when
                                 # redis is trying to send while another thread is trying to acquire the lock
@@ -262,7 +267,9 @@ class Control(object):
                             shipping_count = 0
 
                     except ConnectionError:
-                        logger.info('Log shipper got connection error while incrementing counts or committing logs with ident={}, thread={}'.format(self.ident, threading.get_ident()))
+                        logger.info('Log shipper got connection error while '
+                                    'incrementing counts or committing logs with '
+                                    'ident={}, thread={}'.format(self.ident, threading.get_ident()))
 
         logger.info('Log shipper exiting with ident={}, thread={}'.format(self.ident, threading.get_ident()))
         return True
