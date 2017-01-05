@@ -230,7 +230,6 @@ class Control(object):
                                 self.log_script(keys=entry['keys'], args=entry['args'], client=pipe)
 
                             shipping_count += 1
-                            self.log_queue.task_done()
                         except Empty:
                             pass
                         finally: # If we can't ship the log entry, discard
