@@ -175,15 +175,15 @@ class Control(object):
         logger.info('Got exit advice with ident={}, thread={}'.format(self.ident, threading.get_ident()))
         #self.flag_logging_thread_for_termination()
 
-    def update_bytes_downloaded(self, size):
+    def update_bytes_downloaded(self, size: int):
         with self.countslock:
             self.bytes_downloaded_outstanding += size
 
-    def update_items_downloaded(self, count):
+    def update_items_downloaded(self, count: int):
         with self.countslock:
             self.items_downloaded_outstanding += count
 
-    def update_items_queued(self, count):
+    def update_items_queued(self, count: int):
         with self.countslock:
             self.items_queued_outstanding += count
 

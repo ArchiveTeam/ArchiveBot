@@ -53,7 +53,7 @@ def _extract_response_code(item_session: ItemSession) -> int:
 
 def _extract_item_size(item_session: ItemSession) -> int:
     try:
-        return ItemSession.response.body.size
+        return item_session.response.body.size()
     except (AttributeError, KeyError):
         return 0
 
