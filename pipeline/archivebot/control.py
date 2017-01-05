@@ -230,9 +230,13 @@ class Control(object):
                                 self.log_script(keys=entry['keys'], args=entry['args'], client=pipe)
 
                             shipping_count += 1
+
+                            self.log_queue.task_done()
+
                         except Empty:
-                            pass
-                        finally: # If we can't ship the log entry, discard
+                            pass #don't task_done() without tasks
+                        except RedisConnectionError:
+                            # If we couldn't ship it due to redis being down, discard
                             self.log_queue.task_done()
 
                         # If we have accreted enough or the queue is empty, commit logs and counts
