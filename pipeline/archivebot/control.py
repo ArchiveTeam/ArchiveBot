@@ -147,7 +147,7 @@ class Control(object):
         try:
             with conn(self):
                 self.redis.hincrby(ident, 'heartbeat', 1)
-        except ConnectionError:
+        except RedisConnectionError:
             pass
 
     def is_aborted(self, ident):
@@ -199,7 +199,7 @@ class Control(object):
                 self.redis.hmset(pipeline_id, report)
                 self.redis.sadd('pipelines', pipeline_id)
                 self.redis.publish(self.pipeline_channel, pipeline_id)
-        except ConnectionError:
+        except RedisConnectionError:
             pass
 
     def unregister_pipeline(self, pipeline_id):
@@ -208,7 +208,7 @@ class Control(object):
                 self.redis.delete(pipeline_id)
                 self.redis.srem('pipelines', pipeline_id)
                 self.redis.publish(self.pipeline_channel, pipeline_id)
-        except ConnectionError:
+        except RedisConnectionError:
             pass
 
     # This function is a thread used to asynchronously ship logs to redis for
@@ -233,10 +233,8 @@ class Control(object):
                             self.log_queue.task_done()
                         except Empty:
                             pass
-                        except ConnectionError as exception: # If we can't ship the log entry, discard
+                        finally: # If we can't ship the log entry, discard
                             self.log_queue.task_done()
-                            raise exception
-
 
                         # If we have accreted enough or the queue is empty, commit logs and counts
                         # The magic constant is necessary to resolve a race condition that might prevent shipping
@@ -252,21 +250,18 @@ class Control(object):
                                     t_items_queued = self.items_queued_outstanding
                                     self.items_queued_outstanding = 0
 
-                                try:
-                                    if t_bytes_downloaded > 0:
-                                        pipe.hincrby(self.ident, 'bytes_downloaded', t_bytes_downloaded)
-                                    if t_items_downloaded > 0:
-                                        pipe.hincrby(self.ident, 'items_downloaded', t_items_downloaded)
-                                    if t_items_queued > 0:
-                                        pipe.hincrby(self.ident, 'items_queued', t_items_queued)
-                                except ConnectionError:
-                                    pass
+                                if t_bytes_downloaded > 0:
+                                    pipe.hincrby(self.ident, 'bytes_downloaded', t_bytes_downloaded)
+                                if t_items_downloaded > 0:
+                                    pipe.hincrby(self.ident, 'items_downloaded', t_items_downloaded)
+                                if t_items_queued > 0:
+                                    pipe.hincrby(self.ident, 'items_queued', t_items_queued)
 
                                 pipe.execute()
                            
                             shipping_count = 0
 
-                    except ConnectionError:
+                    except RedisConnectionError:
                         logger.info('Log shipper got connection error while '
                                     'incrementing counts or committing logs with '
                                     'ident={}, thread={}'.format(self.ident, threading.get_ident()))
@@ -284,7 +279,7 @@ class Control(object):
         try:
             with conn(self):
                 return self.redis.hget(ident, 'url_file')
-        except ConnectionError:
+        except RedisConnectionError:
             pass
 
     def get_settings(self, ident):
