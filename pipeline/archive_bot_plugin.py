@@ -220,7 +220,8 @@ class ArchiveBotPlugin(WpullPlugin):
         url = item_session.url_record.url_info
 
         if (url.scheme not in ['https', 'http', 'ws', 'wss', 'ftp', 'gopher']
-                or url.path in [None, '/', '']):
+                or url.path is None
+                or url.host in [None, '']):
             return False
 
         pattern = self.settings.ignore_url(item_session.url_record)
