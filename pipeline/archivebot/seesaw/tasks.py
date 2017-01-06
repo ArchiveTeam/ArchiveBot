@@ -12,7 +12,7 @@ from seesaw.task import Task, SimpleTask
 from tornado.ioloop import IOLoop
 import tornado.ioloop
 
-from archivebot.control import ConnectionError
+from redis.exceptions import ConnectionError
 
 
 class CheckIP(SimpleTask):

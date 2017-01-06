@@ -6,7 +6,6 @@ import wpull
 
 from .ignoracle import Ignoracle
 from .. import shared_config
-from ..control import ConnectionError
 from redis.exceptions import ConnectionError as RedisConnectionError
 
 class Settings(object):
@@ -191,9 +190,7 @@ class ListenerWorkerThread(threading.Thread):
 
                 p.close()
 
-            # We catch both RedisConnectionError and ConnectionError because
-            # the former may be raised directly from pubsub.
-            except (RedisConnectionError, ConnectionError) as e:
+            except RedisConnectionError as e:
                 print('Settings listener disconnected (cause: %s).'
                       'Reconnecting in %s seconds.' % (str(e), self.reconnect_timeout))
                 r = None
