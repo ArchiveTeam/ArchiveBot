@@ -11,14 +11,6 @@ from redis.exceptions import ConnectionError as RedisConnectionError
 
 logger = logging.getLogger('archivebot.control')
 
-class ConnectionError(Exception):
-    '''
-    Represents connection errors that can occur when talking to the ArchiveBot
-    control node, Redis or otherwise.
-    '''
-
-    pass
-
 @contextmanager
 def conn(controller):
     try:
@@ -27,7 +19,7 @@ def conn(controller):
         yield
     except RedisConnectionError as e:
         controller.disconnect()
-        raise ConnectionError(str(e)) from e
+        raise e
 
 def candidate_queues(named_queues, pipeline_nick, ao_only):
     '''
@@ -51,7 +43,7 @@ class Control(object):
     Handles communication to and from the ArchiveBot control server.
 
     If a message cannot be processed due to a connection error, the Redis
-    connection is closed and deleted.  An archivebot.control.ConnectionError
+    connection is closed and deleted.  A redis.exceptions.ConnectionError
     is also raised.
     '''
 
@@ -88,7 +80,7 @@ class Control(object):
         logger.info('Attempting to connect to redis with ident={}, thread={}'.format(
             self.ident, threading.get_ident()))
         if self.redis_url is None:
-            raise ConnectionError('self.redis_url not set')
+            raise RedisConnectionError('self.redis_url not set')
 
         self.redis = redis.StrictRedis.from_url(self.redis_url,
                                                 decode_responses=True)
@@ -158,11 +150,13 @@ class Control(object):
         #TODO: alas, this results in deadlock for no apparent reason
         pass
 
-        #logger.info('Attempting to set semaphore to close logger with id {} from thread {}'.format(log_thread.ident, threading.get_ident()))
+        #logger.info('Attempting to set semaphore to close logger with id {} from thread {}'
+        #    .format(log_thread.ident, threading.get_ident()))
 
         #self.ending = True
 
-        #logger.info('State update complete with id {} from thread {}; joining'.format(log_thread.ident, threading.get_ident()))
+        #logger.info('State update complete with id {} from thread {}; joining'
+        #    .format(log_thread.ident, threading.get_ident()))
         # self.log_thread.join()
         #logger.info('Logger thread joined to thread {}'.format(threading.get_ident()))
 
@@ -178,7 +172,8 @@ class Control(object):
             self.mark_aborted_script(keys=[ident], args=[self.log_channel])
 
     def advise_exiting(self): # used when in wpull subprocess
-        logger.info('Got exit advice with ident={}, thread={}'.format(self.ident, threading.get_ident()))
+        logger.info('Got exit advice with ident={}, thread={}'
+                    .format(self.ident, threading.get_ident()))
         #self.flag_logging_thread_for_termination()
 
     def update_bytes_downloaded(self, size: int):
@@ -216,7 +211,8 @@ class Control(object):
     def ship_logs(self):
         shipping_count = 0
 
-        logger.info('Started log shipper thread with ident={}, thread={}'.format(self.ident, threading.get_ident()))
+        logger.info('Started log shipper thread with ident={}, thread={}'
+                    .format(self.ident, threading.get_ident()))
 
         with conn(self):
             with self.redis.pipeline(transaction=False) as pipe:
@@ -240,11 +236,13 @@ class Control(object):
                             self.log_queue.task_done()
 
                         # If we have accreted enough or the queue is empty, commit logs and counts
-                        # The magic constant is necessary to resolve a race condition that might prevent shipping
+                        # The magic constant is necessary to resolve a race condition that might
+                        # prevent shipping
                         if self.log_queue.empty() or shipping_count >= 64:
                             with conn(self):
-                                # This locking structure is necessary to avoid a deadlock that happens when
-                                # redis is trying to send while another thread is trying to acquire the lock
+                                # This locking structure is necessary to avoid a deadlock that
+                                # happens when redis is trying to send while another thread is
+                                # trying to acquire the lock
                                 with self.countslock:
                                     t_bytes_downloaded = self.bytes_downloaded_outstanding
                                     self.bytes_downloaded_outstanding = 0
@@ -261,7 +259,7 @@ class Control(object):
                                     pipe.hincrby(self.ident, 'items_queued', t_items_queued)
 
                                 pipe.execute()
-                           
+
                             shipping_count = 0
 
                     except RedisConnectionError:
@@ -269,7 +267,8 @@ class Control(object):
                                     'incrementing counts or committing logs with '
                                     'ident={}, thread={}'.format(self.ident, threading.get_ident()))
 
-        logger.info('Log shipper exiting with ident={}, thread={}'.format(self.ident, threading.get_ident()))
+        logger.info('Log shipper exiting with ident={}, thread={}'
+                    .format(self.ident, threading.get_ident()))
         return True
 
     def log(self, packet, ident, log_key):
