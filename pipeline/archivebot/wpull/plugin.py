@@ -1,4 +1,9 @@
-import argparse
+"""plugin.py
+Wpull 1.x style plugin for spotting duplicates based on MD5 digest of
+documents, tweaked to work with Wpull 2.x.
+
+"""
+
 import functools
 import hashlib
 import sys
@@ -9,7 +14,6 @@ import wpull.processor.rule
 
 from archivebot.dupespotter.dupes import DupesInMemory, DupesOnDisk
 import archivebot.dupespotter.dupespotter
-
 
 class NoFsyncSQLTable(SQLiteURLTable):
     @classmethod
@@ -29,6 +33,7 @@ class DupSpottingProcessingRule(wpull.processor.rule.ProcessingRule):
             body = response.body.content()
             if HTMLReader.is_response(response):
                 body = archivebot.dupespotter.dupespotter.process_body(body, response.request.url)
+
             digest = hashlib.md5(body).digest()
             if dupes_db is not None:
                 dupe_of = dupes_db.get_old_url(digest)
@@ -46,22 +51,25 @@ class DupSpottingProcessingRule(wpull.processor.rule.ProcessingRule):
 
         super().scrape_document(request, response, url_item)
 
+def activate(app_session):
+    """Activate dupespotter plugin in a wpull 2.x context
+    --plugin-args (to wpull) should be the name of a file to store
+    deduplication records in, or :memory: to store the database in memory (not
+    recommended).
+    """
 
-arg_parser = argparse.ArgumentParser()
-arg_parser.add_argument(
-    '--dupes-db',
-    metavar='DIR',
-    default=':memory:',
-    help='save dupes db into DIR instead of memory',
-)
-args = arg_parser.parse_args(wpull_plugin.plugin_args.split())
+    try:
+        dupes_db_location = app_session.args.plugin_args
+    except AttributeError:
+        dupes_db_location = ':memory'
 
-if args.dupes_db == ':memory:':
-    dupes_db = DupesInMemory()
-else:
-    dupes_db = DupesOnDisk(args.dupes_db)
+    if dupes_db_location == ':memory:':
+        dupes_db = DupesInMemory()
+    else:
+        dupes_db = DupesOnDisk(dupes_db_location)
 
-wpull_plugin.factory.class_map['URLTableImplementation'] = NoFsyncSQLTable
-wpull_plugin.factory.class_map['ProcessingRule'] = functools.partial(
-    DupSpottingProcessingRule, dupes_db=dupes_db
-)
+    app_session.factory.class_map['URLTableImplementation'] = NoFsyncSQLTable
+    app_session.factory.class_map['ProcessingRule'] = functools.partial(
+        DupSpottingProcessingRule, dupes_db=dupes_db)
+
+# vim: ts=4:sw=4:et:tw=78

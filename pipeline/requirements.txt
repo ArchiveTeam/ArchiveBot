@@ -2,8 +2,7 @@ seesaw>=0.9,<=0.9.2
 psutil
 pyyaml
 redis==2.10.3
-trollius>=1.0.2
-wpull==1.2.2
+wpull==2.0.1
 sqlalchemy
 hiredis
 requests
@@ -11,3 +10,4 @@ manhole
 lxml
 lmdb
 youtube-dl
+html5lib==0.9999999
