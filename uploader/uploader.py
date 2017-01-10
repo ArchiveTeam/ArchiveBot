@@ -156,8 +156,13 @@ def ia_s3_ship(fname, basename, item, params: Params):
         return 1
 
     size_hint = str(os.stat(fname).st_size)
+    compat_filename = re.sub(r'[^0-9a-zA-Z-.]+', '_', basename)[-64:]
+    if compat_filename is '' or compat_filename[0] is '_':
+        # IA filenames cannot be empty or start with underscore
+        compat_filename = 'z' + compat_filename[1:]
+
     target = params.url + '/' + ia_upload_bucket + '/' + \
-             re.sub(r'[^0-9a-zA-Z-.]+', '_', basename)[-64:]
+             compat_filename
 
     md5sum = file_md5(fname)
 
