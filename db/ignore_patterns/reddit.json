@@ -1,6 +1,7 @@
 {
     "name": "reddit",
     "patterns": [
+        "^https?://out\.reddit\.com/",
         "^https?://www\\.reddit\\.com/gold\\?goldtype=",
         "^https?://www\\.reddit\\.com/r/[^/]+/comments/[a-z0-9]+/[^/]+/[a-z0-9]+",
         "^https?://www\\.reddit\\.com/r/[^/]+/comments/[a-z0-9]+.*\\?sort=",
