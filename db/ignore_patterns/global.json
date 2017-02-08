@@ -184,7 +184,7 @@
         "^http://www\\.warnerbros\\.com/\\d+$",
         "^https?://tm\\.uol\\.com\\.br/h/.+/h/",
         "^https?://media\\.opb\\.org/clips/embed/.+\\.js$",
-        "^https?://[^.]+.pintrest.[^/]+/join/"
+        "^https?://[^.]+\\.pinterest\\.[^/]+/join/"
     ],
     "type": "ignore_patterns"
 }
