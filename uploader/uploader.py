@@ -80,7 +80,7 @@ class Params:
                 raise RuntimeError('Must specify IA_ACCESS if using IA S3 '
                                    '(hint: your access key)')
 
-            self.wait = os.environ.get('WAIT', 5)
+        self.wait = os.environ.get('WAIT', 5)
 
 def try_mkdir(path):
     try:

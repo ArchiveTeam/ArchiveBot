@@ -122,6 +122,7 @@
         "^https?://(ssl\\.|www\\.)?reddit\\.com/(login\\?dest=|submit\\?|static/button/button)",
         "^https?://digg\\.com/submit\\?",
         "^https?://(www\\.)?facebook\\.com/(plugins/like(box)?\\.php|sharer/sharer\\.php|sharer?\\.php|dialog/(feed|share))\\?",
+        "^https?://www\\.facebook\\.com/captcha/",
         "^https?://(www\\.)?twitter\\.com/(share\\?|intent/((re)?tweet|favorite)|home/?\\?status=|\\?status=)",
         "^https?://platform\\d?\\.twitter\\.com/widgets/tweet_button.html\\?",
         "^https?://www\\.newsvine\\.com/_wine/save\\?",
@@ -173,6 +174,7 @@
         "^https?://[^/]+\\.corp\\.ne1\\.yahoo\\.com/",
         "^https?://.+/js-agent\\.newrelic\\.com/nr-\\d{3,3}(\\.min)?\\.js$",
         "^https?://.+/stats\\.g\\.doubleclick\\.net/dc\\.js$",
+        "^https?://stats\\.g\\.doubleclick\\.net/r/collect",
         "^https?://.+/js/chartbeat\\.js$",
         "^http://www\\.khaleejtimes\\.com/.+/kt_.+/kt_",
         "^http://www\\.khaleejtimes\\.com/.+/images/.+/images/",
@@ -185,7 +187,8 @@
         "^http://www\\.warnerbros\\.com/\\d+$",
         "^https?://tm\\.uol\\.com\\.br/h/.+/h/",
         "^https?://media\\.opb\\.org/clips/embed/.+\\.js$",
-        "^https?://[^.]+\\.pinterest\\.[^/]+/join/"
+        "^https?://[^.]+\\.pinterest\\.[^/]+/join/",
+        "\\?wordfence_logHuman=1"
     ],
     "type": "ignore_patterns"
 }
