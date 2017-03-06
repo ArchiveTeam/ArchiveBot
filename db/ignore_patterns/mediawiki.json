@@ -6,6 +6,7 @@
         "[\\?&]limit=(20|100|250|500)",
         "[\\?&]hide(minor|bots|anons|liu|myself|redirs|links|trans|patrolled)=",
         "([\\?&]title=|/)Special:(UserLogin|UserLogout|Translate|MobileFeedback|MobileOptions|RecentChangesLinked|Diff|MobileDiff)",
+        "([\\?&]title=|/)Special:(Ask|Browse|SearchByProperty|ExportRDF|PageProperty|Properties|UnusedProperties|WantedProperties|SMWAdmin|Types|URIResolver|QueryCreator)",
         "([\\?&]title=|/)Special:RecentChanges&from=\\d+",
         "([\\?&]title=|/)Special:ListFiles&dir=prev&offset=\\d+",
         "([\\?&]title=|/)Special:(ListFiles|PrefixIndex).*&amp;",
