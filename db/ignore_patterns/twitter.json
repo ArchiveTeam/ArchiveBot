@@ -2,7 +2,11 @@
     "name": "twitter",
     "patterns": [
         "^https?://((?:www|mobile)\\.)?twitter\\.com/.+[\\?&](?:id|lang|locale|screen_name|nav)=",
-        "^https?://mobile\\.twitter\\.com/i/anonymize\\?data="
+        "^https?://mobile\\.twitter\\.com/i/anonymize\\?data=",
+        "^https?://twitter.com/i/csp_report",
+        "^https?://analytics.twitter.com/tpm",
+        "^https?://syndication.twitter.com/i/jot/syndication",
+        "^https?://twitter.com/i/jot"
     ],
     "type": "ignore_patterns"
 }

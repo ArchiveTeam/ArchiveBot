@@ -1,19 +1,15 @@
 import json
-import redis
 import time
-
+import os
+import logging
+import threading
 from queue import Queue, Empty
-from threading import Thread
 from contextlib import contextmanager
+
+import redis
 from redis.exceptions import ConnectionError as RedisConnectionError
 
-class ConnectionError(Exception):
-    '''
-    Represents connection errors that can occur when talking to the ArchiveBot
-    control node, Redis or otherwise.
-    '''
-
-    pass
+logger = logging.getLogger('archivebot.control')
 
 @contextmanager
 def conn(controller):
@@ -23,7 +19,7 @@ def conn(controller):
         yield
     except RedisConnectionError as e:
         controller.disconnect()
-        raise ConnectionError(str(e)) from e
+        raise e
 
 def candidate_queues(named_queues, pipeline_nick, ao_only):
     '''
@@ -47,7 +43,7 @@ class Control(object):
     Handles communication to and from the ArchiveBot control server.
 
     If a message cannot be processed due to a connection error, the Redis
-    connection is closed and deleted.  An archivebot.control.ConnectionError
+    connection is closed and deleted.  A redis.exceptions.ConnectionError
     is also raised.
     '''
 
@@ -56,31 +52,50 @@ class Control(object):
         self.pipeline_channel = pipeline_channel
         self.items_downloaded_outstanding = 0
         self.items_queued_outstanding = 0
+        self.bytes_downloaded_outstanding = 0
         self.redis_url = redis_url
         self.log_queue = Queue()
-        self.bytes_downloaded_queue = Queue()
-        self.item_count_queue = Queue()
 
-        self.connect()
+        # if ITEM_IDENT is set, we are running inside a wpull process
+        self.ident = os.getenv('ITEM_IDENT')
+        logger.info('Started new control process with ident={}, thread={}, this={}'.format(
+            self.ident, threading.get_ident(), self))
+        # and as such this lock will be used to manage count concurrency
+        self.countslock = threading.Lock()
 
-        self.log_thread = Thread(target=self.ship_logs)
-        self.log_thread.daemon = True
+        self.redis = self.connect()
+
+        self.ending = False
+        self.log_thread = threading.Thread(target=self.ship_logs)
+
+        # At some point it would be preferable to not use a daemonic thread
+        # but I dare you to try and ever join it.
+        self.log_thread.setDaemon(True)
         self.log_thread.start()
 
     def connected(self):
         return self.redis is not None
 
     def connect(self):
+        logger.info('Attempting to connect to redis with ident={}, thread={}'.format(
+            self.ident, threading.get_ident()))
         if self.redis_url is None:
-            raise ConnectionError('self.redis_url not set')
+            raise RedisConnectionError('self.redis_url not set')
 
         self.redis = redis.StrictRedis.from_url(self.redis_url,
-                decode_responses=True)
+                                                decode_responses=True)
 
         self.register_scripts()
+        logger.info('Redis connection successful with ident={}, thread={}'.format(
+            self.ident, threading.get_ident()))
 
     def disconnect(self):
         self.redis = None
+
+    def stop(self):
+        logger.info('Control subsystem got immediate stop')
+        self.disconnect()
+        self.ending = True
 
     def register_scripts(self):
         self.mark_done_script = self.redis.register_script(MARK_DONE_SCRIPT)
@@ -124,42 +139,54 @@ class Control(object):
         try:
             with conn(self):
                 self.redis.hincrby(ident, 'heartbeat', 1)
-        except ConnectionError:
+        except RedisConnectionError:
             pass
 
     def is_aborted(self, ident):
         with conn(self):
             return self.redis.hget(ident, 'aborted')
 
-    def mark_done(self, item, expire_time):
+    def flag_logging_thread_for_termination(self):
+        #TODO: alas, this results in deadlock for no apparent reason
+        pass
+
+        #logger.info('Attempting to set semaphore to close logger with id {} from thread {}'
+        #    .format(log_thread.ident, threading.get_ident()))
+
+        #self.ending = True
+
+        #logger.info('State update complete with id {} from thread {}; joining'
+        #    .format(log_thread.ident, threading.get_ident()))
+        # self.log_thread.join()
+        #logger.info('Logger thread joined to thread {}'.format(threading.get_ident()))
+
+    def mark_done(self, item, expire_time): # used from main controller
         with conn(self):
             self.mark_done_script(keys=[item['ident']], args=[expire_time,
                 self.log_channel, int(time.time()), json.dumps(item['info']),
-                item['log_key']])
+                                                              item['log_key']])
 
-    def mark_aborted(self, ident):
+    def mark_aborted(self, ident): # used when in wpull subprocess
+        #self.flag_logging_thread_for_termination()
         with conn(self):
             self.mark_aborted_script(keys=[ident], args=[self.log_channel])
 
-    def update_bytes_downloaded(self, ident, size):
-        self.bytes_downloaded_queue.put({'ident': ident,
-                                         'bytes': size
-                                       })
+    def advise_exiting(self): # used when in wpull subprocess
+        logger.info('Got exit advice with ident={}, thread={}'
+                    .format(self.ident, threading.get_ident()))
+        #self.flag_logging_thread_for_termination()
 
-    def update_items_downloaded(self, count):
-        self.items_downloaded_outstanding += count
+    def update_bytes_downloaded(self, size: int):
+        with self.countslock:
+            self.bytes_downloaded_outstanding += size
 
-    def update_items_queued(self, count):
-        self.items_queued_outstanding += count
+    def update_items_downloaded(self, count: int):
+        with self.countslock:
+            self.items_downloaded_outstanding += count
 
-    def flush_item_counts(self, ident):
-        self.item_count_queue.put({'ident': ident,
-                                  'items_downloaded':
-                                      self.items_downloaded_outstanding,
-                                  'items_queued': self.items_queued_outstanding
-                                 })
-        self.items_downloaded_outstanding = 0
-        self.items_queued_outstanding = 0
+    def update_items_queued(self, count: int):
+        with self.countslock:
+            self.items_queued_outstanding += count
 
     def pipeline_report(self, pipeline_id, report):
         try:
@@ -167,7 +194,7 @@ class Control(object):
                 self.redis.hmset(pipeline_id, report)
                 self.redis.sadd('pipelines', pipeline_id)
                 self.redis.publish(self.pipeline_channel, pipeline_id)
-        except ConnectionError:
+        except RedisConnectionError:
             pass
 
     def unregister_pipeline(self, pipeline_id):
@@ -176,97 +203,104 @@ class Control(object):
                 self.redis.delete(pipeline_id)
                 self.redis.srem('pipelines', pipeline_id)
                 self.redis.publish(self.pipeline_channel, pipeline_id)
-        except ConnectionError:
+        except RedisConnectionError:
             pass
 
     # This function is a thread used to asynchronously ship logs to redis for
     # this job, in a daemonic thread
     def ship_logs(self):
-        while True:
-            # Ship a log entry
-            try:
-                entry = self.log_queue.get(timeout=5)
-                with conn(self):
-                    self.log_script(keys=entry['keys'], args=entry['args'])
-                self.log_queue.task_done()
-            except Empty:
-                pass
-            except ConnectionError:
-                self.log_queue.task_done()
+        shipping_count = 0
 
-            # Ship bytes entries in aggregate
-            bytes_entries = {}
-            try:
-                entry = self.bytes_downloaded_queue.get(block=False)
-                if entry['ident'] in bytes_entries:
-                    bytes_entries[entry['ident']] += int(entry['bytes'])
-                else:
-                    bytes_entries[entry['ident']] = int(entry['bytes'])
-                self.bytes_downloaded_queue.task_done()
-            except Empty:
-                pass
+        logger.info('Started log shipper thread with ident={}, thread={}'
+                    .format(self.ident, threading.get_ident()))
 
-            try:
-                with conn(self):
-                    for ident, count in bytes_entries:
-                        self.redis.hincrby(ident, 'bytes_downloaded', count)
-            except ConnectionError:
-                pass
+        with conn(self):
+            with self.redis.pipeline(transaction=False) as pipe:
+                while not (self.ending and self.log_queue.empty()):
 
-            # Ship count entries in aggregate
-            counts_entries = {}
-            try:
-                entry = self.item_count_queue.get(block=False)
-                if entry['ident'] in counts_entries:
-                    counts_entries[entry['ident']][0] += int(entry['items_downloaded'])
-                    counts_entries[entry['ident']][1] += int(entry['items_queued'])
-                else:
-                    counts_entries[entry['ident']] = [
-                        int(entry['items_downloaded']),
-                        int(entry['items_queued'])
-                    ]
-                self.item_count_queue.task_done()
-            except Empty:
-                pass
+                    try:
+                        # Ship a log entry
+                        try:
+                            entry = self.log_queue.get(timeout=5)
+                            with conn(self):
+                                self.log_script(keys=entry['keys'], args=entry['args'], client=pipe)
 
-            try:
-                with conn(self):
-                    for ident, data in counts_entries:
-                        self.redis.hincrby(ident, 'items_downloaded', data[0])
-                        self.redis.hincrby(ident, 'items_queued', data[1])
-            except ConnectionError:
-                pass
+                            shipping_count += 1
 
+                            self.log_queue.task_done()
+
+                        except Empty:
+                            pass #don't task_done() without tasks
+                        except RedisConnectionError:
+                            # If we couldn't ship it due to redis being down, discard
+                            self.log_queue.task_done()
+
+                        # If we have accreted enough or the queue is empty, commit logs and counts
+                        # The magic constant is necessary to resolve a race condition that might
+                        # prevent shipping
+                        if self.log_queue.empty() or shipping_count >= 64:
+                            with conn(self):
+                                # This locking structure is necessary to avoid a deadlock that
+                                # happens when redis is trying to send while another thread is
+                                # trying to acquire the lock
+                                with self.countslock:
+                                    t_bytes_downloaded = self.bytes_downloaded_outstanding
+                                    self.bytes_downloaded_outstanding = 0
+                                    t_items_downloaded = self.items_downloaded_outstanding
+                                    self.items_downloaded_outstanding = 0
+                                    t_items_queued = self.items_queued_outstanding
+                                    self.items_queued_outstanding = 0
+
+                                if t_bytes_downloaded > 0:
+                                    pipe.hincrby(self.ident, 'bytes_downloaded', t_bytes_downloaded)
+                                if t_items_downloaded > 0:
+                                    pipe.hincrby(self.ident, 'items_downloaded', t_items_downloaded)
+                                if t_items_queued > 0:
+                                    pipe.hincrby(self.ident, 'items_queued', t_items_queued)
+
+                                pipe.execute()
+
+                            shipping_count = 0
+
+                    except RedisConnectionError:
+                        logger.info('Log shipper got connection error while '
+                                    'incrementing counts or committing logs with '
+                                    'ident={}, thread={}'.format(self.ident, threading.get_ident()))
+
+        logger.info('Log shipper exiting with ident={}, thread={}'
+                    .format(self.ident, threading.get_ident()))
+        return True
 
     def log(self, packet, ident, log_key):
-        self.log_queue.put({'keys': [ident],
+        self.log_queue.put({'type': 'log',
+                            'keys': [ident],
                             'args': [json.dumps(packet), self.log_channel, log_key]
-                          })
+                           })
 
     def get_url_file(self, ident):
         try:
             with conn(self):
                 return self.redis.hget(ident, 'url_file')
-        except ConnectionError:
+        except RedisConnectionError:
             pass
 
     def get_settings(self, ident):
         with conn(self):
             data = self.redis.hmget(ident, 'delay_min', 'delay_max',
-                    'concurrency',
-                    'settings_age',
-                    'abort_requested',
-                    'suppress_ignore_reports',
-                    'ignore_patterns_set_key')
+                                    'concurrency',
+                                    'settings_age',
+                                    'abort_requested',
+                                    'suppress_ignore_reports',
+                                    'ignore_patterns_set_key')
 
             result = dict(
-                    delay_min=data[0],
-                    delay_max=data[1],
-                    concurrency=data[2],
-                    age=data[3],
-                    abort_requested=data[4],
-                    suppress_ignore_reports=data[5]
-                    )
+                delay_min=data[0],
+                delay_max=data[1],
+                concurrency=data[2],
+                age=data[3],
+                abort_requested=data[4],
+                suppress_ignore_reports=data[5]
+                )
 
             if data[6]:
                 result['ignore_patterns'] = self.redis.smembers(data[6])

@@ -32,8 +32,8 @@ def check_wpull_args(wpull_args):
     args = wpull_args.realize(item)
 
     # We don't want to mess up redis with junk data
-    args.remove('--python-script')
-    args.remove('wpull_hooks.py')
+    args.remove('--plugin-script')
+    args.remove('archive_bot_plugin.py')
 
     # We don't want junk warcs uploaded
     args.remove('--warc-move')

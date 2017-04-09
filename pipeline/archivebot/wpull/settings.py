@@ -1,12 +1,11 @@
-import os
-import re
 import redis
 import threading
 import time
 
-from .ignoracle import Ignoracle, parameterize_record_info
+import wpull
+
+from .ignoracle import Ignoracle
 from .. import shared_config
-from ..control import ConnectionError
 from redis.exceptions import ConnectionError as RedisConnectionError
 
 class Settings(object):
@@ -18,12 +17,12 @@ class Settings(object):
     ignoracle = Ignoracle()
 
     settings = dict(
-            age=None,
-            concurrency=None,
-            abort_requested=None,
-            delay_min=None,
-            delay_max=None,
-            suppress_ignore_reports=False
+        age=None,
+        concurrency=None,
+        abort_requested=None,
+        delay_min=None,
+        delay_max=None,
+        suppress_ignore_reports=False
     )
 
     def update_settings(self, new_settings):
@@ -44,13 +43,11 @@ class Settings(object):
         with self.settings_lock:
             return self.settings['age'] or 0
 
-    def ignore_url_p(self, url, record_info):
+    def ignore_url(self, record_info: wpull.pipeline.item.URLRecord):
         '''
         Returns whether a URL should be ignored.
         '''
-        parameters = parameterize_record_info(record_info)
-
-        return self.ignoracle.ignores(url, **parameters)
+        return self.ignoracle.ignores(record_info)
 
     def abort_requested(self):
         '''
@@ -169,6 +166,7 @@ class ListenerWorkerThread(threading.Thread):
         self.job_ident = ident
         self.running = True
         self.reconnect_timeout = 5.0
+        self.last_run = 0.0
 
     def stop(self):
         self.running = False
@@ -192,10 +190,9 @@ class ListenerWorkerThread(threading.Thread):
 
                 p.close()
 
-            # We catch both RedisConnectionError and ConnectionError because
-            # the former may be raised directly from pubsub.
-            except (RedisConnectionError, ConnectionError) as e:
-                print('Settings listener disconnected (cause: %s).  Reconnecting in %s seconds.' % (str(e), self.reconnect_timeout))
+            except RedisConnectionError as e:
+                print('Settings listener disconnected (cause: %s).'
+                      'Reconnecting in %s seconds.' % (str(e), self.reconnect_timeout))
                 r = None
                 p = None
                 time.sleep(self.reconnect_timeout)

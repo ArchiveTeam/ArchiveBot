@@ -3,8 +3,8 @@ module CommandPatterns
   IDENT = %r{[0-9a-z]+}
   DELAY_SPEC = %r{[\d]{1,7}}
 
-  ARCHIVE           = %r{\A(?:\!a|\!archive|\!firstworldproblems)(?!\s+<)\s+#{AC}\s*\Z}
-  ARCHIVE_FILE      = %r{\A(?:\!a|\!archive|\!firstworldproblems)\s+<\s+#{AC}\s*\Z}
+  ARCHIVE           = %r{\A(?:\!a|\!archive)(?!\s+<)\s+#{AC}\s*\Z}
+  ARCHIVE_FILE      = %r{\A(?:\!a|\!archive)\s+<\s+#{AC}\s*\Z}
   ARCHIVEONLY       = %r{\A(?:\!ao|\!archiveonly)(?!\s+<)\s+#{AC}\s*\Z}
   ARCHIVEONLY_FILE  = %r{\A(?:\!ao|\!archiveonly)\s+<\s+#{AC}\s*\Z}
   SET_DELAY         = %r{\A\!d(?:elay)?\s+(#{IDENT})\s+(#{DELAY_SPEC})\s+(#{DELAY_SPEC})\s*\Z}
