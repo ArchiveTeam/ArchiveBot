@@ -172,6 +172,7 @@ def ia_s3_ship(fname, basename, item, params: Params):
         "--header", "Content-MD5: " + md5sum,
         "--header", "x-archive-queue-derive:1",
         "--header", "x-amz-auto-make-bucket:1",
+        "--header", "x-archive-meta-sponsor:Internet Archive",
         "--header", "x-archive-meta-collection:" + params.ia_collection,
         "--header", "x-archive-meta-mediatype:web",
         "--header", "x-archive-meta-subject:archivebot",
