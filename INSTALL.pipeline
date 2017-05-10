@@ -113,6 +113,11 @@ or
     ~/.local/bin/run-pipeline3 pipeline.py --disable-web-server \
       --concurrent 2 YOUR-PIPELINE-NAME-GOES-HERE
 
+If your pipeline has large amounts of disk space (at least 100GB dedicated to
+ArchiveBot's processing), set the LARGE environment variable in the same way
+as AO_ONLY above.  Your pipeline will accept jobs queued with the --large
+option.
+
 If you are getting errors about wpull, you may need to create a symbolic 
 link to it, like this:
 

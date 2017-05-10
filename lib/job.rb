@@ -297,11 +297,13 @@ class Job < Struct.new(:uri, :redis)
     redis.expire(ignore_patterns_set_key, 5)
   end
 
-  def queue(destination = nil)
+  def queue(destination = nil, large = nil)
     queue = if destination
               "pending:#{destination}"
             elsif depth == :shallow
               'pending-ao'
+            elsif large
+              'pending-large'
             else
               'pending'
             end
