@@ -30,7 +30,7 @@ from archivebot.seesaw.tasks import GetItemFromQueue, StartHeartbeat, \
     SetFetchDepth, PreparePaths, WriteInfo, DownloadUrlFile, \
     RelabelIfAborted, MoveFiles, StopHeartbeat, MarkItemAsDone, CheckIP
 
-VERSION = "20170106.02"
+VERSION = "20170510.01"
 PHANTOMJS_VERSIONS = ('1.9.8', '2.1.1')
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
 WPULL_EXE = find_executable('Wpull', None, ['./wpull'])
@@ -126,7 +126,8 @@ wpull_args = WpullArgs(
 
 pipeline = Pipeline(
     CheckIP(),
-    GetItemFromQueue(control, pipeline_id, downloader, ao_only=env.get('AO_ONLY')),
+    GetItemFromQueue(control, pipeline_id, downloader,
+        ao_only=env.get('AO_ONLY'), large=env.get('LARGE'))
     StartHeartbeat(control),
     SetFetchDepth(),
     PreparePaths(),
@@ -187,7 +188,16 @@ print('*' * 60)
 print('Pipeline ID: %s' % pipeline_id)
 
 if env.get('AO_ONLY'):
-    print('!ao-only mode enabled')
+    print('!ao-only mode enabled; pipeline will accept jobs queued with !ao '
+    '(and not jobs queued with !a or --pipeline)')
+
+elif env.get('LARGE'):
+    print('large mode enabled; pipeline will accept jobs queued with !a'
+    ' --large')
+
+elif env.get('LARGE') and env.get('AO_ONLY'):
+    print('!ao-only and large modes enabled.  THIS IS PROBABLY A MISTAKE. '
+    ' Pipeline will accept only jobs queued with --large or !ao.')
 
 print('*' * 60)
 print()
