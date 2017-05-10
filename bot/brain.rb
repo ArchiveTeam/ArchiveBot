@@ -68,6 +68,11 @@ class Brain
       return
     end
 
+    if h[:large] && (h[:pipeline] || depth == :shallow)
+      reply m, '--large has no effect when combined with --pipeline or !ao.'
+      return
+    end
+
     # Is the URI in our list of recognized schemes?
     if !schemes.include?(uri.scheme)
       reply m, "Sorry, I can only handle #{schemes.join(', ')}."
@@ -139,7 +144,8 @@ class Brain
       end
 
       pipeline = h[:pipeline]
-      job.queue(pipeline)
+      large = h[:large]
+      job.queue(pipeline, large)
     end
   end
 
