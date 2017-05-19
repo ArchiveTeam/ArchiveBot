@@ -175,6 +175,7 @@
         "^https?://.+/js-agent\\.newrelic\\.com/nr-\\d{3,3}(\\.min)?\\.js$",
         "^https?://.+/stats\\.g\\.doubleclick\\.net/dc\\.js$",
         "^https?://stats\\.g\\.doubleclick\\.net/r/collect",
+        "^https?://ad\\.doubleclick\\.net/activity",
         "^https?://.+/js/chartbeat\\.js$",
         "^http://www\\.khaleejtimes\\.com/.+/kt_.+/kt_",
         "^http://www\\.khaleejtimes\\.com/.+/images/.+/images/",
