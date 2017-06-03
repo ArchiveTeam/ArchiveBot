@@ -121,6 +121,14 @@ a.job-log-line-url {
 	left: 0px;
 	opacity: 0.8;
 }
+
+.extra-links {
+    margin-top: 3em;
+}
+
+.pipeline {
+    font-size: smaller;
+}
 </style>
 </head>
 <body ng-controller="DashboardController">
@@ -164,7 +172,7 @@ a.job-log-line-url {
 
 <div>
 	<label for="filterBox">Filter:</label>
-	<input type="search" ng-model="filterQuery" id="filterBox" placeholder="URL or Ident">
+	<input type="search" ng-model="filterQuery" id="filterBox" placeholder="{{ :: showNicks ? 'URL, ident, or nick' : 'URL or ident'}}">
 	<button class="btn btn-default" ng-click="applyFilterQuery('')"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Clear</button>
 </div>
 
@@ -182,6 +190,7 @@ a.job-log-line-url {
 <table id="dashboardTable" class="table table-condensed table-striped table-bordered">
 	<tr>
 		<th class="col-sm-4 tablesort" ng-click="sortParam = 'url'">URL<span class="caret" ng-if="sortParam == 'url'"></span></th>
+		<th class="col-sm-2 tablesort" ng-click="sortParam = 'startedBy'" ng-show="::showNicks">Started by<span class="caret" ng-if="sortParam == 'startedBy'"></span></th>
 		<th class="col-sm-1 tablesort" ng-click="sortParam = 'startedAt'">Started<span class="caret" ng-if="sortParam == 'startedAt'"></span></th>
 		<th class="col-sm-1 tablesort" ng-click="sortParam = 'itemsDownloaded'">Fetched<span class="caret" ng-if="sortParam == 'itemsDownloaded'"></span></th>
 		<th class="col-sm-1 tablesort" ng-click="sortParam = 'bytesDownloaded'">Size<span class="caret" ng-if="sortParam == 'bytesDownloaded'"></span></th>
@@ -191,6 +200,7 @@ a.job-log-line-url {
 
 	<tr class="job-summary" ng-repeat-start="job in jobs | filter: filterOperator | orderBy:sortParam:true">
 		<td>!{{ :: job.depth == 'shallow' ? 'ao' : 'a' }} <a href="{{ ::job.url }}" ng-bind="::job.url"></a></td>
+		<td ng-bind="job.startedBy" ng-if="::showNicks"></td>
 		<td ng-bind=":: job.startedAt * 1000|date:'MM-dd'"
 			title="{{:: job.startedAt * 1000|date:'medium'}}"></td>
 		<td ng-bind="job.itemsDownloaded|number" class="numeric"></td>
@@ -200,7 +210,7 @@ a.job-log-line-url {
 	</tr>
 
 	<tr class="job-detail" ng-repeat-end ng-if="!hideDetails">
-		<td colspan="6">
+		<td colspan="{{ :: showNicks ? 7 : 6}}">
 			<div class="job-detail-container container-fluid">
 				<div class="row">
 					<div class="job-detail-datatable col-sm-3" ng-class="{ 'height-limit-small': !job.fullview, 'height-limit-big': job.fullview }">
@@ -257,10 +267,6 @@ a.job-log-line-url {
 								<td ng-bind="job.r3xx|number" class="numeric text-info"></td>
 							</tr>
 							<tr>
-								<th>300s</th>
-								<td ng-bind="job.r3xx|number" class="numeric text-primary"></td>
-							</tr>
-							<tr>
 								<th>400s</th>
 								<td ng-bind="job.r4xx|number" class="numeric text-warning"></td>
 							</tr>
@@ -275,8 +281,18 @@ a.job-log-line-url {
 						</table>
 
 						<p>
-							Queued <span ng-bind="::job.queuedAt * 1000|date:'medium'"></span> 
+							Queued <span ng-bind="::job.queuedAt * 1000|date:'yyyy-MM-dd HH:mm:ss'"></span>
 							<span ng-if="::showNicks">by <span ng-bind="::job.startedBy"></span></span>.
+						</p>
+						
+						<p>
+							<tt ng-bind="::job.pipelineId" class="pipeline"></tt>
+						</p>
+						
+						<p class="extra-links">
+						    <a href="https://archive.fart.website/archivebot/viewer/job/{{:: job.ident | limitTo:5 }}">ArchiveBot viewer</a>
+						    &bull;
+						    <a href="https://web.archive.org/web/*/{{:: job.url }}">Wayback Machine</a>
 						</p>
 					</div>
 
