@@ -7,6 +7,7 @@ import sys
 from urllib.parse import urlparse
 
 import wpull
+import wpull.pipeline.item
 
 def parameterize_record_info(record_info: wpull.pipeline.item.URLRecord):
     '''

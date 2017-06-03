@@ -1,7 +1,14 @@
+from os import environ as env
 import unittest
 
 from .wpull import WpullArgs
 from seesaw.item import Item
+
+# taken form pipeline/pipeline.py
+if 'WARC_MAX_SIZE' in env:
+    WARC_MAX_SIZE = env['WARC_MAX_SIZE']
+else:
+    WARC_MAX_SIZE = '5368709120'
 
 def joined(args):
     return str.join(' ', args)
@@ -20,7 +27,8 @@ class TestWpullArgs(unittest.TestCase):
                 wpull_exe='/bin/wpull',
                 youtube_dl_exe='/usr/bin/youtube-dl',
                 phantomjs_exe='/usr/bin/phantomjs',
-                finished_warcs_dir='/lost+found/'
+                finished_warcs_dir='/lost+found/',
+                warc_max_size=WARC_MAX_SIZE
             )
 
     def test_user_agent_can_be_set(self):

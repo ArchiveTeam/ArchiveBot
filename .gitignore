@@ -6,3 +6,4 @@ data
 *.pyc
 
 .sass-cache
+test/.cache
