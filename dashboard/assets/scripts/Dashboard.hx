@@ -321,7 +321,14 @@ class Dashboard {
                 dashboardControllerScopeApply = Reflect.field(scope, "$apply").bind(scope);
                 scope.filterOperator = function (job:Job) {
                     var query:String = scope.filterQuery;
-                    return (job.ident.startsWith(query) || job.url.indexOf(query) != -1);
+                    if (scope.showNicks) {
+                        return (job.ident.startsWith(query)
+                            || job.url.indexOf(query) != -1
+                            || job.startedBy.toLowerCase().indexOf(query.toLowerCase()) != -1);
+                    } else {
+                        return (job.ident.startsWith(query)
+                            || job.url.indexOf(query) != -1);
+                    }
                 };
                 dashboardControllerScope = scope;
                 scope.applyFilterQuery = function (query:String) {

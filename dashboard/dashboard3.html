@@ -168,7 +168,7 @@ a.job-log-line-url {
 
 <div>
 	<label for="filterBox">Filter:</label>
-	<input type="search" ng-model="filterQuery" id="filterBox" placeholder="URL or Ident">
+	<input type="search" ng-model="filterQuery" id="filterBox" placeholder="{{ :: showNicks ? 'URL, ident, or nick' : 'URL or ident'}}">
 	<button class="btn btn-default" ng-click="applyFilterQuery('')"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Clear</button>
 </div>
 
