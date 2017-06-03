@@ -125,6 +125,10 @@ a.job-log-line-url {
 .extra-links {
     margin-top: 3em;
 }
+
+.pipeline {
+    font-size: smaller;
+}
 </style>
 </head>
 <body ng-controller="DashboardController">
@@ -279,6 +283,10 @@ a.job-log-line-url {
 						<p>
 							Queued <span ng-bind="::job.queuedAt * 1000|date:'yyyy-MM-dd HH:mm:ss'"></span>
 							<span ng-if="::showNicks">by <span ng-bind="::job.startedBy"></span></span>.
+						</p>
+						
+						<p>
+							<tt ng-bind="::job.pipelineId" class="pipeline"></tt>
 						</p>
 						
 						<p class="extra-links">
