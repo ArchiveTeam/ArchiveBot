@@ -24,6 +24,7 @@
         "/forumdisplay\\.php.*[\\?&]do=markread",
         "/userpoll/vote\\.php\\?",
         "/showthread\\.php.*[\\?&]goto=(next(old|new)est|newpost)",
+        "/showthread\\.php.*[\\?&]highlight=",
         "/editpost\\.php\\?",
         "/\\?view=getlastpost$",
         "/index\\.php\\?sharelink=",
@@ -31,7 +32,18 @@
         "/new_reply_form\\.asp\\?",
         "/pm_buddy_list\\.asp\\?",
         "/pm_new_message_form\\.asp\\?",
-        "/search_form\\.asp\\?"
+        "/search_form\\.asp\\?",
+        "/index\\.php\\?action=profile;u=\\d+;area=showposts;sa=attach;sort=\\w+",
+        "/index\\.php\\?action=quickmod2;topic=\\d+\\.\\d+",
+        "/index\\.php\\?action=stats;expand=",
+        "/index\\.php\\?topic=\\d+\\.\\d+;prev_next=",
+        "/index\\.php\\?topic=\\d+\\.msg\\d+",
+        "/viewtopic\\.php\\?p=\\d+",
+        "/showpost\\.php\\?p=\\d+",
+        "/post/new/\\d+",
+        "/post/\\d+/quote/\\d+",
+        "/tortoise\\.pl",
+        "/ad\\.pl"
     ],
     "type": "ignore_patterns"
 }
