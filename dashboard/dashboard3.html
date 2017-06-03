@@ -279,7 +279,7 @@ a.job-log-line-url {
 						</table>
 
 						<p>
-							Queued <span ng-bind="::job.queuedAt * 1000|date:'medium'"></span> 
+							Queued <span ng-bind="::job.queuedAt * 1000|date:'yyyy-MM-dd HH:mm:ss'"></span>
 							<span ng-if="::showNicks">by <span ng-bind="::job.startedBy"></span></span>.
 						</p>
 						
