@@ -121,6 +121,10 @@ a.job-log-line-url {
 	left: 0px;
 	opacity: 0.8;
 }
+
+.extra-links {
+    margin-top: 3em;
+}
 </style>
 </head>
 <body ng-controller="DashboardController">
@@ -277,6 +281,12 @@ a.job-log-line-url {
 						<p>
 							Queued <span ng-bind="::job.queuedAt * 1000|date:'medium'"></span> 
 							<span ng-if="::showNicks">by <span ng-bind="::job.startedBy"></span></span>.
+						</p>
+						
+						<p class="extra-links">
+						    <a href="https://archive.fart.website/archivebot/viewer/job/{{:: job.ident | limitTo:5 }}">ArchiveBot viewer</a>
+						    &bull;
+						    <a href="https://web.archive.org/web/*/{{:: job.url }}">Wayback Machine</a>
 						</p>
 					</div>
 
