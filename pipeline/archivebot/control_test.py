@@ -11,16 +11,16 @@ class TestCandidateQueues(unittest.TestCase):
         ])
 
     def test_selects_exact_match_on_nick(self):
-        queues = candidate_queues(self.named_queues, 'ovhca1-47', False)
+        queues = candidate_queues(self.named_queues, 'ovhca1-47', False, large=False)
 
-        self.assertEqual(['pending:ovhca1-47', 'pending-ao', 'pending'], queues)
+        self.assertEqual(set(['pending:ovhca1-47', 'pending-ao', 'pending']), set(queues))
 
     def test_selects_substring_match_on_nick(self):
-        queues = candidate_queues(self.named_queues, 'ovhca1-reddit-over18-55', False)
+        queues = candidate_queues(self.named_queues, 'ovhca1-reddit-over18-55', False, large=False)
 
-        self.assertEqual(['pending:reddit-over18', 'pending-ao', 'pending'], queues)
+        self.assertEqual(set(['pending:reddit-over18', 'pending-ao', 'pending']), set(queues))
 
     def test_only_checks_pending_ao_if_ao_only(self):
-        queues = candidate_queues(self.named_queues, 'ovhca1-reddit-over18-55', True)
+        queues = candidate_queues(self.named_queues, 'ovhca1-reddit-over18-55', True, large=False)
 
-        self.assertEqual(['pending-ao'], queues)
+        self.assertEqual(set(['pending-ao']), set(queues))
