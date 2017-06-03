@@ -21,7 +21,7 @@ install:
   - sudo apt-get -qq install ircd-hybrid python3.4 python3.4-dev rsync libzmq3-dev
   - sudo python3.4 get-pip.py
   - travis_retry python3.4 -m pip install -q -r pipeline/requirements.txt --user
-  - travis_retry python3.4 -m pip install -q nose irc --user
+  - travis_retry python3.4 -m pip install -q nose pytest irc --user
   - sudo cp test/example_rsyncd.conf /etc/rsyncd.conf
   - python3.4 -m pip install -q git+https://github.com/chfoo/huhhttp#egg=huhhttp --user
 
@@ -56,4 +56,5 @@ services:
 script:
   - bundle exec rake
   - python3.4 -m nose pipeline/
+  - python3.4 -m pytest test/validate_db.py
   #- python3.4 test/integration_runner.py
