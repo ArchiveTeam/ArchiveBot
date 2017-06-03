@@ -469,7 +469,8 @@ expire
 
 In rare cases, the 48 hour timeout enforced by ArchiveBot on archive
 jobs is too long.  This command permits faster snapshotting.  It
-should be used sparingly; abuse is very easy to spot.
+should be used sparingly, and only ops are able to use it; abuse is
+very easy to spot.
 
 If a job's expiry timer has not yet started, this command does not
 affect the given job::
