@@ -132,7 +132,7 @@ class Job {
         logLine.pattern = logEvent.pattern;
         logLine.wgetCode = logEvent.wget_code;
 
-        totalResponses = r1xx + r2xx + r3xx + r4xx + r1xx + errorCount;
+        totalResponses = r1xx + r2xx + r3xx + r4xx + r5xx + errorCount;
         queueRemaining = itemsQueued - itemsDownloaded;
 
         if (logLines.length >= maxScrollback) {

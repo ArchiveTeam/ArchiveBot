@@ -93,7 +93,7 @@ Job.prototype = {
 		logLine.message = logEvent.message;
 		logLine.pattern = logEvent.pattern;
 		logLine.wgetCode = logEvent.wget_code;
-		this.totalResponses = this.r1xx + this.r2xx + this.r3xx + this.r4xx + this.r1xx + this.errorCount;
+		this.totalResponses = this.r1xx + this.r2xx + this.r3xx + this.r4xx + this.r5xx + this.errorCount;
 		this.queueRemaining = this.itemsQueued - this.itemsDownloaded;
 		if(this.logLines.length >= maxScrollback) {
 			this.logLines.shift();
