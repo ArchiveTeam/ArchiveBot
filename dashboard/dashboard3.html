@@ -186,6 +186,7 @@ a.job-log-line-url {
 <table id="dashboardTable" class="table table-condensed table-striped table-bordered">
 	<tr>
 		<th class="col-sm-4 tablesort" ng-click="sortParam = 'url'">URL<span class="caret" ng-if="sortParam == 'url'"></span></th>
+		<th class="col-sm-2 tablesort" ng-click="sortParam = 'startedBy'" ng-show="::showNicks">Started by<span class="caret" ng-if="sortParam == 'startedBy'"></span></th>
 		<th class="col-sm-1 tablesort" ng-click="sortParam = 'startedAt'">Started<span class="caret" ng-if="sortParam == 'startedAt'"></span></th>
 		<th class="col-sm-1 tablesort" ng-click="sortParam = 'itemsDownloaded'">Fetched<span class="caret" ng-if="sortParam == 'itemsDownloaded'"></span></th>
 		<th class="col-sm-1 tablesort" ng-click="sortParam = 'bytesDownloaded'">Size<span class="caret" ng-if="sortParam == 'bytesDownloaded'"></span></th>
@@ -195,6 +196,7 @@ a.job-log-line-url {
 
 	<tr class="job-summary" ng-repeat-start="job in jobs | filter: filterOperator | orderBy:sortParam:true">
 		<td>!{{ :: job.depth == 'shallow' ? 'ao' : 'a' }} <a href="{{ ::job.url }}" ng-bind="::job.url"></a></td>
+		<td ng-bind="job.startedBy" ng-if="::showNicks"></td>
 		<td ng-bind=":: job.startedAt * 1000|date:'MM-dd'"
 			title="{{:: job.startedAt * 1000|date:'medium'}}"></td>
 		<td ng-bind="job.itemsDownloaded|number" class="numeric"></td>
@@ -204,7 +206,7 @@ a.job-log-line-url {
 	</tr>
 
 	<tr class="job-detail" ng-repeat-end ng-if="!hideDetails">
-		<td colspan="6">
+		<td colspan="{{ :: showNicks ? 7 : 6}}">
 			<div class="job-detail-container container-fluid">
 				<div class="row">
 					<div class="job-detail-datatable col-sm-3" ng-class="{ 'height-limit-small': !job.fullview, 'height-limit-big': job.fullview }">
