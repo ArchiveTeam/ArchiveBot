@@ -6,9 +6,9 @@ language: ruby
 rvm:
   - 2.2.3
 
-notifications:
-  irc:
-    - "irc.efnet.net#archivebot"
+#notifications:
+#  irc:
+#    - "irc.efnet.net#archivebot"
 
 before_install:
   - sudo add-apt-repository ppa:fkrull/deadsnakes --yes
