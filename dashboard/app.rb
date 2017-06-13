@@ -61,7 +61,8 @@ App = Webmachine::Application.new do |app|
 end
 
 at_exit do
-  Celluloid::Actor[:log_receiver].stop
+  # dead code: log_receiver isn't set anywhere
+  # Celluloid::Actor[:log_receiver].stop
 end
 
 class Broadcaster
