@@ -16,6 +16,7 @@ class JobOptionsParser
       opt :explain, 'Short note explaining archive purpose', :type => :string
       opt :delay, 'inter-request delay, in milliseconds', :type => :integer
       opt :concurrency, 'number of workers', :type => :integer
+      opt :large, 'Job includes many large (>500MB) files'
     end
   end
 

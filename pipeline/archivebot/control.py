@@ -21,7 +21,7 @@ def conn(controller):
         controller.disconnect()
         raise e
 
-def candidate_queues(named_queues, pipeline_nick, ao_only):
+def candidate_queues(named_queues, pipeline_nick, ao_only, large):
     '''
     Generates names of queues that this pipeline will check for work.
     '''
@@ -29,12 +29,16 @@ def candidate_queues(named_queues, pipeline_nick, ao_only):
     def applies(q):
         return q.replace('pending:', '') in pipeline_nick
 
-    if ao_only:
+    if ao_only and large:
+        return ['pending-ao', 'pending-large']
+    elif ao_only:
         return ['pending-ao']
     else:
         matches = [q for q in named_queues if applies(q)]
-        matches.append('pending-ao')
+        if large:
+            matches.append('pending-large')
         matches.append('pending')
+        matches.append('pending-ao')
 
         return matches
 
@@ -111,10 +115,11 @@ class Control(object):
 
             return pipelines
 
-    def reserve_job(self, pipeline_id, pipeline_nick, ao_only):
+    def reserve_job(self, pipeline_id, pipeline_nick, ao_only, large):
         named_queues = self.all_named_pending_queues()
 
-        for queue in candidate_queues(named_queues, pipeline_nick, ao_only):
+        for queue in candidate_queues(named_queues, pipeline_nick, ao_only,
+            large):
             ident = self.dequeue_item(queue)
 
             if ident:

@@ -11,6 +11,7 @@ import time
 
 import irc.client
 
+PYTHON = os.getenv('PYTHON', "python3")
 
 class Client(irc.client.SimpleIRCClient):
     def __init__(self):
@@ -103,7 +104,7 @@ class Client(irc.client.SimpleIRCClient):
 
 
 def main():
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
 
     script_dir = os.path.dirname(__file__)
     bot_script = os.path.join(script_dir, 'run_bot.sh')
@@ -130,7 +131,7 @@ def main():
     pipeline_proc = subprocess.Popen([pipeline_script], preexec_fn=os.setpgrp)
     cogs_proc = subprocess.Popen([cogs_script], preexec_fn=os.setpgrp)
     web_proc = subprocess.Popen(
-        ['python3.4', '-m', 'huhhttp', '--port', '8866'],
+        [PYTHON, '-m', 'huhhttp', '--port', '8866'],
         preexec_fn=os.setpgrp
     )
     all_procs = [bot_proc, firehose_proc, dashboard_proc, pipeline_proc, cogs_proc, web_proc]
