@@ -43,7 +43,8 @@
         "/post/new/\\d+",
         "/post/\\d+/quote/\\d+",
         "/tortoise\\.pl",
-        "/ad\\.pl"
+        "/ad\\.pl",
+        "/reportpost\\?link="
     ],
     "type": "ignore_patterns"
 }
