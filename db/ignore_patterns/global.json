@@ -189,7 +189,8 @@
         "^https?://tm\\.uol\\.com\\.br/h/.+/h/",
         "^https?://media\\.opb\\.org/clips/embed/.+\\.js$",
         "^https?://[^.]+\\.pinterest\\.[^/]+/join/",
-        "\\?wordfence_logHuman=1"
+        "\\?wordfence_logHuman=1",
+        "^https?://[^/]*tumblr\\.com/widgets/share/tool"
     ],
     "type": "ignore_patterns"
 }
