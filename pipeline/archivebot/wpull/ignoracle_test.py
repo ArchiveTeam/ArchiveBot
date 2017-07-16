@@ -7,9 +7,10 @@ from wpull.pipeline.item import URLRecord
 p1 = 'www\.example\.com/foo\.css\?'
 p2 = 'bar/.+/baz'
 
-def urlrec(url):
+def urlrec(url, level=0):
     r = URLRecord()
     r.url = url
+    r.level = level
 
     return r
 
@@ -81,11 +82,20 @@ class TestIgnoracle(unittest.TestCase):
 
         self.assertEqual(result, pattern)
 
-    def test_ignores_escapes_url(self):
-        pattern = '{primary_url}foo\.css\?'
+    def test_ignores_escapes_primary_url(self):
+        pattern = '{primary_url}/bar\.css\?'
         self.oracle.set_patterns([pattern])
 
-        result = self.oracle.ignores(urlrec('http://www.example.com/bar.css??/foo.css?body=1'))
+        r = URLRecord()
+        r.parent_url = 'http://www.example.com'
+        r.url = 'http://www.example.com/bar.css??'
+        r.level = 1
+
+        # The ignore pattern we're using expands to
+        # http://www.example.com/bar\.css\?
+        # We want to make sure it'll match the double-? without trying to interpret
+        # ? as a metacharacter.
+        result = self.oracle.ignores(r)
 
         self.assertEqual(result, pattern)
 
