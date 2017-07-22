@@ -190,7 +190,8 @@
         "^https?://media\\.opb\\.org/clips/embed/.+\\.js$",
         "^https?://[^.]+\\.pinterest\\.[^/]+/join/",
         "\\?wordfence_logHuman=1",
-        "^https?://[^/]*tumblr\\.com/widgets/share/tool"
+        "^https?://[^/]*tumblr\\.com/widgets/share/tool",
+        "amp;amp;"
     ],
     "type": "ignore_patterns"
 }
