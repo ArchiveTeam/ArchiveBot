@@ -1,7 +1,8 @@
 {
     "name": "mediawiki",
     "patterns": [
-        "[\\?&]diff=\\d+",
+        "[\\?&]diff=(prev|next|cur|\\d+)",
+        "[\\?&]direction=(prev|next)&oldid=\\d+",
         "[\\?&]curid=\\d+",
         "[\\?&]limit=(20|100|250|500)",
         "[\\?&]hide(minor|bots|anons|liu|myself|redirs|links|trans|patrolled)=",
