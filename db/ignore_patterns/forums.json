@@ -37,6 +37,7 @@
         "/index\\.php\\?action=profile;u=\\d+;area=showposts;sa=attach;sort=\\w+",
         "/index\\.php\\?action=quickmod2;topic=\\d+\\.\\d+",
         "/index\\.php\\?action=stats;expand=",
+        "/index\\.php\\?board=\\d+\\.\\d+;sort=",
         "/index\\.php\\?topic=\\d+\\.\\d+;prev_next=",
         "/index\\.php\\?topic=\\d+\\.msg\\d+",
         "/index\\.php.*;wap2",
