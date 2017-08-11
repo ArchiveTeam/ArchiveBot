@@ -52,7 +52,8 @@ class DupesOnDisk(object):
         with tempfile.NamedTemporaryFile(dir=os.getcwd()) as file:
             file.truncate(1000000)
 
-            return os.stat(file.name).st_blocks == 0
+            # ZFS will take one block. Most other filesystems 0.
+            return os.stat(file.name).st_blocks < 2
 
 
 class DupesInMemory(object):
