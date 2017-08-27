@@ -191,7 +191,9 @@
         "^https?://[^.]+\\.pinterest\\.[^/]+/join/",
         "\\?wordfence_logHuman=1",
         "^https?://[^/]*tumblr\\.com/widgets/share/tool",
-        "amp;amp;"
+        "amp;amp;",
+        "^https?://accounts\\.google\\.com/o/oauth2/auth\\?",
+        "^https?://www\\.facebook\\.com/dialog/oauth\\?"
     ],
     "type": "ignore_patterns"
 }
