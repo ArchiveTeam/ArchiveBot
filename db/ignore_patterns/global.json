@@ -191,7 +191,8 @@
         "^https?://[^.]+\\.pinterest\\.[^/]+/join/",
         "\\?wordfence_logHuman=1",
         "^https?://[^/]*tumblr\\.com/widgets/share/tool",
-        "amp;amp;"
+        "amp;amp;",
+        "^https?://[^/]+\\.onion/"
     ],
     "type": "ignore_patterns"
 }
