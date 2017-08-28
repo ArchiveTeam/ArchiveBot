@@ -154,7 +154,7 @@
         "^http://wow\\.ya\\.ru/posts_(add|share)_link\\.xml\\?",
         "^https?://connect\\.mail\\.ru/share\\?",
         "^http://zakladki\\.yandex\\.ru/newlink\\.xml\\?",
-        "^https?://vkontakte\\.ru/share\\.php\\?",
+        "^https?://(vkontakte\\.ru|vk\\.com)/share\\.php\\?",
         "^https?://www\\.odnoklassniki\\.ru/dk\\?st\\.cmd=addShare",
         "^https?://www\\.google\\.com/(reader/link\\?|buzz/post\\?)",
         "^https?://service\\.weibo\\.com/share/share\\.php\\?",
@@ -190,7 +190,11 @@
         "^https?://media\\.opb\\.org/clips/embed/.+\\.js$",
         "^https?://[^.]+\\.pinterest\\.[^/]+/join/",
         "\\?wordfence_logHuman=1",
-        "^https?://[^/]*tumblr\\.com/widgets/share/tool"
+        "^https?://[^/]*tumblr\\.com/widgets/share/tool",
+        "amp;amp;",
+        "^https?://accounts\\.google\\.com/o/oauth2/auth\\?",
+        "^https?://www\\.facebook\\.com/dialog/oauth\\?",
+        "^https?://[^/]+\\.onion/"
     ],
     "type": "ignore_patterns"
 }
