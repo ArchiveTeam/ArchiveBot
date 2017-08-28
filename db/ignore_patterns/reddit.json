@@ -16,7 +16,10 @@
         "^https?://simple\\.reddit\\.com/",
         "^https?://pixel\\.redditmedia\\.com/pixel/",
         "\\.reddit\\.com/message/compose/?\\?",
-        "^https?://m\\.reddit\\.com/"
+        "^https?://m\\.reddit\\.com/",
+        "^https?://www\\.reddit\\.com/r/[^/]+/comments/[0-9a-z]+/[^/]+/\\?utm_content=(thumbnail|title|comments)(?!.*&(?!utm_))",
+        "^https?://amp\\.reddit\\.com/pixel\\?",
+        "^https?://www\\.reddit\\.com/[^?]+\\?(.*&)?ref=readnext(&|$)"
     ],
     "type": "ignore_patterns"
 }
