@@ -194,7 +194,8 @@
         "amp;amp;",
         "^https?://accounts\\.google\\.com/o/oauth2/auth\\?",
         "^https?://www\\.facebook\\.com/dialog/oauth\\?",
-        "^https?://[^/]+\\.onion/"
+        "^https?://[^/]+\\.onion/",
+        "^https?://www\\.addtoany\\.com/add_to/"
     ],
     "type": "ignore_patterns"
 }
