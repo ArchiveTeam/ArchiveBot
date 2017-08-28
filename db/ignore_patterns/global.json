@@ -193,7 +193,8 @@
         "^https?://[^/]*tumblr\\.com/widgets/share/tool",
         "amp;amp;",
         "^https?://accounts\\.google\\.com/o/oauth2/auth\\?",
-        "^https?://www\\.facebook\\.com/dialog/oauth\\?"
+        "^https?://www\\.facebook\\.com/dialog/oauth\\?",
+        "^https?://[^/]+\\.onion/"
     ],
     "type": "ignore_patterns"
 }
