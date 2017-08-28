@@ -42,6 +42,7 @@
         "/index\\.php\\?topic=\\d+\\.msg\\d+",
         "/index\\.php.*;wap2",
         "/index\\.php\\?action=calendar",
+        "/index\\.php\\?action=verificationcode;rand=[0-9a-f]{32};vid=search;format=\\.wav(;sound)?$",
         "/viewtopic\\.php\\?p=\\d+",
         "/viewtopic\\.php\\?f=\\d+&t=\\d+&p=\\d+",
         "/showpost\\.php\\?p=\\d+",
