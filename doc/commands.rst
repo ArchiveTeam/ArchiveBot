@@ -371,7 +371,7 @@ Examples
 unignore
 ========
 
-``!unignore IDENT PATTERN``, ``!unig IDENT PATTERN``
+``!unignore IDENT PATTERN``, ``!unig IDENT PATTERN``, ``!ug IDENT PATTERN``
     remove an ignore pattern::
 
         > !unig 1q2qydhkeh3gfnrcxuf6py70b obnoxious\?foo=\d+
