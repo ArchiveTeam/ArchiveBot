@@ -51,7 +51,13 @@
         "/post/\\d+/quote/\\d+",
         "/tortoise\\.pl",
         "/ad\\.pl",
-        "/reportpost\\?link="
+        "/reportpost\\?link=",
+        "/discussion/comment/\\d+/(smile|smiley|wink|blush|neutral|relaxed|grin|joy|sweat_smile|lol|innocent|naughty|yum|relieved|love|sunglasses|smirk|expressionless|unamused|sweat|pensive|confused|confounded|kissing|kissing_heart|kissing_smiling_eyes|kissing_closed_eyes|tongue|disappointed|worried|angry|rage)\\.png",
+        "/discussion/\\d+/(smile|smiley|wink|blush|neutral|relaxed|grin|joy|sweat_smile|lol|innocent|naughty|yum|relieved|love|sunglasses|smirk|expressionless|unamused|sweat|pensive|confused|confounded|kissing|kissing_heart|kissing_smiling_eyes|kissing_closed_eyes|tongue|disappointed|worried|angry|rage)\\.png",
+        "/discussion/comment/\\d+/(cry|persevere|triumph|frowning|anguished|fearful|weary|sleepy|tired_face|grimace|bawling|open_mouth|hushed|cold_sweat|scream|astonished|flushed|sleeping|dizzy|no_mouth|mask|star|cookie|warning|mrgreen|heart|heartbreak|kiss|\\+1|-1|grey_question|trollface|grey_question)\\.png",
+        "/discussion/\\d+/(cry|persevere|triumph|frowning|anguished|fearful|weary|sleepy|tired_face|grimace|bawling|open_mouth|hushed|cold_sweat|scream|astonished|flushed|sleeping|dizzy|no_mouth|mask|star|cookie|warning|mrgreen|heart|heartbreak|kiss|\\+1|-1|grey_question|trollface|grey_question)\\.png",
+        "/discussion/votecomment/",
+        "/discussion/flag/"
     ],
     "type": "ignore_patterns"
 }
