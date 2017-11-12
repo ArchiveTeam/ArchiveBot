@@ -199,7 +199,8 @@
         "amp;amp;",
         "^https?://accounts\\.google\\.com/o/oauth2/auth\\?",
         "^https?://www\\.facebook\\.com/dialog/oauth\\?",
-        "^https?://[^/]+\\.onion/"
+        "^https?://[^/]+\\.onion/",
+        "http://connect\\.qq\\.com/widget/shareqq/index\\.html\\?"
     ],
     "type": "ignore_patterns"
 }
