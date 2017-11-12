@@ -10,6 +10,6 @@ module CommandPatterns
   SET_DELAY         = %r{\A\!d(?:elay)?\s+(#{IDENT})\s+(#{DELAY_SPEC})\s+(#{DELAY_SPEC})\s*\Z}
   SET_CONCURRENCY   = %r{\A\!con(?:currency)?\s+(#{IDENT})\s+(\d{1,2})\s*\Z}
   IGNORE            = %r{\A!ig(?:nore)?\s+(#{IDENT})\s+([^\s]+)\s*\Z}
-  UNIGNORE          = %r{\A!unig(?:nore)?\s+(#{IDENT})\s+([^\s]+)\s*\Z}
+  UNIGNORE          = %r{\A!(?:ug|unig(?:nore)?)\s+(#{IDENT})\s+([^\s]+)\s*\Z}
   WHEREIS           = %r{\A!w(?:hereis)?\s+(#{IDENT})\s*\Z}
 end
