@@ -86,7 +86,7 @@ Accepted parameters
     Aliases: ``--useragentalias``, ``--user-agent``, ``--useragent``
 
 ``--pipeline TAG``
-    specify pipeline to use::
+    specify which pipeline to use::
 
         > !archive http://example.blogspot.com/ncr
             --pipeline=superfast
@@ -99,11 +99,14 @@ Accepted parameters
     nicknames describe the pipeline: datacenter, special modifications, etc.
     This option can be used to load jobs onto those pipelines.
 
-    In the above example, the following pipeline nicks would match the given
+    In the above example, both of the following pipeline nicks would match the given
     tag:
 
     * superfast
     * ovhca1-superfast-47
+
+    NOTE: You should use a pipeline *nickname* for this command, not one of the 
+    auto-assigned pipeline *id numbers* like ``1a5adaacbe686c708f9277e7b70b590c``.
 
 ``--phantomjs``
     access pages via PhantomJS
@@ -143,6 +146,9 @@ abort
 
         > !abort 1q2qydhkeh3gfnrcxuf6py70b
         < Initiating abort for job 1q2qydhkeh3gfnrcxuf6py70b.
+
+    At the moment, a job is not actually aborted and removed from the 
+    ``!pending`` job queue until all the jobs in front of it have started.
 
 archiveonly
 ===========
@@ -198,12 +204,15 @@ Accepted parameters
 
 ``--youtube-dl``
     .. warning::
-      This is a new feature; not all pipelines support it.  To find a pipeline
-      that supports youtube-dl, use the `ArchiveBot pipeline monitor page
-      <http://dashboard.at.ninjawedding.org/pipelines>`_ and look for a
-      pipeline whose version is newer than 20150512.01.
+      This is an often-glitchy feature and not all pipelines support it.  To find 
+      a pipeline that supports youtube-dl, use the `ArchiveBot pipeline monitor 
+      page <http://dashboard.at.ninjawedding.org/pipelines>`_ and look for a
+      pipeline whose version is newer than 20150512.01.  Also note that this 
+      command will only work when using ``!archiveonly`` or ``!ao`` to crawl specific 
+      individual web pages with embedded video, and this will not work recursively 
+      on an entire ``!archive`` or ``!a`` website grab.
 
-    attempt to download videos using youtube-dl (experimental)::
+    Attempt to download videos using youtube-dl (experimental)::
 
       > !archiveonly https://example.website/fun-video-38214 --youtube-dl
       < Queued https://example.website/fun-video-38214 for archival without
