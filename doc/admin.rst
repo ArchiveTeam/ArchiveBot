@@ -74,7 +74,7 @@ Administrators probably won't need to do much in this pane, but it's useful to k
 tmux pane 1: pipeline manager
 +++++++++++++++++++++++++++++
 
-This pane runs the pipeline manager, which is ```plumbing/updates-listener```.  This listens for updates coming into Redis from all of the many pipelines.  It then sends these updates to a ZeroMQ socket, which is what used by the web-based ArchiveBot dashboard (and possibly a few other things?)l;the dashboard is listening on publicly accessible port 31337.
+This pane runs the pipeline manager, which is ```plumbing/updates-listener```.  This listens for updates coming into Redis from all of the many pipelines.  It then sends these updates to a ZeroMQ socket, which is what used by the web-based ArchiveBot dashboard (and possibly a few other things?); the dashboard is listening on publicly accessible port 31337.
 
 (This port is *not* where the ArchiveBot Twitter bot gets its data; that's a different daemon.)
 
@@ -107,7 +107,7 @@ tmux pane 4: IRC bot
 
 This pane runs the actual ArchiveBot, which is an IRC bot that sits in the channel #archivebot on EFNet and listens for Archive Team volunteers feeding it commands about what websites to archive.
 
-Usually, there's not much that an administrator will need to do for this. If the bot gets kicked off EFnet, it will try to reconnect on its own. However, EFnet sometimes has the tendency to netsplit (disconnect from some IRC noces in a disorganized manner). If that happens, the bot might try to rejoin a server that's been split, in which case the bot might need to be "kicked" (restarted and reconnected to the IRC server).
+Usually, there's not much that an administrator will need to do for this. If the bot gets kicked off EFnet, it will try to reconnect on its own. However, EFnet sometimes has the tendency to netsplit (disconnect from some IRC nodes in a disorganized manner). If that happens, the bot might try to rejoin a server that's been split, in which case the bot might need to be "kicked" (restarted and reconnected to the IRC server).
 
 If you need to kick it, hit ``^C`` in this pane to kill the non-responding bot. Then hit the ``Up arrow key`` to show the last command that had been typed into bash, which is usually the one that invokes the bot. You can then adjust that command if you need to (such as possibly changing the server), and then hit enter to re-run that command and reconnect the bot to EFnet.
 
@@ -194,5 +194,5 @@ The ArchiveBot ``!status`` command that is available in the #archivebot IRC chan
 	cd /ArchiveBot/bot
 	bundle exec ruby console.rb
 	in_working = $redis.lrange('working', 0, -1); 1
-	in_working.each { |ident| $redis.lren('working', 0, ident) if Job.from_ident(ident, $redis).nil ? }
+	in_working.each { |ident| $redis.lrem('working', 0, ident) if Job.from_ident(ident, $redis).nil ? }
 
