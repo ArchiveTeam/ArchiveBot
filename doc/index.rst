@@ -14,6 +14,8 @@ Contents:
    :maxdepth: 2
    
    commands
+   redis
+   admin
 
 
 Indices and tables
