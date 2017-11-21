@@ -1,5 +1,5 @@
 {
-    "name": "flikr",
+    "name": "flickr",
     "patterns": [
         "^https?://www\.flickr\.com/photos/[^/]+/.*\.[jJ][pP][gG]$",
         "^https?://www\.flickr\.com/photos/.*/javascripts/",
