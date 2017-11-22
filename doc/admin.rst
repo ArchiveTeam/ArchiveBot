@@ -2,9 +2,9 @@
 ArchiveBot Administration
 =========================
 
-ArchiveBot has a central "control node" server, currently run by Archive Team member David Yip (yipdw) at archivebot.at.ninjawedding.org .  This document explains how to manage it, hopefully without breaking anything.
+ArchiveBot has a central "control node" server, currently run by Archive Team member David Yip (yipdw) at ``archivebot.at.ninjawedding.org``.  This document explains how to manage it, hopefully without breaking anything.
 
-This control node server does many things. It runs the actual bot that sits in the IRC channel #archivebot and listens to Archive Team members' commands about which websites to archive. It runs the Redis server that keeps track of all the pipelines and their data. It runs the web-based ArchiveBot dashboard and pipeline dashboard. It runs the Twitter bot that sends information about what's being archived. It has access to log files and debug information.
+This control node server does many things. It runs the actual bot that sits in the EFnet IRC channel #archivebot and listens to Archive Team members' commands about which websites to archive. It runs the Redis server that keeps track of all the pipelines and their data. It runs the web-based ArchiveBot dashboard and pipeline dashboard. It runs the Twitter bot that sends information about what's being archived. It has access to log files and debug information.
 
 It also handles many manual administrative tasks that need doing from time to time, such as cleaning out (or "reaping") information about old pipelines that have gone offline, or old web crawl jobs that were aborted or died or disappeared.
 
@@ -40,7 +40,9 @@ https://github.com/ArchiveTeam/ArchiveBot/blob/master/INSTALL.pipeline
 
 When a new pipeline is set up and all ready to go, the last step is that the server's SSH key still needs to be manually added to the control node. The new pipeline's operator should e-mail or private message one of the Archive Team members who already has SSH access to the control node server, such as David Yip (yipdw), Brooke Schreier Ganz (Asparagirl) or Just Another Archivist (JAA), who may be hanging out in #archiveteam on EFnet. One of them should SSH into the ``pipeline@archivebot.at.ninjawedding.org`` account, and do:
 
+	```bash
 	cd /home/pipeline/.ssh
+	```
 
 Then they should open the file ``authorized_keys`` with the text editor of their choice, and add the new pipeline server's SSH key to the bottom of the list, save, and quit.  If the new pipeline is set up correctly, it should then show up on the web-based pipeline dashboard shortly after that, and should start being assigned web crawl jobs from the queue.
 
@@ -74,7 +76,7 @@ Administrators probably won't need to do much in this pane, but it's useful to k
 tmux pane 1: pipeline manager
 +++++++++++++++++++++++++++++
 
-This pane runs the pipeline manager, which is ```plumbing/updates-listener```.  This listens for updates coming into Redis from all of the many pipelines.  It then sends these updates to a ZeroMQ socket, which is what used by the web-based ArchiveBot dashboard (and possibly a few other things?); the dashboard is listening on publicly accessible port 31337.
+This pane runs the pipeline manager, which is ``plumbing/updates-listener``.  This listens for updates coming into Redis from all of the many pipelines.  It then sends these updates to a ZeroMQ socket, which is what used by the web-based ArchiveBot dashboard (and possibly a few other things?); the dashboard is listening on publicly accessible port 31337.
 
 (This port is *not* where the ArchiveBot Twitter bot gets its data; that's a different daemon.)
 
@@ -105,7 +107,7 @@ The web-based dashboard has a small unknown memory leak, so the bottom pane runs
 tmux pane 4: IRC bot
 ++++++++++++++++++++
 
-This pane runs the actual ArchiveBot, which is an IRC bot that sits in the channel #archivebot on EFNet and listens for Archive Team volunteers feeding it commands about what websites to archive.
+This pane runs the actual ArchiveBot, which is an IRC bot that sits in the channel #archivebot on EFnet and listens for Archive Team volunteers feeding it commands about what websites to archive.
 
 Usually, there's not much that an administrator will need to do for this. If the bot gets kicked off EFnet, it will try to reconnect on its own. However, EFnet sometimes has the tendency to netsplit (disconnect from some IRC nodes in a disorganized manner). If that happens, the bot might try to rejoin a server that's been split, in which case the bot might need to be "kicked" (restarted and reconnected to the IRC server).
 
@@ -127,13 +129,17 @@ Every job has a heartbeat associated with it, which Redis monitors. This pane wi
 
 If you need to reap a dead ArchiveBot job -- in this case, one with the hypothetical job id 'abcdefghiabcdefghi' -- here's what to do in this pane:
 
+	```bash
 	cd ~/ArchiveBot/bot/
 	bundle exec ruby console.rb
 	j = Job.from_ident('abcdefghiabcdefghi', $redis)
+	```
 
 At this point, you should get a response message starting with ``<struct Job...>``.  That means the job id does exist somewhere in Redis, which is good. Then you should run:
 
+	```bash
 	j.fail
+	```
 
 This will kill that one job, but note that the magic Redis word in the command here is 'fail', not 'kill'.  This deletes the job state from Redis.
 
@@ -141,13 +147,19 @@ It is possible to reap multiple jobs at once, by mapping their job id's with reg
 
 You can also clean out “nil” jobs with redis-cli in the admin console with this command:
 
+	```bash
 	idents.each { |id| $redis.del(id) }
+	```
 
 That command would send the delete command about each id to the Redis server.
 
 This tmux pane 6 *also* runs the ArchiveBot Twitter bot connector. You shouldn't need to do anything with that most of the time, but it ever dies, go to pane 6 and press up and enter to re-run command, which is:
 
+	```bash
 	bundle exec ruby start.rb -t twitter_archivebot.json
+	```
+
+The Twitter bot is publicly viewable at https://twitter.com/ArchiveBot/ .
 
 
 tmux pane 7: couchdb
@@ -159,28 +171,35 @@ This pane inserts couchdb documents.  You can probably ignore this, and should l
 tmux pane 8: the pipeline reaper
 ++++++++++++++++++++++++++++++++
 
-This is the pane where you can reap old dead pipelines from the pipeline monitor.  You can view the web-based pipeline monitor page here:
-http://dashboard.at.ninjawedding.org/pipelines
+This is the pane where you can reap old dead pipelines from the pipeline monitor.  You can view the web-based pipeline monitor page here: http://dashboard.at.ninjawedding.org/pipelines
 
 Pipeline data is stored inside Redis. You can get a list of all the pipelines Redis knows about with this command:
 
+	```bash
 	~/redis-2.8.6/src/redis-cli keys pipeline:*
+	```
 
 That will list all currently assigned pipeline keys -- but some of those pipelines may be dead.
 
 To peek at the data within any given pipeline -- in this case, a pipeline that was assigned the id 4f618cfcd81f44583a93b8bdb50470a1 -- use the command:
 
+	```bash
 	~/redis-2.8.6/src/redis-cli type pipeline:4f618cfcd81f44583a93b8bdb50470a1
+	```
 
 To find out which pipelines are dead, check the web-based pipeline monitor and copy the unique key for a dead pipeline.
 
 To reap the dead pipeline (two parts):
 
+	```bash
 	~/redis-2.8.6/src/redis-cli srem pipelines pipeline:4f618cfcd81f44583a93b8bdb50470a1
+	```
 
 That removes the dead pipeline from the set of active pipelines. Then do:
 
+	```bash
 	~/redis-2.8.6/src/redis-cli del pipeline:4f618cfcd81f44583a93b8bdb50470a1
+	```
 	***NOTE: be very careful with this; make sure you do not have the word "pipelines" in this command!***
 
 That deletes that dead pipeline's data.
@@ -191,8 +210,10 @@ Re-sync the IRC !status command to actual Redis data
 
 The ArchiveBot ``!status`` command that is available in the #archivebot IRC channel on EFnet is supposed to be an accurate counter of how many jobs are currently running, aborted, completed, or pending.  But sometimes it gets un-synchronized from the actual Redis values, especially if a pipeline dies.  Here's how to automatically sync the information again, from Redis to IRC:
 
+	```bash
 	cd /ArchiveBot/bot
 	bundle exec ruby console.rb
 	in_working = $redis.lrange('working', 0, -1); 1
 	in_working.each { |ident| $redis.lrem('working', 0, ident) if Job.from_ident(ident, $redis).nil ? }
+	```
 
