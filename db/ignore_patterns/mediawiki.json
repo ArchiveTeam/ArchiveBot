@@ -20,6 +20,7 @@
         "[\\?&]mobileaction=",
         "[\\?&]undo(after)?=\\d+",
         "^http://a\\.wikia-beacon\\.com/__track/",
+        "([\\?&]title=|/)Special:(PrefixIndex|WhatLinksHere)/.*/\\2/",
         "/User_talk:.+/User_talk:",
         "/User_blog:.+/User_blog:",
         "/User:.+/User:",
