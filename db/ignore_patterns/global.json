@@ -194,7 +194,7 @@
         "^https?://tm\\.uol\\.com\\.br/h/.+/h/",
         "^https?://media\\.opb\\.org/clips/embed/.+\\.js$",
         "^https?://[^.]+\\.pinterest\\.[^/]+/join/",
-        "\\?wordfence_logHuman=1",
+        "\\?wordfence_(logHuman|lh)=1",
         "^https?://[^/]*tumblr\\.com/widgets/share/tool",
         "amp;amp;",
         "^https?://accounts\\.google\\.com/o/oauth2/auth\\?",
