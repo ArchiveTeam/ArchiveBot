@@ -230,7 +230,7 @@ def main():
                 if params.mode == 'rsync':
                     exit_code = subprocess.call([
                         "rsync", "-av", "--timeout=300", "--contimeout=300",
-                        "--progress", fname_u, params.url])
+                        "--progress", "--ignore-existing", fname_u, params.url])
                 elif params.mode == 's3':
                     exit_code = ia_s3_ship(fname_u, basename, item, params)
                 else: #no upload mechanism available
