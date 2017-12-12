@@ -40,7 +40,7 @@ class Params:
                 raise RuntimeError('Won\'t let you upload to localhost because I '
                                    'remove files after uploading them, and you '
                                    'might be uploading to the same directory')
-        url_check = re.search(r'/[a-zA-Z0-9].+$', self.url)
+        url_check = re.search(r'/[a-zA-Z0-9!\"£$%^&*()_+=-\[\];'#|,.\|{}:@~<>?`¬]+$', self.url)
         if url_check:
             print('BAD RSYNC URL')
             raise RuntimeError(''
