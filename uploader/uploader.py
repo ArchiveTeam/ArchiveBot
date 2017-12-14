@@ -40,15 +40,16 @@ class Params:
                 raise RuntimeError('Won\'t let you upload to localhost because I '
                                    'remove files after uploading them, and you '
                                    'might be uploading to the same directory')
-        url_check = re.search(r'\/$', self.url)
-        if url_check:
-            self.mode = 'rsync'
-        else:
+
+        if not self.url.endswith('/'):
             print('BAD RSYNC URL')
             raise RuntimeError(''
                                'Woa there! It looks like you are trying to '
                                'use an RSYNC URL ending with a character - '
                                'All rsync addresses should end / - aborting')
+
+        if self.url.endswith('/'):
+            self.mode = 'rsync'
 
         if self.url is None:
             self.url = os.environ.get('S3_URL')
