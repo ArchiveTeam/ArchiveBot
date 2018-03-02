@@ -198,6 +198,7 @@
         "amp;amp;",
         "^https?://accounts\\.google\\.com/o/oauth2/auth\\?",
         "^https?://www\\.facebook\\.com/dialog/oauth\\?",
+        "^https?://www\\.facebook\\.com/widgets/",
         "^https?://[^/]+\\.onion/",
         "http://connect\\.qq\\.com/widget/shareqq/index\\.html\\?",
         "^https?://web\\.whatsapp\\.com/send\\?"
