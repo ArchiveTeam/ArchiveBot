@@ -201,7 +201,7 @@
         "^https?://[^/]+\\.onion/",
         "http://connect\\.qq\\.com/widget/shareqq/index\\.html\\?",
         "^https?://web\\.whatsapp\\.com/send\\?",
-        "^https?://(direct\\.(france(info|inter|culture|musique|bleu)|fipradio|mouv)\\.fr|(aechai9hib|chai5she)\\.cdn\\.dvmr\\.fr(:\\d+)?)/.*\\.mp3$"
+        "^https?://(direct\\.(france(info|inter|culture|musique|bleu)|fipradio|mouv)\\.fr|[^/.]+\\.cdn\\.dvmr\\.fr(:\\d+)?)/.*\\.mp3$"
     ],
     "type": "ignore_patterns"
 }
