@@ -26,21 +26,7 @@ def candidate_queues(named_queues, pipeline_nick, ao_only, large):
     Generates names of queues that this pipeline will check for work.
     '''
 
-    def applies(q):
-        return q.replace('pending:', '') in pipeline_nick
-
-    if ao_only and large:
-        return ['pending-ao', 'pending-large']
-    elif ao_only:
-        return ['pending-ao']
-    else:
-        matches = [q for q in named_queues if applies(q)]
-        if large:
-            matches.append('pending-large')
-        matches.append('pending')
-        matches.append('pending-ao')
-
-        return matches
+    return [q for q in named_queues if q in ('pending:tor', 'pending:{}'.format(pipeline_nick))]
 
 class Control(object):
     '''
