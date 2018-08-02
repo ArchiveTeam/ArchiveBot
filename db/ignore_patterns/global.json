@@ -200,7 +200,8 @@
         "^https?://www\\.facebook\\.com/dialog/oauth\\?",
         "^https?://[^/]+\\.onion/",
         "http://connect\\.qq\\.com/widget/shareqq/index\\.html\\?",
-        "^https?://web\\.whatsapp\\.com/send\\?"
+        "^https?://web\\.whatsapp\\.com/send\\?",
+        "^https?://(direct\\.(france(info|inter|culture|musique|bleu)|fipradio|mouv)\\.fr|[^/.]+\\.cdn\\.dvmr\\.fr(:\\d+)?)/.*\\.mp3$"
     ],
     "type": "ignore_patterns"
 }
