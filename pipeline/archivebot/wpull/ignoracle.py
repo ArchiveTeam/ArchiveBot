@@ -82,6 +82,8 @@ class Ignoracle(object):
         primary_loc = re.escape(params.get('primary_netloc') or '')
 
         for pattern in self.patterns:
+            if pattern == r'^https?://[^/]+\.onion/':
+                continue
             try:
                 expanded = pattern.replace('{primary_url}', primary_url)
                 expanded = expanded.replace('{primary_netloc}', primary_loc)
