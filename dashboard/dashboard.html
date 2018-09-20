@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="referrer" content="never">
+<meta name="referrer" content="no-referrer">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta http-equiv="x-dns-prefetch-control" content="off">
 <base target="_blank">
@@ -32,8 +32,7 @@ html {
 }
 
 html, body {
-	background-color: #D0C0AE;
-	font-family: Tahoma, Arial, sans-serif;
+	font-family: system-ui, Roboto, 'Segoe UI', Tahoma, Arial, sans-serif;
 	font-size: 13px;
 	/**
 	 * Opt out of Chrome's Scroll Anchoring, which causes this page to
@@ -42,6 +41,10 @@ html, body {
 	 * https://github.com/WICG/interventions/blob/0063fe5d3d0e086d4f963c8bd612d12b57db0784/scroll-anchoring/explainer.md#exclusion--opt-out-api
 	 */
 	overflow-anchor: none;
+}
+
+html, body, .job-ident {
+	background-color: #d4c7b8;
 }
 
 #filter-box {
@@ -67,7 +70,7 @@ html, body {
 }
 
 .header {
-	font-family: Arial, sans-serif;
+	font-family: Roboto, Arial, sans-serif;
 	font-weight: bold;
 	font-size: 18px;
 	margin: 0 0 20px 0;
@@ -86,7 +89,7 @@ html, body {
 }
 
 .stats-elements:hover {
-	background-color: #D8CBBC;
+	background-color: #ffffff40;
 }
 
 .job-info {
@@ -113,10 +116,12 @@ html, body {
 	vertical-align: bottom;
 	/* Needed to avoid collapsing of leading space */
 	white-space: pre;
+	/* Keep digits in fonts like San Francisco aligned */
+	font-variant-numeric: tabular-nums;
 }
 
 .job-url {
-	font-family: Arial, sans-serif;
+	font-family: Roboto, Arial, sans-serif;
 	font-size: 14px;
 	font-weight: bold;
 	text-decoration: none;
@@ -140,7 +145,7 @@ html, body {
 }
 
 .job-mb-aligned {
-	width: 70px;
+	width: 78px;
 	overflow: hidden;
 	text-overflow: hidden;
 	text-align: right;
@@ -153,8 +158,22 @@ html, body {
 	text-align: right;
 }
 
+.job-responses-per-second-aligned {
+	width: 27px;
+	overflow: hidden;
+	text-overflow: hidden;
+	text-align: right;
+}
+
 .job-in-queue-aligned {
 	width: 92px;
+	overflow: hidden;
+	text-overflow: hidden;
+	text-align: right;
+}
+
+.job-connections-aligned {
+	width: 14px;
 	overflow: hidden;
 	text-overflow: hidden;
 	text-align: right;
@@ -176,11 +195,10 @@ html, body {
 }
 
 .job-ident {
-	font-family: Tahoma, Arial, sans-serif;
+	font-family: Roboto, Tahoma, Arial, sans-serif;
 	margin: 0 1px 0 0;
 	padding: 0;
 	border: 0;
-	background-color: #D0C0AE;
 	color: #645444;
 	text-align: right;
 }
@@ -193,6 +211,8 @@ html, body {
 	border: 1px solid #999;
 	margin: 0 0 1em 0;
 	border-radius: 3px;
+	box-shadow: 4px 4px 17px 0px #0000001c;
+	overscroll-behavior: contain;
 }
 
 .log-window-hidden {
@@ -202,8 +222,7 @@ html, body {
 }
 
 .log-window-stopped {
-	border: 1px solid #222;
-	box-shadow: 2px 2px 4px #888;
+	box-shadow: 4px 4px 17px 0px #00000052;
 }
 
 .log-window-expanded {
@@ -280,7 +299,7 @@ a.ignore {
 
 #help {
 	background-color: #FFF7E1;
-	font-family: Arial, sans-serif;
+	font-family: Roboto, Arial, sans-serif;
 	font-size: 14px;
 	border-radius: 5px;
 	padding: 0.01em 1em 0.01em 1em;
@@ -320,7 +339,7 @@ a.ignore {
 	line-height: 26px;
 	padding-left: 26px;
 	padding-right: 26px;
-	font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
+	font-family: system-ui, Roboto, 'Segoe UI', 'Helvetica Neue', sans-serif;
 	font-size: 12px;
 	cursor: default;
 	-webkit-touch-callout: none;
@@ -405,7 +424,7 @@ a.ignore {
 				If your adblocker is enabled for this domain, you will see slower performance, and some URLs will not be displayed.
 			</p>
 			<p>
-				In Chrome 42+, Firefox 41+, and IE10+, a custom context menu is enabled when right-clicking URLs in the log windows below.  It can be disabled by adding <kbd><span class="url-q-or-amp">?</span>contextMenu=0</kbd> to the dashboard URL.  Firefox users: if you see both the normal and custom context menu, make sure <code>dom.event.contextmenu.enabled</code> is set to <code>true</code> in <code>about:config</code>.
+				A custom context menu is shown when right-clicking URLs in the log windows below.  It can be disabled by adding <kbd><span class="url-q-or-amp">?</span>contextMenu=0</kbd> to the dashboard URL.  Firefox users: if you see both the normal and custom context menu, make sure <code>dom.event.contextmenu.enabled</code> is set to <code>true</code> in <code>about:config</code>.
 			</p>
 			<p>
 				For easier text selection in the log windows, add <kbd><span class="url-q-or-amp">?</span>moreDom=1</kbd> to the dashboard URL.  (This uses ~25% more memory.)
@@ -841,7 +860,9 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 	// starts to scroll the page instead.  We prevent this behavior here.
 	// If the user wants to scroll the page, they need to move their
 	// mouse outside a log window first.
-	if(!isSafari) {
+	if(isChrome && getChromeMajorVersion() >= 63) {
+		// No need to attach an event; .log-window { overscroll-behavior: contain } will take care of it.
+	} else if(!isSafari) {
 		logWindowAttrs["onwheel"] = function(ev) {
 			// Note: offsetHeight is "wrong" by 2px but it doesn't matter
 			//console.log(ev, logWindow.scrollTop, (logWindow.scrollHeight - logWindow.offsetHeight));
@@ -867,9 +888,9 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 	var statsElements = {
 		mb: h("span", {"className": "inline-stat job-mb"}, "?"),
 		responses: h("span", {"className": "inline-stat job-responses"}, "?"),
-		responsesPerSecond: h("span", null, "?"),
+		responsesPerSecond: h("span", {"className": "inline-stat job-responses-per-second"}, "?"),
 		queueLength: h("span", {"className": "inline-stat job-in-queue"}, "? in q."),
-		connections: h("span", null, "?"),
+		connections: h("span", {"className": "inline-stat job-connections"}, "?"),
 		delay: h("span", {"className": "inline-stat job-delay"}, "? ms delay"),
 		ignores: h("span", {"className": "job-ignores"}, "?"),
 		jobInfo: null /* set later */
@@ -897,7 +918,7 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 				}
 			}, [
 				" on ",
-				h("span", {"title": startedISOString}, startedISOString.split("T")[0].substr(5)),
+				h("span", {"className": "inline-stat", "title": startedISOString}, startedISOString.split("T")[0].substr(5)),
 				h("span", {"className": "inline-stat job-nick"}, (this.showNicks ? " by " + jobData["started_by"] : "")),
 				jobNote,
 				"; ",
@@ -1252,7 +1273,9 @@ JobsRenderer.prototype.updateAlign = function() {
 	arrayFrom(document.querySelectorAll('.job-nick')).map(adderOrRemover('job-nick-aligned'));
 	arrayFrom(document.querySelectorAll('.job-mb')).map(adderOrRemover('job-mb-aligned'));
 	arrayFrom(document.querySelectorAll('.job-responses')).map(adderOrRemover('job-responses-aligned'));
+	arrayFrom(document.querySelectorAll('.job-responses-per-second')).map(adderOrRemover('job-responses-per-second-aligned'));
 	arrayFrom(document.querySelectorAll('.job-in-queue')).map(adderOrRemover('job-in-queue-aligned'));
+	arrayFrom(document.querySelectorAll('.job-connections')).map(adderOrRemover('job-connections-aligned'));
 	arrayFrom(document.querySelectorAll('.job-delay')).map(adderOrRemover('job-delay-aligned'));
 };
 
@@ -1459,32 +1482,11 @@ var Dashboard = function() {
 
 	var args = getQueryArgs();
 
-	var historyLines =
-		args["historyLines"] ?
-			Number(args["historyLines"]) :
-			navigator.userAgent.match(/Mobi/) ? 250 : 1000;
-	var batchTimeWhenVisible =
-		args["batchTimeWhenVisible"] ?
-			Number(args["batchTimeWhenVisible"]) :
-			125;
-	var showNicks =
-		args["showNicks"] ?
-			Boolean(Number(args["showNicks"])) :
-			false;
-	var contextMenu =
-		args["contextMenu"] ?
-			Boolean(Number(args["contextMenu"])) :
-			/**
-			 * The context menu is useless without document.execCommand('copy'),
-			 * which is available in IE10+, Chrome 42+, and Firefox 41+
-			 */
-			((isTrident && getTridentMajorVersion() >= 6) ||
-			 (isChrome && getChromeMajorVersion() >= 42) ||
-			 (isFirefox && getFirefoxMajorVersion() >= 41));
-	var moreDom =
-		args["moreDom"] ?
-			Boolean(Number(args["moreDom"])) :
-			false;
+	var historyLines         = args["historyLines"]         ? Number(args["historyLines"])         : navigator.userAgent.match(/Mobi/) ? 250 : 1000;
+	var batchTimeWhenVisible = args["batchTimeWhenVisible"] ? Number(args["batchTimeWhenVisible"]) : 125;
+	var showNicks            = args["showNicks"]            ? Boolean(Number(args["showNicks"]))   : false;
+	var contextMenu          = args["contextMenu"]          ? Boolean(Number(args["contextMenu"])) : true;
+	var moreDom              = args["moreDom"]              ? Boolean(Number(args["moreDom"]))     : false;
 	// Append to page title to make it possible to identify the tab in Chrome's task manager
 	if(args["title"]) {
 		document.title += " - " + args["title"];
@@ -1572,6 +1574,21 @@ var Dashboard = function() {
 
 Dashboard.prototype.keyPress = function(ev) {
 	//console.log(ev);
+
+	// If you press ctrl-f or alt-f in Firefox (tested: 41), it dispatches
+	// the keypress event for 'f'.  We want only the modifier-free
+	// keypresses.
+	if(ev.ctrlKey || ev.altKey || ev.metaKey) {
+		return;
+	}
+	// Check shiftKey only after handling '?', because you need shift for '?'
+	if(ev.which == 63) { // ?
+		ds.toggleHelp();
+		return;
+	}
+	if(ev.shiftKey) {
+		return;
+	}
 	if(ev.which == 106) { // j
 		this.jobsRenderer.showNextPrev(1);
 	} else if(ev.which == 107) { // k
@@ -1586,8 +1603,6 @@ Dashboard.prototype.keyPress = function(ev) {
 		byId('filter-box').select();
 	} else if(ev.which == 118) { // v
 		window.open(this.jobsRenderer.firstFilterMatch["url"]);
-	} else if(ev.which == 63) { // ?
-		ds.toggleHelp();
 	}
 };
 
