@@ -2,7 +2,7 @@ module JobStatusGeneration
   def to_status
     rep = []
 
-    rep << "Job #{ident} <#{url}>:"
+    rep << "Job #{ident} <#{url}>."
 
     if started_by
       if note
@@ -19,22 +19,21 @@ module JobStatusGeneration
     elsif pending?
       rep << "In queue."
     elsif in_progress?
-      rep << "In progress.  Downloaded #{mb_downloaded.round(2)} MB, #{error_count.to_i} errors encountered, #{item_count} items queued."
-      rep << "#{concurrency.to_i} workers, delay: [#{delay_min.to_f}, #{delay_max.to_f}] ms."
-      rep << "See the ArchiveBot dashboard for more information."
+      rep << "In progress. Downloaded #{mb_downloaded.round(2)} MiB, #{error_count.to_i} errors, #{item_count} queued."
+      rep << "#{concurrency.to_i} workers, delay: #{delay_min.to_f}, #{delay_max.to_f} ms."
     end
 
     if (t = ttl) && (t != -1)
       rep << "Eligible for rearchival in #{formatted_ttl(t)}."
     end
 
-    rep
+    [rep.join(" ")]
   end
 
   private
 
   def mb_downloaded
-    bytes_downloaded.to_f / (1000 * 1000)
+    bytes_downloaded.to_f / (1024 * 1024)
   end
 
   def item_count
