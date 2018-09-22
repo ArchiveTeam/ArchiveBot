@@ -19,7 +19,7 @@ module JobStatusGeneration
     elsif pending?
       rep << "In queue."
     elsif in_progress?
-      rep << "In progress. Downloaded #{mb_downloaded.round(2)} MB, #{error_count.to_i} errors, #{item_count} queued."
+      rep << "In progress. Downloaded #{mb_downloaded.round(2)} MiB, #{error_count.to_i} errors, #{item_count} queued."
       rep << "#{concurrency.to_i} workers, delay: #{delay_min.to_f}, #{delay_max.to_f} ms."
     end
 
@@ -33,7 +33,7 @@ module JobStatusGeneration
   private
 
   def mb_downloaded
-    bytes_downloaded.to_f / (1000 * 1000)
+    bytes_downloaded.to_f / (1024 * 1024)
   end
 
   def item_count
