@@ -30,7 +30,7 @@ from archivebot.seesaw.tasks import GetItemFromQueue, StartHeartbeat, \
     SetFetchDepth, PreparePaths, WriteInfo, DownloadUrlFile, \
     RelabelIfAborted, MoveFiles, StopHeartbeat, MarkItemAsDone, CheckIP
 
-VERSION = "20171212.01"
+VERSION = "20180922.01"
 PHANTOMJS_VERSIONS = ('1.9.8', '2.1.1')
 WPULL_VERSION = ('2.0.3')
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
