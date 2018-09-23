@@ -61,6 +61,12 @@ class Brain
       return
     end
 
+    # youtube-dl is broken: https://github.com/ArchiveTeam/ArchiveBot/issues/291
+    if h[:youtube_dl]
+      reply m, 'Sorry, youtube-dl is broken at the moment.'
+      return
+    end
+
     # Recursive retrieval with youtube-dl is bad juju.
     if h[:youtube_dl] && depth == :inf
       reply m, 'Sorry, recursive retrieval with youtube-dl is not supported at this time.'
