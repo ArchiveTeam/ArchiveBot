@@ -216,8 +216,8 @@ Accepted parameters
 
       > !archiveonly https://example.website/fun-video-38214 --youtube-dl
       < Queued https://example.website/fun-video-38214 for archival without
-        recursion.
-      < Options: youtube-dl: yes
+        recursion as job dma5g7xcy0r3gbmisqshkpkoe.
+      < Options for job dma5g7xcy0r3gbmisqshkpkoe: youtube-dl: yes
       < Use !status dma5g7xcy0r3gbmisqshkpkoe for updates, !abort
         dma5g7xcy0r3gbmisqshkpkoe to abort.
 

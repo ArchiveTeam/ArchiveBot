@@ -32,7 +32,7 @@ module PipelineOptions
     end
 
     if !messages.empty?
-      reply m, "Options: #{messages.join('; ')}"
+      reply m, "Options for job #{job.ident}: #{messages.join('; ')}"
     end
 
     super

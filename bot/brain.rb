@@ -119,13 +119,13 @@ class Brain
       urls_in = 'URLs in ' if url_file
 
       if depth == :shallow
-        reply m, "Queued #{urls_in}#{uri.to_s} for archival without recursion."
+        reply m, "Queued #{urls_in}#{uri.to_s} for archival without recursion as job #{job.ident}."
       else
-        reply m, "Queued #{urls_in}#{uri.to_s}."
+        reply m, "Queued #{urls_in}#{uri.to_s} as job #{job.ident}."
       end
 
       if user_agent
-        reply m, "Using user-agent #{user_agent}."
+        reply m, "Using user-agent #{user_agent} on job #{job.ident}."
       end
 
       reply m, "Use !status #{job.ident} for updates, !abort #{job.ident} to abort."
@@ -202,7 +202,7 @@ class Brain
     return unless authorized?(m)
 
     job.abort
-    reply m, "Initiated abort for #{job.url}."
+    reply m, "Initiated abort of job #{job.ident} for #{job.url}."
   end
 
   def add_ignore_pattern(m, job, pattern)
