@@ -11,3 +11,4 @@ lxml
 lmdb
 youtube-dl
 html5lib==0.9999999
+git+https://github.com/JustAnotherArchivist/dnspython.git@v1.15.0+at#egg=dnspython
