@@ -46,6 +46,12 @@ class Brain
       if url_file
         return unless op?(m)
       end
+
+      # Allow only ops to add jobs to the queue if there are 5 or more jobs pending
+      if redis.llen('pending') >= 5 && !op?(m)
+        reply m, "Sorry, all pipelines are currently full, and only opped users can add to the queue beyond 5 pending. Please try again later."
+        return
+      end
     end
 
     uri = Addressable::URI.parse(target).normalize
