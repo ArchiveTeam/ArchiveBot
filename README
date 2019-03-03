@@ -33,7 +33,7 @@ ArchiveBot was originally written as a set of separate programs for
 deployment on a server.  This means it has a poor distribution story.
 However, Ivan Kozik (@ivan) has taken the ArchiveBot pipeline,
 dashboard, ignores, and control system and created a package intended for
-personal use.  You can find it at https://github.com/ludios/grab-site.
+personal use.  You can find it at https://github.com/ArchiveTeam/grab-site.
 
 4. License
 
