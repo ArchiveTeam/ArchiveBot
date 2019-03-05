@@ -52,6 +52,7 @@
         "^https?://www\\.google\\.com/recaptcha/api",
         "^https?://geo\\.yahoo\\.com/b\\?",
         "^https?://((s-)?static\\.ak\\.fbcdn\\.net|(connect\\.|www\\.)?facebook\\.com)/connect\\.php/js/.*rsrc\\.php",
+        "^https?://static\\.xx\\.fbcdn\\.net/rsrc\\.php/",
         "^https?://www\\.flickr\\.com/change_language\\.gne",
         "^https?://((www|web|web-beta|wayback)\\.)?archive\\.org/",
         "^https?://archive\\.is/",
