@@ -500,7 +500,7 @@ status
     print job summary::
 
         > !status
-        < Job status: 0 completed, 0 aborted, 0 in progress, 0 pending
+        < Job status: 0 completed, 0 aborted, 0 in progress, 0 pending, 0 pending-ao
 
 ``!status IDENT``, ``!status URL``
     print information about a job or URL
