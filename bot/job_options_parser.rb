@@ -28,6 +28,7 @@ class JobOptionsParser
                when '--ignoresets','--ignore_sets','--ignoreset','--ignore-set','--ignore_set','--ig-set','--igset' then '--ignore-sets'
                when '--nooffsitelinks','--no-offsite','--nooffsite' then '--no-offsite-links'
                when '--useragentalias','--user-agent','--useragent' then '--user-agent-alias'
+               when '--concurrent' then '--concurrency'
                else b[0]
                end)
         b.join('=')
