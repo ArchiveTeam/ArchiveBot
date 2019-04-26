@@ -137,7 +137,7 @@ class Brain
       reply m, "Use !status #{job.ident} for updates, !abort #{job.ident} to abort."
 
       if h[:explain]
-        add_note(m, job, h[:explain])
+        add_note(m, job, h[:explain], false)
       end
 
       if h[:delay]
@@ -186,9 +186,11 @@ class Brain
     end
   end
 
-  def add_note(m, job, note)
+  def add_note(m, job, note, need_auth=true)
     # aka !explain
-    return unless authorized?(m)
+    if need_auth
+      return unless authorized?(m)
+    end
     job.add_note(note)
 
     reply m, %Q{Added note "#{note}" to job #{job.ident}.}
