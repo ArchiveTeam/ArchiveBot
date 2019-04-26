@@ -447,7 +447,7 @@ milliseconds.  The default inter-request delay range is [250, 375] ms.
 concurrency
 ===========
 
-``!concurrency IDENT LEVEL``, ``!con IDENT LEVEL``
+``!concurrency IDENT LEVEL``, ``!concurrent IDENT LEVEL``, ``!con IDENT LEVEL``
     set concurrency level::
 
        > !concurrency 1q2qydhkeh3gfnrcxuf6py70b 8
