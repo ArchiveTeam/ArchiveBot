@@ -9,7 +9,7 @@ def add_args(args, names, item):
         if value:
             args.append(value)
 
-def make_args(item, default_user_agent, wpull_exe, youtube_dl_exe, phantomjs_exe, finished_warcs_dir, warc_max_size):
+def make_args(item, default_user_agent, wpull_exe, youtube_dl_exe, phantomjs_exe, finished_warcs_dir, warc_max_size, monitor_disk, monitor_memory):
     # -----------------------------------------------------------------------
     # BASE ARGUMENTS
     # -----------------------------------------------------------------------
@@ -46,8 +46,8 @@ def make_args(item, default_user_agent, wpull_exe, youtube_dl_exe, phantomjs_exe
         '--strip-session-id',
         '--escaped-fragment',
         '--session-timeout', '21600',
-        '--monitor-disk', '500m',
-        '--monitor-memory', '50m',
+        '--monitor-disk', monitor_disk,
+        '--monitor-memory', monitor_memory,
         '--max-redirect', '8',
         '--youtube-dl-exe', youtube_dl_exe
     ]
@@ -109,17 +109,19 @@ def make_args(item, default_user_agent, wpull_exe, youtube_dl_exe, phantomjs_exe
 # ---------------------------------------------------------------------------
 
 class WpullArgs(object):
-    def __init__(self, *, default_user_agent, wpull_exe, youtube_dl_exe, phantomjs_exe, finished_warcs_dir, warc_max_size):
+    def __init__(self, *, default_user_agent, wpull_exe, youtube_dl_exe, phantomjs_exe, finished_warcs_dir, warc_max_size, monitor_disk, monitor_memory):
         self.default_user_agent = default_user_agent
         self.wpull_exe = wpull_exe
         self.youtube_dl_exe = youtube_dl_exe
         self.phantomjs_exe = phantomjs_exe
         self.finished_warcs_dir = finished_warcs_dir
         self.warc_max_size = warc_max_size
+        self.monitor_disk = monitor_disk
+        self.monitor_memory = monitor_memory
 
     def realize(self, item):
         return make_args(item, self.default_user_agent, self.wpull_exe,
             self.youtube_dl_exe, self.phantomjs_exe, self.finished_warcs_dir,
-            self.warc_max_size)
+            self.warc_max_size, self.monitor_disk, self.monitor_memory)
 
 # vim:ts=4:sw=4:et:tw=78

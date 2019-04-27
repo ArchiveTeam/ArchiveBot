@@ -30,7 +30,7 @@ from archivebot.seesaw.tasks import GetItemFromQueue, StartHeartbeat, \
     SetFetchDepth, PreparePaths, WriteInfo, DownloadUrlFile, \
     RelabelIfAborted, MoveFiles, StopHeartbeat, MarkItemAsDone, CheckIP
 
-VERSION = "20180922.01"
+VERSION = "20190427.01"
 PHANTOMJS_VERSIONS = ('1.9.8', '2.1.1')
 WPULL_VERSION = ('2.0.3')
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
@@ -62,6 +62,8 @@ if 'WARC_MAX_SIZE' in env:
     WARC_MAX_SIZE = env['WARC_MAX_SIZE']
 else:
     WARC_MAX_SIZE = '5368709120'
+WPULL_MONITOR_DISK = env.get('WPULL_MONITOR_DISK', '500m')
+WPULL_MONITOR_MEMORY = env.get('WPULL_MONITOR_MEMORY', '50m')
 
 assert 'TMUX' in env or 'STY' in env or env.get('NO_SCREEN') == "1", \
         "Refusing to start outside of screen or tmux, set NO_SCREEN=1 to override"
@@ -122,7 +124,9 @@ wpull_args = WpullArgs(
     youtube_dl_exe=YOUTUBE_DL,
     phantomjs_exe=PHANTOMJS,
     finished_warcs_dir=os.environ["FINISHED_WARCS_DIR"],
-    warc_max_size=WARC_MAX_SIZE
+    warc_max_size=WARC_MAX_SIZE,
+    monitor_disk=WPULL_MONITOR_DISK,
+    monitor_memory=WPULL_MONITOR_MEMORY,
 )
 
 pipeline = Pipeline(

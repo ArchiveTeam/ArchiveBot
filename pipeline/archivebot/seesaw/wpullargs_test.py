@@ -9,6 +9,8 @@ if 'WARC_MAX_SIZE' in env:
     WARC_MAX_SIZE = env['WARC_MAX_SIZE']
 else:
     WARC_MAX_SIZE = '5368709120'
+WPULL_MONITOR_DISK = env.get('WPULL_MONITOR_DISK', '500m')
+WPULL_MONITOR_MEMORY = env.get('WPULL_MONITOR_MEMORY', '50m')
 
 def joined(args):
     return str.join(' ', args)
@@ -28,7 +30,9 @@ class TestWpullArgs(unittest.TestCase):
                 youtube_dl_exe='/usr/bin/youtube-dl',
                 phantomjs_exe='/usr/bin/phantomjs',
                 finished_warcs_dir='/lost+found/',
-                warc_max_size=WARC_MAX_SIZE
+                warc_max_size=WARC_MAX_SIZE,
+                monitor_disk=WPULL_MONITOR_DISK,
+                monitor_memory=WPULL_MONITOR_MEMORY,
             )
 
     def test_user_agent_can_be_set(self):
