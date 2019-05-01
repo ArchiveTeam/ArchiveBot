@@ -13,7 +13,9 @@ class Recent < Webmachine::Resource
     jobs = Job.working(self.class.redis)
 
     jobs.each_with_object([]) do |j, a|
-      a << j.most_recent_log_entries(count).map { |le| LogMessage.new(j, JSON.parse(le)) }
+      if j #TODO: Why is this necessary?
+        a << j.most_recent_log_entries(count).map { |le| LogMessage.new(j, JSON.parse(le)) }
+      end
     end.flatten
   end
 
