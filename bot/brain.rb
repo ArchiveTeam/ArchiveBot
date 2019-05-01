@@ -172,6 +172,11 @@ class Brain
   end
 
   def show_pending(m)
+    if redis.llen('pending') > 10
+      privmsg(m, "Too many pending jobs to reply to !pending, please use the dashboard instead.")
+      return
+    end
+
     idents = redis.lrange('pending', 0, -1).reverse
 
     urls = redis.pipelined do
