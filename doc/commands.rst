@@ -138,6 +138,8 @@ Accepted parameters
     alias for ``!concurrency``
     sets number of workers for job (use with care!)
 
+    Alias: ``--concurrent``
+
 ``--large``
     Job includes many large (>500MB) files. Job will be sent to
     pipelines that define the `LARGE` environment.
@@ -445,7 +447,7 @@ milliseconds.  The default inter-request delay range is [250, 375] ms.
 concurrency
 ===========
 
-``!concurrency IDENT LEVEL``, ``!con IDENT LEVEL``
+``!concurrency IDENT LEVEL``, ``!concurrent IDENT LEVEL``, ``!con IDENT LEVEL``
     set concurrency level::
 
        > !concurrency 1q2qydhkeh3gfnrcxuf6py70b 8
