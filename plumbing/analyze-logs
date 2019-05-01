@@ -80,7 +80,12 @@ $stdin.each_line do |line|
   
   # Classify each response.
   resps.each do |resp, score|
-    parser << resp
+    begin
+      parser << resp
+    rescue Yajl::ParseError #TODO: Why is this necessary?
+      puts job_key
+      next
+    end
   end
 
   # Add the counts to the Redis state.

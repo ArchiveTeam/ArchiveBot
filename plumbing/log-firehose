@@ -86,7 +86,14 @@ $stdin.each_line do |line|
   next if log_entries.empty?
 
   begin
-    log_entries.each { |entry, _| p << entry }
+    log_entries.each do |entry, _|
+      begin
+        p << entry
+      rescue Yajl::ParseError #TODO: Why is this necessary?
+        puts job_key
+        next
+      end
+    end
   rescue Errno::EPIPE
     break
   end
