@@ -24,9 +24,17 @@ class Pending < Webmachine::Resource
     seen.keys.sort_by(&:downcase).each do |queue|
       b = []
       b << queue
-      self.class.redis.lrange(queue, 0, -1).each do |jobid|
-        b << "  " + jobid
+
+      idents = self.class.redis.lrange(queue, 0, -1).reverse
+
+      urls = self.class.redis.pipelined do
+        idents.each { |ident| self.class.redis.hget(ident, 'url') }
       end
+
+      idents.zip(urls).each.with_index do |(ident, url), i|
+        b << "  #{i+1}. #{url} (#{ident})"
+      end
+
       buffer << b.join("\n")
     end
 
