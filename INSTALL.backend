@@ -9,6 +9,7 @@ To run the backend, you will need:
 - Bundler
 - ExecJS supported runtime (for the dashboard)
   (see https://github.com/sstephenson/execjs)
+- Python 3.6+ and websockets (for the dashboard WebSocket)
 
 (Little known fact: ArchiveBot is made to be as hard as possible to set
 up. If you have trouble with these instructions, drop by in IRC for
@@ -18,13 +19,14 @@ can also take a look at the .travis.yml integration test config file.)
 Quick install, for Debian and Debian-esque systems like Ubuntu:
 
     sudo apt-get update
-    sudo apt-get install bundler couchdb git tmux
+    sudo apt-get install bundler couchdb git tmux python3
       (if you might build ZeroMQ from source, add the next line:)
     sudo apt-get install libtool pkg-config build-essential autoconf automake libzmq-dev
     git clone https://github.com/ArchiveTeam/ArchiveBot.git
     cd ArchiveBot
     git submodule update --init
     bundle install
+    pip install websockets  # Or apt install python3-websockets, or whichever method you prefer.
 
 
 ** STEP 2: INSTALL REDIS **
@@ -147,12 +149,15 @@ repository (which is usually /home/archivebot/ArchiveBot/), run:
 
 In another terminal, run
 
-    export FIREHOSE_SOCKET_URL=tcp://127.0.0.1:12345
-    plumbing/firehose-client | bundle exec ruby dashboard/app.rb -u http://127.0.0.1:8080
+    bundle exec ruby dashboard/app.rb -u http://127.0.0.1:8080
        (replace 127.0.0.1 with your web dashboard host's IP address, if needed)
 
-Configure twitter_conf.json if you want to auto-Tweet to Twitter everytime your bot archives 
-something.
+For the WebSocket, in another terminal, run:
+
+    export FIREHOSE_SOCKET_URL=tcp://127.0.0.1:12345
+    plumbing/firehose-client | python3 dashboard/websocket.py
+
+websocket.py will print debugging info if there is an environment variable WSDEBUG=1.
 
 
 ** STEP 6: LOGS AND MAINTENANCE STUFF **
