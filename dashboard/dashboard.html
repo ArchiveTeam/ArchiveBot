@@ -383,7 +383,7 @@ a.ignore {
 
 	<div id="critical-info">
 		<noscript>
-			Need JavaScript (ES5+) and WebSocket -&gt; TCP:4567
+			Need JavaScript (ES5+) and WebSocket -&gt; TCP:4568
 		</noscript>
 		<div id="help" class="undisplayed">
 			<p>
@@ -1617,7 +1617,7 @@ Dashboard.prototype.handleData = function(data) {
 Dashboard.prototype.connectWebSocket = function() {
 	var wsproto = window.location.protocol === "https:" ? "wss:" : "ws:";
 
-	this.ws = new WebSocket(wsproto + "//" + this.host + "/stream");
+	this.ws = new WebSocket(wsproto + "//" + this.host + ":4568/stream");
 
 	this.ws.onmessage = function(ev) {
 		this.queue.push(ev["data"]);

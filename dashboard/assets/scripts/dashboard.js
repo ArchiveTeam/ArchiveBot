@@ -332,7 +332,7 @@ Dashboard.prototype = {
 			return;
 		}
 		var wsProto = window.location.protocol == "https:" ? "wss:" : "ws:";
-		this.websocket = new WebSocket("" + wsProto + "//" + this.hostname + "/stream");
+		this.websocket = new WebSocket("" + wsProto + "//" + this.hostname + ":4568/stream");
 		this.websocket.onmessage = function(message) {
 			_gthis.showError(null);
 			var doc = JSON.parse(message.data);

@@ -417,7 +417,7 @@ class Dashboard {
 
         var wsProto = Browser.location.protocol == "https:" ? "wss:" : "ws:";
 
-        websocket = new WebSocket('$wsProto//$hostname/stream');
+        websocket = new WebSocket('$wsProto//$hostname:4568/stream');
 
         websocket.onmessage = function (message:Dynamic) {
             showError(null);

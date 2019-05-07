@@ -1,11 +1,11 @@
 require 'json'
+require 'redis'
 require 'trollop'
 require 'uri'
 require 'webmachine'
 require 'webmachine/sprockets'
 
 require File.expand_path('../../lib/shared_config', __FILE__)
-require File.expand_path('../log_actors', __FILE__)
 require File.expand_path('../resources/dashboard', __FILE__)
 require File.expand_path('../resources/feed', __FILE__)
 require File.expand_path('../resources/pipeline', __FILE__)
@@ -39,13 +39,6 @@ App = Webmachine::Application.new do |app|
     config.ip = bind_uri.host
     config.port = bind_uri.port
     config.adapter = :Reel
-    config.adapter_options[:websocket_handler] = proc do |ws|
-      if ws.url == '/stream'
-        LogClient.new(ws)
-      else
-        ws.close
-      end
-    end
   end
 
   app.routes do
@@ -62,32 +55,5 @@ App = Webmachine::Application.new do |app|
     add ['feed'], Feed
   end
 end
-
-at_exit do
-  # dead code: log_receiver isn't set anywhere
-  # Celluloid::Actor[:log_receiver].stop
-end
-
-class Broadcaster
-  include Celluloid
-  include Celluloid::Notifications
-
-  def initialize(channel, input)
-    @channel = channel
-    @input = input
-
-    async.slurp
-  end
-
-  def broadcast(msg)
-    publish(@channel, msg)
-  end
-
-  def slurp
-    @input.each_line { |l| broadcast(l.chomp) }
-  end
-end
-
-Broadcaster.supervise_as :broadcaster, SharedConfig.log_channel, $stdin
 
 App.run
