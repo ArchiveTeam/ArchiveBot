@@ -1,0 +1,30 @@
+{
+    "name": "mediawiki-de",
+    "patterns": [
+        "[\\?&]diff=(prev|next|cur|\\d+)",
+        "[\\?&]direction=(prev|next)&oldid=\\d+",
+        "[\\?&]curid=\\d+",
+        "[\\?&]limit=(20|100|250|500)",
+        "[\\?&]hide(minor|bots|anons|liu|myself|redirs|links|trans|patrolled)=",
+        "([\\?&]title=|/)Spezial:(Anmelden|Abmelden|Translate|MobileFeedback|MobileOptions|%C3%84nderungen_an_verlinkten_Seiten|(Diff|Differenz|Unterschied)|MobileDiff)",
+        "([\\?&]title=|/)Spezial:(Ask|Browse|SearchByProperty|ExportRDF|PageProperty|Properties|UnusedProperties|WantedProperties|SMWAdmin|Types|URIResolver|QueryCreator)",
+        "([\\?&]title=|/)Spezial:Letzte_%C3%84nderungen&from=\\d+",
+        "([\\?&]title=|/)Spezial:(Dateien|Dateiliste)&dir=prev&offset=\\d+",
+        "([\\?&]title=|/)Spezial:((Dateien|Dateiliste)|Pr%C3%A4fixindex).*&amp;",
+        "([\\?&]title=|/)Spezial:(Dateien|Dateiliste).*&user=",
+        "([\\?&]title=|/)Spezial:Logbuch/",
+        "[\\?&]action=edit&section=(\\d+|new)",
+        "[\\?&]feed(format)?=atom",
+        "[\\?&]redlink=1",
+        "[\\?&]printable=yes",
+        "[\\?&]mobileaction=",
+        "[\\?&]undo(after)?=\\d+",
+        "^https?://a\\.wikia-beacon\\.com/__track/",
+        "^https?://beacon\\.wikia-services\\.com/__track/",
+        "([\\?&]title=|/)Spezial:(Pr%C3%A4fixindex|(Linkliste|Verweisliste))/.*/\\2/",
+        "/Benutzer_Diskussion:.+/Benutzer_Diskussion:",
+        "/User_blog:.+/User_blog:",
+        "/Benutzer:.+/Benutzer:"
+    ],
+    "type": "ignore_patterns"
+}
