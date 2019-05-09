@@ -1,0 +1,9 @@
+{
+	"name": "mastodon",
+	"patterns": [
+		"^https?://[^/]+/api/salmon/\\d+$",
+		"^https?://[^/]+/interact/\\d+\\?type=(reply|reblog|favourite)$",
+		"[?&]min_id=\\d+(&|$)"
+	],
+	"type": "ignore_patterns"
+}
