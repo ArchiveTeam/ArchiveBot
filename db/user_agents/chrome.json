@@ -1,5 +1,6 @@
 {
-    "agents": [{
+    "agents": [
+        {
             "aliases": [
                 "chrome",
                 "chrome-windows"
