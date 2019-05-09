@@ -202,7 +202,8 @@
         "http://connect\\.qq\\.com/widget/shareqq/index\\.html\\?",
         "^https?://web\\.whatsapp\\.com/send\\?",
         "^https?://(direct\\.(france(info|inter|culture|musique|bleu)|fipradio|mouv)\\.fr|[^/.]+\\.cdn\\.dvmr\\.fr(:\\d+)?)/.*\\.mp3$",
-        "^https?://www\\.testtesttest\\.com/"
+        "^https?://www\\.testtesttest\\.com/",
+        "^https?://static\\.squarespace\\.com/universal/scripts-compressed/src/main/webapp/universal/"
     ],
     "type": "ignore_patterns"
 }
