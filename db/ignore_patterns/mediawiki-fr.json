@@ -1,0 +1,30 @@
+{
+    "name": "mediawiki-fr",
+    "patterns": [
+        "[\\?&]diff=(prev|next|cur|\\d+)",
+        "[\\?&]direction=(prev|next)&oldid=\\d+",
+        "[\\?&]curid=\\d+",
+        "[\\?&]limit=(20|100|250|500)",
+        "[\\?&]hide(minor|bots|anons|liu|myself|redirs|links|trans|patrolled)=",
+        "([\\?&]title=|/)Sp%C3%A9cial:((Connexion|Identification)|(D%C3%A9connexion|Deconnexion)|Translate|MobileFeedback|MobileOptions|(Suivi_des_liens|SuiviDesLiens)|Diff|MobileDiff)",
+        "([\\?&]title=|/)Sp%C3%A9cial:(Ask|Browse|SearchByProperty|ExportRDF|PageProperty|Properties|UnusedProperties|WantedProperties|SMWAdmin|Types|URIResolver|QueryCreator)",
+        "([\\?&]title=|/)Sp%C3%A9cial:(Modifications_r%C3%A9centes|Modifications_recentes|ModificationsR%C3%A9centes|ModificationsRecentes)&from=\\d+",
+        "([\\?&]title=|/)Sp%C3%A9cial:(Liste_des_fichiers|ListeDesFichiers|Liste_des_images|ListeDesImages)&dir=prev&offset=\\d+",
+        "([\\?&]title=|/)Sp%C3%A9cial:((Liste_des_fichiers|ListeDesFichiers|Liste_des_images|ListeDesImages)|(Index|Pr%C3%A9fixes|Prefixes)).*&amp;",
+        "([\\?&]title=|/)Sp%C3%A9cial:(Liste_des_fichiers|ListeDesFichiers|Liste_des_images|ListeDesImages).*&user=",
+        "([\\?&]title=|/)Sp%C3%A9cial:(Journal|Journaux)/",
+        "[\\?&]action=edit&section=(\\d+|new)",
+        "[\\?&]feed(format)?=atom",
+        "[\\?&]redlink=1",
+        "[\\?&]printable=yes",
+        "[\\?&]mobileaction=",
+        "[\\?&]undo(after)?=\\d+",
+        "^https?://a\\.wikia-beacon\\.com/__track/",
+        "^https?://beacon\\.wikia-services\\.com/__track/",
+        "([\\?&]title=|/)Sp%C3%A9cial:((Index|Pr%C3%A9fixes|Prefixes)|(Pages_li%C3%A9es|PagesLi%C3%A9es|Pages_liees|PagesLiees))/.*/\\2/",
+        "/Discussion_utilisateur:.+/Discussion_utilisateur:",
+        "/User_blog:.+/User_blog:",
+        "/Utilisateur:.+/Utilisateur:"
+    ],
+    "type": "ignore_patterns"
+}

@@ -1,0 +1,30 @@
+{
+    "name": "mediawiki-es",
+    "patterns": [
+        "[\\?&]diff=(prev|next|cur|\\d+)",
+        "[\\?&]direction=(prev|next)&oldid=\\d+",
+        "[\\?&]curid=\\d+",
+        "[\\?&]limit=(20|100|250|500)",
+        "[\\?&]hide(minor|bots|anons|liu|myself|redirs|links|trans|patrolled)=",
+        "([\\?&]title=|/)Especial:((Entrar|Entrada_del_usuario)|(Salida_del_usuario|Salir)|Translate|MobileFeedback|MobileOptions|(CambiosEnEnlazadas|Cambios_en_enlazadas)|Diff|MobileDiff)",
+        "([\\?&]title=|/)Especial:(Ask|Browse|SearchByProperty|ExportRDF|PageProperty|Properties|UnusedProperties|WantedProperties|SMWAdmin|Types|URIResolver|QueryCreator)",
+        "([\\?&]title=|/)Especial:(CambiosRecientes|Cambios_recientes)&from=\\d+",
+        "([\\?&]title=|/)Especial:(ListaIm%C3%A1genes|Lista_de_im%C3%A1genes)&dir=prev&offset=\\d+",
+        "([\\?&]title=|/)Especial:((ListaIm%C3%A1genes|Lista_de_im%C3%A1genes)|(P%C3%A1ginasPorPrefijo|P%C3%A1ginas_por_prefijo)).*&amp;",
+        "([\\?&]title=|/)Especial:(ListaIm%C3%A1genes|Lista_de_im%C3%A1genes).*&user=",
+        "([\\?&]title=|/)Especial:Registro/",
+        "[\\?&]action=edit&section=(\\d+|new)",
+        "[\\?&]feed(format)?=atom",
+        "[\\?&]redlink=1",
+        "[\\?&]printable=yes",
+        "[\\?&]mobileaction=",
+        "[\\?&]undo(after)?=\\d+",
+        "^https?://a\\.wikia-beacon\\.com/__track/",
+        "^https?://beacon\\.wikia-services\\.com/__track/",
+        "([\\?&]title=|/)Especial:((P%C3%A1ginasPorPrefijo|P%C3%A1ginas_por_prefijo)|(LoQueEnlazaAqu%C3%AD|Lo_que_enlaza_aqu%C3%AD))/.*/\\2/",
+        "/Usuario_discusi%C3%B3n:.+/Usuario_discusi%C3%B3n:",
+        "/User_blog:.+/User_blog:",
+        "/Usuario:.+/Usuario:"
+    ],
+    "type": "ignore_patterns"
+}
