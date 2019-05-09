@@ -1,0 +1,7 @@
+{
+	"name": "nogithubcode",
+	"patterns": [
+		"^https?://github\\.com/[^/]+/[^/]+/(tree(-commit)?|blob(_excerpt)?|raw|commits?|branch_commits|file-list)([/?]|$)"
+	],
+	"type": "ignore_patterns"
+}

@@ -1,0 +1,20 @@
+{
+	"name": "github",
+	"patterns": [
+		"^https?://github\\.com/[^/]+/[^/]+/(search|find|blame|diffs|compare|notifications)[/?]",
+		"^https?://github\\.com/.*/(s,|,Meta\\+|Control\\+)/",
+		"^https?://github\\.com/[^/]+/[^/]+/(issues|pulls)(/show_menu_content)?\\?(.*&)?q=(.*\\+)?-?(label|sort|assignee|author|project|milestone|review|no|updated|comments|base)(%3A|:)",
+		"^https?://github\\.com/[^/]+/[^/]+/projects\\?query=([^&]+\\+)?sort(%3A|:)",
+		"^https?://github\\.com/[^/]+/[^/]+/milestones\\?(.*&)?(sort|direction)=",
+		"^https?://github\\.com/[^/]+/[^/]+/(issues/)?labels\\?(.*&)?sort=",
+		"^https?://github\\.com/[^/]+/[^/]+/(issues|pull)/new[/?]",
+		"^https?://github\\.com/[^/]+/[^/]+/commits/[0-9a-f]{40}([/?]|$)",
+		"^https?://github\\.com/[^/]+/[^/]+/commit/[0-9a-f]{40}\\?diff=",
+		"^https?://github\\.com/[^/]+/[^/]+/issues/\\d+/set_milestone\\?",
+		"^https?://github\\.com/[^/]+/[^/]+/pull/\\d+/review-requests\\?",
+		"^https?://github\\.com/[^/]+/[^/]+/projects/issues/\\d+$",
+		"^https?://github\\.com/[^/]+/[^/]+/pull/\\d+/(?!commits/).*/",
+		"^https?://github\\.com/[^/]+/[^/]+/(tree|blob|raw)/[0-9a-f]{40}/"
+	],
+	"type": "ignore_patterns"
+}
