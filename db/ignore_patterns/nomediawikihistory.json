@@ -1,0 +1,9 @@
+{
+	"name": "nomediawikihistory",
+	"patterns": [
+		"[?&]oldid=\\d+(&|$)",
+		"[?&]action=history(&|$)",
+		"([?&]title=|/)Special:Log.*[?&]"
+	],
+	"type": "ignore_patterns"
+}
