@@ -11,7 +11,8 @@
         "^https?://r\\-login\\.wordpress\\.com/remote\\-login\\.php",
         "'\\%20\\+\\%20liker\\.(avatar|profile)_URL\\%20\\+\\%20'",
         "\\%22\\%20\\+\\%20$wrapper\\.data\\(",
-        "^http://.+\\.blogspot\\.(com|in|com\\.au|co\\.uk|jp|co\\.nz|ca|de|it|fr|se|sg|es|pt|com\\.br|ar|mx|kr)/(search(\\?|/label/)|\\d{4,4}/\\d{2,2}/CSI/$)",
+        "^https?://.+\\.blogspot\\.(com|in|com\\.au|co\\.uk|jp|co\\.nz|ca|de|it|fr|se|sg|es|pt|com\\.br|ar|mx|kr)/\\d{4,4}/\\d{2,2}/CSI/$",
+        "^https?://.+\\.blogspot\\.(com|in|com\\.au|co\\.uk|jp|co\\.nz|ca|de|it|fr|se|sg|es|pt|com\\.br|ar|mx|kr)/search\\?(.*&)?reverse-paginate=true(&|$)",
         "livejournal\\.com/ljcounter/?\\?",
         "\\?replyto=[0-9]+",
         "[\\?&]mode=reply",
@@ -30,7 +31,8 @@
         "^http://[^\\.]+\\.livejournal\\.com/.+/stats\\.g\\.doubleclick\\.net/dc\\.js$",
         "^https?://www\\.dreamwidth\\.org/tools/(memadd|tellafriend)\\?",
         "^https?://[^\\.]+\\.dreamwidth\\.org/.+[\\?&]mode=reply",
-        "[?&]SuperSocializerAuth=(LiveJournal|Twitch|Twitter|Xing)(&|$)"
+        "[?&]SuperSocializerAuth=(LiveJournal|Twitch|Twitter|Xing)(&|$)",
+        "^https?://wordpress\\.com/log-in\\?"
     ],
     "type": "ignore_patterns"
 }
