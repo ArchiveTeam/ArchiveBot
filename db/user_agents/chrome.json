@@ -27,6 +27,14 @@
                 "chrome-ios"
             ],
             "name": "Mozilla/5.0 (iPhone; U; CPU iPhone OS 8_1_2 like Mac OS X; en) AppleWebKit/600.1.4 (KHTML, like Gecko) CriOS/39.0.2171.50 Mobile/12B440 Safari/600.1.4"
+        },
+        {
+            "aliases": [
+                "chrome-mac",
+                "chrome-osx"
+            ],
+
+            "name": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 Safari/537.36"
         }
     ],
     "type": "user_agents"
