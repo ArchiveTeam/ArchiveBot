@@ -127,7 +127,7 @@ class Brain
       if depth == :shallow
         reply m, "Queued #{urls_in}#{uri.to_s} for archival without recursion. (job ID: #{job.ident} )"
       else
-        reply m, "Queued #{urls_in}#{uri.to_s}. (job ID: #{job.ident})"
+        reply m, "Queued #{urls_in}#{uri.to_s}. (job ID: #{job.ident} )"
       end
 
       if user_agent
