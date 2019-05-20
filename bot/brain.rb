@@ -125,16 +125,14 @@ class Brain
       urls_in = 'URLs in ' if url_file
 
       if depth == :shallow
-        reply m, "Queued #{urls_in}#{uri.to_s} for archival without recursion."
+        reply m, "Queued #{urls_in}#{uri.to_s} for archival without recursion. (job ID: #{job.ident} )"
       else
-        reply m, "Queued #{urls_in}#{uri.to_s}."
+        reply m, "Queued #{urls_in}#{uri.to_s}. (job ID: #{job.ident})"
       end
 
       if user_agent
         reply m, "Using user-agent #{user_agent}."
       end
-
-      reply m, "Use !status #{job.ident} for updates, !abort #{job.ident} to abort."
 
       if h[:explain]
         add_note(m, job, h[:explain], false)
