@@ -200,10 +200,13 @@
         "^https?://www\\.facebook\\.com/dialog/oauth\\?",
         "^https?://[^/]+\\.onion/",
         "http://connect\\.qq\\.com/widget/shareqq/index\\.html\\?",
-        "^https?://web\\.whatsapp\\.com/send\\?",
+        "^https?://((web|api)\\.whatsapp\\.com/send|wa\\.me/)\\?",
         "^https?://(direct\\.(france(info|inter|culture|musique|bleu)|fipradio|mouv)\\.fr|[^/.]+\\.cdn\\.dvmr\\.fr(:\\d+)?)/.*\\.mp3$",
         "^https?://www\\.testtesttest\\.com/",
-        "^https?://static\\.squarespace\\.com/universal/scripts-compressed/src/main/webapp/universal/"
+        "^https?://static\\.squarespace\\.com/universal/scripts-compressed/src/main/webapp/universal/",
+        "^https?://www\\.facebook\\.com/dialog/send\\?",
+        "^https?://linkedin\\.com/shareArticle\\?",
+        "^https?://(line\\.me/R/msg/text/|lineit\\.line\\.me/share/ui|social-plugins\\.line\\.me/lineit/share)\\?"
     ],
     "type": "ignore_patterns"
 }
