@@ -40,6 +40,11 @@ class Params:
                 raise RuntimeError('Won\'t let you upload to localhost because I '
                                    'remove files after uploading them, and you '
                                    'might be uploading to the same directory')
+            if not str(self.url).endswith('/'):
+                print(str(self.url))
+                raise RuntimeError('Won\'t let you run without a trailing slash on '
+                               'rsync directory')
+
             self.mode = 'rsync'
 
         if self.url is None:
