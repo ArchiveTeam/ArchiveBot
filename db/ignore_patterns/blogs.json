@@ -33,7 +33,11 @@
         "^https?://[^\\.]+\\.dreamwidth\\.org/.+[\\?&]mode=reply",
         "[?&]SuperSocializerAuth=(LiveJournal|Twitch|Twitter|Xing)(&|$)",
         "^https?://wordpress\\.com/log-in\\?",
-        "/wp-content/cache/wpfc-minified/[^/]+/[^/]+/"
+        "/wp-content/cache/wpfc-minified/[^/]+/[^/]+/",
+        "/auth/login/",
+        "\\?category=",
+        "/comment/add/",
+        "api\\.kakao\\.tistory\\.com/like/fetch"
     ],
     "type": "ignore_patterns"
 }
