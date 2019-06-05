@@ -35,7 +35,6 @@
         "^https?://wordpress\\.com/log-in\\?",
         "/wp-content/cache/wpfc-minified/[^/]+/[^/]+/",
         "/auth/login/",
-        "\\?category=",
         "/comment/add/",
         "api\\.kakao\\.tistory\\.com/like/fetch"
     ],
