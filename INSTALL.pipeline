@@ -16,7 +16,7 @@ Quick install, for Debian and Debian-esque systems like Ubuntu:
       libxml2-dev libxslt-dev zlib1g-dev libssl-dev libsqlite3-dev \
       libffi-dev git tmux fontconfig-config fonts-dejavu-core \
       libfontconfig1 libjpeg-turbo8 libjpeg8 lsof ffmpeg youtube-dl \
-      autossh
+      autossh rsync
     pip3 install --upgrade pip
 
 NOTE: Installing phantomjs from apt will often not work on newer 
