@@ -30,13 +30,10 @@ from archivebot.seesaw.tasks import GetItemFromQueue, StartHeartbeat, \
     SetFetchDepth, PreparePaths, WriteInfo, DownloadUrlFile, \
     RelabelIfAborted, MoveFiles, StopHeartbeat, MarkItemAsDone, CheckIP
 
-VERSION = "20190617.01"
-PHANTOMJS_VERSIONS = ('1.9.8', '2.1.1')
+VERSION = "20190723.01"
 WPULL_VERSION = ('2.0.3')
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
 WPULL_EXE = find_executable('Wpull', WPULL_VERSION, ['wpull', './wpull'], '--version')
-PHANTOMJS = find_executable('PhantomJS', PHANTOMJS_VERSIONS,
-        ['phantomjs', './phantomjs', '../phantomjs'], '-v')
 YOUTUBE_DL = find_executable('youtube-dl', None, ['./youtube-dl'], '--version')
 RSYNC = find_executable('rsync', None, ['rsync'], '--version')
 
@@ -53,7 +50,6 @@ if not os.environ.get('NO_SEGFAULT_340'):
         "See https://bugs.python.org/issue21435"
 
 assert WPULL_EXE, 'No usable Wpull found.'
-assert PHANTOMJS, 'PhantomJS {} was not found.'.format(PHANTOMJS_VERSIONS)
 assert YOUTUBE_DL, 'No usable youtube-dl found.'
 assert 'RSYNC_URL' in env, 'RSYNC_URL not set.'
 assert 'REDIS_URL' in env, 'REDIS_URL not set.'
@@ -123,7 +119,6 @@ wpull_args = WpullArgs(
     default_user_agent=DEFAULT_USER_AGENT,
     wpull_exe=WPULL_EXE,
     youtube_dl_exe=YOUTUBE_DL,
-    phantomjs_exe=PHANTOMJS,
     finished_warcs_dir=os.environ["FINISHED_WARCS_DIR"],
     warc_max_size=WARC_MAX_SIZE,
     monitor_disk=WPULL_MONITOR_DISK,

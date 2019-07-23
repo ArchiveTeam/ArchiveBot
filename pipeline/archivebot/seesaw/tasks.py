@@ -99,14 +99,9 @@ class GetItemFromQueue(RetryableTask):
                 item['started_in'] = job_data.get('started_in')
                 item['url'] = job_data.get('url')
                 item['url_file'] = job_data.get('url_file')
-                item['grabber'] = job_data.get('grabber')
                 item['user_agent'] = job_data.get('user_agent')
                 item['no_offsite_links'] = job_data.get('no_offsite_links')
                 item['youtube_dl'] = job_data.get('youtube_dl')
-                item['phantomjs_wait'] = job_data.get('phantomjs_wait')
-                item['phantomjs_scroll'] = job_data.get('phantomjs_scroll')
-                item['no_phantomjs_smart_scroll'] = \
-                    job_data.get('no_phantomjs_smart_scroll')
 
                 item.log_output('Received item %s.' % ident)
 

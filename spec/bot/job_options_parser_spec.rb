@@ -5,22 +5,6 @@ require 'bot/job_options_parser'
 describe JobOptionsParser do
   let(:parser) { JobOptionsParser.new }
 
-  it 'recognizes --phantomjs' do
-    expect(parser.parse('--phantomjs')[:phantomjs]).to eq(true)
-  end
-
-  it 'parses --phantomjs-scroll=10 to an integer' do
-    expect(parser.parse('--phantomjs-scroll=10')[:phantomjs_scroll]).to eq(10)
-  end
-
-  it 'parses --phantomjs-wait=4.25 to a float' do
-    expect(parser.parse('--phantomjs-wait=4.25')[:phantomjs_wait]).to eq(4.25)
-  end
-
-  it 'recognizes --no-phantomjs-smart-scroll' do
-    expect(parser.parse('--no-phantomjs-smart-scroll')[:no_phantomjs_smart_scroll]).to eq(true)
-  end
-
   it 'recognizes --no-offsite-links' do
     expect(parser.parse('--no-offsite-links')[:no_offsite_links]).to eq(true)
   end

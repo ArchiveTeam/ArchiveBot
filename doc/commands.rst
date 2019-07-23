@@ -108,24 +108,6 @@ Accepted parameters
     NOTE: You should use a pipeline *nickname* for this command, not one of the 
     auto-assigned pipeline *id numbers* like ``1a5adaacbe686c708f9277e7b70b590c``.
 
-``--phantomjs``
-    access pages via PhantomJS
-
-``--phantomjs-wait``
-    set number of seconds between PhantomJS requests; defaults to 2.0
-
-``--phantomjs-scroll``
-    maximum number of times to scroll a page in PhantomJS; defaults to 100
-
-``--no-phantomjs-smart-scroll``
-    disable PhantomJS' end-of-page
-    detection and always scroll ``--phantomjs-scroll`` number of
-    times; off by default
-
-    PhantomJS mode is enabled if any of the ``--*phantomjs*`` options are
-    passed.
-
-
 ``--explain``
     alias for ``!explain``
     adds a short note explaining the purpose of the archiving job
@@ -247,23 +229,6 @@ Accepted parameters
       ArchiveBot WARCs.  (Wayback may not support the record convention used by
       ArchiveBot and/or may not support video playback at all.)
 
-``--phantomjs``
-    access pages via PhantomJS
-
-``--phantomjs-wait``
-    set number of seconds between PhantomJS requests; defaults to 2.0
-
-``--phantomjs-scroll``
-    maximum number of times to scroll a page in PhantomJS; defaults to 100
-
-``--no-phantomjs-smart-scroll``
-    disable PhantomJS' end-of-page
-    detection and always scroll ``--phantomjs-scroll`` number of
-    times; off by default
-
-PhantomJS mode is enabled if any of the ``--*phantomjs*`` options are
-passed.
-
 explain
 =======
 
@@ -312,20 +277,6 @@ quick reference:
 
 ``--youtube-dl``
     attempt to download videos using youtube-dl
-
-``--phantomjs``
-    access pages via PhantomJS
-
-``--phantomjs-wait``
-    set number of seconds between PhantomJS requests; defaults to 2.0
-
-``--phantomjs-scroll``
-    maximum number of times to scroll a page in PhantomJS; defaults to 100
-
-``--no-phantomjs-smart-scroll``
-    disable PhantomJS' end-of-page
-    detection and always scroll ``--phantomjs-scroll`` number of
-    times; off by default
 
 ignore
 ======

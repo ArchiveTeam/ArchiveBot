@@ -7,7 +7,6 @@ To run the pipeline, you will need:
 - rsync
 - wpull (automatically installed by Pip)
 - youtube-dl
-- PhantomJS 2.1.1 (or 1.9.8 if that doesn't work for you)
 
 Quick install, for Debian and Debian-esque systems like Ubuntu:
 
@@ -18,17 +17,6 @@ Quick install, for Debian and Debian-esque systems like Ubuntu:
       libfontconfig1 libjpeg-turbo8 libjpeg8 lsof ffmpeg youtube-dl \
       autossh rsync
     pip3 install --upgrade pip
-
-NOTE: Installing phantomjs from apt will often not work on newer 
-versions of Ubuntu; it will cause an error.  You'll need to do the 
-following to do a manual install:
-
-    wget https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-linux-x86_64.tar.bz2
-    bzip2 -d phantomjs-2.1.1-linux-x86_64.tar.bz2
-    tar -xvf phantomjs-2.1.1-linux-x86_64.tar
-    cp phantomjs-2.1.1-linux-x86_64/bin/phantomjs /usr/bin/phantomjs
-
-(You can also place it in /opt.  You will need the path later.)
 
 
 ** STEP 2: CREATE THE ARCHIVEBOT USER **
@@ -88,7 +76,6 @@ As user archivebot, in the SECOND tmux session:
     export RSYNC_URL=rsync://fos.textfiles.com/archivebot/
     export REDIS_URL=redis://127.0.0.1:16379/0
     export FINISHED_WARCS_DIR=$HOME/warcs4fos
-    export PATH=$PATH:/opt/phantomjs-2.1.1-linux-x86_64/bin/
 
 Now, think up a name for this new ArchiveBot pipeline.  It will 
 appear on the publicly available pipeline status dashboard. It will 
@@ -169,22 +156,6 @@ Or, for older versions of Python:
 
     sudo apt-get install python-pip
     pip install --upgrade youtube_dl
-
-** STEP 5b: TROUBLESHOOTING PHANTOMJS INSTALLATION **
-
-PhantomJS is a command line program that can more fully evaluate webpages, 
-including the javascript, and scrape the page content in a way that is more 
-like a human looking at it, rather than a bot.  This is especially 
-important if the page has comments or other features that are activated 
-only by scrolling down the page (such as Twitter timelines). Right now, 
-ArchiveBot requires PhantomJS version 1.9.8 or 2.1.1. 
-
-In case it doesn't install or work for you automatically, here's a link to 
-a Gist containing instructions for forcing 1.9.8 to install on your system:
-
-https://gist.github.com/julionc/7476620
-
-Note that this Gist assumes that your user has sudo privileges.
 
 
 ** STEP 6: Operate the Pipeline **

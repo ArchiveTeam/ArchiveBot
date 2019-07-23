@@ -4,10 +4,6 @@ require 'trollop'
 class JobOptionsParser
   def initialize
     @parser = Trollop::Parser.new do
-      opt :phantomjs, 'Use PhantomJS grabber'
-      opt :phantomjs_scroll, 'Number of times to scroll a page', :type => :integer
-      opt :phantomjs_wait, 'Seconds to wait between page interactions', :type => :float
-      opt :no_phantomjs_smart_scroll, 'Always scroll the page to the specified scroll count'
       opt :no_offsite_links, 'Do not fetch offsite links'
       opt :youtube_dl, 'Use youtube-dl on grabbed pages'
       opt :ignore_sets, 'Ignore sets to apply', :type => :string

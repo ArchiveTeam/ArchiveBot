@@ -9,7 +9,7 @@ def add_args(args, names, item):
         if value:
             args.append(value)
 
-def make_args(item, default_user_agent, wpull_exe, youtube_dl_exe, phantomjs_exe, finished_warcs_dir, warc_max_size, monitor_disk, monitor_memory):
+def make_args(item, default_user_agent, wpull_exe, youtube_dl_exe, finished_warcs_dir, warc_max_size, monitor_disk, monitor_memory):
     # -----------------------------------------------------------------------
     # BASE ARGUMENTS
     # -----------------------------------------------------------------------
@@ -41,7 +41,6 @@ def make_args(item, default_user_agent, wpull_exe, youtube_dl_exe, phantomjs_exe
         '--warc-move', finished_warcs_dir,
         '--plugin-script', 'archive_bot_plugin.py',
         '--plugin-args', '%(item_dir)s/dupes_db' % item,
-        '--phantomjs-exe', phantomjs_exe,
         '--debug-manhole',
         '--strip-session-id',
         '--escaped-fragment',
@@ -81,24 +80,6 @@ def make_args(item, default_user_agent, wpull_exe, youtube_dl_exe, phantomjs_exe
         args.append('page-requisites')
 
     # -----------------------------------------------------------------------
-    # PHANTOMJS CONFIGURATION
-    # -----------------------------------------------------------------------
-    if item.get('grabber') == 'phantomjs':
-        item.log_output('Telling wpull to use PhantomJS.')
-
-        phantomjs_args = [
-            '--phantomjs',
-            '--phantomjs-scroll', item['phantomjs_scroll'],
-            '--phantomjs-wait', item['phantomjs_wait']
-        ]
-
-        if item.get('no_phantomjs_smart_scroll'):
-            phantomjs_args.append('--no-phantomjs-smart-scroll')
-
-        item.log_output('Setting PhantomJS args: %s' % phantomjs_args)
-        args.extend(phantomjs_args)
-
-    # -----------------------------------------------------------------------
     # YOUTUBE-DL
     # -----------------------------------------------------------------------
     if item.get('youtube_dl'):
@@ -109,11 +90,10 @@ def make_args(item, default_user_agent, wpull_exe, youtube_dl_exe, phantomjs_exe
 # ---------------------------------------------------------------------------
 
 class WpullArgs(object):
-    def __init__(self, *, default_user_agent, wpull_exe, youtube_dl_exe, phantomjs_exe, finished_warcs_dir, warc_max_size, monitor_disk, monitor_memory):
+    def __init__(self, *, default_user_agent, wpull_exe, youtube_dl_exe, finished_warcs_dir, warc_max_size, monitor_disk, monitor_memory):
         self.default_user_agent = default_user_agent
         self.wpull_exe = wpull_exe
         self.youtube_dl_exe = youtube_dl_exe
-        self.phantomjs_exe = phantomjs_exe
         self.finished_warcs_dir = finished_warcs_dir
         self.warc_max_size = warc_max_size
         self.monitor_disk = monitor_disk
@@ -121,7 +101,7 @@ class WpullArgs(object):
 
     def realize(self, item):
         return make_args(item, self.default_user_agent, self.wpull_exe,
-            self.youtube_dl_exe, self.phantomjs_exe, self.finished_warcs_dir,
+            self.youtube_dl_exe, self.finished_warcs_dir,
             self.warc_max_size, self.monitor_disk, self.monitor_memory)
 
 # vim:ts=4:sw=4:et:tw=78
