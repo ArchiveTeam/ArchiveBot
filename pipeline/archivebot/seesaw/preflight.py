@@ -20,13 +20,10 @@ def check_wpull_args(wpull_args):
 
     item = MockItem({
         'url': 'http://archiveteam-invalid.com/',
-        'grabber': 'phantomjs',
         'item_dir': temp_dir.name,
         'cookie_jar': '{}/cookies.txt'.format(temp_dir.name),
         'warc_file_base': 'preflight.invalid',
         'ident': 'preflight',
-        'phantomjs_scroll': '10',
-        'phantomjs_wait': '1',
     })
 
     args = wpull_args.realize(item)

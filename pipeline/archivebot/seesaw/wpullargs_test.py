@@ -28,7 +28,6 @@ class TestWpullArgs(unittest.TestCase):
         self.args = WpullArgs(default_user_agent='Default/1',
                 wpull_exe='/bin/wpull',
                 youtube_dl_exe='/usr/bin/youtube-dl',
-                phantomjs_exe='/usr/bin/phantomjs',
                 finished_warcs_dir='/lost+found/',
                 warc_max_size=WARC_MAX_SIZE,
                 monitor_disk=WPULL_MONITOR_DISK,

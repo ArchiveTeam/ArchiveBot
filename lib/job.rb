@@ -3,7 +3,6 @@ require 'uuidtools'
 require 'json'
 
 require File.expand_path('../job_analysis', __FILE__)
-require File.expand_path('../phantomjs_job', __FILE__)
 require File.expand_path('../shared_config', __FILE__)
 
 ##
@@ -36,7 +35,6 @@ end
 class Job < Struct.new(:uri, :redis)
   include ChainableJobMethods
   include JobAnalysis
-  include PhantomJSJob
 
   ARCHIVEBOT_V0_NAMESPACE = UUIDTools::UUID.parse('82244de1-c354-4c89-bf2b-f153ce23af43')
 

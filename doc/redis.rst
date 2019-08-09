@@ -77,7 +77,6 @@ error_count                   Integer           Number of error (i.e. 4xx, 5xx) 
 fetch_depth                   String            "shallow" for !ao jobs; "inf" for !a jobs
 finished_at                   UNIX ts w/ frac   When the job finished; not present if the job is running
 heartbeat                     Integer           Set by the pipeline; incremented once per heartbeat
-grabber                       String            "phantomjs" for PhantomJS jobs; omitted otherwise
 ignore_patterns_set_key       String            The key storing this job's ignore patterns
 items_downloaded              Integer           Number of 2xx/3xx responses
 items_queued                  Integer           Number of URLs encountered in the job
@@ -88,9 +87,6 @@ last_trimmed_log_entry        Integer           "" "" "" "" "" "" "" ""  trimmed
 log_key                       String            The key storing this job's log messages
 log_score                     Integer           The current log entry index
 next_watermark                Integer           A threshold for number of queued URLs; currently unused
-no_phantomjs_smart_scroll     Boolean           Whether or not PhantomJS' smart-scroll should be used
-phantomjs_scroll              Integer           Maximum number of times to scroll the page with PhantomJS
-phantomjs_wait                Integer           Maximum wait time between PhantomJS page interactions
 pipeline_id                   String            The pipeline running this job; corresponds to a pipeline:* key
 queued_at                     UNIX ts w/ frac   When this job was queued
 r1xx                          Integer           Number of 1xx responses
