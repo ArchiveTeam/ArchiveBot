@@ -1,6 +1,7 @@
 import datetime
 import functools
 import glob
+import gzip
 import json
 import os
 import shutil
@@ -8,6 +9,7 @@ import time
 import requests
 import socket
 
+from seesaw.externalprocess import WgetDownload
 from seesaw.task import Task, SimpleTask
 from tornado.ioloop import IOLoop
 import tornado.ioloop
@@ -181,6 +183,13 @@ class PreparePaths(SimpleTask, TargetPathMixin):
 
 # ------------------------------------------------------------------------------
 
+class Wpull(WgetDownload):
+    def on_subprocess_end(self, item, returncode):
+        item['wpull_returncode'] = returncode
+        super().on_subprocess_end(item, returncode)
+
+# ------------------------------------------------------------------------------
+
 class RelabelIfAborted(RetryableTask, TargetPathMixin):
     def __init__(self, control):
         RetryableTask.__init__(self, 'RelabelIfAborted')
@@ -204,6 +213,22 @@ class RelabelIfAborted(RetryableTask, TargetPathMixin):
 
 # ------------------------------------------------------------------------------
 
+class CompressLogIfFailed(SimpleTask, TargetPathMixin):
+    def __init__(self):
+        SimpleTask.__init__(self, 'CompressLogIfNoMetaWarc')
+
+    def process(self, item):
+        #TODO: Instead of checking the exit status of wpull, this should check whether wpull wrote a meta WARC (and whether it contains the log).
+        #TODO: If the disk is almost full, this may crash, which would probably mean a loss of the log file (and possibly also anything else).
+        if item['wpull_returncode'] not in (0, 4, 8):
+            item['source_log_file'] = '%(item_dir)s/%(warc_file_base)s-wpull.log.gz' % item
+            item['target_log_file'] = '%(data_dir)s/%(warc_file_base)s-wpull.log.gz' % item
+            with open('%(item_dir)s/wpull.log' % item, 'rb') as fI:
+                with gzip.GzipFile(item['source_log_file'], 'w', compresslevel = 9) as fO:
+                    shutil.copyfileobj(fI, fO)
+
+# ------------------------------------------------------------------------------
+
 class MoveFiles(SimpleTask, TargetPathMixin):
     def __init__(self):
         SimpleTask.__init__(self, "MoveFiles")
@@ -215,6 +240,10 @@ class MoveFiles(SimpleTask, TargetPathMixin):
         if 'target_url_file' in item:
             item['all_target_files'].append(item['target_url_file'])
             os.rename(item['source_url_file'], item['target_url_file'])
+
+        if 'target_log_file' in item:
+            item['all_target_files'].append(item['target_log_file'])
+            os.rename(item['source_log_file'], item['target_log_file'])
 
         os.rename(item['source_info_file'], item['target_info_file'])
         shutil.rmtree("%(item_dir)s" % item)
