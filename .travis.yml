@@ -7,7 +7,7 @@ rvm:
   - 2.2.3
 
 env:
-- PYTHON=python3.4
+- PYTHON=python3.6
 
 #notifications:
 #  irc:
