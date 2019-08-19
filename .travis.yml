@@ -23,11 +23,11 @@ install:
   - bundle install --jobs=3 --retry=3 --deployment
   - cd plumbing && bundle install --jobs=3 --retry=3 --deployment && cd ..
   - sudo apt-get -qq install ircd-hybrid $PYTHON $PYTHON-dev rsync libzmq3-dev
-  - sudo $PYTHON get-pip.py
-  - travis_retry $PYTHON -m pip install -q -r pipeline/requirements.txt --user
-  - travis_retry $PYTHON -m pip install -q nose pytest irc --user
+  - /usr/bin/$PYTHON get-pip.py --user
+  - travis_retry /usr/bin/$PYTHON -m pip install -q -r pipeline/requirements.txt --user
+  - travis_retry /usr/bin/$PYTHON -m pip install -q nose pytest irc --user
   - sudo cp test/example_rsyncd.conf /etc/rsyncd.conf
-  - $PYTHON -m pip install -q git+https://github.com/chfoo/huhhttp#egg=huhhttp --user
+  - /usr/bin/$PYTHON -m pip install -q git+https://github.com/chfoo/huhhttp#egg=huhhttp --user
 
 before_script:
   - curl -X PUT http://127.0.0.1:5984/archivebot
@@ -59,6 +59,6 @@ services:
 
 script:
   - bundle exec rake
-  - $PYTHON -m nose pipeline/
-  - $PYTHON -m pytest test/validate_db.py
-  - $PYTHON test/integration_runner.py
+  - /usr/bin/$PYTHON -m nose pipeline/
+  - /usr/bin/$PYTHON -m pytest test/validate_db.py
+  - /usr/bin/$PYTHON test/integration_runner.py
