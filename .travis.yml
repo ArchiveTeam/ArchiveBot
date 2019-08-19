@@ -27,6 +27,7 @@ install:
   - travis_retry $PYTHON -m pip install -q nose pytest irc --user
   - sudo cp test/example_rsyncd.conf /etc/rsyncd.conf
   - $PYTHON -m pip install -q git+https://github.com/chfoo/huhhttp#egg=huhhttp --user
+  - bundle list
 
 before_script:
   - curl -X PUT http://127.0.0.1:5984/archivebot
@@ -60,4 +61,6 @@ script:
   - bundle exec rake
   - $PYTHON -m nose pipeline/
   - $PYTHON -m pytest test/validate_db.py
+  - test/bottest.sh
+  - $PYTHON test/bottest.py
   - $PYTHON test/integration_runner.py
