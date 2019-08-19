@@ -7,7 +7,7 @@ from queue import Queue, Empty, Full
 from contextlib import contextmanager
 
 import redis
-from redis.exceptions import ConnectionError as RedisConnectionError
+from redis.exceptions import ConnectionError as RedisConnectionError, RedisError
 
 logger = logging.getLogger('archivebot.control')
 
@@ -219,58 +219,61 @@ class Control(object):
         logger.info('Started log shipper thread with ident={}, thread={}'
                     .format(self.ident, threading.get_ident()))
 
-        with conn(self):
-            with self.redis.pipeline(transaction=False) as pipe:
-                while not (self.ending and self.log_queue.empty()):
+        while not (self.ending and self.log_queue.empty()):
+            try:
+                with conn(self):
+                    with self.redis.pipeline(transaction=False) as pipe:
+                        while not (self.ending and self.log_queue.empty()):
+                            try:
+                                # Ship a log entry
+                                try:
+                                    entry = self.log_queue.get(timeout=5)
+                                    with conn(self):
+                                        self.log_script(keys=entry['keys'], args=entry['args'], client=pipe)
 
-                    try:
-                        # Ship a log entry
-                        try:
-                            entry = self.log_queue.get(timeout=5)
-                            with conn(self):
-                                self.log_script(keys=entry['keys'], args=entry['args'], client=pipe)
+                                    shipping_count += 1
 
-                            shipping_count += 1
+                                    self.log_queue.task_done()
 
-                            self.log_queue.task_done()
+                                except Empty:
+                                    pass #don't task_done() without tasks
+                                except RedisConnectionError:
+                                    # If we couldn't ship it due to redis being down, discard
+                                    self.log_queue.task_done()
 
-                        except Empty:
-                            pass #don't task_done() without tasks
-                        except RedisConnectionError:
-                            # If we couldn't ship it due to redis being down, discard
-                            self.log_queue.task_done()
+                                # If we have accreted enough or the queue is empty, commit logs and counts
+                                # The magic constant is necessary to resolve a race condition that might
+                                # prevent shipping
+                                if self.log_queue.empty() or shipping_count >= 64:
+                                    with conn(self):
+                                        # This locking structure is necessary to avoid a deadlock that
+                                        # happens when redis is trying to send while another thread is
+                                        # trying to acquire the lock
+                                        with self.countslock:
+                                            t_bytes_downloaded = self.bytes_downloaded_outstanding
+                                            self.bytes_downloaded_outstanding = 0
+                                            t_items_downloaded = self.items_downloaded_outstanding
+                                            self.items_downloaded_outstanding = 0
+                                            t_items_queued = self.items_queued_outstanding
+                                            self.items_queued_outstanding = 0
 
-                        # If we have accreted enough or the queue is empty, commit logs and counts
-                        # The magic constant is necessary to resolve a race condition that might
-                        # prevent shipping
-                        if self.log_queue.empty() or shipping_count >= 64:
-                            with conn(self):
-                                # This locking structure is necessary to avoid a deadlock that
-                                # happens when redis is trying to send while another thread is
-                                # trying to acquire the lock
-                                with self.countslock:
-                                    t_bytes_downloaded = self.bytes_downloaded_outstanding
-                                    self.bytes_downloaded_outstanding = 0
-                                    t_items_downloaded = self.items_downloaded_outstanding
-                                    self.items_downloaded_outstanding = 0
-                                    t_items_queued = self.items_queued_outstanding
-                                    self.items_queued_outstanding = 0
+                                        if t_bytes_downloaded > 0:
+                                            pipe.hincrby(self.ident, 'bytes_downloaded', t_bytes_downloaded)
+                                        if t_items_downloaded > 0:
+                                            pipe.hincrby(self.ident, 'items_downloaded', t_items_downloaded)
+                                        if t_items_queued > 0:
+                                            pipe.hincrby(self.ident, 'items_queued', t_items_queued)
 
-                                if t_bytes_downloaded > 0:
-                                    pipe.hincrby(self.ident, 'bytes_downloaded', t_bytes_downloaded)
-                                if t_items_downloaded > 0:
-                                    pipe.hincrby(self.ident, 'items_downloaded', t_items_downloaded)
-                                if t_items_queued > 0:
-                                    pipe.hincrby(self.ident, 'items_queued', t_items_queued)
+                                        pipe.execute()
 
-                                pipe.execute()
+                                    shipping_count = 0
 
-                            shipping_count = 0
-
-                    except RedisConnectionError:
-                        logger.info('Log shipper got connection error while '
-                                    'incrementing counts or committing logs with '
-                                    'ident={}, thread={}'.format(self.ident, threading.get_ident()))
+                            except RedisConnectionError:
+                                logger.info('Log shipper got connection error while '
+                                            'incrementing counts or committing logs with '
+                                            'ident={}, thread={}'.format(self.ident, threading.get_ident()))
+            except RedisError as e:
+                logger.info('Log shipper (ident={}, thread={}) got a Redis error: {!r}'.format(self.ident, threading.get_ident(), e))
 
         logger.info('Log shipper exiting with ident={}, thread={}'
                     .format(self.ident, threading.get_ident()))
