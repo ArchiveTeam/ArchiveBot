@@ -14,6 +14,8 @@ env:
 #    - "irc.efnet.net#archivebot"
 
 before_install:
+  - sudo add-apt-repository ppa:deadsnakes/ppa
+  - sudo apt-get update -qq
   - wget https://bootstrap.pypa.io/get-pip.py
 
 install:
