@@ -39,6 +39,18 @@ class CheckIP(SimpleTask):
             raise Exception(
                 'Are you behind a firewall/proxy? That is a big no-no!')
 
+        # Domains that are not supposed to resolve
+        for domain in ('domain.invalid', 'nxdomain.archiveteam.org', 'www'):
+            try:
+                ip = socket.gethostbyname(domain)
+            except socket.gaierror as e:
+                if e.errno != socket.EAI_NONAME:
+                    raise
+            else:
+                item.log_output('Got an IP address ({}) for {} instead of NXDOMAIN'.format(ip, domain))
+                item.log_output('Are you behind a firewall/proxy or have a misconfigured resolv.conf? That is a big no-no!')
+                raise Exception('Are you behind a firewall/proxy or have a misconfigured resolv.conf? That is a big no-no!')
+
 
 class RetryableTask(Task):
     retry_delay = 5
