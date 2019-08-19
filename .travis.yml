@@ -62,5 +62,7 @@ script:
   - $PYTHON -m nose pipeline/
   - $PYTHON -m pytest test/validate_db.py
   - test/bottest.sh
+  - $PYTHON test/bottest3.py
+  - $PYTHON test/bottest2.py
   - $PYTHON test/bottest.py
   - $PYTHON test/integration_runner.py
