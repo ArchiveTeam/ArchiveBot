@@ -11,7 +11,7 @@ mkdir -p /tmp/warc/
 
 # This will affect the wpull exe wrapper
 mkdir -p /tmp/bin/
-ln -s /usr/bin/python3.4 /tmp/bin/python3
+ln -s /usr/bin/$PYTHON /tmp/bin/python3
 
 echo -n 'Using '
 which python3
