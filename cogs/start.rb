@@ -47,10 +47,14 @@ UserAgentUpdater.supervise_as :user_agent_updater,
 
 # This should be started after all actors it references have started, which is
 # why it's the last actor to start up.
-Broadcaster.supervise_as :broadcaster, opts[:redis], SharedConfig.log_channel
+if opts[:twitter_config]
+  Broadcaster.supervise_as :broadcaster, opts[:redis], SharedConfig.log_channel
+end
 
 at_exit do
-  Celluloid::Actor[:broadcaster].stop
+  if opts[:twitter_config]
+    Celluloid::Actor[:broadcaster].stop
+  end
   Celluloid::Actor[:ignore_pattern_updater].stop
   Celluloid::Actor[:user_agent_updater].stop
 end
