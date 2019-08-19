@@ -28,7 +28,7 @@ from archivebot.seesaw.preflight import check_wpull_args
 from archivebot.seesaw.wpull import WpullArgs
 from archivebot.seesaw.tasks import GetItemFromQueue, StartHeartbeat, \
     SetFetchDepth, PreparePaths, Wpull, CompressLogIfFailed, WriteInfo, DownloadUrlFile, \
-    RelabelIfAborted, MoveFiles, StopHeartbeat, MarkItemAsDone, CheckIP
+    RelabelIfAborted, MoveFiles, StopHeartbeat, MarkItemAsDone, CheckIP, CheckLocalWebserver
 
 VERSION = "20190723.01"
 WPULL_VERSION = ('2.0.3')
@@ -127,6 +127,7 @@ wpull_args = WpullArgs(
 
 pipeline = Pipeline(
     CheckIP(),
+    CheckLocalWebserver(),
     GetItemFromQueue(control, pipeline_id, downloader,
         ao_only=env.get('AO_ONLY'), large=env.get('LARGE')),
     StartHeartbeat(control),
