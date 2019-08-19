@@ -3,7 +3,7 @@ import time
 import os
 import logging
 import threading
-from queue import Queue, Empty
+from queue import Queue, Empty, Full
 from contextlib import contextmanager
 
 import redis
@@ -58,7 +58,7 @@ class Control(object):
         self.items_queued_outstanding = 0
         self.bytes_downloaded_outstanding = 0
         self.redis_url = redis_url
-        self.log_queue = Queue()
+        self.log_queue = Queue(maxsize = 10000)
 
         # if ITEM_IDENT is set, we are running inside a wpull process
         self.ident = os.getenv('ITEM_IDENT')
@@ -277,10 +277,20 @@ class Control(object):
         return True
 
     def log(self, packet, ident, log_key):
-        self.log_queue.put({'type': 'log',
-                            'keys': [ident],
-                            'args': [json.dumps(packet), self.log_channel, log_key]
-                           })
+        try:
+            self.log_queue.put_nowait({'type': 'log',
+                'keys': [ident],
+                'args': [json.dumps(packet), self.log_channel, log_key]
+              })
+        except Full:
+            # If the shipping is currently broken, pop an entry off the queue and retry.
+            try:
+                self.log_queue.get_nowait()
+            except Empty:
+                pass
+            else:
+                self.log_queue.task_done()
+                self.log(packet, ident, log_key)
 
     def get_url_file(self, ident):
         try:
