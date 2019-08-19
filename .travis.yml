@@ -28,6 +28,7 @@ install:
   - sudo cp test/example_rsyncd.conf /etc/rsyncd.conf
   - $PYTHON -m pip install -q git+https://github.com/chfoo/huhhttp#egg=huhhttp --user
   - bundle list
+  - pyenv versions
 
 before_script:
   - curl -X PUT http://127.0.0.1:5984/archivebot
