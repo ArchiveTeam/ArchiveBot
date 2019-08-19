@@ -24,10 +24,10 @@ install:
   - cd plumbing && bundle install --jobs=3 --retry=3 --deployment && cd ..
   - sudo apt-get -qq install ircd-hybrid $PYTHON $PYTHON-dev rsync libzmq3-dev
   - /usr/bin/$PYTHON get-pip.py --user
-  - travis_retry /usr/bin/$PYTHON -m pip install -q -r pipeline/requirements.txt --user
-  - travis_retry /usr/bin/$PYTHON -m pip install -q nose pytest irc --user
+  - travis_retry /usr/bin/$PYTHON -m pip install -r pipeline/requirements.txt --user
+  - travis_retry /usr/bin/$PYTHON -m pip install nose pytest irc --user
   - sudo cp test/example_rsyncd.conf /etc/rsyncd.conf
-  - /usr/bin/$PYTHON -m pip install -q git+https://github.com/chfoo/huhhttp#egg=huhhttp --user
+  - /usr/bin/$PYTHON -m pip install git+https://github.com/chfoo/huhhttp#egg=huhhttp --user
 
 before_script:
   - curl -X PUT http://127.0.0.1:5984/archivebot
