@@ -6,7 +6,7 @@ import subprocess
 import sys
 
 import seesaw
-from seesaw.externalprocess import WgetDownload, RsyncUpload
+from seesaw.externalprocess import RsyncUpload
 from seesaw.item import ItemInterpolation, ItemValue
 from seesaw.pipeline import Pipeline
 from seesaw.project import Project
@@ -27,7 +27,7 @@ from archivebot.seesaw import monitoring
 from archivebot.seesaw.preflight import check_wpull_args
 from archivebot.seesaw.wpull import WpullArgs
 from archivebot.seesaw.tasks import GetItemFromQueue, StartHeartbeat, \
-    SetFetchDepth, PreparePaths, WriteInfo, DownloadUrlFile, \
+    SetFetchDepth, PreparePaths, Wpull, CompressLogIfFailed, WriteInfo, DownloadUrlFile, \
     RelabelIfAborted, MoveFiles, StopHeartbeat, MarkItemAsDone, CheckIP
 
 VERSION = "20190723.01"
@@ -134,7 +134,7 @@ pipeline = Pipeline(
     PreparePaths(),
     WriteInfo(),
     DownloadUrlFile(control),
-    WgetDownload(
+    Wpull(
         wpull_args,
         accept_on_exit_code=AcceptAny(),
         env={
@@ -145,6 +145,7 @@ pipeline = Pipeline(
         }
     ),
     RelabelIfAborted(control),
+    CompressLogIfFailed(),
     WriteInfo(),
     MoveFiles(),
     LimitConcurrent(2,
