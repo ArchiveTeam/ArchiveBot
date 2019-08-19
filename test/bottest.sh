@@ -1,5 +1,5 @@
 #!/bin/bash
-./run_bot.sh &
+"$(dirname "$(readlink -f "$0")")"/run_bot.sh &
 botpid=$!
 sleep 30
 kill $botpid
