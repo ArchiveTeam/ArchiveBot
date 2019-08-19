@@ -6,25 +6,18 @@ language: ruby
 rvm:
   - 2.2.3
 
-python:
-  - "3.6"
-
 env:
-- PYTHON=python3.6
+  - PYTHON=python3.6
 
 #notifications:
 #  irc:
 #    - "irc.efnet.net#archivebot"
 
-before_install:
-  - wget https://bootstrap.pypa.io/get-pip.py
-
 install:
-  - pyenv versions
+  - pyenv shell 3.6.7
   - bundle install --jobs=3 --retry=3 --deployment
   - cd plumbing && bundle install --jobs=3 --retry=3 --deployment && cd ..
   - sudo apt-get -qq install ircd-hybrid rsync libzmq3-dev
-  - sudo $PYTHON get-pip.py
   - travis_retry $PYTHON -m pip install -q -r pipeline/requirements.txt --user
   - travis_retry $PYTHON -m pip install -q nose pytest irc --user
   - sudo cp test/example_rsyncd.conf /etc/rsyncd.conf
