@@ -52,6 +52,23 @@ class CheckIP(SimpleTask):
                 raise Exception('Are you behind a firewall/proxy or have a misconfigured resolv.conf? That is a big no-no!')
 
 
+class CheckLocalWebserver(SimpleTask):
+    def __init__(self):
+        SimpleTask.__init__(self, "CheckLocalWebserver")
+
+    def process(self, item):
+        for port in (80, 443, 8000, 8080, 8443):
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            try:
+                s.connect(('localhost', port))
+            except socket.error:
+                pass
+            else:
+                item.log_output('Was able to connect to localhost:{}'.format(port))
+                item.log_output('Are you running a web server on the same machine as the pipeline? That is a big no-no!')
+                raise Exception('Are you running a web server on the same machine as the pipeline? That is a big no-no!')
+
+
 class RetryableTask(Task):
     retry_delay = 5
     cancelable = False
