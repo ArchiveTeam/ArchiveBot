@@ -4,7 +4,7 @@
 language: ruby
 
 rvm:
-  - 2.2.3
+  - 2.6
 
 env:
   - PYTHON=python3.5
