@@ -6,6 +6,9 @@ language: ruby
 rvm:
   - 2.2.3
 
+python:
+  - "3.6"
+
 env:
 - PYTHON=python3.6
 
@@ -14,14 +17,13 @@ env:
 #    - "irc.efnet.net#archivebot"
 
 before_install:
-  - sudo add-apt-repository ppa:fkrull/deadsnakes --yes
-  - sudo apt-get update -qq
   - wget https://bootstrap.pypa.io/get-pip.py
 
 install:
+  - pyenv versions
   - bundle install --jobs=3 --retry=3 --deployment
   - cd plumbing && bundle install --jobs=3 --retry=3 --deployment && cd ..
-  - sudo apt-get -qq install ircd-hybrid $PYTHON $PYTHON-dev rsync libzmq3-dev
+  - sudo apt-get -qq install ircd-hybrid rsync libzmq3-dev
   - sudo $PYTHON get-pip.py
   - travis_retry $PYTHON -m pip install -q -r pipeline/requirements.txt --user
   - travis_retry $PYTHON -m pip install -q nose pytest irc --user
