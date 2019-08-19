@@ -1,7 +1,7 @@
 {
     "name": "meetupeverywhere",
     "patterns": [
-        "^https?://.*\\meetup\\.com/login/"
+        "^https?://([^/]+\\.)?meetup\\.com/login/"
     ],
     "type": "ignore_patterns"
 }
