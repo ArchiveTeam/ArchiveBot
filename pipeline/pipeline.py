@@ -29,8 +29,7 @@ from archivebot.seesaw.preflight import check_wpull_args
 from archivebot.seesaw.wpull import WpullArgs
 from archivebot.seesaw.tasks import GetItemFromQueue, StartHeartbeat, \
     SetFetchDepth, PreparePaths, Wpull, CompressLogIfFailed, WriteInfo, DownloadUrlFile, \
-    RelabelIfAborted, MoveFiles, StopHeartbeat, MarkItemAsDone, CheckIP, CheckLocalWebserver, \
-    CheckPipelineVersion
+    RelabelIfAborted, MoveFiles, StopHeartbeat, MarkItemAsDone, CheckIP, CheckLocalWebserver
 
 WPULL_VERSION = ('2.0.3')
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
@@ -139,11 +138,11 @@ wpull_args = WpullArgs(
 )
 
 pipeline = Pipeline(
-    CheckPipelineVersion(VERSION, pipeline_version),
     CheckIP(),
     CheckLocalWebserver(),
     GetItemFromQueue(control, pipeline_id, downloader,
-        ao_only=env.get('AO_ONLY'), large=env.get('LARGE')),
+        ao_only=env.get('AO_ONLY'), large=env.get('LARGE'),
+        version_check = (VERSION, pipeline_version)),
     StartHeartbeat(control),
     SetFetchDepth(),
     PreparePaths(),
