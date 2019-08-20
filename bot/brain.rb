@@ -56,6 +56,11 @@ class Brain
 
     uri = Addressable::URI.parse(target).normalize
 
+    if !uri.absolute? || uri.host.nil?
+      reply m, "Sorry, I don't understand the URL you provided."
+      return
+    end
+
     # Parse parameters.  If we run into an unknown option, report it and don't
     # run the job.
     h = nil
