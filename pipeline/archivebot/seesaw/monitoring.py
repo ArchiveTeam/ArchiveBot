@@ -49,6 +49,7 @@ def start(pipeline, control, version, nickname):
 
         control.pipeline_report(pipe_id, process_report)
 
+    report()
     cb = tornado.ioloop.PeriodicCallback(report, 1000)
     cb.start()
 
