@@ -187,11 +187,11 @@ def main():
     
     flags = irc_client.flags
     short_ident = flags['ident'][:5]
-    flags['warc_dir'] = tuple(
-        glob.glob('/tmp/warc/*{}*.gz'.format(short_ident))
+    flags['warcs'] = tuple(
+        glob.glob('/tmp/warc/*{}*.warc.gz'.format(short_ident))
     )
-    flags['rsync_dir'] = tuple(
-        glob.glob('/tmp/rsync/*{}*.json'.format(short_ident))
+    flags['infojson'] = tuple(
+        glob.glob('/tmp/warc/*{}*.json'.format(short_ident))
     )
 
     print('---FIN---')

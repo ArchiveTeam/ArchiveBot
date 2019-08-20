@@ -7,7 +7,6 @@ import subprocess
 import sys
 
 import seesaw
-from seesaw.externalprocess import RsyncUpload
 from seesaw.item import ItemInterpolation, ItemValue
 from seesaw.pipeline import Pipeline
 from seesaw.project import Project
@@ -35,7 +34,6 @@ WPULL_VERSION = ('2.0.3')
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
 WPULL_EXE = find_executable('Wpull', WPULL_VERSION, ['wpull', './wpull'], '--version')
 YOUTUBE_DL = find_executable('youtube-dl', None, ['./youtube-dl'], '--version')
-RSYNC = find_executable('rsync', None, ['rsync'], '--version')
 
 version_integer = (sys.version_info.major * 10) + sys.version_info.minor
 
@@ -51,7 +49,6 @@ if not os.environ.get('NO_SEGFAULT_340'):
 
 assert WPULL_EXE, 'No usable Wpull found.'
 assert YOUTUBE_DL, 'No usable youtube-dl found.'
-assert 'RSYNC_URL' in env, 'RSYNC_URL not set.'
 assert 'REDIS_URL' in env, 'REDIS_URL not set.'
 assert 'FINISHED_WARCS_DIR' in env, 'FINISHED_WARCS_DIR not set.'
 
@@ -75,7 +72,6 @@ assert downloader not in ('ignorednick', 'YOURNICKHERE'), 'please use a real nic
 
 assert datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo.utcoffset(None).seconds == 0, 'Please set the time zone to UTC'
 
-RSYNC_URL = env['RSYNC_URL']
 REDIS_URL = env['REDIS_URL']
 LOG_CHANNEL = shared_config.log_channel()
 PIPELINE_CHANNEL = shared_config.pipeline_channel()
@@ -161,18 +157,7 @@ pipeline = Pipeline(
     RelabelIfAborted(control),
     CompressLogIfFailed(),
     WriteInfo(),
-    MoveFiles(),
-    LimitConcurrent(2,
-        RsyncUpload(
-            target = RSYNC_URL,
-            target_source_path = ItemInterpolation("%(data_dir)s"),
-            files=ItemValue("all_target_files"),
-            extra_args = [
-                '--partial',
-                '--partial-dir', '.rsync-tmp'
-            ]
-        )
-    ),
+    MoveFiles(target_directory = os.environ["FINISHED_WARCS_DIR"]),
     StopHeartbeat(),
     MarkItemAsDone(control, EXPIRE_TIME)
 )

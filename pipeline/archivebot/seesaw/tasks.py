@@ -267,8 +267,9 @@ class CompressLogIfFailed(SimpleTask, TargetPathMixin):
 # ------------------------------------------------------------------------------
 
 class MoveFiles(SimpleTask, TargetPathMixin):
-    def __init__(self):
+    def __init__(self, target_directory):
         SimpleTask.__init__(self, "MoveFiles")
+        self.target_directory = target_directory
 
     def process(self, item):
         item['target_warc_files'] = self.rename_warc_files(item)
@@ -284,6 +285,9 @@ class MoveFiles(SimpleTask, TargetPathMixin):
 
         os.rename(item['source_info_file'], item['target_info_file'])
         shutil.rmtree("%(item_dir)s" % item)
+
+        for fn in item['all_target_files']:
+            shutil.move(fn, self.target_directory)
 
     def rename_warc_files(self, item):
         target_filenames = []
