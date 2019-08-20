@@ -161,18 +161,7 @@ pipeline = Pipeline(
     RelabelIfAborted(control),
     CompressLogIfFailed(),
     WriteInfo(),
-    MoveFiles(),
-    LimitConcurrent(2,
-        RsyncUpload(
-            target = RSYNC_URL,
-            target_source_path = ItemInterpolation("%(data_dir)s"),
-            files=ItemValue("all_target_files"),
-            extra_args = [
-                '--partial',
-                '--partial-dir', '.rsync-tmp'
-            ]
-        )
-    ),
+    MoveFiles(target_directory = os.environ["FINISHED_WARCS_DIR"]),
     StopHeartbeat(),
     MarkItemAsDone(control, EXPIRE_TIME)
 )
