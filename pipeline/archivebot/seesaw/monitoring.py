@@ -24,7 +24,11 @@ def start(pipeline, control, version, nickname):
     pid, hostname, fqdn, pipe_id = pipeline_id()
 
     def report():
-        du = psutil.disk_usage(pipeline.data_dir)
+        # If the data dir doesn't exist yet, recurse up the path to the deepest path that does exist.
+        dudir = os.path.normpath(pipeline.data_dir)
+        while not os.path.isdir(dudir):
+            dudir = os.path.dirname(dudir)
+        du = psutil.disk_usage(dudir)
         mu = psutil.virtual_memory()
         load_avg = os.getloadavg()
 
@@ -49,6 +53,7 @@ def start(pipeline, control, version, nickname):
 
         control.pipeline_report(pipe_id, process_report)
 
+    report()
     cb = tornado.ioloop.PeriodicCallback(report, 1000)
     cb.start()
 
