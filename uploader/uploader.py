@@ -96,7 +96,7 @@ def try_mkdir(path):
 def should_upload(basename):
     assert not '/' in basename, basename
     return not basename.startswith('.') and \
-        (basename.endswith('.warc.gz') or basename.endswith('.json') or basename.endswith('.txt'))
+        (basename.endswith('.warc.gz') or basename.endswith('.json') or basename.endswith('.txt') or basename.endswith('.log.gz'))
 
 def parse_name(basename):
     k = re.split(r'(.*)-\w+-(\d{8})-\d{6}-[^.]*\.warc.gz', basename) # extract domain name and date
