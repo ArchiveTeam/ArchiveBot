@@ -1,6 +1,7 @@
 ** STEP 1: INSTALL EVERYTHING **
 
 To run the pipeline, you will need:
+- git 2.6.0+
 - a Python 3.3+ installation
 - Pip (for Python 3.3+)
 - seesaw (automatically installed by Pip)

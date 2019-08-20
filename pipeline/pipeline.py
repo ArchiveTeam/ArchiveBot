@@ -31,7 +31,6 @@ from archivebot.seesaw.tasks import GetItemFromQueue, StartHeartbeat, \
     SetFetchDepth, PreparePaths, Wpull, CompressLogIfFailed, WriteInfo, DownloadUrlFile, \
     RelabelIfAborted, MoveFiles, StopHeartbeat, MarkItemAsDone, CheckIP, CheckLocalWebserver
 
-VERSION = "20190723.01"
 WPULL_VERSION = ('2.0.3')
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
 WPULL_EXE = find_executable('Wpull', WPULL_VERSION, ['wpull', './wpull'], '--version')
@@ -101,6 +100,15 @@ project = Project(
         title = "ArchiveBot request handler"
 )
 
+#FIXME: Same hack as above; seesaw executes pipeline.py with the pipeline dir as the cwd.
+# __file__ can't be used because seesaw exec()s the file contents rather than importing the file.
+REPO_DIRECTORY = os.path.dirname(os.path.realpath('.'))
+
+def pipeline_version():
+    # Returns something like 20190820.5cd1e38
+    output = subprocess.check_output(['git', 'show', '-s', '--format=format:%cd.%h', '--date=format:%Y%m%d'], cwd = REPO_DIRECTORY)
+    return output.decode('utf-8').strip()
+
 def wpull_version():
     output = subprocess.check_output([WPULL_EXE, '--version'],
             stderr=subprocess.STDOUT)
@@ -111,6 +119,7 @@ class AcceptAny:
     def __contains__(self, item):
         return True
 
+VERSION = pipeline_version()
 DEFAULT_USER_AGENT = \
     'ArchiveTeam ArchiveBot/%s (wpull %s) and not Mozilla/5.0 ' \
     '(Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) ' \
