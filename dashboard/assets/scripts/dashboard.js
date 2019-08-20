@@ -287,7 +287,7 @@ Dashboard.main = function() {
 	if(__map_reserved["host"] != null ? args.existsReserved("host") : args.h.hasOwnProperty("host")) {
 		hostname = __map_reserved["host"] != null ? args.getReserved("host") : args.h["host"];
 	} else {
-		hostname = window.location.host;
+		hostname = window.location.hostname;
 	}
 	if(window.navigator.userAgent.indexOf("Mobi") == -1) {
 		maxScrollback = 500;
@@ -322,7 +322,7 @@ Dashboard.prototype = {
 			_gthis.openWebSocket();
 		};
 		var cacheBustValue = new Date().getTime();
-		request.open("GET","//" + this.hostname + "/logs/recent?cb=" + cacheBustValue);
+		request.open("GET","/logs/recent?cb=" + cacheBustValue);
 		request.setRequestHeader("Accept","application/json");
 		request.send("");
 	}

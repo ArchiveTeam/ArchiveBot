@@ -364,7 +364,7 @@ class Dashboard {
         if (args.exists("host")) {
             hostname = args.get("host");
         } else {
-            hostname = Browser.location.host;
+            hostname = Browser.location.hostname;
         }
 
         if (Browser.navigator.userAgent.indexOf("Mobi") == -1) {
@@ -405,7 +405,7 @@ class Dashboard {
         };
         var cacheBustValue = Date.now().getTime();
 
-        request.open("GET", '//$hostname/logs/recent?cb=$cacheBustValue');
+        request.open("GET", '/logs/recent?cb=$cacheBustValue');
         request.setRequestHeader("Accept", "application/json");
         request.send("");
     }
