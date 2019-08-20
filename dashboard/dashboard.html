@@ -1496,7 +1496,7 @@ var Dashboard = function() {
 		JobsRenderer.prototype._renderDownloadLine = JobsRenderer.prototype._moreDomRenderDownloadLine;
 	}
 
-	this.host = args["host"] ? args["host"] : location.host;
+	this.host = args["host"] ? args["host"] : location.hostname;
 	this.dumpTraffic = args["dumpMax"] && Number(args["dumpMax"]) > 0;
 	if(this.dumpTraffic) {
 		this.dumpMax = Number(args["dumpMax"]);
@@ -1554,7 +1554,7 @@ var Dashboard = function() {
 			}
 		}.bind(this), false);
 	}.bind(this);
-	xhr.open("GET", "//" + this.host + "/logs/recent?cb=" + Date.now() + Math.random());
+	xhr.open("GET", "/logs/recent?cb=" + Date.now() + Math.random());
 	xhr.setRequestHeader('Accept', 'application/json');
 	xhr.send("");
 
