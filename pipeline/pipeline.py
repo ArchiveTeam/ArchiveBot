@@ -1,4 +1,5 @@
 import atexit
+import datetime
 from distutils.version import StrictVersion
 from os import environ as env
 import os
@@ -72,6 +73,8 @@ if StrictVersion(seesaw.__version__) < StrictVersion("0.1.8b1"):
     )
 
 assert downloader not in ('ignorednick', 'YOURNICKHERE'), 'please use a real nickname'
+
+assert datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo.utcoffset(None).seconds == 0, 'Please set the time zone to UTC'
 
 RSYNC_URL = env['RSYNC_URL']
 REDIS_URL = env['REDIS_URL']
