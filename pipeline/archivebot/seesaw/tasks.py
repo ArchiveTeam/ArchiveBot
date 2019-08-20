@@ -101,7 +101,7 @@ class RetryableTask(Task):
 
 class GetItemFromQueue(RetryableTask):
     def __init__(self, control, pipeline_id, pipeline_nick, retry_delay=5,
-        ao_only=False, large=False):
+        ao_only=False, large=False, version_check = None):
         RetryableTask.__init__(self, 'GetItemFromQueue')
         self.control = control
         self.pipeline_id = pipeline_id
@@ -111,8 +111,16 @@ class GetItemFromQueue(RetryableTask):
         self.pipeline_queue = 'pending:%s' % self.pipeline_id
         self.ao_only = ao_only
         self.large = large
+        # (versionOnStartup, versionFunc) where the latter is an argument-less function returning the current version of the files
+        self.version_on_startup, self.version_func = version_check
 
     def process(self, item):
+        # Check that the files haven't changed since the pipeline was launched
+        currentVersion = self.version_func()
+        if currentVersion != self.version_on_startup:
+            item.log_output('Version has changed from {!r} on startup to {!r} now'.format(self.version_on_startup, currentVersion))
+            raise Exception('Version has changed from {!r} on startup to {!r} now'.format(self.version_on_startup, currentVersion))
+
         try: 
             ident, job_data = self.control.reserve_job(self.pipeline_id,
                     self.pipeline_nick, self.ao_only, self.large)
