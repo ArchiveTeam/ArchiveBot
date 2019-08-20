@@ -17,6 +17,25 @@ import tornado.ioloop
 from redis.exceptions import ConnectionError
 
 
+class CheckPipelineVersion(SimpleTask):
+    '''
+    Check that the pipeline version hasn't changed since the pipeline was started.
+    versionOnStartup is the version recorded when the pipeline was launched.
+    versionFunc is a function that takes no arguments and returns the version.
+    '''
+
+    def __init__(self, versionOnStartup, versionFunc):
+        SimpleTask.__init__(self, 'CheckPipelineVersion')
+        self.versionOnStartup = versionOnStartup
+        self.versionFunc = versionFunc
+
+    def process(self, item):
+        currentVersion = self.versionFunc()
+        if currentVersion != self.versionOnStartup:
+            item.log_output('Version has changed from {!r} on startup to {!r} now'.format(self.versionOnStartup, currentVersion))
+            raise Exception('Version has changed from {!r} on startup to {!r} now'.format(self.versionOnStartup, currentVersion))
+
+
 class CheckIP(SimpleTask):
     def __init__(self):
         SimpleTask.__init__(self, "CheckIP")
