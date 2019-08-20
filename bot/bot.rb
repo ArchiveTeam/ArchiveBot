@@ -6,6 +6,7 @@ require 'uri'
 require File.expand_path('../brain', __FILE__)
 require File.expand_path('../command_patterns', __FILE__)
 require File.expand_path('../finish_notifier', __FILE__)
+require File.expand_path('../pipeline_notifier', __FILE__)
 require File.expand_path('../../lib/couchdb', __FILE__)
 
 opts = Trollop.options do
@@ -36,10 +37,11 @@ bot = Cinch::Bot.new do
     c.nick = opts[:nick]
     c.channels = channels
     c.password = opts[:password]
-    c.plugins.plugins = [FinishNotifier]
+    c.plugins.plugins = [FinishNotifier, PipelineNotifier]
     c.plugins.options[FinishNotifier] = {
       redis: redis
     }
+    c.plugins.options[PipelineNotifier] = {redis: redis}
 
     if uri.scheme == 'ircs'
       c.ssl.use = true
