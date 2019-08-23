@@ -11,11 +11,11 @@ class PipelineNotifier
 
   def initialize(*args)
     super
-    @known_pipelines = []
+    @known_pipelines = get_pipelines
   end
 
   def announce_pipeline_changes
-    current_pipelines = PipelineCollection.new(config[:redis]).map {|x| x.select {|key, value| ["id", "nickname", "version"].include?(key)} }
+    current_pipelines = get_pipelines
 
     vanished_pipelines = @known_pipelines - current_pipelines
     new_pipelines = current_pipelines - @known_pipelines
@@ -33,5 +33,11 @@ class PipelineNotifier
     end
 
     @known_pipelines = current_pipelines
+  end
+
+  private
+
+  def get_pipelines
+    PipelineCollection.new(config[:redis]).map {|x| x.select {|key, value| ["id", "nickname", "version"].include?(key)} }
   end
 end
