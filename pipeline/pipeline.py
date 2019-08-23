@@ -56,7 +56,7 @@ if 'WARC_MAX_SIZE' in env:
     WARC_MAX_SIZE = env['WARC_MAX_SIZE']
 else:
     WARC_MAX_SIZE = '5368709120'
-WPULL_MONITOR_DISK = env.get('WPULL_MONITOR_DISK', '500m')
+WPULL_MONITOR_DISK = env.get('WPULL_MONITOR_DISK', '5120m')
 WPULL_MONITOR_MEMORY = env.get('WPULL_MONITOR_MEMORY', '50m')
 
 assert 'TMUX' in env or 'STY' in env or env.get('NO_SCREEN') == "1", \
