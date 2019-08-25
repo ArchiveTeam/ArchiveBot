@@ -1,0 +1,8 @@
+{
+	"name": "instagram",
+	"patterns": [
+		"^https?://www\\.instagram\\.com/.*[?&]hl=",
+		"^https?://www\\.instagram\\.com/p/[^/]+/caption/[^/]+/.+/"
+	],
+	"type": "ignore_patterns"
+}
