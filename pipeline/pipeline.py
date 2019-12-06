@@ -75,6 +75,7 @@ assert datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo.utcoffse
 REDIS_URL = env['REDIS_URL']
 LOG_CHANNEL = shared_config.log_channel()
 PIPELINE_CHANNEL = shared_config.pipeline_channel()
+OPENSSL_CONF = env.get('OPENSSL_CONF')
 
 # ------------------------------------------------------------------------------
 # CONTROL CONNECTION
@@ -132,6 +133,14 @@ wpull_args = WpullArgs(
     monitor_disk=WPULL_MONITOR_DISK,
     monitor_memory=WPULL_MONITOR_MEMORY,
 )
+wpull_env = {
+    'ITEM_IDENT': ItemInterpolation('%(ident)s'),
+    'LOG_KEY': ItemInterpolation('%(log_key)s'),
+    'REDIS_URL': REDIS_URL,
+    'PATH': os.environ['PATH'],
+}
+if OPENSSL_CONF:
+    wpull_env['OPENSSL_CONF'] = OPENSSL_CONF
 
 pipeline = Pipeline(
     CheckIP(),
@@ -147,12 +156,7 @@ pipeline = Pipeline(
     Wpull(
         wpull_args,
         accept_on_exit_code=AcceptAny(),
-        env={
-            'ITEM_IDENT': ItemInterpolation('%(ident)s'),
-            'LOG_KEY': ItemInterpolation('%(log_key)s'),
-            'REDIS_URL': REDIS_URL,
-            'PATH': os.environ['PATH']
-        }
+        env=wpull_env,
     ),
     RelabelIfAborted(control),
     CompressLogIfFailed(),
