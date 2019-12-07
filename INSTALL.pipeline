@@ -77,6 +77,12 @@ As user archivebot, in the SECOND tmux session:
     export REDIS_URL=redis://127.0.0.1:16379/0
     export FINISHED_WARCS_DIR=$HOME/warcs4fos
 
+If you run the pipeline on a system with a modern OpenSSL version
+(e.g. Debian Buster and later), which comes with a more secure default
+configuration, additionally set the OPENSSL_CONF environment variable:
+
+    export OPENSSL_CONF=/home/archivebot/ArchiveBot/ops/openssl-less-secure.cnf
+
 Now, think up a name for this new ArchiveBot pipeline.  It will 
 appear on the publicly available pipeline status dashboard. It will 
 go in the command you enter next:

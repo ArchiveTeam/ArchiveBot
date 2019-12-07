@@ -24,6 +24,7 @@ def make_args(item, default_user_agent, wpull_exe, youtube_dl_exe, finished_warc
         '--html-parser', 'libxml2-lxml',
         '--save-cookies', '%(cookie_jar)s' % item,
         '--no-check-certificate',
+        '--no-strong-crypto',
         '--delete-after',
         '--no-robots',
         '--page-requisites',
