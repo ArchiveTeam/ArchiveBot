@@ -26,7 +26,7 @@
         "[\\?&]undo(after)?=\\d+",
         "^https?://a\\.wikia-beacon\\.com/__track/",
         "^https?://beacon\\.wikia-services\\.com/__track/",
-        "([\\?&]title=|/)Special:(PrefixIndex|WhatLinksHere|Contributions|ListFiles|ListUsers)/.*/\\2/",
+        "([\\?&]title=|/)Special:(PrefixIndex|WhatLinksHere|Contributions|ListFiles|ListUsers|CentralAuth)/.*/\\2/",
         "/User_talk:.+/User_talk:",
         "/User_blog:.+/User_blog:",
         "/User:.+/User:"
