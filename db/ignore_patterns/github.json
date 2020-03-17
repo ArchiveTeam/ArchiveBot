@@ -14,7 +14,8 @@
 		"^https?://github\\.com/[^/]+/[^/]+/pull/\\d+/review-requests\\?",
 		"^https?://github\\.com/[^/]+/[^/]+/projects/issues/\\d+$",
 		"^https?://github\\.com/[^/]+/[^/]+/pull/\\d+/(?!commits/).*/",
-		"^https?://github\\.com/[^/]+/[^/]+/(tree|blob|raw)/[0-9a-f]{40}/"
+		"^https?://github\\.com/[^/]+/[^/]+/(tree|blob|raw)/[0-9a-f]{40}/",
+		"^https?://github\\.com/[^/]+/[^/]+/actions(/.*)?\\?(.*&)?query=[^&]+\\+"
 	],
 	"type": "ignore_patterns"
 }
