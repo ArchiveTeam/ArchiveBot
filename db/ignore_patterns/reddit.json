@@ -3,7 +3,7 @@
     "patterns": [
         "^https?://out\\.reddit\\.com/",
         "^https?://(www|old|np)\\.reddit\\.com/gold\\?goldtype=",
-        "^https?://(www|old|np)\\.reddit\\.com/r/[^/]+/comments/[a-z0-9]+/[^/]+/[a-z0-9]+",
+        "^https?://(www|old|np)\\.reddit\\.com/(r|user)/[^/]+/comments/[a-z0-9]+/[^/]+/[a-z0-9]+",
         "^https?://(www|old|np)\\.reddit\\.com/r/[^/]+/comments/[a-z0-9]+.*\\?sort=",
         "^https?://(www|old|np)\\.reddit\\.com/r/[^/]+/comments/[a-z0-9]+/[^/]+/\\.compact",
         "^https?://(www|old|np)\\.reddit\\.com/r/[^/]+/((hot|top|new|rising|controversial|gilded|ads)/)?.*[?&]before=",
@@ -12,7 +12,8 @@
         "^https?://(www|old|np)\\.reddit\\.com/r/[^/]+/search/?\\?",
         "^https?://(www|old|np)\\.reddit\\.com/r/[^/]+/wiki/(revisions|discussions)/user/.+",
         "^https?://(www|old|np)\\.reddit\\.com/r/[^/]+/wiki/revisions/.*[?&]before=",
-        "^https?://(www|old|np)\\.reddit\\.com/user/[^/]+/(comments/)?.+[?&]sort=",
+        "^https?://(www|old|np)\\.reddit\\.com/user/[^/]+/.*[?&]sort=",
+        "^https?://(www|old|np)\\.reddit\\.com/user/[^/]+/.*[?&]before=",
         "^https?://(www|old|np)\\.reddit\\.com/.+/\\.rss$",
         "^https?://simple\\.reddit\\.com/",
         "^https?://pixel\\.redditmedia\\.com/pixel/",
