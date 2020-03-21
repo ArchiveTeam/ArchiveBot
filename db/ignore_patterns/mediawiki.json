@@ -29,7 +29,8 @@
         "([\\?&]title=|/)Special:(PrefixIndex|WhatLinksHere|Contributions|ListFiles|ListUsers|CentralAuth)/.*/\\2/",
         "/User_talk:.+/User_talk:",
         "/User_blog:.+/User_blog:",
-        "/User:.+/User:"
+        "/User:.+/User:",
+        "^https?://[^/]+\\.gamepedia\\.com/(.*[?&]title=)?Special:(WikiPoints/global|ListAllUsers|AllSites)([/?&]|$)"
     ],
     "type": "ignore_patterns"
 }
