@@ -1,14 +1,31 @@
 {
     "name": "dreamwidth",
     "patterns": [
-        "replyto=",
-        "mode=reply",
-        "/inbox/compose",
+        "/\\d+\\.html\\?(.*&)?replyto=\\d+(&|$)",
+        "/\\d+\\.html\\?(.*&)?mode=reply(&|$)",
+        "/inbox/compose\\.bml\\?",
         "/manage/tracking/",
         "/manage/circle/",
+        "/manage/subscriptions/user\\.bml\\?",
         "/shop/account",
-        "/tools/tellafriend",
-        "/tools/memadd"
+        "/tools/tellafriend\\?",
+        "/tools/memadd\\?",
+        "/tools/content_flag\\.bml\\?",
+        "/identity/login\\.bml\\?",
+        "/subscribers/add\\?",
+        "/update\\.bml\\?",
+        "/\\d{4}/\\d\\d/\\d\\d/\\?get=(prev|next)$",
+        "^https?://[^/]+\\.livejournal\\.com/.*/flymeango\\.com/$",
+        "^https?://[^/]+\\.livejournal\\.com/.*/fotogid\\.info$",
+        "^https?://[^/]+\\.livejournal\\.com/.*/spring\\.me$",
+        "^https?://[^/]+\\.livejournal\\.com/.*/www\\.arte\\.tv/en/$",
+        "^https?://[^/]+\\.livejournal\\.com/.*/error\\.[^/]+\\.text$",
+        "^https?://[^/]+\\.livejournal\\.com/.*/fbmerging\\.[^/]+\\.text$",
+        "^https?://[^/]+\\.livejournal\\.com/.*/popup\\.[^/]+\\.text$",
+        "^https?://[^/]+\\.livejournal\\.com/.*/\\*sup_ru/ru/UTF-8/",
+        "^https?://(?=[^/]+\\.livejournal\\.com/){primary_netloc}/(.*/)?https?%3A%2F%2F{primary_netloc}%2F",
+        "^https?://[^/]+\\.livejournal\\.com/.*/(photo/(\\{\\{|%7B%7B)photo\\.siteroot(\\}\\}|%7D%7D)/){2}",
+        "^https?://[^/]+\\.livejournal\\.com/.*/gtm\\.js$"
     ],
     "type": "ignore_patterns"
 }
