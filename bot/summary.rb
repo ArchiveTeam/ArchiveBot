@@ -9,6 +9,8 @@ class Summary
   def run
     @pending = redis.llen('pending')
     @pendingao = redis.llen('pending-ao')
+    @pendingothers = 0
+    redis.scan_each(:match => "pending:*") { |key| @pendingothers += redis.llen(key) }
     @working = redis.llen('working')
     @completed = redis.get('jobs_completed') || 0
     @aborted = redis.get('jobs_aborted') || 0
@@ -16,6 +18,6 @@ class Summary
   end
 
   def to_s
-    "Job status: #{completed} completed, #{aborted} aborted, #{failed} failed, #{working} in progress, #{pending} pending, #{pendingao} pending-ao"
+    "Job status: #{completed} completed, #{aborted} aborted, #{failed} failed, #{working} in progress, #{pending} pending, #{pendingao} pending-ao, #{pendingothers} pending in other queues"
   end
 end
