@@ -1,6 +1,6 @@
 class Summary
   attr_reader :redis
-  attr_reader :pending, :pendingao, :working, :completed, :aborted, :failed
+  attr_reader :pending, :pendingao, :pendingothers, :working, :completed, :aborted, :failed
 
   def initialize(redis)
     @redis = redis
@@ -9,12 +9,17 @@ class Summary
   def run
     @pending = redis.llen('pending')
     @pendingao = redis.llen('pending-ao')
-    @pendingothers = 0
-    redis.scan_each(:match => "pending:*") { |key| @pendingothers += redis.llen(key) }
+    @pendingothers = get_pending_others
     @working = redis.llen('working')
     @completed = redis.get('jobs_completed') || 0
     @aborted = redis.get('jobs_aborted') || 0
     @failed = redis.get('jobs_failed') || 0
+  end
+
+  def get_pending_others
+    pendingothers = 0
+    redis.scan_each(:match => "pending:*") { |key| pendingothers += redis.llen(key) }
+    pendingothers
   end
 
   def to_s
