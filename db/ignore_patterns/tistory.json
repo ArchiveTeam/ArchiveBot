@@ -5,7 +5,8 @@
 		"^https?://www\\.tistory\\.com/auth/login/",
 		"^https?://[^/]+\\.tistory\\.com/manage([/?]|$)",
 		"^https?://[^/]+\\.tistory\\.com/toolbar/popup/abuseReport/",
-		"^https?://[^/]+\\.tistory\\.com/comment/add/\\d+$"
+		"^https?://[^/]+\\.tistory\\.com/comment/add/\\d+$",
+		"^https?://[^/]+\\.tistory\\.com/archive/(200[0-5]|20[5-9]\\d)\\d{2}$"
 	],
 	"type": "ignore_patterns"
 }
