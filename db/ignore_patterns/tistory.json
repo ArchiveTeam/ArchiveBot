@@ -1,0 +1,11 @@
+{
+	"name": "tistory",
+	"patterns": [
+		"^https?://www\\.tistory\\.com/login/",
+		"^https?://www\\.tistory\\.com/auth/login/",
+		"^https?://[^/]+\\.tistory\\.com/manage([/?]|$)",
+		"^https?://[^/]+\\.tistory\\.com/toolbar/popup/abuseReport/",
+		"^https?://[^/]+\\.tistory\\.com/comment/add/\\d+$"
+	],
+	"type": "ignore_patterns"
+}
