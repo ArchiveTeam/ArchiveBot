@@ -5,10 +5,11 @@ import urllib.parse
 import sys
 
 
-if len(sys.argv) != 3:
-	print('Usage: mediawiki-lang.py IGSETFILE MEDIAWIKILANGFILE', file = sys.stderr)
+if len(sys.argv) != 4:
+	print('Usage: mediawiki-lang.py IGSETFILE MEDIAWIKILANGFILE NEWNAME', file = sys.stderr)
 	print(' IGSETFILE: an ignore set file in English', file = sys.stderr)
 	print(" MEDIAWIKILANGFILE: one of the files in MediaWiki's languages/messages directory", file = sys.stderr)
+	print(' NEWNAME: desired name attribute of the generated igset (must not contain quotes or other odd characters; recommended to only use [a-z-]+)', file = sys.stderr)
 	sys.exit(1)
 
 with open(sys.argv[1], 'r') as fp:
@@ -16,6 +17,8 @@ with open(sys.argv[1], 'r') as fp:
 
 with open(sys.argv[2], 'r') as fp:
 	messagesOtherLang = fp.read()
+
+newName = sys.argv[3]
 
 # Extract locale's Special namespace name
 if 'NS_SPECIAL' not in messagesOtherLang:
@@ -88,4 +91,4 @@ for nsConst, enName in (('NS_CATEGORY', 'Category'), ('NS_USER', 'User'), ('NS_U
 	igsetOtherLang = igsetOtherLang.replace(enName + ':', nsAlias + ':')
 
 
-print(igsetOtherLang, end = '')
+print(igsetOtherLang.replace('"name": "mediawiki"', f'"name": "{newName}"'), end = '')
