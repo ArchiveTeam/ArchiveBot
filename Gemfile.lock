@@ -1,5 +1,5 @@
 GIT
-  remote: https://github.com/lgierth/webmachine-sprockets.git
+  remote: https://github.com/ArchiveTeam/webmachine-sprockets.git
   revision: cf8c0d4e0c2383f39f4c68eff9979ccc4a7f7fe9
   specs:
     webmachine-sprockets (0.2.0)
