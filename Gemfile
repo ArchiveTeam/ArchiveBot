@@ -33,7 +33,7 @@ group :dashboard do
   gem 'json'
   gem 'reel'
   gem 'webmachine', :git => 'https://github.com/seancribbs/webmachine-ruby.git'
-  gem 'webmachine-sprockets', :git => 'https://github.com/lgierth/webmachine-sprockets.git'
+  gem 'webmachine-sprockets', :git => 'https://github.com/ArchiveTeam/webmachine-sprockets.git'
   gem 'erubis'
 end
 
