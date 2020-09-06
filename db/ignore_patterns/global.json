@@ -207,7 +207,8 @@
         "^https?://assets\\.squarespace\\.com/universal/scripts-compressed/src/main/webapp/universal/",
         "^https?://www\\.facebook\\.com/dialog/send\\?",
         "^https?://linkedin\\.com/shareArticle\\?",
-        "^https?://(line\\.me/R/msg/text/|lineit\\.line\\.me/share/ui|social-plugins\\.line\\.me/lineit/share)\\?"
+        "^https?://(line\\.me/R/msg/text/|lineit\\.line\\.me/share/ui|social-plugins\\.line\\.me/lineit/share)\\?",
+        "^https?://((videos|360)\\.littlstar\\.com|ls-video-masters\\.s3-accelerate\\.amazonaws\\.com)/.*\\.(mp4|mov|mkv|webm|avi|yuv|y4m)$"
     ],
     "type": "ignore_patterns"
 }
