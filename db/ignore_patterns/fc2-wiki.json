@@ -1,0 +1,8 @@
+{
+	"name": "fc2-wiki",
+	"patterns": [
+		"^https?://[^/.]+\\.wiki\\.fc2\\.com/edit/",
+		"^https?://[^/.]+\\.wiki\\.fc2\\.com/.*[?&]cmd=auth(&|$)"
+	],
+	"type": "ignore_patterns"
+}
