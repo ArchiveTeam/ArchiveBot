@@ -2,7 +2,7 @@
 	"name": "tistory",
 	"patterns": [
 		"^https?://www\\.tistory\\.com/login/",
-		"^https?://www\\.tistory\\.com/auth/login/",
+		"^https?://www\\.tistory\\.com/auth/login[/?]",
 		"^https?://[^/]+/manage([/?]|$)",
 		"^https?://[^/]+/toolbar/popup/abuseReport/",
 		"^https?://[^/]+/comment/add/\\d+$",
