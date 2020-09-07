@@ -1,7 +1,9 @@
 {
 	"name": "fc2-blog",
 	"patterns": [
-		"^https?://[^/.]+\\.blog\\d*\\.fc2\\.com/(\\?date=|blog-date-)(1[0-8]\\d{4}|19[0-8]\\d{3}|20[5-9]\\d{3}|2[1-9]\\d{4})"
+		"^https?://[^/.]+\\.blog\\d*\\.(fc2\\.com|fc2blog\\.us)/(\\?date=|blog-date-)(1[0-8]\\d{4}|19[0-8]\\d{3}|20[5-9]\\d{3}|2[1-9]\\d{4})",
+		"^https?://[^/.]+\\.blog\\d*\\.(fc2\\.com|fc2blog\\.us)/\\?mode=edit&rno=\\d+$",
+		"^https?://blogvote\\.(fc2\\.com|fceblog\\.us)/pickup/[^/]+/\\d+/clap$"
 	],
 	"type": "ignore_patterns"
 }
