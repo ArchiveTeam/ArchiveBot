@@ -47,6 +47,7 @@ bot = Cinch::Bot.new do
 
     if uri.scheme == 'ircs'
       c.ssl.use = true
+      c.ssl.verify = true
     end
   end
 
