@@ -13,6 +13,7 @@ opts = Trollop.options do
   opt :server, 'IRC server, expressed as a URI (irc://SERVER:PORT or ircs://SERVER:PORT for SSL)', :type => String
   opt :nick, 'Nick to use', :default => 'ArchiveBot'
   opt :channels, 'Comma-separated list of channels', :type => String
+  opt :sasl, 'SASL PLAIN authentication (USERNAME:PASSWORD)', :type => String, :default => nil
   opt :schemes, 'Comma-separated list of acceptable URI schemes', :default => 'http,https,ftp'
   opt :redis, 'URL of Redis server', :default => ENV['REDIS_URL'] || 'redis://localhost:6379/0'
   opt :password, 'IRC server password', :default => nil, :type => String
@@ -37,6 +38,7 @@ bot = Cinch::Bot.new do
     c.nick = opts[:nick]
     c.channels = channels
     c.password = opts[:password]
+    c.sasl.username, c.sasl.password = opts[:sasl].split(':', 2) unless opts[:sasl].nil?
     c.plugins.plugins = [FinishNotifier, PipelineNotifier]
     c.plugins.options[FinishNotifier] = {
       redis: redis
