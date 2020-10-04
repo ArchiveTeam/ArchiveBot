@@ -15,13 +15,14 @@
 		"^https?://github\\.com/[^/]+/[^/]+/projects/issues/\\d+$",
 		"^https?://github\\.com/[^/]+/[^/]+/pull/\\d+/(?!commits/).*/",
 		"^https?://github\\.com/[^/]+/[^/]+/(tree|blob|raw)/[0-9a-f]{40}/",
-		"^https?://github\\.com/[^/]+/[^/]+/actions(/.*)?\\?(.*&)?query=[^&]+\\+",
+		"^https?://github\\.com/[^/]+/[^/]+/actions(/.*)?\\?(.*&)?query=",
 		"^https?://github\\.com/[^/]+/[^/]+/runs/\\d+/(header$|toolbar(\\?|$)|step_summary\\?|unseen_check_steps\\?)",
 		"^https?://github\\.com/[^/]+/[^/]+/suites/\\d+/show_partial\\?",
 		"^https?://github\\.com/[^/]+/[^/]+/actions/runs/\\d+/workflow_run$",
 		"^https?://github\\.com/[^/]+/[^/]+/(issues|pull)/[^/]+/hovercard$",
 		"^https?://github\\.com/[^/]+/[^/]+/packages\\?(.*&)?sort_by=",
-		"^https?://github\\.com/.*/(Sortable|randomColor|drag-drop|gist-vendor)\\.js$"
+		"^https?://github\\.com/[^/]+/[^/]+/used_by_list$",
+		"^https?://github\\.com/.*/(contributions-spider-graph|drag-drop|jump-to|profile-pins-element|randomColor|sortable-behavior|tweetsodium|user-status-submit)\\.js$"
 	],
 	"type": "ignore_patterns"
 }
