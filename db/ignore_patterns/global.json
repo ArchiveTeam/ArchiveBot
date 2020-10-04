@@ -204,7 +204,7 @@
         "^https?://((web|api)\\.whatsapp\\.com/send|wa\\.me/)\\?",
         "^https?://(direct\\.(france(info|inter|culture|musique|bleu)|fipradio|mouv)\\.fr|[^/.]+\\.cdn\\.dvmr\\.fr(:\\d+)?)/.*\\.mp3$",
         "^https?://www\\.testtesttest\\.com/",
-        "^https?://(www\\.cgzxb\\.com|216\\.218\\.185\\.162)/",
+        "^https?://(www\\.cgzxb\\.com|imgnet\\.com|216\\.218\\.185\\.162)/",
         "^https?://assets\\.squarespace\\.com/universal/scripts-compressed/src/main/webapp/universal/",
         "^https?://www\\.facebook\\.com/dialog/send\\?",
         "^https?://linkedin\\.com/shareArticle\\?",
