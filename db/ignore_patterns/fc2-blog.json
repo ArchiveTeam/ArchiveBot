@@ -3,7 +3,9 @@
 	"patterns": [
 		"^https?://[^/.]+\\.blog\\d*\\.(fc2\\.com|fc2blog\\.us)/(\\?date=|blog-date-)(1[0-8]\\d{4}|19[0-8]\\d{3}|20[5-9]\\d{3}|2[1-9]\\d{4})",
 		"^https?://[^/.]+\\.blog\\d*\\.(fc2\\.com|fc2blog\\.us)/\\?mode=edit&rno=\\d+$",
-		"^https?://blogvote\\.(fc2\\.com|fceblog\\.us)/pickup/[^/]+/\\d+/clap$"
+		"^https?://blogvote\\.(fc2\\.com|fceblog\\.us)/pickup/[^/]+/\\d+/clap$",
+		"^https?://clap\\.fc2\\.com/post/[^/]+/\\?url=https?%3A%2F%2F[^/&]+\\.blog\\d*\\.(fc2\\.com|fc2blog\\.us)%2F",
+		"^https?://admin\\.blog\\.fc2\\.com/control\\.php"
 	],
 	"type": "ignore_patterns"
 }
