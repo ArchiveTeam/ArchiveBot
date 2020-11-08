@@ -49,6 +49,9 @@ bot = Cinch::Bot.new do
       c.ssl.use = true
       c.ssl.verify = true
     end
+
+    c.server_queue_size = 7
+    c.messages_per_second = 1.0
   end
 
   couchdb = Couchdb.new(URI(opts[:db]), opts[:db_credentials])
