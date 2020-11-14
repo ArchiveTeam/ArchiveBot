@@ -85,9 +85,6 @@ def make_args(item, default_user_agent, wpull_exe, youtube_dl_exe, finished_warc
     if item.get('youtube_dl'):
         args.append('--youtube-dl')
 
-    if item.get('inet4-only'):
-        args.append('--inet4-only')
-
     return args
 
 # ---------------------------------------------------------------------------
