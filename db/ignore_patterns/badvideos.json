@@ -7,7 +7,8 @@
 		"^https?://vp\\.nyt\\.com/",
 		"^https?://video1\\.nytimes\\.com/",
 		"^https?://(d21rhj7n383afu\\.cloudfront\\.net|videos\\.posttv\\.com)/washpost-production/",
-		"^https?://videos\\.usatoday\\.net/Brightcove2/"
+		"^https?://videos\\.usatoday\\.net/Brightcove2/",
+		"^https?://cdn([1-9]|1\\d|20)\\.anyclip\\.com/.*\\.mp4$"
 	],
 	"type": "ignore_patterns"
 }
