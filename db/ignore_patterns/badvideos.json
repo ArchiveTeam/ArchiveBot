@@ -1,0 +1,13 @@
+{
+	"name": "badvideos",
+	"patterns": [
+		"^https?://mp3\\.cbc\\.ca/",
+		"^https?://podcast-a\\.akamaihd\\.net/mp3/",
+		"^https?://content\\.jwplatform\\.com/videos/",
+		"^https?://vp\\.nyt\\.com/",
+		"^https?://video1\\.nytimes\\.com/",
+		"^https?://(d21rhj7n383afu\\.cloudfront\\.net|videos\\.posttv\\.com)/washpost-production/",
+		"^https?://videos\\.usatoday\\.net/Brightcove2/"
+	],
+	"type": "ignore_patterns"
+}
