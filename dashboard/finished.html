@@ -1,0 +1,131 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>ArchiveBot finished jobs</title>
+<link rel="stylesheet" type="text/css" href="/assets/jquery.dataTables.min.css">
+<style>
+html, body {
+	background-color: #D4D6E9;
+	color: black;
+}
+
+.cell_warn_higlight {
+	background-color: #FFC2E3 !important;
+	font-weight: bold;
+}
+</style>
+</head>
+<body>
+	<noscript>Please enable JavaScript or request this resource
+		as application/json for raw data.</noscript>
+	<table id="finished_table" class="display">
+		<thead>
+			<tr>
+				<th>Ident</th>
+				<th>URL</th>
+				<th>Pipeline</th>
+				<th>Queued at</th>
+				<th id="queued_by" style="display: none">Queued by</th>
+				<th>Started at</th>
+				<th>Finished at</th>
+				<th>Size</th>
+				<th>Responses</th>
+			</tr>
+		</thead>
+		<tbody>
+		</tbody>
+	</table>
+	<script type="text/javascript" src="/assets/jquery-3.4.1.min.js"></script>
+	<script type="text/javascript" charset="utf8" src="/assets/jquery.dataTables.min.js"></script>
+	<script type="text/javascript" src="/assets/jquery.timeago.js"></script>
+	<script>
+		var table;
+		var reloadInterval = 600 * 1000; // 10 minutes
+		var timestampThreshold = 60 * 5 * 1000;
+		var showNicks = (location.search.indexOf("?showNicks=") != -1) || (location.search.indexOf("&showNicks=") != -1);
+		function initTable() {
+			if (showNicks) $('#queued_by').show();
+
+			table = $('#finished_table').DataTable({
+				"paging" : false,
+				"ajax" : {
+					"url" : "/finished",
+					"dataSrc": ""
+				},
+				"columns" : [ {
+					"data" : "ident"
+				}, {
+					"data" : "url"
+				}, {
+					"data" : "pipeline_id"
+				}, {
+					"data" : "queued_at",
+					"createdCell" : function(td, cellData, rowData, row, col) {
+						var cellDate = new Date(cellData * 1000);
+						var dateNow = new Date();
+						$(td).attr('title', cellDate.toLocaleString());
+						$(td).text(jQuery.timeago(cellDate));
+					},
+					"className" : "dateFormatable"
+				}, {
+					"data" : function (row) { return showNicks ? row["started_by"] : ""; },
+					"createdCell" : function(td, cellData, rowData, row, col) { if (!showNicks) $(td).hide(); }
+				}, {
+					"data" : "started_at",
+					"createdCell" : function(td, cellData, rowData, row, col) {
+						var cellDate = new Date(cellData * 1000);
+						var dateNow = new Date();
+						$(td).attr('title', cellDate.toLocaleString());
+						$(td).text(jQuery.timeago(cellDate));
+					},
+					"className" : "dateFormatable"
+				}, {
+					"data" : "finished_at",
+					"createdCell" : function(td, cellData, rowData, row, col) {
+						var cellDate = new Date(cellData * 1000);
+						var dateNow = new Date();
+						$(td).attr('title', cellDate.toLocaleString());
+						$(td).text(jQuery.timeago(cellDate));
+					},
+					"className" : "dateFormatable"
+				}, {
+					"data" : "bytes_downloaded",
+					"createdCell" : function(td, cellData, rowData, row, col) {
+						var units = ['B', 'KiB', 'MiB', 'GiB', 'TiB'];
+						var unit = null;
+						var value = cellData;
+						for (var i = 0; i < units.length - 1; ++i) {
+							if (value < 1024) {
+								unit = units[i];
+								break;
+							}
+							value /= 1024.0;
+						}
+						if (!unit) unit = units[units.length - 1];
+						$(td).attr('title', cellData + ' bytes');
+						$(td).text(value.toLocaleString(undefined, { maximumSignificantDigits: 4 }) + "\xA0" + unit);
+					}
+				}, {
+					"data" : null,
+					"render" : function(data, type, row) {
+						return (data["r1xx"] + data["r2xx"] + data["r3xx"] + data["r4xx"] + data["r5xx"] + data["runk"] + data["error_count"]);
+					}
+				}]
+			});
+
+			setTimeout(reloadTable, reloadInterval);
+
+			$('.dateFormatable').timeago();
+		}
+
+		function reloadTable() {
+			table.ajax.reload(function() {
+				setTimeout(reloadTable, reloadInterval);
+			})
+		}
+
+		$(document).ready(initTable);
+	</script>
+</body>
+</html>
