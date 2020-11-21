@@ -13,6 +13,7 @@ require File.expand_path('../resources/recent', __FILE__)
 require File.expand_path('../resources/ignores', __FILE__)
 require File.expand_path('../resources/pending', __FILE__)
 require File.expand_path('../resources/status', __FILE__)
+require File.expand_path('../resources/finished', __FILE__)
 
 opts = Trollop.options do
   opt :url, 'URL to bind to', :default => 'http://localhost:4567'
@@ -29,6 +30,7 @@ Recent.redis = R
 Pending.redis = R
 Feed.redis = R
 Status.redis = R
+Finished.redis = R
 
 App = Webmachine::Application.new do |app|
   sprockets = Sprockets::Environment.new
@@ -57,6 +59,7 @@ App = Webmachine::Application.new do |app|
     add ['feed', 'archivebot.atom'], AtomFeed
     add ['feed'], Feed
     add ['status'], Status
+    add ['finished'], Finished
   end
 end
 
