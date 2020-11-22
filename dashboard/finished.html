@@ -108,9 +108,7 @@ html, body {
 						$(td).text(value.toLocaleString(undefined, { maximumSignificantDigits: 4 }) + "\xA0" + unit);
 					}
 				}, {
-					"data" : null,
-					"render" : function(data, type, row) {
-						return (data["r1xx"] + data["r2xx"] + data["r3xx"] + data["r4xx"] + data["r5xx"] + data["runk"] + data["error_count"]);
+					"data" : function (row) { return (row["r1xx"] + row["r2xx"] + row["r3xx"] + row["r4xx"] + row["r5xx"] + row["runk"] + row["error_count"]); }
 				}, {
 					"data" : function (row) { return row["items_queued"] - row["items_downloaded"]; },
 					"createdCell" : function (td, cellData, rowData, row, col) {
