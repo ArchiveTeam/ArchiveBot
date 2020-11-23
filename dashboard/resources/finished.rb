@@ -1,3 +1,4 @@
+require 'addressable/uri'
 require 'json'
 require 'webmachine'
 
@@ -21,8 +22,13 @@ class Finished < Webmachine::Resource
   def get_finished_jobs
     jobs = []
     get_all_job_ids.each do |ident|
-      j = Job.from_ident(ident, self.class.redis)
+      # Don't do this at home, kids.
+      j = Job.new(nil, self.class.redis)
+      j.instance_variable_set(:@ident, ident)
+      h = self.class.redis.hgetall(ident)
+      j.from_hash(h)
       if j && j.finished?
+        j[:uri] = Addressable::URI.parse(h['url']).normalize
         jobs.push(j.as_json)
       end
     end
