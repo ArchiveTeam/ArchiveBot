@@ -16,16 +16,21 @@ class Finished < Webmachine::Resource
     # So instead, abuse the ignore_patterns_set_key entries and extract the job ID from those.
     # (The log_key entries only exist for currently running jobs.)
     self.class.redis.scan_each(:match => "*_ignores") { |key| jobs.add(key[0..-9]) }
-    jobs
+    jobs.to_a
   end
 
   def get_finished_jobs
+    jobids = get_all_job_ids
+    hashes = self.class.redis.pipelined do |p|
+      jobids.each do |ident|
+        p.hgetall(ident)
+      end
+    end
     jobs = []
-    get_all_job_ids.each do |ident|
+    jobids.zip(hashes).each do |ident, h|
       # Don't do this at home, kids.
       j = Job.new(nil, self.class.redis)
       j.instance_variable_set(:@ident, ident)
-      h = self.class.redis.hgetall(ident)
       j.from_hash(h)
       if j && j.finished?
         j[:uri] = Addressable::URI.parse(h['url']).normalize
