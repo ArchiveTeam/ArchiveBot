@@ -115,7 +115,8 @@ html, body {
 						if (cellData > 0.01 * rowData["items_queued"])
 							$(td).addClass('cell_warn_higlight');
 					}
-				}]
+				}],
+				"order": [[6, "desc"]]
 			});
 
 			setTimeout(reloadTable, reloadInterval);
