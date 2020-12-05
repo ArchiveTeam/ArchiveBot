@@ -115,12 +115,12 @@ def ia_upload_allowed(s3_url, accesskey, bucket=''):
         print('Exception: {}'.format(err))
         return False
 
-    if 'over_limit' in data and data['over_limit'] is not 0:
+    if 'over_limit' in data and data['over_limit'] != 0:
         print('IA S3 API notifies us we are being throttled (over_limit)')
         return False
 
     if 'detail' in data and 'rationing_engaged' in data['detail'] \
-       and data['detail']['rationing_engaged'] is not 0:
+       and data['detail']['rationing_engaged'] != 0:
         quota_our_remaining = data['detail']['accesskey_ration'] - \
             data['detail']['accesskey_tasks_queued']
         quota_global_remaining = data['detail']['total_global_limit'] - \
@@ -162,7 +162,7 @@ def ia_s3_ship(fname, basename, item, params: Params):
 
     size_hint = str(os.stat(fname).st_size)
     compat_filename = re.sub(r'[^0-9a-zA-Z-.]+', '_', basename)[-64:]
-    if compat_filename is '' or compat_filename[0] is '_':
+    if compat_filename == '' or compat_filename[0] == '_':
         # IA filenames cannot be empty or start with underscore
         compat_filename = 'z' + compat_filename[1:]
 

@@ -30,7 +30,6 @@ def make_args(item, default_user_agent, wpull_exe, youtube_dl_exe, finished_warc
         '--page-requisites',
         '--no-parent',
         '--sitemaps',
-        '--inet4-only',
         '--timeout', '20',
         '--tries', '3',
         '--waitretry', '5',
