@@ -1,0 +1,18 @@
+1. Verify and possibly truncate the WARC:
+a. if there is a wpullinc file, truncate the relevant .warc.gz to the size noted in that file
+b. run warc-tiny-nodigest verify on each .warc.gz in the datadir
+c. upload only WARCs that pass (feel free to try other WARC recovery strategies)
+
+2. Compress the log:
+gzip -9 <wpull.log >${NAME}-wpull.log.gz
+
+3. Find the temp log, which would otherwise go in the metawarc:
+a. Look through each file tmp-wpull-warc-xxxxxxxx.log.gz in the pipeline directory (parent dir of data/) to see which one corresponds to this job
+b. Name it ${NAME}-tmp.log.gz
+
+3. Upload the following files through the uploader:
+*.warc.gz
+${NAME}-wpull.log.gz
+${NAME}-tmp.log.gz
+${NAME}-urls.txt (if present)
+${NAME}.json
