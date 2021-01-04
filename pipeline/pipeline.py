@@ -133,6 +133,9 @@ wpull_args = WpullArgs(
     monitor_disk=WPULL_MONITOR_DISK,
     monitor_memory=WPULL_MONITOR_MEMORY,
 )
+
+check_wpull_args(wpull_args)
+
 wpull_env = {
     'ITEM_IDENT': ItemInterpolation('%(ident)s'),
     'LOG_KEY': ItemInterpolation('%(log_key)s'),
@@ -186,8 +189,6 @@ pipeline.on_stop_requested += status_stopping
 
 # Activate system monitoring.
 monitoring.start(pipeline, control, VERSION, downloader)
-
-check_wpull_args(wpull_args)
 
 print('*' * 60)
 print('Pipeline ID: %s' % pipeline_id)
