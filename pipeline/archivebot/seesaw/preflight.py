@@ -15,8 +15,8 @@ def check_wpull_args(wpull_args):
     print('Doing preflight check ', end='')
     sys.stdout.flush()
 
-    temp_dir = tempfile.TemporaryDirectory()
-    temp_log = tempfile.NamedTemporaryFile()
+    temp_dir = tempfile.TemporaryDirectory(prefix = 'tmp-wpull-preflight-', dir = '.')
+    temp_log = tempfile.NamedTemporaryFile(prefix = 'tmp-wpull-preflight-', suffix = '.log', dir = '.')
 
     item = MockItem({
         'url': 'http://archiveteam-invalid.com/',
