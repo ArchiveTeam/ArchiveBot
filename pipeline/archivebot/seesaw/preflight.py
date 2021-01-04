@@ -19,7 +19,7 @@ def check_wpull_args(wpull_args):
     temp_log = tempfile.NamedTemporaryFile(prefix = 'tmp-wpull-preflight-', suffix = '.log', dir = '.')
 
     item = MockItem({
-        'url': 'http://archiveteam-invalid.com/',
+        'url': 'http://archiveteam.invalid/',
         'item_dir': temp_dir.name,
         'cookie_jar': '{}/cookies.txt'.format(temp_dir.name),
         'warc_file_base': 'preflight.invalid',
