@@ -76,6 +76,7 @@ REDIS_URL = env['REDIS_URL']
 LOG_CHANNEL = shared_config.log_channel()
 PIPELINE_CHANNEL = shared_config.pipeline_channel()
 OPENSSL_CONF = env.get('OPENSSL_CONF')
+TMPDIR = env.get('TMPDIR')
 
 # ------------------------------------------------------------------------------
 # CONTROL CONNECTION
@@ -144,6 +145,8 @@ wpull_env = {
 }
 if OPENSSL_CONF:
     wpull_env['OPENSSL_CONF'] = OPENSSL_CONF
+if TMPDIR:
+    wpull_env['TMPDIR'] = TMPDIR
 
 pipeline = Pipeline(
     CheckIP(),
