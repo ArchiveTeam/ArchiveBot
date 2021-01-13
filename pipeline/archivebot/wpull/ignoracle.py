@@ -3,6 +3,7 @@
 
 import re
 import sys
+import threading
 
 from urllib.parse import urlparse
 
@@ -54,11 +55,15 @@ class Ignoracle(object):
     An Ignoracle's pattern list starts as the empty list.
     '''
 
+    # Note that set_patterns() is called from a different thread than ignores().
+    # The lock prevents race conditions on iteration over self._compiled.
+
     patterns = []
 
     def __init__(self):
         self._primary = None
         self._compiled = []
+        self._lock = threading.Lock()
 
     def set_patterns(self, strings):
         '''
@@ -66,16 +71,18 @@ class Ignoracle(object):
         that list.
         '''
 
-        self.patterns = []
+        patterns = []
 
         for string in strings:
             if isinstance(string, bytes):
                 string = string.decode('utf-8')
 
-            self.patterns.append(string)
+            patterns.append(string)
 
-        self._primary = None
-        self._compiled = []
+        with self._lock:
+            self.patterns = patterns
+            self._primary = None
+            # Don't replace _compiled here; _primary acts as a trigger for the recompilation.
 
     def ignores(self, url_record: wpull.pipeline.item.URLRecord):
         '''
@@ -88,19 +95,20 @@ class Ignoracle(object):
         primaryUrl = params.get('primary_url') or ''
         primaryNetloc = params.get('primary_netloc') or ''
         if self._primary != (primaryUrl, primaryNetloc):
-            self._compiled = []
-            escapedPrimaryUrl = re.escape(primaryUrl)
-            escapedPrimaryNetloc = re.escape(primaryNetloc)
-            for pattern in self.patterns:
-                try:
-                    expanded = pattern.replace('{primary_url}', escapedPrimaryUrl)
-                    expanded = expanded.replace('{primary_netloc}', escapedPrimaryNetloc)
-                    compiledPattern = re.compile(expanded)
-                except re.error as error:
-                    print('Pattern %s is invalid (error: %s).  Ignored.'
-                          % (pattern, str(error)), file=sys.stderr)
-                self._compiled.append((pattern, compiledPattern))
-            self._primary = (primaryUrl, primaryNetloc)
+            with self._lock:
+                self._compiled = []
+                escapedPrimaryUrl = re.escape(primaryUrl)
+                escapedPrimaryNetloc = re.escape(primaryNetloc)
+                for pattern in self.patterns:
+                    try:
+                        expanded = pattern.replace('{primary_url}', escapedPrimaryUrl)
+                        expanded = expanded.replace('{primary_netloc}', escapedPrimaryNetloc)
+                        compiledPattern = re.compile(expanded)
+                    except re.error as error:
+                        print('Pattern %s is invalid (error: %s).  Ignored.'
+                              % (pattern, str(error)), file=sys.stderr)
+                    self._compiled.append((pattern, compiledPattern))
+                self._primary = (primaryUrl, primaryNetloc)
 
         for pattern, compiled in self._compiled:
             match = compiled.search(url_record.url)
