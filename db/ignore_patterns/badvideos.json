@@ -9,7 +9,10 @@
 		"^https?://(d21rhj7n383afu\\.cloudfront\\.net|videos\\.posttv\\.com)/washpost-production/",
 		"^https?://videos\\.usatoday\\.net/Brightcove2/",
 		"^https?://cdn([1-9]|1\\d|20)\\.anyclip\\.com/.*\\.mp4$",
-		"^https?://video\\.csfd\\.cz/files/videos/"
+		"^https?://video\\.csfd\\.cz/files/videos/",
+		"^https?://assets\\d+\\.ign\\.com/videos/zencoder/.*\\.mp4$",
+		"^https?://s3\\.amazonaws\\.com/o\\.videoarchive\\.ign\\.com/.*\\.mp4$",
+		"^https?://(cuts\\.diamond|mlb-cuts-diamond)\\.mlb\\.com/FORGE/.*\\.mp4$"
 	],
 	"type": "ignore_patterns"
 }
