@@ -17,7 +17,14 @@ env:
 before_install:
   - sudo add-apt-repository ppa:deadsnakes/ppa --yes
   - sudo apt-get update -qq
-  - wget https://bootstrap.pypa.io/get-pip.py
+  # The current version of pip no longer supports Python 3.5 since 2021-01-23, so get the specific version instead.
+  - |
+    if [[ "${PYTHON}" == "python3.5" ]]; then
+      GETPIPURL=https://bootstrap.pypa.io/3.5/get-pip.py
+    else
+      GETPIPURL=https://bootstrap.pypa.io/get-pip.py
+    fi
+  - wget "${GETPIPURL}"
 
 install:
   - bundle install --jobs=3 --retry=3 --deployment
