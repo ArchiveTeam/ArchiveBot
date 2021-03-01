@@ -137,12 +137,11 @@ wpull_args = WpullArgs(
 
 check_wpull_args(wpull_args)
 
-wpull_env = {
-    'ITEM_IDENT': ItemInterpolation('%(ident)s'),
-    'LOG_KEY': ItemInterpolation('%(log_key)s'),
-    'REDIS_URL': REDIS_URL,
-    'PATH': os.environ['PATH'],
-}
+wpull_env = dict(os.environ)
+wpull_env['ITEM_IDENT'] = ItemInterpolation('%(ident)s')
+wpull_env['LOG_KEY'] = ItemInterpolation('%(log_key)s')
+wpull_env['REDIS_URL'] = REDIS_URL
+
 if OPENSSL_CONF:
     wpull_env['OPENSSL_CONF'] = OPENSSL_CONF
 if TMPDIR:
