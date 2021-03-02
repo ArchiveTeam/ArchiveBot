@@ -11,3 +11,4 @@ lxml
 lmdb
 youtube-dl
 html5lib==0.9999999
+dnspython==1.16.0
