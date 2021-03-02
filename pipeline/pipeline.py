@@ -25,6 +25,7 @@ from archivebot import shared_config
 from archivebot.seesaw import extensions
 from archivebot.seesaw import monitoring
 from archivebot.seesaw.preflight import check_wpull_args
+from archivebot.seesaw.dnspythoncrash import test as dnspython_crash_fixed
 from archivebot.seesaw.wpull import WpullArgs
 from archivebot.seesaw.tasks import GetItemFromQueue, StartHeartbeat, \
     SetFetchDepth, PreparePaths, Wpull, CompressLogIfFailed, WriteInfo, DownloadUrlFile, \
@@ -71,6 +72,8 @@ if StrictVersion(seesaw.__version__) < StrictVersion("0.1.8b1"):
 assert downloader not in ('ignorednick', 'YOURNICKHERE'), 'please use a real nickname'
 
 assert datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo.utcoffset(None).seconds == 0, 'Please set the time zone to UTC'
+
+assert dnspython_crash_fixed(), 'Broken crash-prone dnspython found'
 
 REDIS_URL = env['REDIS_URL']
 LOG_CHANNEL = shared_config.log_channel()
