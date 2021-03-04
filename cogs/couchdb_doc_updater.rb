@@ -13,6 +13,11 @@ class CouchdbDocUpdater
     @credentials = credentials
     @path = path
 
+    Dir.foreach(@path) do |filename|
+      next if filename == '.' or filename == '..'
+      next if not filename.end_with? '.json'
+      add_set("#{@path}/#{filename}")
+    end
     start_listener
   end
 
