@@ -1,0 +1,11 @@
+{
+	"agents": [
+		{
+			"aliases": [
+				"curl"
+			],
+			"name": "curl/7.75.0"
+		}
+	],
+	"type": "user_agents"
+}
