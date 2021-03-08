@@ -20,7 +20,7 @@ before_install:
   # The current version of pip no longer supports Python 3.5 since 2021-01-23, so get the specific version instead.
   - |
     if [[ "${PYTHON}" == "python3.5" ]]; then
-      GETPIPURL=https://bootstrap.pypa.io/3.5/get-pip.py
+      GETPIPURL=https://bootstrap.pypa.io/pip/3.5/get-pip.py
     else
       GETPIPURL=https://bootstrap.pypa.io/get-pip.py
     fi
