@@ -12,3 +12,4 @@ lmdb
 youtube-dl
 html5lib==0.9999999
 dnspython==1.16.0
+SQLAlchemy<1.4
