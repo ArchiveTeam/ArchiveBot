@@ -345,7 +345,7 @@ GEM
       simple_oauth (~> 0.2.0)
     uuidtools (2.1.4)
     websocket_parser (0.1.6)
-    yajl-ruby (1.2.1)
+    yajl-ruby (1.4.1)
 
 PLATFORMS
   ruby
@@ -358,7 +358,7 @@ DEPENDENCIES
   cinch (~> 2.2.0)
   cucumber
   erubis
-  ffi-rzmq (~>2.0)
+  ffi-rzmq (~> 2.0)
   hiredis
   json
   listen (~> 2.0)
