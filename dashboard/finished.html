@@ -108,12 +108,22 @@ html, body {
 						$(td).text(value.toLocaleString(undefined, { maximumSignificantDigits: 4 }) + "\xA0" + unit);
 					}
 				}, {
-					"data" : function (row) { return (row["r1xx"] + row["r2xx"] + row["r3xx"] + row["r4xx"] + row["r5xx"] + row["runk"] + row["error_count"]); }
+					"data" : function (row) { return (row["r1xx"] + row["r2xx"] + row["r3xx"] + row["r4xx"] + row["r5xx"] + row["runk"]); },
+					"createdCell" : function(td, cellData, rowData, row, col) {
+						$(td).attr('title', '1xx: ' + rowData['r1xx'] + '\n' +
+						                    '2xx: ' + rowData['r2xx'] + '\n' +
+						                    '3xx: ' + rowData['r3xx'] + '\n' +
+						                    '4xx: ' + rowData['r4xx'] + '\n' +
+						                    '5xx: ' + rowData['r5xx'] + '\n' +
+						                    'Unknown: ' + rowData['runk'] + '\n' +
+						                    '(Errors: ' + rowData['error_count'] + ')');
+					}
 				}, {
 					"data" : function (row) { return row["items_queued"] - row["items_downloaded"]; },
 					"createdCell" : function (td, cellData, rowData, row, col) {
 						if (cellData > 0.01 * rowData["items_queued"])
 							$(td).addClass('cell_warn_higlight');
+						$(td).attr('title', rowData['items_queued'] + ' queued\n' + rowData['items_downloaded'] + ' downloaded');
 					}
 				}],
 				"order": [[6, "desc"]]
