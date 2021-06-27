@@ -112,6 +112,8 @@ Accepted parameters
     alias for ``!explain``
     adds a short note explaining the purpose of the archiving job
 
+    Alias: ``--reason``
+
 ``--delay``
     alias for ``!delay`` (in milliseconds)
     only allows a single value; to provide a range, use ``!delay``
@@ -232,7 +234,7 @@ Accepted parameters
 explain
 =======
 
-``!explain IDENT NOTE``, ``!ex IDENT NOTE``
+``!explain IDENT NOTE``, ``!ex IDENT NOTE``, ``!reason IDENT NOTE``
    add a short note to explain why this site is being archived::
 
         > !explain byu50bzfdbnlyl6mrgn6dd24h shutting down 7/31

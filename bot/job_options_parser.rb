@@ -25,6 +25,7 @@ class JobOptionsParser
                when '--nooffsitelinks','--no-offsite','--nooffsite' then '--no-offsite-links'
                when '--useragentalias','--user-agent','--useragent' then '--user-agent-alias'
                when '--concurrent' then '--concurrency'
+               when '--reason' then '--explain'
                else b[0]
                end)
         b.join('=')
