@@ -45,6 +45,23 @@ him know a username you'd like for yourself, if you don't already have one.
 He will set things up so your new pipeline server can coordinate with the 
 others, and will be allowed to upload finished WARCs to the Internet Archive.
 
+** STEP 2.5: PYTHON VENV **
+
+For a recent OS, you will likely want to run Archivebot in a venv.  These
+instructions use the installer; we suggest readng the pyenv.run script first
+or installing it manually.
+
+    sudo apt install git make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev libffi-dev curl
+    curl https://pyenv.run | bash
+    echo 'export PATH="$HOME/.pyenv/bin:$PATH"' >> ~/.bashrc
+    echo 'export "$(pyenv init -)"' >> ~/.bashrc
+    echo 'eval "$(pyenv virtualenv-init -)"' >> ~/.bashrc
+
+Restart your shell, and then:
+
+    pyenv install -v 3.6.14 # or whatever the newest python 3.6 is
+    pyenv virtualenv 3.6.14 archivebot
+    pyenv activate archivebot
 
 ** STEP 3: FINALLY, IT'S TIME TO INSTALL ARCHIVEBOT CODE **
 
