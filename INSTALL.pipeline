@@ -64,6 +64,18 @@ Restart your shell, and then:
     pyenv install -v 3.6.14 # or whatever the newest python 3.6 is
     pyenv virtualenv 3.6.14 archivebot
     pyenv activate archivebot
+    
+** STEP 2.7: TCP-CLOSER **
+
+Sometimes the pipeline clogs up due to hung sockets.  tcp-closer fixes this.
+
+    apt install cmake libmnl-dev
+    git clone https://github.com/kristrev/tcp_closer.git
+
+Follow the directions in its README.md to install.  Run as follows:
+
+    screen -dmS tcp-closer-4 -- bash -c 'sudo /usr/local/bin/tcp-closer --dport 443 -i 30 --idle_time 21601000 --last_recv_limit 43200000; exec bash'
+    screen -dmS tcp-closer-6 -- bash -c 'sudo /usr/local/bin/tcp-closer -6 --dport 443 -i 30 --idle_time 21601000 --last_recv_limit 43200000; exec bash'
 
 ** STEP 3: FINALLY, IT'S TIME TO INSTALL ARCHIVEBOT CODE **
 
