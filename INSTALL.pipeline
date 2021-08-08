@@ -52,11 +52,12 @@ version of Python.  One way around this is to use pyenv.  These instructions
 use the installer; we suggest reading the pyenv.run script first or installing
 it manually. For a manual installation, see <https://github.com/pyenv/pyenv>.
 
-    sudo apt install git make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev libffi-dev curl
+    sudo apt install git make build-essential libssl-dev zlib1g-dev libbz2-dev \
+        libreadline-dev libsqlite3-dev libffi-dev curl
     curl https://pyenv.run | bash
-    echo 'export PATH="$HOME/.pyenv/bin:$PATH"' >> ~/.profile
-    echo 'export "$(pyenv init -)"' >> ~/.profile
-    echo 'eval "$(pyenv virtualenv-init -)"' >> ~/.profile
+
+Follow the directions the script gives you (probably, the shims part to add
+to .profile must be near the beginning).
 
 Restart your shell, and then:
 
