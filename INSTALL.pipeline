@@ -47,9 +47,10 @@ others, and will be allowed to upload finished WARCs to the Internet Archive.
 
 ** STEP 2.5: PYTHON VENV **
 
-For a recent OS, you will likely want to run Archivebot in a venv.  These
-instructions use the installer; we suggest readng the pyenv.run script first
-or installing it manually.
+For a recent OS, you will likely not be able to run ArchiveBot with the system
+version of Python.  One way around this is to use pyenv.  These instructions
+use the installer; we suggest reading the pyenv.run script first or installing
+it manually. For a manual installation, see <https://github.com/pyenv/pyenv>.
 
     sudo apt install git make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev libffi-dev curl
     curl https://pyenv.run | bash
@@ -215,4 +216,3 @@ If the pipeline runs out of RAM, you will likely have to kill the job
 that is consuming all the RAM; wpull instances will pause to avoid the
 OOM killer being run.  Consider creating a small swap file if your VM
 does not have any swap.
-
