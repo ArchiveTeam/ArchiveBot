@@ -1,0 +1,7 @@
+{
+	"name": "notweets",
+	"patterns": [
+		"^https?://((www|mobile)\\.)?twitter\\.com/([^/]+|i/web)/status/\\d+(\\?|$)"
+	],
+	"type": "ignore_patterns"
+}
