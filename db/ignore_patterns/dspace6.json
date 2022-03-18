@@ -1,0 +1,9 @@
+{
+	"name": "dspace6",
+	"patterns": [
+		"/discover\\?((.*&)?filtertype(_\\d+)?=){2}",
+		"/simple-search\\?((.*&)?(filter_type(_\\d+)?|filtertype)=){2}",
+		"[?&]starts_with="
+	],
+	"type": "ignore_patterns"
+}
