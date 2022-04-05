@@ -30,7 +30,7 @@ GEM
     redis (3.1.0)
     timers (1.1.0)
     trollop (2.0)
-    yajl-ruby (1.2.1)
+    yajl-ruby (1.4.2)
 
 PLATFORMS
   ruby
