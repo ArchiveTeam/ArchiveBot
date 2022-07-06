@@ -10,6 +10,6 @@ manhole
 lxml
 lmdb
 youtube-dl
-html5lib==0.9999999
+html5lib==0.999999999
 dnspython==1.16.0
 SQLAlchemy<1.4
