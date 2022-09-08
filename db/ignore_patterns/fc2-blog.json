@@ -1,11 +1,11 @@
 {
 	"name": "fc2-blog",
 	"patterns": [
-		"^https?://[^/.]+\\.blog\\d*\\.(fc2\\.com|fc2blog\\.us)/(\\?date=|blog-date-)(1[0-8]\\d{4}|19[0-8]\\d{3}|20[5-9]\\d{3}|2[1-9]\\d{4})",
-		"^https?://[^/.]+\\.blog\\d*\\.(fc2\\.com|fc2blog\\.us)/\\?mode=edit&rno=\\d+$",
-		"^https?://blogvote\\.(fc2\\.com|fceblog\\.us)/pickup/[^/]+/\\d+/clap$",
-		"^https?://clap\\.fc2\\.com/post/[^/]+/\\?url=https?%3A%2F%2F[^/&]+\\.blog\\d*\\.(fc2\\.com|fc2blog\\.us)%2F",
-		"^https?://admin\\.blog\\.fc2\\.com/control\\.php"
+		"^https?://[^/.]+\\.blog\\d*\\.(fc2\\.com|fc2blog\\.us|2nt\\.com)/(\\?date=|blog-date-)(1[0-8]\\d{4}|19[0-8]\\d{3}|20[5-9]\\d{3}|2[1-9]\\d{4})",
+		"^https?://[^/.]+\\.blog\\d*\\.(fc2\\.com|fc2blog\\.us|2nt\\.com)/\\?mode=edit(entry)?&rno=\\d+$",
+		"^https?://blogvote\\.(fc2\\.com|fceblog\\.us|2nt\\.com)/pickup/[^/]+/\\d+/clap$",
+		"^https?://clap\\.fc2\\.com/post/[^/]+/\\?url=https?%3A%2F%2F[^/&]+\\.blog\\d*\\.(fc2\\.com|fc2blog\\.us|2nt\\.com)%2F",
+		"^https?://admin\\.blog\\.(fc2\\.com|2nt\\.com)/control\\.php"
 	],
 	"type": "ignore_patterns"
 }
