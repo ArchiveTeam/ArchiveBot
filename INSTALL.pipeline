@@ -122,7 +122,7 @@ link to it, like this:
 
 As user archivebot, in the THIRD tmux session:
 
-    export RSYNC_URL=rsync://fos.textfiles.com/archivebot/
+    export RSYNC_URL=UPLOAD-URL-GOES-HERE
     ~/ArchiveBot/uploader/uploader.py $HOME/warcs4fos
 
 If you start multiple pipelines, you can safely point them to the
