@@ -321,7 +321,7 @@ Examples
 5.  Say you have this URL file::
 
         http://www.example.com/foo.html
-        http://www.bar.org:8080/qux.html
+        http://example.net:8080/qux.html
 
     and you submit it as an ``!archiveonly < FILE`` job.
 
@@ -329,9 +329,9 @@ Examples
     ``{primary_url}`` will be ``http://www.example.com/foo.html`` and
     ``{primary_netloc}`` will be ``www.example.com``.
 
-    When retriving requisites of ``http://www.bar.org:8080/qux.html```,
-    ``{primary_url}`` will be ``http://www.bar.org:8080/qux.html`` and
-    ``{primary_netloc}`` will be ``www.bar.org:8080``.
+    When retriving requisites of ``http://example.net:8080/qux.html```,
+    ``{primary_url}`` will be ``http://example.net:8080/qux.html`` and
+    ``{primary_netloc}`` will be ``example.net:8080``.
 
 unignore
 ========
