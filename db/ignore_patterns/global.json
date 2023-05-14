@@ -51,6 +51,7 @@
         "^https?://198\\.51\\.100\\.\\d+(:\\d+)?/",
         "^https?://203\\.0\\.113\\.\\d+(:\\d+)?/",
         "^https?://www\\.google\\.com/recaptcha/api",
+        "^https?://(www\\.)?geocities\\.com/",
         "^https?://geo\\.yahoo\\.com/b\\?",
         "^https?://((s-)?static\\.ak\\.fbcdn\\.net|(connect\\.|www\\.)?facebook\\.com)/connect\\.php/js/.*rsrc\\.php",
         "^https?://www\\.flickr\\.com/change_language\\.gne",
