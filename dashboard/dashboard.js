@@ -346,11 +346,11 @@ const getSummaryResponses = function(jobData) {
 const JobsRenderer = function(container, filterBox, historyLines, showNicks, contextMenuRenderer) {
 	this.container = container;
 	this.filterBox = filterBox;
-	addAnyChangeListener(this.filterBox, this.applyFilter.bind(this));
-	this.filterBox.onkeypress = function(ev) {
+	addAnyChangeListener(this.filterBox, () => this.applyFilter());
+	this.filterBox.onkeypress = ev => {
 		// So that j or k in input box does not result in job window switching
 		ev.stopPropagation();
-	}
+	};
 	this.historyLines = historyLines;
 	this.showNicks = showNicks;
 	this.contextMenuRenderer = contextMenuRenderer;
@@ -387,15 +387,15 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 	const logWindowAttrs = {
 		"className": "log-window",
 		"id": "log-window-" + ident,
-		"onmouseenter": function(ev) {
+		"onmouseenter": ev => {
 			this.mouseInside = ident;
 			ev.target.classList.add('log-window-stopped');
-		}.bind(this),
-		"onmouseleave": function(ev) {
-			const leave = function() {
+		},
+		"onmouseleave": ev => {
+			const leave = () => {
 				this.mouseInside = null;
 				ev.target.classList.remove('log-window-stopped');
-			}.bind(this);
+			};
 			// When our custom context menu pops up, it causes onmouseleave on the
 			// log window, so make our leave callback fire only after the context
 			// menu is closed.
@@ -404,7 +404,7 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 			} else {
 				leave();
 			}
-		}.bind(this)
+		}
 	}
 
 	// If you reach the end of a log window, the browser annoyingly
@@ -782,9 +782,9 @@ JobsRenderer.prototype.showNextPrev = function(offset) {
 	if (this.firstFilterMatch == null) {
 		idx = null;
 	} else {
-		idx = findInArray(this.jobs.sorted, function(el, i) {
-			return el["ident"] == this.firstFilterMatch["ident"];
-		}.bind(this));
+		idx = findInArray(this.jobs.sorted, (el, _i) => {
+			return el["ident"] === this.firstFilterMatch["ident"];
+		});
 	}
 	if (idx == null) {
 		// If no job windows are shown, set up index to make j show the first job window,
@@ -847,13 +847,13 @@ ContextMenuRenderer.prototype.clickedOnLogWindowURL = function(ev) {
 };
 
 ContextMenuRenderer.prototype.makeCopyTextFn = function(text) {
-	return function() {
+	return () => {
 		const clipboardScratchpad = byId('clipboard-scratchpad');
 		clipboardScratchpad.value = text;
 		clipboardScratchpad.focus();
 		clipboardScratchpad.select();
 		document.execCommand('copy');
-	}.bind(this);
+	};
 };
 
 ContextMenuRenderer.prototype.getPathVariants = function(path) {
@@ -890,13 +890,13 @@ ContextMenuRenderer.prototype.getSuggestedCommands = function(ident, url) {
 };
 
 ContextMenuRenderer.prototype.makeEntries = function(ident, url) {
-	const commands = this.getSuggestedCommands(ident, url).map(function(c) {
+	const commands = this.getSuggestedCommands(ident, url).map(c => {
 		return h(
 			'span',
 			{'onclick': this.makeCopyTextFn(c)},
 			"Copy " + c.replace(" " + ident + " ", " … ")
 		);
-	}.bind(this));
+	});
 	return [
 		// Unfortunately, this does not open it in a background tab
 		// like the real context menu does.
@@ -966,7 +966,6 @@ const BatchingQueue = function(callable, minInterval) {
 	this._minInterval = minInterval;
 	this.queue = [];
 	this._timeout = null;
-	this._boundRunCallable = this._runCallable.bind(this);
 };
 
 BatchingQueue.prototype.setMinInterval = function(minInterval) {
@@ -991,7 +990,7 @@ BatchingQueue.prototype.callNow = function() {
 BatchingQueue.prototype.push = function(v) {
 	this.queue.push(v);
 	if (this._timeout === null) {
-		this._timeout = setTimeout(this._boundRunCallable, this._minInterval);
+		this._timeout = setTimeout(() => this._runCallable(), this._minInterval);
 	}
 };
 
@@ -1045,20 +1044,20 @@ const Dashboard = function() {
 
 	this.contextMenuRenderer = new ContextMenuRenderer(document);
 	if (contextMenu) {
-		document.oncontextmenu = this.contextMenuRenderer.onContextMenu.bind(this.contextMenuRenderer);
-		document.onclick = this.contextMenuRenderer.blur.bind(this.contextMenuRenderer);
+		document.oncontextmenu = ev => this.contextMenuRenderer.onContextMenu(ev);
+		document.onclick = ev => this.contextMenuRenderer.blur(ev);
 		// onkeydown picks up ESC, onkeypress doesn't (tested Chrome 44)
-		document.onkeydown = function(ev) {
+		document.onkeydown = ev => {
 			if (ev.keyCode == 27) { // ESC
 				this.contextMenuRenderer.blur();
 			}
-		}.bind(this);
+		};
 		// In Chrome, the native context menu disappears when you wheel around, so
 		// match that behavior for our own context menu.
 		if (isChrome) {
-			document.onwheel = function(ev) {
+			document.onwheel = ev => {
 				this.contextMenuRenderer.blur();
-			}.bind(this);
+			};
 		}
 	}
 
@@ -1070,12 +1069,12 @@ const Dashboard = function() {
 	const xhr = new XMLHttpRequest();
 
 	const finishSetup = () => {
-		this.queue = new BatchingQueue(function(queue) {
+		this.queue = new BatchingQueue(queue => {
 			//console.log("Queue has ", queue.length, "items");
 			for (const item of queue) {
 				this.handleData(JSON.parse(item));
 			}
-		}.bind(this), batchTimeWhenVisible);
+		}, batchTimeWhenVisible);
 
 		this.decayer = new Decayer(1000, 1.5, 60000);
 		this.connectWebSocket();
@@ -1111,7 +1110,7 @@ const Dashboard = function() {
 	xhr.setRequestHeader('Accept', 'application/json');
 	xhr.send("");
 
-	document.onkeypress = this.keyPress.bind(this);
+	document.onkeypress = ev => this.keyPress(ev);
 
 	// Adjust help text based on URL
 	Array.prototype.slice.call(document.querySelectorAll('.url-q-or-amp')).map(function(elem) {
@@ -1172,21 +1171,21 @@ Dashboard.prototype.connectWebSocket = function() {
 
 	this.ws = new WebSocket(wsproto + "//" + this.host + ":4568/stream");
 
-	this.ws.onmessage = function(ev) {
+	this.ws.onmessage = ev => {
 		this.queue.push(ev["data"]);
-	}.bind(this);
+	};
 
-	this.ws.onopen = function(ev) {
+	this.ws.onopen = ev => {
 		console.log("WebSocket opened:", ev);
 		this.decayer.reset();
-	}.bind(this);
+	};
 
-	this.ws.onclose = function(ev) {
+	this.ws.onclose = ev => {
 		console.log("WebSocket closed:", ev);
 		const delay = this.decayer.decay();
 		console.log("Reconnecting in", delay, "ms");
-		setTimeout(this.connectWebSocket.bind(this), delay);
-	}.bind(this);
+		setTimeout(() => this.connectWebSocket(), delay);
+	};
 };
 
 Dashboard.prototype.toggleAlign = function() {
