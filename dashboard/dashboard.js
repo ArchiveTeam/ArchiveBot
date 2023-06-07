@@ -1,16 +1,16 @@
 "use strict";
 
-var assert = function(condition, message) {
+const assert = function(condition, message) {
 	if (!condition) {
 		throw message || "Assertion failed";
 	}
 };
 
-var byId = function(id) {
+const byId = function(id) {
 	return document.getElementById(id);
 };
 
-var text = function(s) {
+const text = function(s) {
 	return document.createTextNode(s);
 };
 
@@ -20,16 +20,16 @@ var text = function(s) {
  * Returns true if the object is undefined, null, or is a string whose
  * post-trim length is zero.  Otherwise, returns false.
  */
-var isBlank = function(o) {
+const isBlank = function(o) {
 	return !o || o.trim().length === 0;
 }
 
 /**
  * appendChild but accepts strings and arrays of children|strings
  */
-var appendAny = function(e, thing) {
+const appendAny = function(e, thing) {
 	if (Array.isArray(thing)) {
-		for (var i=0; i < thing.length; i++) {
+		for (let i=0; i < thing.length; i++) {
 			appendAny(e, thing[i]);
 		}
 	} else if (typeof thing == "string") {
@@ -45,10 +45,10 @@ var appendAny = function(e, thing) {
 /**
  * Create DOM element with attributes and children from Array<node|string>|node|string
  */
-var h = function(elem, attrs, thing) {
-	var e = document.createElement(elem);
+const h = function(elem, attrs, thing) {
+	const e = document.createElement(elem);
 	if (attrs != null) {
-		for (var attr in attrs) {
+		for (let attr in attrs) {
 			if (attr == "spellcheck" || attr == "readonly") {
 				e.setAttribute(attr, attrs[attr]);
 			} else if (attr == "class") {
@@ -64,20 +64,20 @@ var h = function(elem, attrs, thing) {
 	return e;
 };
 
-var href = function(href, text) {
-	var a = h("a");
+const href = function(href, text) {
+	const a = h("a");
 	a.href = href;
 	a.textContent = text;
 	return a;
 };
 
-var removeChildren = function(elem) {
+const removeChildren = function(elem) {
 	while (elem.firstChild) {
 		elem.removeChild(elem.firstChild);
 	}
 };
 
-var prettyJson = function(obj) {
+const prettyJson = function(obj) {
 	return JSON.stringify(obj, undefined, 2);
 };
 
@@ -92,36 +92,36 @@ var prettyJson = function(obj) {
  *
  * @return {!Array.<string>} The splitted string, as an array.
  */
-var split = function(s, sep, maxsplit) {
+const split = function(s, sep, maxsplit) {
 	assert(typeof sep == "string",
 		"arguments[1] of split must be a separator string");
 	if (maxsplit === undefined || maxsplit < 0) {
 		return s.split(sep);
 	}
-	var pieces = s.split(sep);
-	var head = pieces.splice(0, maxsplit);
+	const pieces = s.split(sep);
+	const head = pieces.splice(0, maxsplit);
 	// after the splice, pieces is shorter and no longer has the `head` elements.
 	if (pieces.length > 0) {
-		var tail = pieces.join(sep);
+		const tail = pieces.join(sep);
 		head.push(tail); // no longer just the head.
 	}
 	return head;
 };
 
 // Copied from closure-library's goog.string.startsWith
-var startsWith = function(str, prefix) {
+const startsWith = function(str, prefix) {
 	return str.lastIndexOf(prefix, 0) == 0;
 }
 
 // Copied from closure-library's goog.string.endsWith
-var endsWith = function(str, suffix) {
-	var l = str.length - suffix.length;
+const endsWith = function(str, suffix) {
+	const l = str.length - suffix.length;
 	return l >= 0 && str.indexOf(suffix, l) == l;
 };
 
 // Based on closure-library's goog.string.regExpEscape
-var regExpEscape = function(s) {
-	var escaped = String(s).replace(/([-()\[\]{}+?*.$\^|,:#<!\\])/g, '\\$1').
+const regExpEscape = function(s) {
+	let escaped = String(s).replace(/([-()\[\]{}+?*.$\^|,:#<!\\])/g, '\\$1').
 		replace(/\x08/g, '\\x08');
 	if (s.indexOf('[') == -1 && s.indexOf(']') == -1) {
 		// If there were no character classes, there can't have been any need
@@ -134,40 +134,40 @@ var regExpEscape = function(s) {
 /**
  * [[1, 2], [3, 4]] -> {1: 2, 3: 4}
  */
-var intoObject = function(arr) {
-	var obj = {};
+const intoObject = function(arr) {
+	const obj = {};
 	arr.forEach(function(e) {
 		obj[e[0]] = e[1];
 	});
 	return obj;
 };
 
-var getQueryArgs = function() {
-	var pairs = location.search.replace("?", "").split("&");
+const getQueryArgs = function() {
+	const pairs = location.search.replace("?", "").split("&");
 	if (pairs == "") {
 		return {};
 	}
 	return intoObject(pairs.map(function(e) { return split(e, "=", 1); }));
 };
 
-var getChromeMajorVersion = function() {
+const getChromeMajorVersion = function() {
 	return Number(navigator.userAgent.match(/Chrome\/(\d+)/)[1]);
 };
 
-var getFirefoxMajorVersion = function() {
+const getFirefoxMajorVersion = function() {
 	return Number(navigator.userAgent.match(/Firefox\/(\d+)/)[1]);
 };
 
-var getTridentMajorVersion = function() {
+const getTridentMajorVersion = function() {
 	return Number(navigator.userAgent.match(/Trident\/(\d+)/)[1]);
 };
 
-var isChrome = navigator.userAgent.indexOf("Chrome/") != -1;
-var isSafari = !isChrome && navigator.userAgent.indexOf("Safari") != -1;
-var isFirefox = navigator.userAgent.indexOf("Firefox") != -1;
-var isTrident = navigator.userAgent.indexOf("Trident/") != -1;
+const isChrome = navigator.userAgent.indexOf("Chrome/") != -1;
+const isSafari = !isChrome && navigator.userAgent.indexOf("Safari") != -1;
+const isFirefox = navigator.userAgent.indexOf("Firefox") != -1;
+const isTrident = navigator.userAgent.indexOf("Trident/") != -1;
 
-var addAnyChangeListener = function(elem, func) {
+const addAnyChangeListener = function(elem, func) {
 	// DOM0 handler for convenient use by Clear button
 	elem.onchange = func;
 	elem.addEventListener('keydown', func, false);
@@ -175,14 +175,14 @@ var addAnyChangeListener = function(elem, func) {
 	elem.addEventListener('input', func, false);
 };
 
-var arrayFrom = function(arrayLike) {
+const arrayFrom = function(arrayLike) {
 	return Array.prototype.slice.call(arrayLike);
 };
 
 /**
  * Returns a function that gets the given property on any object passed in
  */
-var prop = function(name) {
+const prop = function(name) {
 	return function(obj) {
 		return obj[name];
 	};
@@ -191,7 +191,7 @@ var prop = function(name) {
 /**
  * Returns a function that adds the given class to any element passed in
  */
-var classAdder = function(name) {
+const classAdder = function(name) {
 	return function(elem) {
 		elem.classList.add(name);
 	};
@@ -200,22 +200,22 @@ var classAdder = function(name) {
 /**
  * Returns a function that removes the given class to any element passed in
  */
-var classRemover = function(name) {
+const classRemover = function(name) {
 	return function(elem) {
 		elem.classList.remove(name);
 	};
 };
 
-var removeFromArray = function(arr, item) {
-	var idx = arr.indexOf(item);
+const removeFromArray = function(arr, item) {
+	const idx = arr.indexOf(item);
 	if (idx != -1) {
 		arr.splice(idx, 1);
 	}
 };
 
 // Based on http://stackoverflow.com/a/18520276
-var findInArray = function(arr, test, ctx) {
-	var result = null;
+const findInArray = function(arr, test, ctx) {
+	let result = null;
 	arr.some(function(el, i) {
 		return test.call(ctx, el, i, arr) ? ((result = i), true) : false;
 	});
@@ -226,7 +226,7 @@ var findInArray = function(arr, test, ctx) {
 
 
 
-var JobsTracker = function() {
+const JobsTracker = function() {
 	this.known = {};
 	this.sorted = [];
 	this.finishedArray = [];
@@ -246,8 +246,8 @@ JobsTracker.prototype.resort = function() {
  * Returns true if a new job was added
  */
 JobsTracker.prototype.handleJobData = function(jobData) {
-	var ident = jobData["ident"];
-	var alreadyKnown = ident in this.known;
+	const ident = jobData["ident"];
+	const alreadyKnown = ident in this.known;
 	if (!alreadyKnown) {
 		this.known[ident] = true;
 		this.sorted.push(jobData);
@@ -284,7 +284,7 @@ JobsTracker.prototype.hasFatalException = function(ident) {
 
 
 
-var JobRenderInfo = function(logWindow, logSegment, statsElements, jobNote, lineCountWindow, lineCountSegments) {
+const JobRenderInfo = function(logWindow, logSegment, statsElements, jobNote, lineCountWindow, lineCountSegments) {
 	this.logWindow = logWindow;
 	this.logSegment = logSegment;
 	this.statsElements = statsElements;
@@ -295,7 +295,7 @@ var JobRenderInfo = function(logWindow, logSegment, statsElements, jobNote, line
 
 
 
-var Reusable = {
+const Reusable = {
 	obj_className_line_normal: {"className": "line-normal"},
 	obj_className_line_error: {"className": "line-error"},
 	obj_className_line_warning: {"className": "line-warning"},
@@ -309,19 +309,19 @@ var Reusable = {
 
 
 // http://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript
-var numberWithCommas = function(s_or_n) {
+const numberWithCommas = function(s_or_n) {
 	return ("" + s_or_n).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 };
 
-var toStringTenths = function(n) {
-	var s = "" + (Math.round(10 * n) / 10);
+const toStringTenths = function(n) {
+	let s = "" + (Math.round(10 * n) / 10);
 	if (s.indexOf(".") == -1) {
 		s += ".0";
 	}
 	return s;
 };
 
-var getTotalResponses = function(jobData) {
+const getTotalResponses = function(jobData) {
 	return (
 		parseInt(jobData["r1xx"]) +
 		parseInt(jobData["r2xx"]) +
@@ -331,7 +331,7 @@ var getTotalResponses = function(jobData) {
 		parseInt(jobData["runk"]));
 };
 
-var getSummaryResponses = function(jobData) {
+const getSummaryResponses = function(jobData) {
 	return (
 		"1xx: " + numberWithCommas(jobData["r1xx"]) + "\n" +
 		"2xx: " + numberWithCommas(jobData["r2xx"]) + "\n" +
@@ -343,7 +343,7 @@ var getSummaryResponses = function(jobData) {
 
 
 
-var JobsRenderer = function(container, filterBox, historyLines, showNicks, contextMenuRenderer) {
+const JobsRenderer = function(container, filterBox, historyLines, showNicks, contextMenuRenderer) {
 	this.container = container;
 	this.filterBox = filterBox;
 	addAnyChangeListener(this.filterBox, this.applyFilter.bind(this));
@@ -364,8 +364,8 @@ var JobsRenderer = function(container, filterBox, historyLines, showNicks, conte
 };
 
 JobsRenderer.prototype._getNextJobInSorted = function(ident) {
-	for (var i=0; i < this.jobs.sorted.length; i++) {
-		var e = this.jobs.sorted[i];
+	for (let i=0; i < this.jobs.sorted.length; i++) {
+		const e = this.jobs.sorted[i];
 		if (e["ident"] == ident) {
 			return this.jobs.sorted[i+1];
 		}
@@ -378,13 +378,13 @@ JobsRenderer.prototype._createLogSegment = function() {
 };
 
 JobsRenderer.prototype._createLogContainer = function(jobData) {
-	var ident = jobData["ident"];
-	var beforeJob = this._getNextJobInSorted(ident);
-	var beforeElement = beforeJob == null ? null : byId("log-container-" + beforeJob["ident"]);
+	const ident = jobData["ident"];
+	const beforeJob = this._getNextJobInSorted(ident);
+	const beforeElement = beforeJob == null ? null : byId("log-container-" + beforeJob["ident"]);
 
-	var logSegment = this._createLogSegment();
+	const logSegment = this._createLogSegment();
 
-	var logWindowAttrs = {
+	const logWindowAttrs = {
 		"className": "log-window",
 		"id": "log-window-" + ident,
 		"onmouseenter": function(ev) {
@@ -392,7 +392,7 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 			ev.target.classList.add('log-window-stopped');
 		}.bind(this),
 		"onmouseleave": function(ev) {
-			var leave = function() {
+			const leave = function() {
 				this.mouseInside = null;
 				ev.target.classList.remove('log-window-stopped');
 			}.bind(this);
@@ -436,7 +436,7 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 		}
 	}
 
-	var statsElements = {
+	const statsElements = {
 		mb: h("span", {"className": "inline-stat job-mb"}, "?"),
 		responses: h("span", {"className": "inline-stat job-responses"}, "?"),
 		responsesPerSecond: h("span", {"className": "inline-stat job-responses-per-second"}, "?"),
@@ -447,8 +447,8 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 		jobInfo: null /* set later */
 	};
 
-	var startedISOString = new Date(parseFloat(jobData["started_at"]) * 1000).toISOString();
-	var jobNote = h("span", {"className": "job-note"}, null);
+	const startedISOString = new Date(parseFloat(jobData["started_at"]) * 1000).toISOString();
+	const jobNote = h("span", {"className": "job-note"}, null);
 
 	statsElements.jobInfo = h(
 		"span", {"className": "job-info"}, [
@@ -458,7 +458,7 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 			h("span", {
 				"className": "stats-elements",
 				"onclick": function() {
-					var filter = ds.getFilter();
+					const filter = ds.getFilter();
 					if (RegExp(filter).test(jobData["url"]) && startsWith(filter, "^") && endsWith(filter, "$")) {
 						// If we're already showing just this log window, go back
 						// to showing nothing.
@@ -490,8 +490,8 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 		]
 	);
 
-	var logWindow = h('div', logWindowAttrs, logSegment);
-	var div = h(
+	const logWindow = h('div', logWindowAttrs, logSegment);
+	const div = h(
 		'div',
 		{"id": "log-container-" + ident}, [
 			h("div", {"className": "job-header"}, [
@@ -519,14 +519,15 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 }
 
 JobsRenderer.prototype._renderDownloadLine = function(data, logSegment) {
+    let attrs;
 	if (data["is_warning"]) {
-		var attrs = {"className": "line-warning", "href": data["url"]};
+		attrs = {"className": "line-warning", "href": data["url"]};
 	} else if (data["is_error"]) {
-		var attrs = {"className": "line-error", "href": data["url"]};
+		attrs = {"className": "line-error", "href": data["url"]};
 	} else if (data["response_code"] && data["response_code"] >= 300 && data["response_code"] < 400) {
-		var attrs = {"className": "line-redirect", "href": data["url"]};
+		attrs = {"className": "line-redirect", "href": data["url"]};
 	} else {
-		var attrs = {"className": "line-normal", "href": data["url"]};
+		attrs = {"className": "line-normal", "href": data["url"]};
 	}
 	logSegment.appendChild(
 		h("a", attrs, data["response_code"] + " " + data["wget_code"] + " " + data["url"])
@@ -539,14 +540,15 @@ JobsRenderer.prototype._renderDownloadLine = function(data, logSegment) {
  * left or right of the URL.
  */
 JobsRenderer.prototype._moreDomRenderDownloadLine = function(data, logSegment) {
+    let attrs;
 	if (data["is_warning"]) {
-		var attrs = Reusable.obj_className_line_warning;
+		attrs = Reusable.obj_className_line_warning;
 	} else if (data["is_error"]) {
-		var attrs = Reusable.obj_className_line_error;
+		attrs = Reusable.obj_className_line_error;
 	} else if (data["response_code"] && data["response_code"] >= 300 && data["response_code"] < 400) {
-		var attrs = Reusable.obj_className_line_redirect;
+		attrs = Reusable.obj_className_line_redirect;
 	} else {
-		var attrs = Reusable.obj_className_line_normal;
+		attrs = Reusable.obj_className_line_normal;
 	}
 	logSegment.appendChild(h("div", attrs, [
 		data["response_code"] + " " + data["wget_code"] + " ",
@@ -556,9 +558,9 @@ JobsRenderer.prototype._moreDomRenderDownloadLine = function(data, logSegment) {
 };
 
 JobsRenderer.prototype._renderIgnoreLine = function(data, logSegment) {
-	var attrs = Reusable.obj_className_line_ignore;
-	var source = data["source"];
-	var ignoreSpan;
+	const attrs = Reusable.obj_className_line_ignore;
+	const source = data["source"];
+	let ignoreSpan;
 
 	if (source != null) {
 		ignoreSpan = h('span', null, " IGNOR (" + source + "): ");
@@ -576,14 +578,14 @@ JobsRenderer.prototype._renderIgnoreLine = function(data, logSegment) {
 };
 
 JobsRenderer.prototype._renderStdoutLine = function(data, logSegment, info, ident) {
-	var cleanedMessage = data["message"].replace(/[\r\n]+$/, "");
-	var renderedLines = 0;
+	const cleanedMessage = data["message"].replace(/[\r\n]+$/, "");
+	let renderedLines = 0;
 	if (!cleanedMessage) {
 		return renderedLines;
 	}
-	var lines = cleanedMessage.split("\n");
-	for (var i=0; i < lines.length; i++) {
-		var line = lines[i];
+	const lines = cleanedMessage.split("\n");
+	for (let i=0; i < lines.length; i++) {
+		const line = lines[i];
 		if (!line) {
 			continue;
 		}
@@ -621,28 +623,29 @@ JobsRenderer.prototype._renderStdoutLine = function(data, logSegment, info, iden
 };
 
 JobsRenderer.prototype.handleData = function(data) {
-	var jobData = data["job_data"];
-	var added = this.jobs.handleJobData(jobData);
+	const jobData = data["job_data"];
+	const added = this.jobs.handleJobData(jobData);
 	this.numCrawls.textContent = this.jobs.countActive();
 	if (added) {
 		this._createLogContainer(jobData);
 	}
-	var type = data["type"];
-	var ident = jobData["ident"];
+	const type = data["type"];
+	const ident = jobData["ident"];
 
-	var info = this.renderInfo[ident];
+	const info = this.renderInfo[ident];
 	if (!info) {
 		console.warn("No render info for " + ident);
 		return;
 	}
 
-	var totalResponses = parseInt(getTotalResponses(jobData));
+	const totalResponses = parseInt(getTotalResponses(jobData));
+    let linesRendered;
 	if (type == "download") {
-		var linesRendered = this._renderDownloadLine(data, info.logSegment);
+		linesRendered = this._renderDownloadLine(data, info.logSegment);
 	} else if (type == "stdout") {
-		var linesRendered = this._renderStdoutLine(data, info.logSegment, info, ident);
+		linesRendered = this._renderStdoutLine(data, info.logSegment, info, ident);
 	} else if (type == "ignore") {
-		var linesRendered = this._renderIgnoreLine(data, info.logSegment);
+		linesRendered = this._renderIgnoreLine(data, info.logSegment);
 	} else {
 		assert(false, "Unexpected message type " + type);
 	}
@@ -655,13 +658,13 @@ JobsRenderer.prototype.handleData = function(data) {
 	info.statsElements.responses.textContent =
 		numberWithCommas(totalResponses) + " resp.";
 	info.statsElements.responses.title = getSummaryResponses(jobData);
-	var duration = Date.now()/1000 - parseFloat(jobData["started_at"]);
+	const duration = Date.now()/1000 - parseFloat(jobData["started_at"]);
 	info.statsElements.responsesPerSecond.textContent =
 		toStringTenths(totalResponses/duration);
 
 	if (jobData["items_queued"] && jobData["items_downloaded"]) {
-		var totalQueued = parseInt(jobData["items_queued"], 10);
-		var totalDownloaded = parseInt(jobData["items_downloaded"], 10);
+		const totalQueued = parseInt(jobData["items_queued"], 10);
+		const totalDownloaded = parseInt(jobData["items_downloaded"], 10);
 		info.statsElements.queueLength.textContent =
 			numberWithCommas((totalQueued - totalDownloaded) + " in q.");
 		info.statsElements.queueLength.title =
@@ -671,8 +674,8 @@ JobsRenderer.prototype.handleData = function(data) {
 
 	info.statsElements.connections.textContent = jobData["concurrency"];
 
-	var delayMin = parseInt(jobData["delay_min"]);
-	var delayMax = parseInt(jobData["delay_max"]);
+	const delayMin = parseInt(jobData["delay_min"]);
+	const delayMax = parseInt(jobData["delay_max"]);
 	info.statsElements.delay.textContent =
 		(delayMin == delayMax ?
 			delayMin :
@@ -701,7 +704,7 @@ JobsRenderer.prototype.handleData = function(data) {
 
 	if (info.lineCountSegments[info.lineCountSegments.length - 1] >= this.linesPerSegment) {
 		//console.log("Created new segment", info);
-		var newSegment = this._createLogSegment();
+		const newSegment = this._createLogSegment();
 		info.logWindow.appendChild(newSegment);
 		info.logSegment = newSegment;
 		info.lineCountSegments.push(0);
@@ -714,7 +717,7 @@ JobsRenderer.prototype.handleData = function(data) {
 			// We may have to remove more than one segment, if the user
 			// has paused the log window for a while.
 			while (info.lineCountWindow >= this.historyLines + this.linesPerSegment) {
-				var firstLogSegment = info.logWindow.firstChild;
+				const firstLogSegment = info.logWindow.firstChild;
 				assert(firstLogSegment != null, "info.logWindow.firstChild is null; " +
 					JSON.stringify({
 						"lineCountWindow": info.lineCountWindow,
@@ -733,14 +736,14 @@ JobsRenderer.prototype.handleData = function(data) {
 };
 
 JobsRenderer.prototype.applyFilter = function() {
-	var query = this.filterBox.value;
-	var matches = 0;
-	var matchedWindows = [];
-	var unmatchedWindows = [];
+	const query = this.filterBox.value;
+	let matches = 0;
+	const matchedWindows = [];
+	const unmatchedWindows = [];
 	this.firstFilterMatch = null;
-	for (var i=0; i < this.jobs.sorted.length; i++) {
-		var job = this.jobs.sorted[i];
-		var w = this.renderInfo[job["ident"]].logWindow;
+	for (let i=0; i < this.jobs.sorted.length; i++) {
+		const job = this.jobs.sorted[i];
+		const w = this.renderInfo[job["ident"]].logWindow;
 		if (!RegExp(query).test(job["url"])) {
 			w.classList.add("log-window-hidden");
 			// Firefox exhibits serious performance problems when adding
@@ -788,7 +791,7 @@ JobsRenderer.prototype.applyFilter = function() {
 };
 
 JobsRenderer.prototype.showNextPrev = function(offset) {
-	var idx;
+	let idx;
 	if (this.firstFilterMatch == null) {
 		idx = null;
 	} else {
@@ -812,13 +815,13 @@ JobsRenderer.prototype.showNextPrev = function(offset) {
 	if (idx == this.jobs.sorted.length) {
 		ds.setFilter("^$");
 	} else {
-		var newShownJob = this.jobs.sorted[idx];
+		const newShownJob = this.jobs.sorted[idx];
 		ds.setFilter("^" + regExpEscape(newShownJob["url"]) + "$");
 	}
 };
 
 JobsRenderer.prototype.updateAlign = function() {
-	var adderOrRemover = this.aligned ? classAdder : classRemover;
+	const adderOrRemover = this.aligned ? classAdder : classRemover;
 	arrayFrom(document.querySelectorAll('.job-url')).map(adderOrRemover('job-url-aligned'));
 	arrayFrom(document.querySelectorAll('.job-note')).map(adderOrRemover('job-note-aligned'));
 	arrayFrom(document.querySelectorAll('.job-nick')).map(adderOrRemover('job-nick-aligned'));
@@ -842,7 +845,7 @@ JobsRenderer.prototype.toggleAlign = function() {
  * a log window, helping you copy an !ig command based on the URL
  * you right-clicked.
  */
-var ContextMenuRenderer = function() {
+const ContextMenuRenderer = function() {
 	this.visible = false;
 	this.callAfterBlurFns = [];
 	this.element = byId('context-menu');
@@ -852,13 +855,13 @@ var ContextMenuRenderer = function() {
  * Returns true if the event target is a URL in a log window
  */
 ContextMenuRenderer.prototype.clickedOnLogWindowURL = function(ev) {
-	var cn = ev.target.className;
+	const cn = ev.target.className;
 	return cn == "line-normal" || cn == "line-error" || cn == "line-warning" || cn == "line-redirect" || cn == "log-url";
 };
 
 ContextMenuRenderer.prototype.makeCopyTextFn = function(text) {
 	return function() {
-		var clipboardScratchpad = byId('clipboard-scratchpad');
+		const clipboardScratchpad = byId('clipboard-scratchpad');
 		clipboardScratchpad.value = text;
 		clipboardScratchpad.focus();
 		clipboardScratchpad.select();
@@ -867,7 +870,7 @@ ContextMenuRenderer.prototype.makeCopyTextFn = function(text) {
 };
 
 ContextMenuRenderer.prototype.getPathVariants = function(path) {
-	var paths = [path];
+	const paths = [path];
 
 	// Avoid generating a duplicate suggestion
 	path = path.replace(/\/$/, "");
@@ -886,11 +889,11 @@ ContextMenuRenderer.prototype.getSuggestedCommands = function(ident, url) {
 	// !d IDENT 250 375 (if !d is currently high)
 	// !con IDENT 1 (if > 1)
 	// !con IDENT 3 (if < 3)
-	var schema = url.split(':')[0];
-	var domain = url.split('/')[2];
-	var withoutQuery = url.split('?')[0];
-	var path = '/' + split(withoutQuery, '/', 3)[3];
-	var reSchema = startsWith(schema, 'http') ? 'https?' : 'ftp';
+	const schema = url.split(':')[0];
+	const domain = url.split('/')[2];
+	const withoutQuery = url.split('?')[0];
+	const path = '/' + split(withoutQuery, '/', 3)[3];
+	const reSchema = startsWith(schema, 'http') ? 'https?' : 'ftp';
 	return this.getPathVariants(path).map(function(p) {
 		return "!ig " + ident + " ^" + reSchema + "://" + regExpEscape(domain + p);
 	}).concat([
@@ -900,7 +903,7 @@ ContextMenuRenderer.prototype.getSuggestedCommands = function(ident, url) {
 };
 
 ContextMenuRenderer.prototype.makeEntries = function(ident, url) {
-	var commands = this.getSuggestedCommands(ident, url).map(function(c) {
+	const commands = this.getSuggestedCommands(ident, url).map(function(c) {
 		return h(
 			'span',
 			{'onclick': this.makeCopyTextFn(c)},
@@ -935,16 +938,17 @@ ContextMenuRenderer.prototype.onContextMenu = function(ev) {
 	// and we want to avoid such scrolling.
 	appendAny(this.element, h('input', {'type': 'text', 'id': 'clipboard-scratchpad'}));
 
-	var url = ev.target.href;
+	const url = ev.target.href;
+    let ident;
 	try {
-		var ident = ev.target.parentNode.parentNode.id.match(/^log-window-(.*)/)[1];
+		ident = ev.target.parentNode.parentNode.id.match(/^log-window-(.*)/)[1];
 	} catch(e) {
 		// moreDom=1
-		var ident = ev.target.parentNode.parentNode.parentNode.id.match(/^log-window-(.*)/)[1];
+		ident = ev.target.parentNode.parentNode.parentNode.id.match(/^log-window-(.*)/)[1];
 	}
-	var entries = this.makeEntries(ident, url);
-	for (var i=0; i < entries.length; i++) {
-		var entry = entries[i];
+	const entries = this.makeEntries(ident, url);
+	for (let i=0; i < entries.length; i++) {
+		const entry = entries[i];
 		entry.classList.add('context-menu-entry');
 		appendAny(this.element, entry);
 	}
@@ -971,7 +975,7 @@ ContextMenuRenderer.prototype.callAfterBlur = function(fn) {
 
 
 
-var BatchingQueue = function(callable, minInterval) {
+const BatchingQueue = function(callable, minInterval) {
 	this.callable = callable;
 	this._minInterval = minInterval;
 	this.queue = [];
@@ -985,7 +989,7 @@ BatchingQueue.prototype.setMinInterval = function(minInterval) {
 
 BatchingQueue.prototype._runCallable = function() {
 	this._timeout = null;
-	var queue = this.queue;
+	const queue = this.queue;
 	this.queue = [];
 	this.callable(queue);
 };
@@ -1007,7 +1011,7 @@ BatchingQueue.prototype.push = function(v) {
 
 
 
-var Decayer = function(initial, multiplier, max) {
+const Decayer = function(initial, multiplier, max) {
 	this.initial = initial;
 	this.multiplier = multiplier;
 	this.max = max;
@@ -1028,16 +1032,16 @@ Decayer.prototype.decay = function() {
 
 
 
-var Dashboard = function() {
+const Dashboard = function() {
 	this.messageCount = 0;
 
-	var args = getQueryArgs();
+	const args = getQueryArgs();
 
-	var historyLines         = args["historyLines"]         ? Number(args["historyLines"])         : navigator.userAgent.match(/Mobi/) ? 250 : 1000;
-	var batchTimeWhenVisible = args["batchTimeWhenVisible"] ? Number(args["batchTimeWhenVisible"]) : 125;
-	var showNicks            = args["showNicks"]            ? Boolean(Number(args["showNicks"]))   : false;
-	var contextMenu          = args["contextMenu"]          ? Boolean(Number(args["contextMenu"])) : true;
-	var moreDom              = args["moreDom"]              ? Boolean(Number(args["moreDom"]))     : false;
+	const historyLines         = args["historyLines"]         ? Number(args["historyLines"])         : navigator.userAgent.match(/Mobi/) ? 250 : 1000;
+	const batchTimeWhenVisible = args["batchTimeWhenVisible"] ? Number(args["batchTimeWhenVisible"]) : 125;
+	const showNicks            = args["showNicks"]            ? Boolean(Number(args["showNicks"]))   : false;
+	const contextMenu          = args["contextMenu"]          ? Boolean(Number(args["contextMenu"])) : true;
+	const moreDom              = args["moreDom"]              ? Boolean(Number(args["moreDom"]))     : false;
 	// Append to page title to make it possible to identify the tab in Chrome's task manager
 	if (args["title"]) {
 		document.title += " - " + args["title"];
@@ -1075,14 +1079,14 @@ var Dashboard = function() {
 	this.jobsRenderer = new JobsRenderer(
 		byId('logs'), byId('filter-box'), historyLines, showNicks, this.contextMenuRenderer);
 
-	var batchTimeWhenHidden = 1000;
+	const batchTimeWhenHidden = 1000;
 
-	var xhr = new XMLHttpRequest();
+	const xhr = new XMLHttpRequest();
 
 	const finishSetup = () => {
 		this.queue = new BatchingQueue(function(queue) {
 			//console.log("Queue has ", queue.length, "items");
-			for (var i=0; i < queue.length; i++) {
+			for (let i=0; i < queue.length; i++) {
 				this.handleData(JSON.parse(queue[i]));
 			}
 		}.bind(this), batchTimeWhenVisible);
@@ -1104,8 +1108,8 @@ var Dashboard = function() {
 
 	xhr.onload = () => {
 		try {
-			var recentLines = JSON.parse(xhr.responseText);
-			for (var i=0; i < recentLines.length; i++) {
+			const recentLines = JSON.parse(xhr.responseText);
+			for (let i=0; i < recentLines.length; i++) {
 				this.handleData(recentLines[i]);
 			}
 		} catch(e) {
@@ -1178,7 +1182,7 @@ Dashboard.prototype.handleData = function(data) {
 };
 
 Dashboard.prototype.connectWebSocket = function() {
-	var wsproto = window.location.protocol === "https:" ? "wss:" : "ws:";
+	const wsproto = window.location.protocol === "https:" ? "wss:" : "ws:";
 
 	this.ws = new WebSocket(wsproto + "//" + this.host + ":4568/stream");
 
@@ -1193,7 +1197,7 @@ Dashboard.prototype.connectWebSocket = function() {
 
 	this.ws.onclose = function(ev) {
 		console.log("WebSocket closed:", ev);
-		var delay = this.decayer.decay();
+		const delay = this.decayer.decay();
 		console.log("Reconnecting in", delay, "ms");
 		setTimeout(this.connectWebSocket.bind(this), delay);
 	}.bind(this);
@@ -1204,7 +1208,7 @@ Dashboard.prototype.toggleAlign = function() {
 };
 
 Dashboard.prototype.toggleHelp = function() {
-	var help = byId('help');
+	const help = byId('help');
 	if (help.classList.contains('undisplayed')) {
 		help.classList.remove('undisplayed');
 	} else {
@@ -1221,4 +1225,4 @@ Dashboard.prototype.setFilter = function(value) {
 	byId('filter-box').onchange();
 };
 
-var ds = new Dashboard();
+const ds = new Dashboard();
