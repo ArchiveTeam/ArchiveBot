@@ -29,8 +29,8 @@ const isBlank = function(o) {
  */
 const appendAny = function(e, thing) {
 	if (Array.isArray(thing)) {
-		for (let i=0; i < thing.length; i++) {
-			appendAny(e, thing[i]);
+		for (const item of thing) {
+			appendAny(e, item);
 		}
 	} else if (typeof thing == "string") {
 		e.appendChild(text(thing));
@@ -584,8 +584,7 @@ JobsRenderer.prototype._renderStdoutLine = function(data, logSegment, info, iden
 		return renderedLines;
 	}
 	const lines = cleanedMessage.split("\n");
-	for (let i=0; i < lines.length; i++) {
-		const line = lines[i];
+	for (const line of lines) {
 		if (!line) {
 			continue;
 		}
@@ -741,8 +740,7 @@ JobsRenderer.prototype.applyFilter = function() {
 	const matchedWindows = [];
 	const unmatchedWindows = [];
 	this.firstFilterMatch = null;
-	for (let i=0; i < this.jobs.sorted.length; i++) {
-		const job = this.jobs.sorted[i];
+	for (const job of this.jobs.sorted) {
 		const w = this.renderInfo[job["ident"]].logWindow;
 		if (!RegExp(query).test(job["url"])) {
 			w.classList.add("log-window-hidden");
@@ -947,8 +945,7 @@ ContextMenuRenderer.prototype.onContextMenu = function(ev) {
 		ident = ev.target.parentNode.parentNode.parentNode.id.match(/^log-window-(.*)/)[1];
 	}
 	const entries = this.makeEntries(ident, url);
-	for (let i=0; i < entries.length; i++) {
-		const entry = entries[i];
+	for (const entry of entries) {
 		entry.classList.add('context-menu-entry');
 		appendAny(this.element, entry);
 	}
@@ -1086,8 +1083,8 @@ const Dashboard = function() {
 	const finishSetup = () => {
 		this.queue = new BatchingQueue(function(queue) {
 			//console.log("Queue has ", queue.length, "items");
-			for (let i=0; i < queue.length; i++) {
-				this.handleData(JSON.parse(queue[i]));
+			for (const item of queue) {
+				this.handleData(JSON.parse(item));
 			}
 		}.bind(this), batchTimeWhenVisible);
 
@@ -1109,8 +1106,8 @@ const Dashboard = function() {
 	xhr.onload = () => {
 		try {
 			const recentLines = JSON.parse(xhr.responseText);
-			for (let i=0; i < recentLines.length; i++) {
-				this.handleData(recentLines[i]);
+			for (const line of recentLines) {
+				this.handleData(line);
 			}
 		} catch(e) {
 			console.log("Failed to load /logs/recent data:", e);
