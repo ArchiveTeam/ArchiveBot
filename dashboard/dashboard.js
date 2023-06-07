@@ -108,17 +108,6 @@ const split = function(s, sep, maxsplit) {
 	return head;
 };
 
-// Copied from closure-library's goog.string.startsWith
-const startsWith = function(str, prefix) {
-	return str.lastIndexOf(prefix, 0) == 0;
-}
-
-// Copied from closure-library's goog.string.endsWith
-const endsWith = function(str, suffix) {
-	const l = str.length - suffix.length;
-	return l >= 0 && str.indexOf(suffix, l) == l;
-};
-
 // Based on closure-library's goog.string.regExpEscape
 const regExpEscape = function(s) {
 	let escaped = String(s).replace(/([-()\[\]{}+?*.$\^|,:#<!\\])/g, '\\$1').
@@ -459,7 +448,7 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 				"className": "stats-elements",
 				"onclick": function() {
 					const filter = ds.getFilter();
-					if (RegExp(filter).test(jobData["url"]) && startsWith(filter, "^") && endsWith(filter, "$")) {
+					if (RegExp(filter).test(jobData["url"]) && filter.startsWith("^") && filter.endsWith("$")) {
 						// If we're already showing just this log window, go back
 						// to showing nothing.
 						ds.setFilter("^$");
@@ -880,7 +869,7 @@ ContextMenuRenderer.prototype.getSuggestedCommands = function(ident, url) {
 	const domain = url.split('/')[2];
 	const withoutQuery = url.split('?')[0];
 	const path = '/' + split(withoutQuery, '/', 3)[3];
-	const reSchema = startsWith(schema, 'http') ? 'https?' : 'ftp';
+	const reSchema = schema.startsWith('http') ? 'https?' : 'ftp';
 	return this.getPathVariants(path).map(function(p) {
 		return "!ig " + ident + " ^" + reSchema + "://" + regExpEscape(domain + p);
 	}).concat([
