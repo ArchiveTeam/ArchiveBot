@@ -744,21 +744,10 @@ JobsRenderer.prototype.applyFilter = function() {
 		const w = this.renderInfo[job["ident"]].logWindow;
 		if (!RegExp(query).test(job["url"])) {
 			w.classList.add("log-window-hidden");
-			// Firefox exhibits serious performance problems when adding
-			// lines to our 0px-high log windows, so add display: none
-			// (effectively killing the animation)
-			if (isFirefox) {
-				w.style.display = "none";
-			}
 
-			// Remove this class, else an ugly border may be visible
-			w.classList.remove('log-window-stopped');
 			unmatchedWindows.push(w);
 		} else {
 			w.classList.remove("log-window-hidden");
-			if (isFirefox) {
-				w.style.display = "block";
-			}
 
 			matches += 1;
 			matchedWindows.push(w);
