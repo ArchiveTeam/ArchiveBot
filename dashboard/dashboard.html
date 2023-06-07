@@ -1517,12 +1517,8 @@ var Dashboard = function() {
 	var batchTimeWhenHidden = 5000;
 
 	var xhr = new XMLHttpRequest();
-	xhr.onload = function() {
-		var recentLines = JSON.parse(xhr.responseText);
-		for (var i=0; i < recentLines.length; i++) {
-			this.handleData(recentLines[i]);
-		}
 
+	const finishSetup = () => {
 		this.queue = new BatchingQueue(function(queue) {
 			//console.log("Queue has ", queue.length, "items");
 			for (var i=0; i < queue.length; i++) {
@@ -1533,7 +1529,7 @@ var Dashboard = function() {
 		this.decayer = new Decayer(1000, 1.5, 60000);
 		this.connectWebSocket();
 
-		document.addEventListener("visibilitychange", function() {
+		document.addEventListener("visibilitychange", () => {
 			if (document.hidden) {
 				//console.log("Page has become hidden");
 				this.queue.setMinInterval(batchTimeWhenHidden);
@@ -1542,8 +1538,24 @@ var Dashboard = function() {
 				this.queue.setMinInterval(batchTimeWhenVisible);
 				this.queue.callNow();
 			}
-		}.bind(this), false);
-	}.bind(this);
+		}, false);
+	};
+
+	xhr.onload = () => {
+		try {
+			var recentLines = JSON.parse(xhr.responseText);
+			for (var i=0; i < recentLines.length; i++) {
+				this.handleData(recentLines[i]);
+			}
+		} catch(e) {
+			console.log("Failed to load /logs/recent data:", e);
+		}
+		finishSetup();
+	};
+	xhr.onerror = () => {
+		// Try to continue despite lack of /logs/recent data
+		finishSetup();
+	};
 	xhr.open("GET", "/logs/recent?cb=" + Date.now() + Math.random());
 	xhr.setRequestHeader('Accept', 'application/json');
 	xhr.send("");
