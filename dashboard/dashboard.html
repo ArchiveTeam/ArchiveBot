@@ -440,7 +440,7 @@ a.ignore {
 "use strict";
 
 var assert = function(condition, message) {
-	if(!condition) {
+	if (!condition) {
 		throw message || "Assertion failed";
 	}
 };
@@ -467,14 +467,14 @@ var isBlank = function(o) {
  * appendChild but accepts strings and arrays of children|strings
  */
 var appendAny = function(e, thing) {
-	if(Array.isArray(thing)) {
-		for(var i=0; i < thing.length; i++) {
+	if (Array.isArray(thing)) {
+		for (var i=0; i < thing.length; i++) {
 			appendAny(e, thing[i]);
 		}
-	} else if(typeof thing == "string") {
+	} else if (typeof thing == "string") {
 		e.appendChild(text(thing));
 	} else {
-		if(thing == null) {
+		if (thing == null) {
 			throw Error("thing is " + JSON.stringify(thing));
 		}
 		e.appendChild(thing);
@@ -486,18 +486,18 @@ var appendAny = function(e, thing) {
  */
 var h = function(elem, attrs, thing) {
 	var e = document.createElement(elem);
-	if(attrs != null) {
-		for(var attr in attrs) {
-			if(attr == "spellcheck" || attr == "readonly") {
+	if (attrs != null) {
+		for (var attr in attrs) {
+			if (attr == "spellcheck" || attr == "readonly") {
 				e.setAttribute(attr, attrs[attr]);
-			} else if(attr == "class") {
+			} else if (attr == "class") {
 				throw new Error("Did you mean className?");
 			} else {
 				e[attr] = attrs[attr];
 			}
 		}
 	}
-	if(thing != null) {
+	if (thing != null) {
 		appendAny(e, thing);
 	}
 	return e;
@@ -511,7 +511,7 @@ var href = function(href, text) {
 };
 
 var removeChildren = function(elem) {
-	while(elem.firstChild) {
+	while (elem.firstChild) {
 		elem.removeChild(elem.firstChild);
 	}
 };
@@ -534,13 +534,13 @@ var prettyJson = function(obj) {
 var split = function(s, sep, maxsplit) {
 	assert(typeof sep == "string",
 		"arguments[1] of split must be a separator string");
-	if(maxsplit === undefined || maxsplit < 0) {
+	if (maxsplit === undefined || maxsplit < 0) {
 		return s.split(sep);
 	}
 	var pieces = s.split(sep);
 	var head = pieces.splice(0, maxsplit);
 	// after the splice, pieces is shorter and no longer has the `head` elements.
-	if(pieces.length > 0) {
+	if (pieces.length > 0) {
 		var tail = pieces.join(sep);
 		head.push(tail); // no longer just the head.
 	}
@@ -562,7 +562,7 @@ var endsWith = function(str, suffix) {
 var regExpEscape = function(s) {
 	var escaped = String(s).replace(/([-()\[\]{}+?*.$\^|,:#<!\\])/g, '\\$1').
 		replace(/\x08/g, '\\x08');
-	if(s.indexOf('[') == -1 && s.indexOf(']') == -1) {
+	if (s.indexOf('[') == -1 && s.indexOf(']') == -1) {
 		// If there were no character classes, there can't have been any need
 		// to escape -, to unescape them.
 		escaped = escaped.replace(/\\-/g, "-");
@@ -583,7 +583,7 @@ var intoObject = function(arr) {
 
 var getQueryArgs = function() {
 	var pairs = location.search.replace("?", "").split("&");
-	if(pairs == "") {
+	if (pairs == "") {
 		return {};
 	}
 	return intoObject(pairs.map(function(e) { return split(e, "=", 1); }));
@@ -647,7 +647,7 @@ var classRemover = function(name) {
 
 var removeFromArray = function(arr, item) {
 	var idx = arr.indexOf(item);
-	if(idx != -1) {
+	if (idx != -1) {
 		arr.splice(idx, 1);
 	}
 };
@@ -687,7 +687,7 @@ JobsTracker.prototype.resort = function() {
 JobsTracker.prototype.handleJobData = function(jobData) {
 	var ident = jobData["ident"];
 	var alreadyKnown = ident in this.known;
-	if(!alreadyKnown) {
+	if (!alreadyKnown) {
 		this.known[ident] = true;
 		this.sorted.push(jobData);
 		this.resort();
@@ -696,19 +696,19 @@ JobsTracker.prototype.handleJobData = function(jobData) {
 };
 
 JobsTracker.prototype.markFinished = function(ident) {
-	if(!(ident in this.finishedSet)) {
+	if (!(ident in this.finishedSet)) {
 		this.finishedSet[ident] = true;
 		this.finishedArray.push(ident);
 	}
 };
 
 JobsTracker.prototype.markUnfinished = function(ident) {
-	if(ident in this.finishedSet) {
+	if (ident in this.finishedSet) {
 		delete this.finishedSet[ident];
 		removeFromArray(this.finishedArray, ident);
 	}
 	// Job was restarted, so unmark fatal exception
-	if(ident in this.fatalExceptionSet) {
+	if (ident in this.fatalExceptionSet) {
 		delete this.fatalExceptionSet[ident];
 	}
 };
@@ -754,7 +754,7 @@ var numberWithCommas = function(s_or_n) {
 
 var toStringTenths = function(n) {
 	var s = "" + (Math.round(10 * n) / 10);
-	if(s.indexOf(".") == -1) {
+	if (s.indexOf(".") == -1) {
 		s += ".0";
 	}
 	return s;
@@ -803,9 +803,9 @@ var JobsRenderer = function(container, filterBox, historyLines, showNicks, conte
 };
 
 JobsRenderer.prototype._getNextJobInSorted = function(ident) {
-	for(var i=0; i < this.jobs.sorted.length; i++) {
+	for (var i=0; i < this.jobs.sorted.length; i++) {
 		var e = this.jobs.sorted[i];
-		if(e["ident"] == ident) {
+		if (e["ident"] == ident) {
 			return this.jobs.sorted[i+1];
 		}
 	}
@@ -838,7 +838,7 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 			// When our custom context menu pops up, it causes onmouseleave on the
 			// log window, so make our leave callback fire only after the context
 			// menu is closed.
-			if(this.contextMenuRenderer.visible) {
+			if (this.contextMenuRenderer.visible) {
 				this.contextMenuRenderer.callAfterBlur(leave);
 			} else {
 				leave();
@@ -850,15 +850,15 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 	// starts to scroll the page instead.  We prevent this behavior here.
 	// If the user wants to scroll the page, they need to move their
 	// mouse outside a log window first.
-	if(isChrome && getChromeMajorVersion() >= 63) {
+	if (isChrome && getChromeMajorVersion() >= 63) {
 		// No need to attach an event; .log-window { overscroll-behavior: contain } will take care of it.
-	} else if(!isSafari) {
+	} else if (!isSafari) {
 		logWindowAttrs["onwheel"] = function(ev) {
 			// Note: offsetHeight is "wrong" by 2px but it doesn't matter
 			//console.log(ev, logWindow.scrollTop, (logWindow.scrollHeight - logWindow.offsetHeight));
-			if(ev.deltaY < 0 && logWindow.scrollTop == 0) {
+			if (ev.deltaY < 0 && logWindow.scrollTop == 0) {
 				ev.preventDefault();
-			} else if(ev.deltaY > 0 && logWindow.scrollTop >= (logWindow.scrollHeight - logWindow.offsetHeight)) {
+			} else if (ev.deltaY > 0 && logWindow.scrollTop >= (logWindow.scrollHeight - logWindow.offsetHeight)) {
 				ev.preventDefault();
 			}
 		}
@@ -867,9 +867,9 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 		// so use onmousewheel instead.
 		logWindowAttrs["onmousewheel"] = function(ev) {
 			//console.log(ev, logWindow.scrollTop, (logWindow.scrollHeight - logWindow.offsetHeight));
-			if(ev.wheelDeltaY > 0 && logWindow.scrollTop == 0) {
+			if (ev.wheelDeltaY > 0 && logWindow.scrollTop == 0) {
 				ev.preventDefault();
-			} else if(ev.wheelDeltaY < 0 && logWindow.scrollTop >= (logWindow.scrollHeight - logWindow.offsetHeight)) {
+			} else if (ev.wheelDeltaY < 0 && logWindow.scrollTop >= (logWindow.scrollHeight - logWindow.offsetHeight)) {
 				ev.preventDefault();
 			}
 		}
@@ -898,7 +898,7 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 				"className": "stats-elements",
 				"onclick": function() {
 					var filter = ds.getFilter();
-					if(RegExp(filter).test(jobData["url"]) && startsWith(filter, "^") && endsWith(filter, "$")) {
+					if (RegExp(filter).test(jobData["url"]) && startsWith(filter, "^") && endsWith(filter, "$")) {
 						// If we're already showing just this log window, go back
 						// to showing nothing.
 						ds.setFilter("^$");
@@ -958,11 +958,11 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 }
 
 JobsRenderer.prototype._renderDownloadLine = function(data, logSegment) {
-	if(data["is_warning"]) {
+	if (data["is_warning"]) {
 		var attrs = {"className": "line-warning", "href": data["url"]};
-	} else if(data["is_error"]) {
+	} else if (data["is_error"]) {
 		var attrs = {"className": "line-error", "href": data["url"]};
-	} else if(data["response_code"] && data["response_code"] >= 300 && data["response_code"] < 400) {
+	} else if (data["response_code"] && data["response_code"] >= 300 && data["response_code"] < 400) {
 		var attrs = {"className": "line-redirect", "href": data["url"]};
 	} else {
 		var attrs = {"className": "line-normal", "href": data["url"]};
@@ -978,11 +978,11 @@ JobsRenderer.prototype._renderDownloadLine = function(data, logSegment) {
  * left or right of the URL.
  */
 JobsRenderer.prototype._moreDomRenderDownloadLine = function(data, logSegment) {
-	if(data["is_warning"]) {
+	if (data["is_warning"]) {
 		var attrs = Reusable.obj_className_line_warning;
-	} else if(data["is_error"]) {
+	} else if (data["is_error"]) {
 		var attrs = Reusable.obj_className_line_error;
-	} else if(data["response_code"] && data["response_code"] >= 300 && data["response_code"] < 400) {
+	} else if (data["response_code"] && data["response_code"] >= 300 && data["response_code"] < 400) {
 		var attrs = Reusable.obj_className_line_redirect;
 	} else {
 		var attrs = Reusable.obj_className_line_normal;
@@ -1017,13 +1017,13 @@ JobsRenderer.prototype._renderIgnoreLine = function(data, logSegment) {
 JobsRenderer.prototype._renderStdoutLine = function(data, logSegment, info, ident) {
 	var cleanedMessage = data["message"].replace(/[\r\n]+$/, "");
 	var renderedLines = 0;
-	if(!cleanedMessage) {
+	if (!cleanedMessage) {
 		return renderedLines;
 	}
 	var lines = cleanedMessage.split("\n");
-	for(var i=0; i < lines.length; i++) {
+	for (var i=0; i < lines.length; i++) {
 		var line = lines[i];
-		if(!line) {
+		if (!line) {
 			continue;
 		}
 		logSegment.appendChild(h("div", Reusable.obj_className_line_stdout, line));
@@ -1032,13 +1032,13 @@ JobsRenderer.prototype._renderStdoutLine = function(data, logSegment, info, iden
 		// Check for 'Finished RsyncUpload for Item'
 		// instead of 'Starting MarkItemAsDone for Item'
 		// because the latter is often missing
-		if(/^Finished RsyncUpload for Item/.test(line)) {
+		if (/^Finished RsyncUpload for Item/.test(line)) {
 			info.statsElements.jobInfo.classList.add('job-info-done');
 			this.jobs.markFinished(ident);
-		} else if(/^CRITICAL (Sorry|Please report)|^ERROR Fatal exception|No space left on device|^Fatal Python error:|^(Thread|Current thread) 0x/.test(line)) {
+		} else if (/^CRITICAL (Sorry|Please report)|^ERROR Fatal exception|No space left on device|^Fatal Python error:|^(Thread|Current thread) 0x/.test(line)) {
 			info.statsElements.jobInfo.classList.add('job-info-fatal');
 			this.jobs.markFatalException(ident);
-		} else if(/Script requested immediate stop|^Adjusted target WARC path to.*-aborted$/.test(line)) {
+		} else if (/Script requested immediate stop|^Adjusted target WARC path to.*-aborted$/.test(line)) {
 			// Note: above message can be in:
 			// ERROR Script requested immediate stop
 			// or after an ERROR Fatal exception:
@@ -1048,7 +1048,7 @@ JobsRenderer.prototype._renderStdoutLine = function(data, logSegment, info, iden
 			// the exception may be entirely missing.
 			info.statsElements.jobInfo.classList.remove('job-info-fatal');
 			info.statsElements.jobInfo.classList.add('job-info-aborted');
-		} else if(/^Received item /.test(line)) {
+		} else if (/^Received item /.test(line)) {
 			// Clear other statuses if a job restarts with the same job ID
 			info.statsElements.jobInfo.classList.remove('job-info-done');
 			info.statsElements.jobInfo.classList.remove('job-info-fatal');
@@ -1063,24 +1063,24 @@ JobsRenderer.prototype.handleData = function(data) {
 	var jobData = data["job_data"];
 	var added = this.jobs.handleJobData(jobData);
 	this.numCrawls.textContent = this.jobs.countActive();
-	if(added) {
+	if (added) {
 		this._createLogContainer(jobData);
 	}
 	var type = data["type"];
 	var ident = jobData["ident"];
 
 	var info = this.renderInfo[ident];
-	if(!info) {
+	if (!info) {
 		console.warn("No render info for " + ident);
 		return;
 	}
 
 	var totalResponses = parseInt(getTotalResponses(jobData));
-	if(type == "download") {
+	if (type == "download") {
 		var linesRendered = this._renderDownloadLine(data, info.logSegment);
-	} else if(type == "stdout") {
+	} else if (type == "stdout") {
 		var linesRendered = this._renderStdoutLine(data, info.logSegment, info, ident);
-	} else if(type == "ignore") {
+	} else if (type == "ignore") {
 		var linesRendered = this._renderIgnoreLine(data, info.logSegment);
 	} else {
 		assert(false, "Unexpected message type " + type);
@@ -1117,14 +1117,14 @@ JobsRenderer.prototype.handleData = function(data) {
 			delayMin :
 			delayMin + "-" + delayMax) + " ms delay";
 
-	if(jobData["suppress_ignore_reports"]) {
+	if (jobData["suppress_ignore_reports"]) {
 		info.statsElements.ignores.textContent = 'igoff';
-		if(!info.statsElements.ignores.classList.contains('job-igoff')) {
+		if (!info.statsElements.ignores.classList.contains('job-igoff')) {
 			info.statsElements.ignores.classList.add('job-igoff');
 		}
 	} else {
 		info.statsElements.ignores.textContent = 'igon';
-		if(info.statsElements.ignores.classList.contains('job-igoff')) {
+		if (info.statsElements.ignores.classList.contains('job-igoff')) {
 			info.statsElements.ignores.classList.remove('job-igoff');
 		}
 	}
@@ -1138,7 +1138,7 @@ JobsRenderer.prototype.handleData = function(data) {
 	info.lineCountWindow += linesRendered;
 	info.lineCountSegments[info.lineCountSegments.length - 1] += linesRendered;
 
-	if(info.lineCountSegments[info.lineCountSegments.length - 1] >= this.linesPerSegment) {
+	if (info.lineCountSegments[info.lineCountSegments.length - 1] >= this.linesPerSegment) {
 		//console.log("Created new segment", info);
 		var newSegment = this._createLogSegment();
 		info.logWindow.appendChild(newSegment);
@@ -1146,13 +1146,13 @@ JobsRenderer.prototype.handleData = function(data) {
 		info.lineCountSegments.push(0);
 	}
 
-	if(this.mouseInside != ident) {
+	if (this.mouseInside != ident) {
 		// Don't remove any scrollback information when the job has a fatal exception,
 		// so that the user can find the traceback and report a bug.
-		if(!this.jobs.hasFatalException(ident)) {
+		if (!this.jobs.hasFatalException(ident)) {
 			// We may have to remove more than one segment, if the user
 			// has paused the log window for a while.
-			while(info.lineCountWindow >= this.historyLines + this.linesPerSegment) {
+			while (info.lineCountWindow >= this.historyLines + this.linesPerSegment) {
 				var firstLogSegment = info.logWindow.firstChild;
 				assert(firstLogSegment != null, "info.logWindow.firstChild is null; " +
 					JSON.stringify({
@@ -1177,15 +1177,15 @@ JobsRenderer.prototype.applyFilter = function() {
 	var matchedWindows = [];
 	var unmatchedWindows = [];
 	this.firstFilterMatch = null;
-	for(var i=0; i < this.jobs.sorted.length; i++) {
+	for (var i=0; i < this.jobs.sorted.length; i++) {
 		var job = this.jobs.sorted[i];
 		var w = this.renderInfo[job["ident"]].logWindow;
-		if(!RegExp(query).test(job["url"])) {
+		if (!RegExp(query).test(job["url"])) {
 			w.classList.add("log-window-hidden");
 			// Firefox exhibits serious performance problems when adding
 			// lines to our 0px-high log windows, so add display: none
 			// (effectively killing the animation)
-			if(isFirefox) {
+			if (isFirefox) {
 				w.style.display = "none";
 			}
 
@@ -1194,13 +1194,13 @@ JobsRenderer.prototype.applyFilter = function() {
 			unmatchedWindows.push(w);
 		} else {
 			w.classList.remove("log-window-hidden");
-			if(isFirefox) {
+			if (isFirefox) {
 				w.style.display = "block";
 			}
 
 			matches += 1;
 			matchedWindows.push(w);
-			if(this.firstFilterMatch == null) {
+			if (this.firstFilterMatch == null) {
 				this.firstFilterMatch = job;
 			}
 		}
@@ -1209,11 +1209,11 @@ JobsRenderer.prototype.applyFilter = function() {
 	// If there's only one visible log window, expand it so that more lines are visible.
 	unmatchedWindows.map(classRemover('log-window-expanded'));
 	matchedWindows.map(classRemover('log-window-expanded'));
-	if(matches == 1) {
+	if (matches == 1) {
 		matchedWindows.map(classAdder('log-window-expanded'));
 	}
 
-	if(matches < this.jobs.sorted.length) {
+	if (matches < this.jobs.sorted.length) {
 		// If you're not seeing all of the log windows, you're probably seeing very
 		// few of them, so you probably want alignment enabled.
 		this.aligned = true;
@@ -1228,14 +1228,14 @@ JobsRenderer.prototype.applyFilter = function() {
 
 JobsRenderer.prototype.showNextPrev = function(offset) {
 	var idx;
-	if(this.firstFilterMatch == null) {
+	if (this.firstFilterMatch == null) {
 		idx = null;
 	} else {
 		idx = findInArray(this.jobs.sorted, function(el, i) {
 			return el["ident"] == this.firstFilterMatch["ident"];
 		}.bind(this));
 	}
-	if(idx == null) {
+	if (idx == null) {
 		// If no job windows are shown, set up index to make j show the first job window,
 		// k the last job window.
 		idx = this.jobs.sorted.length;
@@ -1243,12 +1243,12 @@ JobsRenderer.prototype.showNextPrev = function(offset) {
 	idx = idx + offset;
 	// When reaching either end, hide all job windows.  When going past
 	// the end, wrap around.
-	if(idx == -1) {
+	if (idx == -1) {
 		idx = this.jobs.sorted.length;
-	} else if(idx == this.jobs.sorted.length + 1) {
+	} else if (idx == this.jobs.sorted.length + 1) {
 		idx = 0;
 	}
-	if(idx == this.jobs.sorted.length) {
+	if (idx == this.jobs.sorted.length) {
 		ds.setFilter("^$");
 	} else {
 		var newShownJob = this.jobs.sorted[idx];
@@ -1311,7 +1311,7 @@ ContextMenuRenderer.prototype.getPathVariants = function(path) {
 	// Avoid generating a duplicate suggestion
 	path = path.replace(/\/$/, "");
 
-	while(path && path.lastIndexOf('/') != -1) {
+	while (path && path.lastIndexOf('/') != -1) {
 		path = path.replace(/\/[^\/]*$/, "");
 		paths.push(path + '/');
 	}
@@ -1356,7 +1356,7 @@ ContextMenuRenderer.prototype.makeEntries = function(ident, url) {
 
 ContextMenuRenderer.prototype.onContextMenu = function(ev) {
 	//console.log(ev);
-	if(!this.clickedOnLogWindowURL(ev)) {
+	if (!this.clickedOnLogWindowURL(ev)) {
 		this.blur();
 		return;
 	}
@@ -1382,7 +1382,7 @@ ContextMenuRenderer.prototype.onContextMenu = function(ev) {
 		var ident = ev.target.parentNode.parentNode.parentNode.id.match(/^log-window-(.*)/)[1];
 	}
 	var entries = this.makeEntries(ident, url);
-	for(var i=0; i < entries.length; i++) {
+	for (var i=0; i < entries.length; i++) {
 		var entry = entries[i];
 		entry.classList.add('context-menu-entry');
 		appendAny(this.element, entry);
@@ -1391,7 +1391,7 @@ ContextMenuRenderer.prototype.onContextMenu = function(ev) {
 	// If the bottom of the context menu is outside the viewport, move the context
 	// menu up, so that it appears to have opened from its bottom-left corner.
 	// + 1 pixel so that the pointer lands inside the element and turns on cursor: default
-	if(ev.clientY + this.element.offsetHeight > document.documentElement.clientHeight) {
+	if (ev.clientY + this.element.offsetHeight > document.documentElement.clientHeight) {
 		this.element.style.top = (ev.clientY - this.element.offsetHeight + 1) + "px";
 	}
 };
@@ -1430,7 +1430,7 @@ BatchingQueue.prototype._runCallable = function() {
 };
 
 BatchingQueue.prototype.callNow = function() {
-	if(this._timeout !== null) {
+	if (this._timeout !== null) {
 		clearTimeout(this._timeout);
 		this._timeout = null;
 	}
@@ -1439,7 +1439,7 @@ BatchingQueue.prototype.callNow = function() {
 
 BatchingQueue.prototype.push = function(v) {
 	this.queue.push(v);
-	if(this._timeout === null) {
+	if (this._timeout === null) {
 		this._timeout = setTimeout(this._boundRunCallable, this._minInterval);
 	}
 };
@@ -1478,33 +1478,33 @@ var Dashboard = function() {
 	var contextMenu          = args["contextMenu"]          ? Boolean(Number(args["contextMenu"])) : true;
 	var moreDom              = args["moreDom"]              ? Boolean(Number(args["moreDom"]))     : false;
 	// Append to page title to make it possible to identify the tab in Chrome's task manager
-	if(args["title"]) {
+	if (args["title"]) {
 		document.title += " - " + args["title"];
 	}
 
-	if(moreDom) {
+	if (moreDom) {
 		JobsRenderer.prototype._renderDownloadLine = JobsRenderer.prototype._moreDomRenderDownloadLine;
 	}
 
 	this.host = args["host"] ? args["host"] : location.hostname;
 	this.dumpTraffic = args["dumpMax"] && Number(args["dumpMax"]) > 0;
-	if(this.dumpTraffic) {
+	if (this.dumpTraffic) {
 		this.dumpMax = Number(args["dumpMax"]);
 	}
 
 	this.contextMenuRenderer = new ContextMenuRenderer(document);
-	if(contextMenu) {
+	if (contextMenu) {
 		document.oncontextmenu = this.contextMenuRenderer.onContextMenu.bind(this.contextMenuRenderer);
 		document.onclick = this.contextMenuRenderer.blur.bind(this.contextMenuRenderer);
 		// onkeydown picks up ESC, onkeypress doesn't (tested Chrome 44)
 		document.onkeydown = function(ev) {
-			if(ev.keyCode == 27) { // ESC
+			if (ev.keyCode == 27) { // ESC
 				this.contextMenuRenderer.blur();
 			}
 		}.bind(this);
 		// In Chrome, the native context menu disappears when you wheel around, so
 		// match that behavior for our own context menu.
-		if(isChrome) {
+		if (isChrome) {
 			document.onwheel = function(ev) {
 				this.contextMenuRenderer.blur();
 			}.bind(this);
@@ -1519,13 +1519,13 @@ var Dashboard = function() {
 	var xhr = new XMLHttpRequest();
 	xhr.onload = function() {
 		var recentLines = JSON.parse(xhr.responseText);
-		for(var i=0; i < recentLines.length; i++) {
+		for (var i=0; i < recentLines.length; i++) {
 			this.handleData(recentLines[i]);
 		}
 
 		this.queue = new BatchingQueue(function(queue) {
 			//console.log("Queue has ", queue.length, "items");
-			for(var i=0; i < queue.length; i++) {
+			for (var i=0; i < queue.length; i++) {
 				this.handleData(JSON.parse(queue[i]));
 			}
 		}.bind(this), batchTimeWhenVisible);
@@ -1534,7 +1534,7 @@ var Dashboard = function() {
 		this.connectWebSocket();
 
 		document.addEventListener("visibilitychange", function() {
-			if(document.hidden) {
+			if (document.hidden) {
 				//console.log("Page has become hidden");
 				this.queue.setMinInterval(batchTimeWhenHidden);
 			} else {
@@ -1552,12 +1552,12 @@ var Dashboard = function() {
 
 	// Adjust help text based on URL
 	Array.prototype.slice.call(document.querySelectorAll('.url-q-or-amp')).map(function(elem) {
-		if(window.location.search.indexOf("?") != -1) {
+		if (window.location.search.indexOf("?") != -1) {
 			elem.textContent = "&";
 		}
 	});
 
-	if(!showNicks) {
+	if (!showNicks) {
 		document.write('<style>.job-nick-aligned { width: 0; }</style>');
 	}
 };
@@ -1568,37 +1568,37 @@ Dashboard.prototype.keyPress = function(ev) {
 	// If you press ctrl-f or alt-f in Firefox (tested: 41), it dispatches
 	// the keypress event for 'f'.  We want only the modifier-free
 	// keypresses.
-	if(ev.ctrlKey || ev.altKey || ev.metaKey) {
+	if (ev.ctrlKey || ev.altKey || ev.metaKey) {
 		return;
 	}
 	// Check shiftKey only after handling '?', because you need shift for '?'
-	if(ev.which == 63) { // ?
+	if (ev.which == 63) { // ?
 		ds.toggleHelp();
 		return;
 	}
-	if(ev.shiftKey) {
+	if (ev.shiftKey) {
 		return;
 	}
-	if(ev.which == 106) { // j
+	if (ev.which == 106) { // j
 		this.jobsRenderer.showNextPrev(1);
-	} else if(ev.which == 107) { // k
+	} else if (ev.which == 107) { // k
 		this.jobsRenderer.showNextPrev(-1);
-	} else if(ev.which == 97) { // a
+	} else if (ev.which == 97) { // a
 		ds.setFilter('');
-	} else if(ev.which == 110) { // n
+	} else if (ev.which == 110) { // n
 		ds.setFilter('^$');
-	} else if(ev.which == 102) { // f
+	} else if (ev.which == 102) { // f
 		ev.preventDefault();
 		byId('filter-box').focus();
 		byId('filter-box').select();
-	} else if(ev.which == 118) { // v
+	} else if (ev.which == 118) { // v
 		window.open(this.jobsRenderer.firstFilterMatch["url"]);
 	}
 };
 
 Dashboard.prototype.handleData = function(data) {
 	this.messageCount += 1;
-	if(this.dumpTraffic && this.messageCount <= this.dumpMax) {
+	if (this.dumpTraffic && this.messageCount <= this.dumpMax) {
 		byId('traffic').appendChild(h("pre", null, prettyJson(data)));
 	}
 	this.jobsRenderer.handleData(data);
@@ -1632,7 +1632,7 @@ Dashboard.prototype.toggleAlign = function() {
 
 Dashboard.prototype.toggleHelp = function() {
 	var help = byId('help');
-	if(help.classList.contains('undisplayed')) {
+	if (help.classList.contains('undisplayed')) {
 		help.classList.remove('undisplayed');
 	} else {
 		help.classList.add('undisplayed');
