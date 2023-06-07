@@ -1034,7 +1034,7 @@ const Dashboard = function() {
 
 	const args = getQueryArgs();
 
-	const historyLines         = args["historyLines"]         ? Number(args["historyLines"])         : navigator.userAgent.match(/Mobi/) ? 250 : 1000;
+	const historyLines         = args["historyLines"]         ? Number(args["historyLines"])         : navigator.userAgent.match(/Mobi/) ? 250 : 500;
 	const batchTimeWhenVisible = args["batchTimeWhenVisible"] ? Number(args["batchTimeWhenVisible"]) : 125;
 	const showNicks            = args["showNicks"]            ? Boolean(Number(args["showNicks"]))   : false;
 	const contextMenu          = args["contextMenu"]          ? Boolean(Number(args["contextMenu"])) : true;
