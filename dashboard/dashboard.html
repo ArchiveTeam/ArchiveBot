@@ -1514,7 +1514,7 @@ var Dashboard = function() {
 	this.jobsRenderer = new JobsRenderer(
 		byId('logs'), byId('filter-box'), historyLines, showNicks, this.contextMenuRenderer);
 
-	var batchTimeWhenHidden = 5000;
+	var batchTimeWhenHidden = 1000;
 
 	var xhr = new XMLHttpRequest();
 
