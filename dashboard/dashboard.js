@@ -32,11 +32,11 @@ function appendAny(e, thing) {
 		for (const item of thing) {
 			appendAny(e, item);
 		}
-	} else if (typeof thing == "string") {
+	} else if (typeof thing === "string") {
 		e.appendChild(text(thing));
 	} else {
 		if (thing == null) {
-			throw Error("thing is " + JSON.stringify(thing));
+			throw Error(`thing is ${JSON.stringify(thing)}`);
 		}
 		e.appendChild(thing);
 	}
@@ -48,10 +48,10 @@ function appendAny(e, thing) {
 function h(elem, attrs, thing) {
 	const e = document.createElement(elem);
 	if (attrs != null) {
-		for (let attr in attrs) {
-			if (attr == "spellcheck" || attr == "readonly") {
+		for (const attr in attrs) {
+			if (attr === "spellcheck" || attr === "readonly") {
 				e.setAttribute(attr, attrs[attr]);
-			} else if (attr == "class") {
+			} else if (attr === "class") {
 				throw new Error("Did you mean className?");
 			} else {
 				e[attr] = attrs[attr];
@@ -78,7 +78,7 @@ function removeChildren(elem) {
 }
 
 function addPageStyles(cssText) {
-	const style = document.createElement('style')
+	const style = document.createElement("style");
 	style.innerHTML = cssText;
 	document.body.appendChild(style);
 }
@@ -99,8 +99,7 @@ function prettyJson(obj) {
  * @return {!Array.<string>} The splitted string, as an array.
  */
 function split(s, sep, maxsplit) {
-	assert(typeof sep == "string",
-		"arguments[1] of split must be a separator string");
+	assert(typeof sep === "string", "arguments[1] of split must be a separator string");
 	if (maxsplit === undefined || maxsplit < 0) {
 		return s.split(sep);
 	}
@@ -116,9 +115,8 @@ function split(s, sep, maxsplit) {
 
 // Based on closure-library's goog.string.regExpEscape
 function regExpEscape(s) {
-	let escaped = String(s).replace(/([-()\[\]{}+?*.$\^|,:#<!\\])/g, '\\$1').
-		replace(/\x08/g, '\\x08');
-	if (s.indexOf('[') == -1 && s.indexOf(']') == -1) {
+	let escaped = String(s).replace(/([-()\[\]{}+?*.$\^|,:#<!\\])/g, "\\$1").replace(/\x08/g, "\\x08");
+	if (s.indexOf("[") === -1 && s.indexOf("]") === -1) {
 		// If there were no character classes, there can't have been any need
 		// to escape -, to unescape them.
 		escaped = escaped.replace(/\\-/g, "-");
@@ -131,7 +129,7 @@ function regExpEscape(s) {
  */
 function intoObject(arr) {
 	const obj = {};
-	arr.forEach(e => {
+	arr.forEach((e) => {
 		obj[e[0]] = e[1];
 	});
 	return obj;
@@ -139,51 +137,49 @@ function intoObject(arr) {
 
 function getQueryArgs() {
 	const pairs = location.search.replace("?", "").split("&");
-	if (pairs == "") {
+	if (pairs === "") {
 		return {};
 	}
-	return intoObject(pairs.map(e => split(e, "=", 1)));
+	return intoObject(pairs.map((e) => split(e, "=", 1)));
 }
 
 function addAnyChangeListener(elem, func) {
 	// DOM0 handler for convenient use by Clear button
 	elem.onchange = func;
-	elem.addEventListener('keydown', func, false);
-	elem.addEventListener('paste', func, false);
-	elem.addEventListener('input', func, false);
+	elem.addEventListener("keydown", func, false);
+	elem.addEventListener("paste", func, false);
+	elem.addEventListener("input", func, false);
 }
 
 /**
  * Returns a function that gets the given property on any object passed in
  */
 function prop(name) {
-	return obj => obj[name];
+	return (obj) => obj[name];
 }
 
 /**
  * Returns a function that adds the given class to any element passed in
  */
 function classAdder(name) {
-	return elem => elem.classList.add(name);
+	return (elem) => elem.classList.add(name);
 }
 
 /**
  * Returns a function that removes the given class to any element passed in
  */
 function classRemover(name) {
-	return elem => elem.classList.remove(name);
+	return (elem) => elem.classList.remove(name);
 }
 
 function removeFromArray(arr, item) {
 	const idx = arr.indexOf(item);
-	if (idx != -1) {
+	if (idx !== -1) {
 		arr.splice(idx, 1);
 	}
 }
 
 /*** End of utility code ***/
-
-
 
 class JobsTracker {
 	constructor() {
@@ -199,16 +195,14 @@ class JobsTracker {
 	}
 
 	resort() {
-		this.sorted.sort((a, b) =>
-			a["started_at"] > b["started_at"] ? -1 : 1
-		);
+		this.sorted.sort((a, b) => (a.started_at > b.started_at ? -1 : 1));
 	}
 
 	/**
 	 * Returns true if a new job was added
 	 */
 	handleJobData(jobData) {
-		const ident = jobData["ident"];
+		const ident = jobData.ident;
 		const alreadyKnown = ident in this.known;
 		if (!alreadyKnown) {
 			this.known[ident] = true;
@@ -245,8 +239,6 @@ class JobsTracker {
 	}
 }
 
-
-
 class JobRenderInfo {
 	constructor(logWindow, logSegment, statsElements, jobNote, lineCountWindow, lineCountSegments) {
 		this.logWindow = logWindow;
@@ -258,29 +250,25 @@ class JobRenderInfo {
 	}
 }
 
-
-
 const Reusable = {
-	obj_className_line_normal: {"className": "line-normal"},
-	obj_className_line_error: {"className": "line-error"},
-	obj_className_line_warning: {"className": "line-warning"},
-	obj_className_line_redirect: {"className": "line-redirect"},
+	obj_className_line_normal: { className: "line-normal" },
+	obj_className_line_error: { className: "line-error" },
+	obj_className_line_warning: { className: "line-warning" },
+	obj_className_line_redirect: { className: "line-redirect" },
 	//
-	obj_className_line_ignore: {"className": "line-ignore"},
-	obj_className_line_stdout: {"className": "line-stdout"},
-	obj_className_bold: {"className": "bold"}
+	obj_className_line_ignore: { className: "line-ignore" },
+	obj_className_line_stdout: { className: "line-stdout" },
+	obj_className_bold: { className: "bold" },
 };
-
-
 
 // http://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript
 function numberWithCommas(s_or_n) {
-	return ("" + s_or_n).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+	return `${s_or_n}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
 function toStringTenths(n) {
-	let s = "" + (Math.round(10 * n) / 10);
-	if (s.indexOf(".") == -1) {
+	let s = `${Math.round(10 * n) / 10}`;
+	if (s.indexOf(".") === -1) {
 		s += ".0";
 	}
 	return s;
@@ -288,32 +276,32 @@ function toStringTenths(n) {
 
 function getTotalResponses(jobData) {
 	return (
-		parseInt(jobData["r1xx"]) +
-		parseInt(jobData["r2xx"]) +
-		parseInt(jobData["r3xx"]) +
-		parseInt(jobData["r4xx"]) +
-		parseInt(jobData["r5xx"]) +
-		parseInt(jobData["runk"]));
+		parseInt(jobData.r1xx) +
+		parseInt(jobData.r2xx) +
+		parseInt(jobData.r3xx) +
+		parseInt(jobData.r4xx) +
+		parseInt(jobData.r5xx) +
+		parseInt(jobData.runk)
+	);
 }
 
 function getSummaryResponses(jobData) {
-	return (
-		"1xx: " + numberWithCommas(jobData["r1xx"]) + "\n" +
-		"2xx: " + numberWithCommas(jobData["r2xx"]) + "\n" +
-		"3xx: " + numberWithCommas(jobData["r3xx"]) + "\n" +
-		"4xx: " + numberWithCommas(jobData["r4xx"]) + "\n" +
-		"5xx: " + numberWithCommas(jobData["r5xx"]) + "\n" +
-		"Unknown: " + numberWithCommas(jobData["runk"]));
+	return [
+		`1xx: ${numberWithCommas(jobData.r1xx)}`,
+		`2xx: ${numberWithCommas(jobData.r2xx)}`,
+		`3xx: ${numberWithCommas(jobData.r3xx)}`,
+		`4xx: ${numberWithCommas(jobData.r4xx)}`,
+		`5xx: ${numberWithCommas(jobData.r5xx)}`,
+		`Unknown: ${numberWithCommas(jobData.runk)}`,
+	].join("\n");
 }
-
-
 
 class JobsRenderer {
 	constructor(container, filterBox, historyLines, showNicks, contextMenuRenderer) {
 		this.container = container;
 		this.filterBox = filterBox;
 		addAnyChangeListener(this.filterBox, () => this.applyFilter());
-		this.filterBox.onkeypress = ev => {
+		this.filterBox.onkeypress = (ev) => {
 			// So that j or k in input box does not result in job window switching
 			ev.stopPropagation();
 		};
@@ -325,42 +313,42 @@ class JobsRenderer {
 		// ident -> JobRenderInfo
 		this.renderInfo = {};
 		this.mouseInside = null;
-		this.numCrawls = byId('num-crawls');
+		this.numCrawls = byId("num-crawls");
 		this.aligned = false;
 	}
 
 	_getNextJobInSorted(ident) {
-		for (let i=0; i < this.jobs.sorted.length; i++) {
+		for (let i = 0; i < this.jobs.sorted.length; i++) {
 			const e = this.jobs.sorted[i];
-			if (e["ident"] == ident) {
-				return this.jobs.sorted[i+1];
+			if (e.ident === ident) {
+				return this.jobs.sorted[i + 1];
 			}
 		}
 		return null;
 	}
 
 	_createLogSegment() {
-		return h('div');
+		return h("div");
 	}
 
 	_createLogContainer(jobData) {
-		const ident = jobData["ident"];
+		const ident = jobData.ident;
 		const beforeJob = this._getNextJobInSorted(ident);
-		const beforeElement = beforeJob == null ? null : byId("log-container-" + beforeJob["ident"]);
+		const beforeElement = beforeJob == null ? null : byId(`log-container-${beforeJob.ident}`);
 
 		const logSegment = this._createLogSegment();
 
 		const logWindowAttrs = {
-			"className": "log-window",
-			"id": "log-window-" + ident,
-			"onmouseenter": ev => {
+			className: "log-window",
+			id: `log-window-${ident}`,
+			onmouseenter: (ev) => {
 				this.mouseInside = ident;
-				ev.target.classList.add('log-window-stopped');
+				ev.target.classList.add("log-window-stopped");
 			},
-			"onmouseleave": ev => {
+			onmouseleave: (ev) => {
 				const leave = () => {
 					this.mouseInside = null;
-					ev.target.classList.remove('log-window-stopped');
+					ev.target.classList.remove("log-window-stopped");
 				};
 				// When our custom context menu pops up, it causes onmouseleave on the
 				// log window, so make our leave callback fire only after the context
@@ -370,44 +358,46 @@ class JobsRenderer {
 				} else {
 					leave();
 				}
-			}
-		}
-
-		const statsElements = {
-			mb: h("span", {"className": "inline-stat job-mb"}, "?"),
-			responses: h("span", {"className": "inline-stat job-responses"}, "?"),
-			responsesPerSecond: h("span", {"className": "inline-stat job-responses-per-second"}, "?"),
-			queueLength: h("span", {"className": "inline-stat job-in-queue"}, "? in q."),
-			connections: h("span", {"className": "inline-stat job-connections"}, "?"),
-			delay: h("span", {"className": "inline-stat job-delay"}, "? ms delay"),
-			ignores: h("span", {"className": "job-ignores"}, "?"),
-			jobInfo: null /* set later */
+			},
 		};
 
-		const startedISOString = new Date(parseFloat(jobData["started_at"]) * 1000).toISOString();
-		const jobNote = h("span", {"className": "job-note"}, null);
+		const statsElements = {
+			mb: h("span", { className: "inline-stat job-mb" }, "?"),
+			responses: h("span", { className: "inline-stat job-responses" }, "?"),
+			responsesPerSecond: h("span", { className: "inline-stat job-responses-per-second" }, "?"),
+			queueLength: h("span", { className: "inline-stat job-in-queue" }, "? in q."),
+			connections: h("span", { className: "inline-stat job-connections" }, "?"),
+			delay: h("span", { className: "inline-stat job-delay" }, "? ms delay"),
+			ignores: h("span", { className: "job-ignores" }, "?"),
+			jobInfo: null /* set later */,
+		};
 
-		statsElements.jobInfo = h(
-			"span", {"className": "job-info"}, [
-				h("a", {"className": "inline-stat job-url", "href": jobData["url"]}, jobData["url"]),
-				// Clicking anywhere in this area will set the filter to a regexp that
-				// matches only this job URL, thus hiding everything but this job.
-				h("span", {
-					"className": "stats-elements",
-					"onclick": () => {
+		const startedISOString = new Date(parseFloat(jobData.started_at) * 1000).toISOString();
+		const jobNote = h("span", { className: "job-note" }, null);
+
+		statsElements.jobInfo = h("span", { className: "job-info" }, [
+			h("a", { className: "inline-stat job-url", href: jobData.url }, jobData.url),
+			// Clicking anywhere in this area will set the filter to a regexp that
+			// matches only this job URL, thus hiding everything but this job.
+			h(
+				"span",
+				{
+					className: "stats-elements",
+					onclick: () => {
 						const filter = ds.getFilter();
-						if (RegExp(filter).test(jobData["url"]) && filter.startsWith("^") && filter.endsWith("$")) {
+						if (RegExp(filter).test(jobData.url) && filter.startsWith("^") && filter.endsWith("$")) {
 							// If we're already showing just this log window, go back
 							// to showing nothing.
 							ds.setFilter("^$");
 						} else {
-							ds.setFilter("^" + regExpEscape(jobData["url"]) + "$");
+							ds.setFilter(`^${regExpEscape(jobData.url)}$`);
 						}
-					}
-				}, [
+					},
+				},
+				[
 					" on ",
-					h("span", {"className": "inline-stat", "title": startedISOString}, startedISOString.split("T")[0].substr(5)),
-					h("span", {"className": "inline-stat job-nick"}, (this.showNicks ? " by " + jobData["started_by"] : "")),
+					h("span", { className: "inline-stat", title: startedISOString }, startedISOString.split("T")[0].substr(5)),
+					h("span", { className: "inline-stat job-nick" }, this.showNicks ? ` by ${jobData.started_by}` : ""),
 					jobNote,
 					"; ",
 					statsElements.mb,
@@ -422,30 +412,27 @@ class JobsRenderer {
 					" con. w/ ",
 					statsElements.delay,
 					"; ",
-					statsElements.ignores
-				])
-			]
-		);
+					statsElements.ignores,
+				],
+			),
+		]);
 
-		const logWindow = h('div', logWindowAttrs, logSegment);
-		const div = h(
-			'div',
-			{"id": "log-container-" + ident}, [
-				h("div", {"className": "job-header"}, [
-					statsElements.jobInfo,
-					h("input", {
-						"className": "job-ident",
-						"type": "text",
-						"value": ident,
-						"size": "28",
-						"spellcheck": "false",
-						"readonly": "",
-						"onclick": () => this.select(),
-					})
-				]),
-				logWindow
-			]
-		);
+		const logWindow = h("div", logWindowAttrs, logSegment);
+		const div = h("div", { id: `log-container-${ident}` }, [
+			h("div", { className: "job-header" }, [
+				statsElements.jobInfo,
+				h("input", {
+					className: "job-ident",
+					type: "text",
+					value: ident,
+					size: "28",
+					spellcheck: "false",
+					readonly: "",
+					onclick: () => this.select(),
+				}),
+			]),
+			logWindow,
+		]);
 		this.renderInfo[ident] = new JobRenderInfo(logWindow, logSegment, statsElements, jobNote, 0, [0]);
 		this.container.insertBefore(div, beforeElement);
 		// Set appropriate CSS classes - we might be in aligned mode already
@@ -457,18 +444,16 @@ class JobsRenderer {
 
 	_renderDownloadLine(data, logSegment) {
 		let attrs;
-		if (data["is_warning"]) {
-			attrs = {"className": "line-warning", "href": data["url"]};
-		} else if (data["is_error"]) {
-			attrs = {"className": "line-error", "href": data["url"]};
-		} else if (data["response_code"] && data["response_code"] >= 300 && data["response_code"] < 400) {
-			attrs = {"className": "line-redirect", "href": data["url"]};
+		if (data.is_warning) {
+			attrs = { className: "line-warning", href: data.url };
+		} else if (data.is_error) {
+			attrs = { className: "line-error", href: data.url };
+		} else if (data.response_code && data.response_code >= 300 && data.response_code < 400) {
+			attrs = { className: "line-redirect", href: data.url };
 		} else {
-			attrs = {"className": "line-normal", "href": data["url"]};
+			attrs = { className: "line-normal", href: data.url };
 		}
-		logSegment.appendChild(
-			h("a", attrs, data["response_code"] + " " + data["wget_code"] + " " + data["url"])
-		);
+		logSegment.appendChild(h("a", attrs, `${data.response_code} ${data.wget_code} ${data.url}`));
 		return 1;
 	}
 
@@ -478,44 +463,48 @@ class JobsRenderer {
 	 */
 	_moreDomRenderDownloadLine(data, logSegment) {
 		let attrs;
-		if (data["is_warning"]) {
+		if (data.is_warning) {
 			attrs = Reusable.obj_className_line_warning;
-		} else if (data["is_error"]) {
+		} else if (data.is_error) {
 			attrs = Reusable.obj_className_line_error;
-		} else if (data["response_code"] && data["response_code"] >= 300 && data["response_code"] < 400) {
+		} else if (data.response_code && data.response_code >= 300 && data.response_code < 400) {
 			attrs = Reusable.obj_className_line_redirect;
 		} else {
 			attrs = Reusable.obj_className_line_normal;
 		}
-		logSegment.appendChild(h("div", attrs, [
-			data["response_code"] + " " + data["wget_code"] + " ",
-			h("a", {"href": data["url"], "className": "log-url"}, data["url"])
-		]));
+		logSegment.appendChild(
+			h("div", attrs, [
+				`${data.response_code} ${data.wget_code} `,
+				h("a", { href: data.url, className: "log-url" }, data.url),
+			]),
+		);
 		return 1;
 	}
 
 	_renderIgnoreLine(data, logSegment) {
 		const attrs = Reusable.obj_className_line_ignore;
-		const source = data["source"];
+		const source = data.source;
 		let ignoreSpan;
 
 		if (source != null) {
-			ignoreSpan = h('span', null, " IGNOR (" + source + "): ");
+			ignoreSpan = h("span", null, ` IGNOR (${source}): `);
 		} else {
-			ignoreSpan = h('span', null, " IGNOR ");
+			ignoreSpan = h("span", null, " IGNOR ");
 		}
 
-		logSegment.appendChild(h("div", attrs, [
-			ignoreSpan,
-			h('a', {"href": data["url"], "className": "ignore"}, data["url"]),
-			h('span', Reusable.obj_className_bold, " by "),
-			data["pattern"]
-		]));
+		logSegment.appendChild(
+			h("div", attrs, [
+				ignoreSpan,
+				h("a", { href: data.url, className: "ignore" }, data.url),
+				h("span", Reusable.obj_className_bold, " by "),
+				data.pattern,
+			]),
+		);
 		return 1;
 	}
 
 	_renderStdoutLine(data, logSegment, info, ident) {
-		const cleanedMessage = data["message"].replace(/[\r\n]+$/, "");
+		const cleanedMessage = data.message.replace(/[\r\n]+$/, "");
 		let renderedLines = 0;
 		if (!cleanedMessage) {
 			return renderedLines;
@@ -532,10 +521,14 @@ class JobsRenderer {
 			// instead of 'Starting MarkItemAsDone for Item'
 			// because the latter is often missing
 			if (/^Finished RsyncUpload for Item/.test(line)) {
-				info.statsElements.jobInfo.classList.add('job-info-done');
+				info.statsElements.jobInfo.classList.add("job-info-done");
 				this.jobs.markFinished(ident);
-			} else if (/^CRITICAL (Sorry|Please report)|^ERROR Fatal exception|No space left on device|^Fatal Python error:|^(Thread|Current thread) 0x/.test(line)) {
-				info.statsElements.jobInfo.classList.add('job-info-fatal');
+			} else if (
+				/^CRITICAL (Sorry|Please report)|^ERROR Fatal exception|No space left on device|^Fatal Python error:|^(Thread|Current thread) 0x/.test(
+					line,
+				)
+			) {
+				info.statsElements.jobInfo.classList.add("job-info-fatal");
 				this.jobs.markFatalException(ident);
 			} else if (/Script requested immediate stop|^Adjusted target WARC path to.*-aborted$/.test(line)) {
 				// Note: above message can be in:
@@ -545,13 +538,13 @@ class JobsRenderer {
 				//
 				// Also check for "Adjusted target WARC path" because
 				// the exception may be entirely missing.
-				info.statsElements.jobInfo.classList.remove('job-info-fatal');
-				info.statsElements.jobInfo.classList.add('job-info-aborted');
+				info.statsElements.jobInfo.classList.remove("job-info-fatal");
+				info.statsElements.jobInfo.classList.add("job-info-aborted");
 			} else if (/^Received item /.test(line)) {
 				// Clear other statuses if a job restarts with the same job ID
-				info.statsElements.jobInfo.classList.remove('job-info-done');
-				info.statsElements.jobInfo.classList.remove('job-info-fatal');
-				info.statsElements.jobInfo.classList.remove('job-info-aborted');
+				info.statsElements.jobInfo.classList.remove("job-info-done");
+				info.statsElements.jobInfo.classList.remove("job-info-fatal");
+				info.statsElements.jobInfo.classList.remove("job-info-aborted");
 				this.jobs.markUnfinished(ident);
 			}
 		}
@@ -559,81 +552,71 @@ class JobsRenderer {
 	}
 
 	handleData(data) {
-		const jobData = data["job_data"];
+		const jobData = data.job_data;
 		const added = this.jobs.handleJobData(jobData);
 		this.numCrawls.textContent = this.jobs.countActive();
 		if (added) {
 			this._createLogContainer(jobData);
 		}
-		const type = data["type"];
-		const ident = jobData["ident"];
+		const type = data.type;
+		const ident = jobData.ident;
 
 		const info = this.renderInfo[ident];
 		if (!info) {
-			console.warn("No render info for " + ident);
+			console.warn(`No render info for ${ident}`);
 			return;
 		}
 
 		const totalResponses = parseInt(getTotalResponses(jobData));
 		let linesRendered;
-		if (type == "download") {
+		if (type === "download") {
 			linesRendered = this._renderDownloadLine(data, info.logSegment);
-		} else if (type == "stdout") {
+		} else if (type === "stdout") {
 			linesRendered = this._renderStdoutLine(data, info.logSegment, info, ident);
-		} else if (type == "ignore") {
+		} else if (type === "ignore") {
 			linesRendered = this._renderIgnoreLine(data, info.logSegment);
 		} else {
-			assert(false, "Unexpected message type " + type);
+			assert(false, `Unexpected message type ${type}`);
 		}
 
 		// Update stats
-		info.statsElements.mb.textContent =
-			numberWithCommas(
-				toStringTenths(
-					(parseInt(jobData["bytes_downloaded"]) / (1024 * 1024)).toString()));
-		info.statsElements.responses.textContent =
-			numberWithCommas(totalResponses) + " resp.";
+		info.statsElements.mb.textContent = numberWithCommas(
+			toStringTenths((parseInt(jobData.bytes_downloaded) / (1024 * 1024)).toString()),
+		);
+		info.statsElements.responses.textContent = `${numberWithCommas(totalResponses)} resp.`;
 		info.statsElements.responses.title = getSummaryResponses(jobData);
-		const duration = Date.now()/1000 - parseFloat(jobData["started_at"]);
-		info.statsElements.responsesPerSecond.textContent =
-			toStringTenths(totalResponses/duration);
+		const duration = Date.now() / 1000 - parseFloat(jobData.started_at);
+		info.statsElements.responsesPerSecond.textContent = toStringTenths(totalResponses / duration);
 
-		if (jobData["items_queued"] && jobData["items_downloaded"]) {
-			const totalQueued = parseInt(jobData["items_queued"], 10);
-			const totalDownloaded = parseInt(jobData["items_downloaded"], 10);
-			info.statsElements.queueLength.textContent =
-				numberWithCommas((totalQueued - totalDownloaded) + " in q.");
-			info.statsElements.queueLength.title =
-				numberWithCommas(totalQueued) + " queued\n" +
-				numberWithCommas(totalDownloaded) + " downloaded";
+		if (jobData.items_queued && jobData.items_downloaded) {
+			const totalQueued = parseInt(jobData.items_queued, 10);
+			const totalDownloaded = parseInt(jobData.items_downloaded, 10);
+			info.statsElements.queueLength.textContent = numberWithCommas(`${totalQueued - totalDownloaded} in q.`);
+			info.statsElements.queueLength.title = `${numberWithCommas(totalQueued)} queued\n${numberWithCommas(
+				totalDownloaded,
+			)} downloaded`;
 		}
 
-		info.statsElements.connections.textContent = jobData["concurrency"];
+		info.statsElements.connections.textContent = jobData.concurrency;
 
-		const delayMin = parseInt(jobData["delay_min"]);
-		const delayMax = parseInt(jobData["delay_max"]);
-		info.statsElements.delay.textContent =
-			(delayMin == delayMax ?
-				delayMin :
-				delayMin + "-" + delayMax) + " ms delay";
+		const delayMin = parseInt(jobData.delay_min);
+		const delayMax = parseInt(jobData.delay_max);
+		info.statsElements.delay.textContent = `${delayMin === delayMax ? delayMin : `${delayMin}-${delayMax}`} ms delay`;
 
-		if (jobData["suppress_ignore_reports"]) {
-			info.statsElements.ignores.textContent = 'igoff';
-			if (!info.statsElements.ignores.classList.contains('job-igoff')) {
-				info.statsElements.ignores.classList.add('job-igoff');
+		if (jobData.suppress_ignore_reports) {
+			info.statsElements.ignores.textContent = "igoff";
+			if (!info.statsElements.ignores.classList.contains("job-igoff")) {
+				info.statsElements.ignores.classList.add("job-igoff");
 			}
 		} else {
-			info.statsElements.ignores.textContent = 'igon';
-			if (info.statsElements.ignores.classList.contains('job-igoff')) {
-				info.statsElements.ignores.classList.remove('job-igoff');
+			info.statsElements.ignores.textContent = "igon";
+			if (info.statsElements.ignores.classList.contains("job-igoff")) {
+				info.statsElements.ignores.classList.remove("job-igoff");
 			}
 		}
 
 		// Update note
-		info.jobNote.textContent =
-			isBlank(jobData["note"]) ?
-				"" :
-				" (" + jobData["note"] + ")";
+		info.jobNote.textContent = isBlank(jobData.note) ? "" : ` (${jobData.note})`;
 
 		info.lineCountWindow += linesRendered;
 		info.lineCountSegments[info.lineCountSegments.length - 1] += linesRendered;
@@ -646,7 +629,7 @@ class JobsRenderer {
 			info.lineCountSegments.push(0);
 		}
 
-		if (this.mouseInside != ident) {
+		if (this.mouseInside !== ident) {
 			// Don't remove any scrollback information when the job has a fatal exception,
 			// so that the user can find the traceback and report a bug.
 			if (!this.jobs.hasFatalException(ident)) {
@@ -654,10 +637,13 @@ class JobsRenderer {
 				// has paused the log window for a while.
 				while (info.lineCountWindow >= this.historyLines + this.linesPerSegment) {
 					const firstLogSegment = info.logWindow.firstChild;
-					assert(firstLogSegment != null, "info.logWindow.firstChild is null; " +
-						JSON.stringify({
-							"lineCountWindow": info.lineCountWindow,
-							"lineCountSegments": info.lineCountSegments}));
+					assert(
+						firstLogSegment != null,
+						`info.logWindow.firstChild is null; ${JSON.stringify({
+							lineCountWindow: info.lineCountWindow,
+							lineCountSegments: info.lineCountSegments,
+						})}`,
+					);
 					info.logWindow.removeChild(firstLogSegment);
 					info.lineCountWindow -= info.lineCountSegments[0];
 					info.lineCountSegments.shift();
@@ -678,8 +664,8 @@ class JobsRenderer {
 		const unmatchedWindows = [];
 		this.firstFilterMatch = null;
 		for (const job of this.jobs.sorted) {
-			const w = this.renderInfo[job["ident"]].logWindow;
-			if (!RegExp(query).test(job["url"])) {
+			const w = this.renderInfo[job.ident].logWindow;
+			if (!RegExp(query).test(job.url)) {
 				w.classList.add("log-window-hidden");
 
 				unmatchedWindows.push(w);
@@ -695,10 +681,10 @@ class JobsRenderer {
 		}
 
 		// If there's only one visible log window, expand it so that more lines are visible.
-		unmatchedWindows.map(classRemover('log-window-expanded'));
-		matchedWindows.map(classRemover('log-window-expanded'));
-		if (matches == 1) {
-			matchedWindows.map(classAdder('log-window-expanded'));
+		unmatchedWindows.map(classRemover("log-window-expanded"));
+		matchedWindows.map(classRemover("log-window-expanded"));
+		if (matches === 1) {
+			matchedWindows.map(classAdder("log-window-expanded"));
 		}
 
 		if (matches < this.jobs.sorted.length) {
@@ -719,8 +705,8 @@ class JobsRenderer {
 		if (this.firstFilterMatch == null) {
 			idx = null;
 		} else {
-			idx = this.jobs.sorted.findIndex(el => {
-				return el["ident"] === this.firstFilterMatch["ident"];
+			idx = this.jobs.sorted.findIndex((el) => {
+				return el.ident === this.firstFilterMatch.ident;
 			});
 		}
 		if (idx == null) {
@@ -731,30 +717,32 @@ class JobsRenderer {
 		idx = idx + offset;
 		// When reaching either end, hide all job windows.  When going past
 		// the end, wrap around.
-		if (idx == -1) {
+		if (idx === -1) {
 			idx = this.jobs.sorted.length;
-		} else if (idx == this.jobs.sorted.length + 1) {
+		} else if (idx === this.jobs.sorted.length + 1) {
 			idx = 0;
 		}
-		if (idx == this.jobs.sorted.length) {
+		if (idx === this.jobs.sorted.length) {
 			ds.setFilter("^$");
 		} else {
 			const newShownJob = this.jobs.sorted[idx];
-			ds.setFilter("^" + regExpEscape(newShownJob["url"]) + "$");
+			ds.setFilter(`^${regExpEscape(newShownJob.url)}$`);
 		}
 	}
 
 	updateAlign() {
 		const adderOrRemover = this.aligned ? classAdder : classRemover;
-		Array.from(document.querySelectorAll('.job-url')).map(adderOrRemover('job-url-aligned'));
-		Array.from(document.querySelectorAll('.job-note')).map(adderOrRemover('job-note-aligned'));
-		Array.from(document.querySelectorAll('.job-nick')).map(adderOrRemover('job-nick-aligned'));
-		Array.from(document.querySelectorAll('.job-mb')).map(adderOrRemover('job-mb-aligned'));
-		Array.from(document.querySelectorAll('.job-responses')).map(adderOrRemover('job-responses-aligned'));
-		Array.from(document.querySelectorAll('.job-responses-per-second')).map(adderOrRemover('job-responses-per-second-aligned'));
-		Array.from(document.querySelectorAll('.job-in-queue')).map(adderOrRemover('job-in-queue-aligned'));
-		Array.from(document.querySelectorAll('.job-connections')).map(adderOrRemover('job-connections-aligned'));
-		Array.from(document.querySelectorAll('.job-delay')).map(adderOrRemover('job-delay-aligned'));
+		Array.from(document.querySelectorAll(".job-url")).map(adderOrRemover("job-url-aligned"));
+		Array.from(document.querySelectorAll(".job-note")).map(adderOrRemover("job-note-aligned"));
+		Array.from(document.querySelectorAll(".job-nick")).map(adderOrRemover("job-nick-aligned"));
+		Array.from(document.querySelectorAll(".job-mb")).map(adderOrRemover("job-mb-aligned"));
+		Array.from(document.querySelectorAll(".job-responses")).map(adderOrRemover("job-responses-aligned"));
+		Array.from(document.querySelectorAll(".job-responses-per-second")).map(
+			adderOrRemover("job-responses-per-second-aligned"),
+		);
+		Array.from(document.querySelectorAll(".job-in-queue")).map(adderOrRemover("job-in-queue-aligned"));
+		Array.from(document.querySelectorAll(".job-connections")).map(adderOrRemover("job-connections-aligned"));
+		Array.from(document.querySelectorAll(".job-delay")).map(adderOrRemover("job-delay-aligned"));
 	}
 
 	toggleAlign() {
@@ -762,8 +750,6 @@ class JobsRenderer {
 		this.updateAlign();
 	}
 }
-
-
 
 /**
  * This context menu pops up when you right-click on a URL in
@@ -774,7 +760,7 @@ class ContextMenuRenderer {
 	constructor() {
 		this.visible = false;
 		this.callAfterBlurFns = [];
-		this.element = byId('context-menu');
+		this.element = byId("context-menu");
 	}
 
 	/**
@@ -782,16 +768,18 @@ class ContextMenuRenderer {
 	 */
 	clickedOnLogWindowURL(ev) {
 		const cn = ev.target.className;
-		return cn == "line-normal" || cn == "line-error" || cn == "line-warning" || cn == "line-redirect" || cn == "log-url";
+		return (
+			cn === "line-normal" || cn === "line-error" || cn === "line-warning" || cn === "line-redirect" || cn === "log-url"
+		);
 	}
 
 	makeCopyTextFn(text) {
 		return () => {
-			const clipboardScratchpad = byId('clipboard-scratchpad');
+			const clipboardScratchpad = byId("clipboard-scratchpad");
 			clipboardScratchpad.value = text;
 			clipboardScratchpad.focus();
 			clipboardScratchpad.select();
-			document.execCommand('copy');
+			document.execCommand("copy");
 		};
 	}
 
@@ -801,42 +789,36 @@ class ContextMenuRenderer {
 		// Avoid generating a duplicate suggestion
 		path = path.replace(/\/$/, "");
 
-		while (path && path.lastIndexOf('/') != -1) {
+		while (path && path.lastIndexOf("/") !== -1) {
 			path = path.replace(/\/[^\/]*$/, "");
-			paths.push(path + '/');
+			paths.push(`${path}/`);
 		}
 
 		return paths;
 	}
 
 	getSuggestedCommands(ident, url) {
-		const schema = url.split(':')[0];
-		const domain = url.split('/')[2];
-		const withoutQuery = url.split('?')[0];
-		const path = '/' + split(withoutQuery, '/', 3)[3];
-		const reSchema = schema.startsWith('http') ? 'https?' : 'ftp';
-		return this.getPathVariants(path).map(p => {
-			return "!ig " + ident + " ^" + reSchema + "://" + regExpEscape(domain + p);
-		}).concat([
-			"!d " + ident + " 180000 180000",
-			"!d " + ident + " 250 375",
-			"!con " + ident + " 1",
-		]);
+		const schema = url.split(":")[0];
+		const domain = url.split("/")[2];
+		const withoutQuery = url.split("?")[0];
+		const path = `/${split(withoutQuery, "/", 3)[3]}`;
+		const reSchema = schema.startsWith("http") ? "https?" : "ftp";
+		return this.getPathVariants(path)
+			.map((p) => {
+				return `!ig ${ident} ^${reSchema}://${regExpEscape(domain + p)}`;
+			})
+			.concat([`!d ${ident} 180000 180000`, `!d ${ident} 250 375`, `!con ${ident} 1`]);
 	}
 
 	makeEntries(ident, url) {
-		const commands = this.getSuggestedCommands(ident, url).map(c => {
-			return h(
-				'span',
-				{'onclick': this.makeCopyTextFn(c)},
-				"Copy " + c.replace(" " + ident + " ", " … ")
-			);
+		const commands = this.getSuggestedCommands(ident, url).map((c) => {
+			return h("span", { onclick: this.makeCopyTextFn(c) }, `Copy ${c.replace(` ${ident} `, " … ")}`);
 		});
 		return [
 			// Unfortunately, this does not open it in a background tab
 			// like the real context menu does.
-			h('a', {'href': url}, "Open link in new tab")
-			,h('span', {'onclick': this.makeCopyTextFn(url)}, "Copy link address")
+			h("a", { href: url }, "Open link in new tab"),
+			h("span", { onclick: this.makeCopyTextFn(url) }, "Copy link address"),
 		].concat(commands);
 	}
 
@@ -849,8 +831,8 @@ class ContextMenuRenderer {
 		ev.preventDefault();
 		this.visible = true;
 		this.element.style.display = "block";
-		this.element.style.left = ev.clientX + "px";
-		this.element.style.top = ev.clientY + "px";
+		this.element.style.left = `${ev.clientX}px`;
+		this.element.style.top = `${ev.clientY}px`;
 
 		removeChildren(this.element);
 		// We put the clipboard-scratchpad in the fixed-positioned
@@ -858,19 +840,19 @@ class ContextMenuRenderer {
 		// we must focus the input box to automatically copy its text,
 		// and the focus operation scrolls to the element on the page,
 		// and we want to avoid such scrolling.
-		appendAny(this.element, h('input', {'type': 'text', 'id': 'clipboard-scratchpad'}));
+		appendAny(this.element, h("input", { type: "text", id: "clipboard-scratchpad" }));
 
 		const url = ev.target.href;
 		let ident;
 		try {
 			ident = ev.target.parentNode.parentNode.id.match(/^log-window-(.*)/)[1];
-		} catch(e) {
+		} catch (e) {
 			// moreDom=1
 			ident = ev.target.parentNode.parentNode.parentNode.id.match(/^log-window-(.*)/)[1];
 		}
 		const entries = this.makeEntries(ident, url);
 		for (const entry of entries) {
-			entry.classList.add('context-menu-entry');
+			entry.classList.add("context-menu-entry");
 			appendAny(this.element, entry);
 		}
 
@@ -878,14 +860,14 @@ class ContextMenuRenderer {
 		// menu up, so that it appears to have opened from its bottom-left corner.
 		// + 1 pixel so that the pointer lands inside the element and turns on cursor: default
 		if (ev.clientY + this.element.offsetHeight > document.documentElement.clientHeight) {
-			this.element.style.top = (ev.clientY - this.element.offsetHeight + 1) + "px";
+			this.element.style.top = `${ev.clientY - this.element.offsetHeight}${1}px`;
 		}
 	}
 
 	blur() {
 		this.visible = false;
 		this.element.style.display = "none";
-		this.callAfterBlurFns.map(fn => fn());
+		this.callAfterBlurFns.map((fn) => fn());
 		this.callAfterBlurFns = [];
 	}
 
@@ -894,8 +876,6 @@ class ContextMenuRenderer {
 		this.callAfterBlurFns.push(fn);
 	}
 }
-
-
 
 class BatchingQueue {
 	constructor(callable, minInterval) {
@@ -932,8 +912,6 @@ class BatchingQueue {
 	}
 }
 
-
-
 class Decayer {
 	constructor(initial, multiplier, max) {
 		this.initial = initial;
@@ -955,41 +933,39 @@ class Decayer {
 	}
 }
 
-
-
 class Dashboard {
 	constructor() {
 		this.messageCount = 0;
 
 		const args = getQueryArgs();
 
-		const historyLines         = args["historyLines"]         ? Number(args["historyLines"])         : navigator.userAgent.match(/Mobi/) ? 250 : 500;
-		const batchTimeWhenVisible = args["batchTimeWhenVisible"] ? Number(args["batchTimeWhenVisible"]) : 125;
-		const showNicks            = args["showNicks"]            ? Boolean(Number(args["showNicks"]))   : false;
-		const contextMenu          = args["contextMenu"]          ? Boolean(Number(args["contextMenu"])) : true;
-		const moreDom              = args["moreDom"]              ? Boolean(Number(args["moreDom"]))     : false;
+		const historyLines = args.historyLines ? Number(args.historyLines) : navigator.userAgent.match(/Mobi/) ? 250 : 500;
+		const batchTimeWhenVisible = args.batchTimeWhenVisible ? Number(args.batchTimeWhenVisible) : 125;
+		const showNicks = args.showNicks ? Boolean(Number(args.showNicks)) : false;
+		const contextMenu = args.contextMenu ? Boolean(Number(args.contextMenu)) : true;
+		const moreDom = args.moreDom ? Boolean(Number(args.moreDom)) : false;
 		// Append to page title to make it possible to identify the tab in Chrome's task manager
-		if (args["title"]) {
-			document.title += " - " + args["title"];
+		if (args.title) {
+			document.title += ` - ${args.title}`;
 		}
 
 		if (moreDom) {
 			JobsRenderer.prototype._renderDownloadLine = JobsRenderer.prototype._moreDomRenderDownloadLine;
 		}
 
-		this.host = args["host"] ? args["host"] : location.hostname;
-		this.dumpTraffic = args["dumpMax"] && Number(args["dumpMax"]) > 0;
+		this.host = args.host ? args.host : location.hostname;
+		this.dumpTraffic = args.dumpMax && Number(args.dumpMax) > 0;
 		if (this.dumpTraffic) {
-			this.dumpMax = Number(args["dumpMax"]);
+			this.dumpMax = Number(args.dumpMax);
 		}
 
 		this.contextMenuRenderer = new ContextMenuRenderer(document);
 		if (contextMenu) {
-			document.oncontextmenu = ev => this.contextMenuRenderer.onContextMenu(ev);
-			document.onclick = ev => this.contextMenuRenderer.blur(ev);
+			document.oncontextmenu = (ev) => this.contextMenuRenderer.onContextMenu(ev);
+			document.onclick = (ev) => this.contextMenuRenderer.blur(ev);
 			// onkeydown picks up ESC, onkeypress doesn't (tested Chrome 44)
-			document.onkeydown = ev => {
-				if (ev.keyCode == 27) { // ESC
+			document.onkeydown = (ev) => {
+				if (ev.keyCode === 27 /* ESC */) {
 					this.contextMenuRenderer.blur();
 				}
 			};
@@ -997,14 +973,19 @@ class Dashboard {
 		}
 
 		this.jobsRenderer = new JobsRenderer(
-			byId('logs'), byId('filter-box'), historyLines, showNicks, this.contextMenuRenderer);
+			byId("logs"),
+			byId("filter-box"),
+			historyLines,
+			showNicks,
+			this.contextMenuRenderer,
+		);
 
 		const batchTimeWhenHidden = 1000;
 
 		const xhr = new XMLHttpRequest();
 
 		const finishSetup = () => {
-			this.queue = new BatchingQueue(queue => {
+			this.queue = new BatchingQueue((queue) => {
 				//console.log("Queue has ", queue.length, "items");
 				for (const item of queue) {
 					this.handleData(JSON.parse(item));
@@ -1014,16 +995,20 @@ class Dashboard {
 			this.decayer = new Decayer(1000, 1.5, 60000);
 			this.connectWebSocket();
 
-			document.addEventListener("visibilitychange", () => {
-				if (document.hidden) {
-					//console.log("Page has become hidden");
-					this.queue.setMinInterval(batchTimeWhenHidden);
-				} else {
-					//console.log("Page has become visible");
-					this.queue.setMinInterval(batchTimeWhenVisible);
-					this.queue.callNow();
-				}
-			}, false);
+			document.addEventListener(
+				"visibilitychange",
+				() => {
+					if (document.hidden) {
+						//console.log("Page has become hidden");
+						this.queue.setMinInterval(batchTimeWhenHidden);
+					} else {
+						//console.log("Page has become visible");
+						this.queue.setMinInterval(batchTimeWhenVisible);
+						this.queue.callNow();
+					}
+				},
+				false,
+			);
 		};
 
 		xhr.onload = () => {
@@ -1032,7 +1017,7 @@ class Dashboard {
 				for (const line of recentLines) {
 					this.handleData(line);
 				}
-			} catch(e) {
+			} catch (e) {
 				console.log("Failed to load /logs/recent data:", e);
 			}
 			finishSetup();
@@ -1041,15 +1026,15 @@ class Dashboard {
 			// Try to continue despite lack of /logs/recent data
 			finishSetup();
 		};
-		xhr.open("GET", "/logs/recent?cb=" + Date.now() + Math.random());
-		xhr.setRequestHeader('Accept', 'application/json');
+		xhr.open("GET", `/logs/recent?cb=${Date.now()}${Math.random()}`);
+		xhr.setRequestHeader("Accept", "application/json");
 		xhr.send("");
 
-		document.onkeypress = ev => this.keyPress(ev);
+		document.onkeypress = (ev) => this.keyPress(ev);
 
 		// Adjust help text based on URL
-		Array.prototype.slice.call(document.querySelectorAll('.url-q-or-amp')).map(elem => {
-			if (window.location.search.indexOf("?") != -1) {
+		Array.prototype.slice.call(document.querySelectorAll(".url-q-or-amp")).map((elem) => {
+			if (window.location.search.indexOf("?") !== -1) {
 				elem.textContent = "&";
 			}
 		});
@@ -1069,34 +1054,34 @@ class Dashboard {
 			return;
 		}
 		// Check shiftKey only after handling '?', because you need shift for '?'
-		if (ev.which == 63) { // ?
+		if (ev.which === 63 /* ? */) {
 			ds.toggleHelp();
 			return;
 		}
 		if (ev.shiftKey) {
 			return;
 		}
-		if (ev.which == 106) { // j
+		if (ev.which === 106 /* j */) {
 			this.jobsRenderer.showNextPrev(1);
-		} else if (ev.which == 107) { // k
+		} else if (ev.which === 107 /* k */) {
 			this.jobsRenderer.showNextPrev(-1);
-		} else if (ev.which == 97) { // a
-			ds.setFilter('');
-		} else if (ev.which == 110) { // n
-			ds.setFilter('^$');
-		} else if (ev.which == 102) { // f
+		} else if (ev.which === 97 /* a */) {
+			ds.setFilter("");
+		} else if (ev.which === 110 /* n */) {
+			ds.setFilter("^$");
+		} else if (ev.which === 102 /* f */) {
 			ev.preventDefault();
-			byId('filter-box').focus();
-			byId('filter-box').select();
-		} else if (ev.which == 118) { // v
-			window.open(this.jobsRenderer.firstFilterMatch["url"]);
+			byId("filter-box").focus();
+			byId("filter-box").select();
+		} else if (ev.which === 118 /* v */) {
+			window.open(this.jobsRenderer.firstFilterMatch.url);
 		}
 	}
 
 	handleData(data) {
 		this.messageCount += 1;
 		if (this.dumpTraffic && this.messageCount <= this.dumpMax) {
-			byId('traffic').appendChild(h("pre", null, prettyJson(data)));
+			byId("traffic").appendChild(h("pre", null, prettyJson(data)));
 		}
 		this.jobsRenderer.handleData(data);
 	}
@@ -1104,18 +1089,18 @@ class Dashboard {
 	connectWebSocket() {
 		const wsproto = window.location.protocol === "https:" ? "wss:" : "ws:";
 
-		this.ws = new WebSocket(wsproto + "//" + this.host + ":4568/stream");
+		this.ws = new WebSocket(`${wsproto}//${this.host}:4568/stream`);
 
-		this.ws.onmessage = ev => {
-			this.queue.push(ev["data"]);
+		this.ws.onmessage = (ev) => {
+			this.queue.push(ev.data);
 		};
 
-		this.ws.onopen = ev => {
+		this.ws.onopen = (ev) => {
 			console.log("WebSocket opened:", ev);
 			this.decayer.reset();
 		};
 
-		this.ws.onclose = ev => {
+		this.ws.onclose = (ev) => {
 			console.log("WebSocket closed:", ev);
 			const delay = this.decayer.decay();
 			console.log("Reconnecting in", delay, "ms");
@@ -1128,21 +1113,21 @@ class Dashboard {
 	}
 
 	toggleHelp() {
-		const help = byId('help');
-		if (help.classList.contains('undisplayed')) {
-			help.classList.remove('undisplayed');
+		const help = byId("help");
+		if (help.classList.contains("undisplayed")) {
+			help.classList.remove("undisplayed");
 		} else {
-			help.classList.add('undisplayed');
+			help.classList.add("undisplayed");
 		}
 	}
 
 	getFilter(value) {
-		return byId('filter-box').value;
+		return byId("filter-box").value;
 	}
 
 	setFilter(value) {
-		byId('filter-box').value = value;
-		byId('filter-box').onchange();
+		byId("filter-box").value = value;
+		byId("filter-box").onchange();
 	}
 }
 
