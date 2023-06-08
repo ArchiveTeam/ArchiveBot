@@ -139,22 +139,7 @@ function getQueryArgs() {
 	return intoObject(pairs.map(function(e) { return split(e, "=", 1); }));
 };
 
-function getChromeMajorVersion() {
-	return Number(navigator.userAgent.match(/Chrome\/(\d+)/)[1]);
-};
-
-function getFirefoxMajorVersion() {
-	return Number(navigator.userAgent.match(/Firefox\/(\d+)/)[1]);
-};
-
-function getTridentMajorVersion() {
-	return Number(navigator.userAgent.match(/Trident\/(\d+)/)[1]);
-};
-
 const isChrome = navigator.userAgent.indexOf("Chrome/") != -1;
-const isSafari = !isChrome && navigator.userAgent.indexOf("Safari") != -1;
-const isFirefox = navigator.userAgent.indexOf("Firefox") != -1;
-const isTrident = navigator.userAgent.indexOf("Trident/") != -1;
 
 function addAnyChangeListener(elem, func) {
 	// DOM0 handler for convenient use by Clear button
