@@ -26,6 +26,10 @@ class Recent < Webmachine::Resource
     ]
   end
 
+  def encodings_provided
+    {'gzip' => :encode_gzip, 'deflate' => :encode_deflate, 'identity' => :encode_identity}
+  end
+
   def to_json
     response.headers['Access-Control-Allow-Origin'] = '*'
     count = [[request.query['count'] ? request.query['count'].to_i : 10, 10].min, 1].max
