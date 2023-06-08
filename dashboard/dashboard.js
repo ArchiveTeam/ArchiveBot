@@ -788,17 +788,14 @@ class ContextMenuRenderer {
 		};
 	}
 
-	getPathVariants(path) {
-		const paths = [path];
-
-		// Avoid generating a duplicate suggestion
-		path = path.replace(/\/$/, "");
-
+	getPathVariants(fullPath) {
+		const paths = [fullPath];
+		// Avoid generating a near-duplicate suggestion with just the trailing slash removed
+		let path = fullPath.replace(/\/$/, "");
 		while (path && path.lastIndexOf("/") !== -1) {
 			path = path.replace(/\/[^\/]*$/, "");
 			paths.push(`${path}/`);
 		}
-
 		return paths;
 	}
 
