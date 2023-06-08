@@ -147,10 +147,6 @@ function addAnyChangeListener(elem, func) {
 	elem.addEventListener('input', func, false);
 };
 
-function arrayFrom(arrayLike) {
-	return Array.prototype.slice.call(arrayLike);
-};
-
 /**
  * Returns a function that gets the given property on any object passed in
  */
@@ -748,15 +744,15 @@ class JobsRenderer {
 
 	updateAlign() {
 		const adderOrRemover = this.aligned ? classAdder : classRemover;
-		arrayFrom(document.querySelectorAll('.job-url')).map(adderOrRemover('job-url-aligned'));
-		arrayFrom(document.querySelectorAll('.job-note')).map(adderOrRemover('job-note-aligned'));
-		arrayFrom(document.querySelectorAll('.job-nick')).map(adderOrRemover('job-nick-aligned'));
-		arrayFrom(document.querySelectorAll('.job-mb')).map(adderOrRemover('job-mb-aligned'));
-		arrayFrom(document.querySelectorAll('.job-responses')).map(adderOrRemover('job-responses-aligned'));
-		arrayFrom(document.querySelectorAll('.job-responses-per-second')).map(adderOrRemover('job-responses-per-second-aligned'));
-		arrayFrom(document.querySelectorAll('.job-in-queue')).map(adderOrRemover('job-in-queue-aligned'));
-		arrayFrom(document.querySelectorAll('.job-connections')).map(adderOrRemover('job-connections-aligned'));
-		arrayFrom(document.querySelectorAll('.job-delay')).map(adderOrRemover('job-delay-aligned'));
+		Array.from(document.querySelectorAll('.job-url')).map(adderOrRemover('job-url-aligned'));
+		Array.from(document.querySelectorAll('.job-note')).map(adderOrRemover('job-note-aligned'));
+		Array.from(document.querySelectorAll('.job-nick')).map(adderOrRemover('job-nick-aligned'));
+		Array.from(document.querySelectorAll('.job-mb')).map(adderOrRemover('job-mb-aligned'));
+		Array.from(document.querySelectorAll('.job-responses')).map(adderOrRemover('job-responses-aligned'));
+		Array.from(document.querySelectorAll('.job-responses-per-second')).map(adderOrRemover('job-responses-per-second-aligned'));
+		Array.from(document.querySelectorAll('.job-in-queue')).map(adderOrRemover('job-in-queue-aligned'));
+		Array.from(document.querySelectorAll('.job-connections')).map(adderOrRemover('job-connections-aligned'));
+		Array.from(document.querySelectorAll('.job-delay')).map(adderOrRemover('job-delay-aligned'));
 	}
 
 	toggleAlign() {
