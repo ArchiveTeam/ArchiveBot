@@ -470,7 +470,7 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 }
 
 JobsRenderer.prototype._renderDownloadLine = function(data, logSegment) {
-    let attrs;
+	let attrs;
 	if (data["is_warning"]) {
 		attrs = {"className": "line-warning", "href": data["url"]};
 	} else if (data["is_error"]) {
@@ -491,7 +491,7 @@ JobsRenderer.prototype._renderDownloadLine = function(data, logSegment) {
  * left or right of the URL.
  */
 JobsRenderer.prototype._moreDomRenderDownloadLine = function(data, logSegment) {
-    let attrs;
+	let attrs;
 	if (data["is_warning"]) {
 		attrs = Reusable.obj_className_line_warning;
 	} else if (data["is_error"]) {
@@ -589,7 +589,7 @@ JobsRenderer.prototype.handleData = function(data) {
 	}
 
 	const totalResponses = parseInt(getTotalResponses(jobData));
-    let linesRendered;
+	let linesRendered;
 	if (type == "download") {
 		linesRendered = this._renderDownloadLine(data, info.logSegment);
 	} else if (type == "stdout") {
@@ -878,7 +878,7 @@ ContextMenuRenderer.prototype.onContextMenu = function(ev) {
 	appendAny(this.element, h('input', {'type': 'text', 'id': 'clipboard-scratchpad'}));
 
 	const url = ev.target.href;
-    let ident;
+	let ident;
 	try {
 		ident = ev.target.parentNode.parentNode.id.match(/^log-window-(.*)/)[1];
 	} catch(e) {
