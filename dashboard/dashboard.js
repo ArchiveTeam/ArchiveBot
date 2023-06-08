@@ -307,7 +307,7 @@ class JobsRenderer {
 		this.filterBox = filterBox;
 		addAnyChangeListener(this.filterBox, () => this.applyFilter());
 		this.filterBox.onkeypress = (ev) => {
-			// So that j or k in input box does not result in job window switching
+			// Don't let `j` or `k` in the filter box cause the job window to switch
 			ev.stopPropagation();
 		};
 		this.historyLines = historyLines;
@@ -655,9 +655,8 @@ class JobsRenderer {
 				}
 			}
 
-			// Scroll to the bottom
-			// To avoid serious performance problems in Firefox, we use a big number
-			// instead of info.logWindow.scrollHeight.
+			// Scroll to the bottom. To avoid serious performance problems in Firefox,
+			// use a big number instead of info.logWindow.scrollHeight.
 			info.logWindow.scrollTop = 999999;
 		}
 	}
