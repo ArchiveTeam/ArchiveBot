@@ -125,7 +125,7 @@ function regExpEscape(s) {
  */
 function intoObject(arr) {
 	const obj = {};
-	arr.forEach(function(e) {
+	arr.forEach(e => {
 		obj[e[0]] = e[1];
 	});
 	return obj;
@@ -136,7 +136,7 @@ function getQueryArgs() {
 	if (pairs == "") {
 		return {};
 	}
-	return intoObject(pairs.map(function(e) { return split(e, "=", 1); }));
+	return intoObject(pairs.map(e => split(e, "=", 1)));
 };
 
 function addAnyChangeListener(elem, func) {
@@ -151,27 +151,21 @@ function addAnyChangeListener(elem, func) {
  * Returns a function that gets the given property on any object passed in
  */
 function prop(name) {
-	return function(obj) {
-		return obj[name];
-	};
+	return obj => obj[name];
 };
 
 /**
  * Returns a function that adds the given class to any element passed in
  */
 function classAdder(name) {
-	return function(elem) {
-		elem.classList.add(name);
-	};
+	return elem => elem.classList.add(name);
 };
 
 /**
  * Returns a function that removes the given class to any element passed in
  */
 function classRemover(name) {
-	return function(elem) {
-		elem.classList.remove(name);
-	};
+	return elem => elem.classList.remove(name);
 };
 
 function removeFromArray(arr, item) {
@@ -199,7 +193,9 @@ class JobsTracker {
 	}
 
 	resort() {
-		this.sorted.sort(function(a, b) { return a["started_at"] > b["started_at"] ? -1 : 1 });
+		this.sorted.sort((a, b) =>
+			a["started_at"] > b["started_at"] ? -1 : 1
+		);
 	}
 
 	/**
@@ -392,7 +388,7 @@ class JobsRenderer {
 				// matches only this job URL, thus hiding everything but this job.
 				h("span", {
 					"className": "stats-elements",
-					"onclick": function() {
+					"onclick": () => {
 						const filter = ds.getFilter();
 						if (RegExp(filter).test(jobData["url"]) && filter.startsWith("^") && filter.endsWith("$")) {
 							// If we're already showing just this log window, go back
@@ -438,7 +434,7 @@ class JobsRenderer {
 						"size": "28",
 						"spellcheck": "false",
 						"readonly": "",
-						"onclick": function() { this.select(); }
+						"onclick": () => this.select(),
 					})
 				]),
 				logWindow
@@ -813,7 +809,7 @@ class ContextMenuRenderer {
 		const withoutQuery = url.split('?')[0];
 		const path = '/' + split(withoutQuery, '/', 3)[3];
 		const reSchema = schema.startsWith('http') ? 'https?' : 'ftp';
-		return this.getPathVariants(path).map(function(p) {
+		return this.getPathVariants(path).map(p => {
 			return "!ig " + ident + " ^" + reSchema + "://" + regExpEscape(domain + p);
 		}).concat([
 			"!d " + ident + " 180000 180000",
@@ -883,7 +879,7 @@ class ContextMenuRenderer {
 	blur() {
 		this.visible = false;
 		this.element.style.display = "none";
-		this.callAfterBlurFns.map(function(fn) { fn(); });
+		this.callAfterBlurFns.map(fn => fn());
 		this.callAfterBlurFns = [];
 	}
 
@@ -1046,7 +1042,7 @@ class Dashboard {
 		document.onkeypress = ev => this.keyPress(ev);
 
 		// Adjust help text based on URL
-		Array.prototype.slice.call(document.querySelectorAll('.url-q-or-amp')).map(function(elem) {
+		Array.prototype.slice.call(document.querySelectorAll('.url-q-or-amp')).map(elem => {
 			if (window.location.search.indexOf("?") != -1) {
 				elem.textContent = "&";
 			}
