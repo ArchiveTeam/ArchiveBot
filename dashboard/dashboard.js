@@ -4,15 +4,15 @@ function assert(condition, message) {
 	if (!condition) {
 		throw message || "Assertion failed";
 	}
-};
+}
 
 function byId(id) {
 	return document.getElementById(id);
-};
+}
 
 function text(s) {
 	return document.createTextNode(s);
-};
+}
 
 /**
  * Adaptation of ActiveSupport's #blank?.
@@ -40,7 +40,7 @@ function appendAny(e, thing) {
 		}
 		e.appendChild(thing);
 	}
-};
+}
 
 /**
  * Create DOM element with attributes and children from Array<node|string>|node|string
@@ -62,20 +62,20 @@ function h(elem, attrs, thing) {
 		appendAny(e, thing);
 	}
 	return e;
-};
+}
 
 function href(href, text) {
 	const a = h("a");
 	a.href = href;
 	a.textContent = text;
 	return a;
-};
+}
 
 function removeChildren(elem) {
 	while (elem.firstChild) {
 		elem.removeChild(elem.firstChild);
 	}
-};
+}
 
 function addPageStyles(cssText) {
 	const style = document.createElement('style')
@@ -85,7 +85,7 @@ function addPageStyles(cssText) {
 
 function prettyJson(obj) {
 	return JSON.stringify(obj, undefined, 2);
-};
+}
 
 // Copied from Coreweb/js_coreweb/cw/string.js
 /**
@@ -112,7 +112,7 @@ function split(s, sep, maxsplit) {
 		head.push(tail); // no longer just the head.
 	}
 	return head;
-};
+}
 
 // Based on closure-library's goog.string.regExpEscape
 function regExpEscape(s) {
@@ -124,7 +124,7 @@ function regExpEscape(s) {
 		escaped = escaped.replace(/\\-/g, "-");
 	}
 	return escaped;
-};
+}
 
 /**
  * [[1, 2], [3, 4]] -> {1: 2, 3: 4}
@@ -135,7 +135,7 @@ function intoObject(arr) {
 		obj[e[0]] = e[1];
 	});
 	return obj;
-};
+}
 
 function getQueryArgs() {
 	const pairs = location.search.replace("?", "").split("&");
@@ -143,7 +143,7 @@ function getQueryArgs() {
 		return {};
 	}
 	return intoObject(pairs.map(e => split(e, "=", 1)));
-};
+}
 
 function addAnyChangeListener(elem, func) {
 	// DOM0 handler for convenient use by Clear button
@@ -151,35 +151,35 @@ function addAnyChangeListener(elem, func) {
 	elem.addEventListener('keydown', func, false);
 	elem.addEventListener('paste', func, false);
 	elem.addEventListener('input', func, false);
-};
+}
 
 /**
  * Returns a function that gets the given property on any object passed in
  */
 function prop(name) {
 	return obj => obj[name];
-};
+}
 
 /**
  * Returns a function that adds the given class to any element passed in
  */
 function classAdder(name) {
 	return elem => elem.classList.add(name);
-};
+}
 
 /**
  * Returns a function that removes the given class to any element passed in
  */
 function classRemover(name) {
 	return elem => elem.classList.remove(name);
-};
+}
 
 function removeFromArray(arr, item) {
 	const idx = arr.indexOf(item);
 	if (idx != -1) {
 		arr.splice(idx, 1);
 	}
-};
+}
 
 /*** End of utility code ***/
 
@@ -216,7 +216,7 @@ class JobsTracker {
 			this.resort();
 		}
 		return !alreadyKnown;
-	};
+	}
 
 	markFinished(ident) {
 		if (!(ident in this.finishedSet)) {
@@ -276,7 +276,7 @@ const Reusable = {
 // http://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript
 function numberWithCommas(s_or_n) {
 	return ("" + s_or_n).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-};
+}
 
 function toStringTenths(n) {
 	let s = "" + (Math.round(10 * n) / 10);
@@ -284,7 +284,7 @@ function toStringTenths(n) {
 		s += ".0";
 	}
 	return s;
-};
+}
 
 function getTotalResponses(jobData) {
 	return (
@@ -294,7 +294,7 @@ function getTotalResponses(jobData) {
 		parseInt(jobData["r4xx"]) +
 		parseInt(jobData["r5xx"]) +
 		parseInt(jobData["runk"]));
-};
+}
 
 function getSummaryResponses(jobData) {
 	return (
@@ -304,7 +304,7 @@ function getSummaryResponses(jobData) {
 		"4xx: " + numberWithCommas(jobData["r4xx"]) + "\n" +
 		"5xx: " + numberWithCommas(jobData["r5xx"]) + "\n" +
 		"Unknown: " + numberWithCommas(jobData["runk"]));
-};
+}
 
 
 
@@ -930,7 +930,7 @@ class BatchingQueue {
 			this._timeout = setTimeout(() => this._runCallable(), this._minInterval);
 		}
 	}
-};
+}
 
 
 
@@ -953,7 +953,7 @@ class Decayer {
 		this.current = Math.min(this.current * this.multiplier, this.max);
 		return this.current;
 	}
-};
+}
 
 
 
