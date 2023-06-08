@@ -202,15 +202,6 @@ const removeFromArray = function(arr, item) {
 	}
 };
 
-// Based on http://stackoverflow.com/a/18520276
-const findInArray = function(arr, test, ctx) {
-	let result = null;
-	arr.some(function(el, i) {
-		return test.call(ctx, el, i, arr) ? ((result = i), true) : false;
-	});
-	return result;
-};
-
 /*** End of utility code ***/
 
 
@@ -771,7 +762,7 @@ JobsRenderer.prototype.showNextPrev = function(offset) {
 	if (this.firstFilterMatch == null) {
 		idx = null;
 	} else {
-		idx = findInArray(this.jobs.sorted, (el, _i) => {
+		idx = this.jobs.sorted.findIndex(el => {
 			return el["ident"] === this.firstFilterMatch["ident"];
 		});
 	}
