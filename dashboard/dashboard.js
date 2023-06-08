@@ -822,11 +822,6 @@ ContextMenuRenderer.prototype.getPathVariants = function(path) {
 };
 
 ContextMenuRenderer.prototype.getSuggestedCommands = function(ident, url) {
-	// TODO:
-	// !d IDENT 180000 180000 (if !d is currently low)
-	// !d IDENT 250 375 (if !d is currently high)
-	// !con IDENT 1 (if > 1)
-	// !con IDENT 3 (if < 3)
 	const schema = url.split(':')[0];
 	const domain = url.split('/')[2];
 	const withoutQuery = url.split('?')[0];
