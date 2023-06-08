@@ -387,35 +387,6 @@ JobsRenderer.prototype._createLogContainer = function(jobData) {
 		}
 	}
 
-	// If you reach the end of a log window, the browser annoyingly
-	// starts to scroll the page instead.  We prevent this behavior here.
-	// If the user wants to scroll the page, they need to move their
-	// mouse outside a log window first.
-	if (isChrome && getChromeMajorVersion() >= 63) {
-		// No need to attach an event; .log-window { overscroll-behavior: contain } will take care of it.
-	} else if (!isSafari) {
-		logWindowAttrs["onwheel"] = function(ev) {
-			// Note: offsetHeight is "wrong" by 2px but it doesn't matter
-			//console.log(ev, logWindow.scrollTop, (logWindow.scrollHeight - logWindow.offsetHeight));
-			if (ev.deltaY < 0 && logWindow.scrollTop == 0) {
-				ev.preventDefault();
-			} else if (ev.deltaY > 0 && logWindow.scrollTop >= (logWindow.scrollHeight - logWindow.offsetHeight)) {
-				ev.preventDefault();
-			}
-		}
-	} else {
-		// Safari 7.0.5 can't preventDefault or stopPropagation an onwheel event,
-		// so use onmousewheel instead.
-		logWindowAttrs["onmousewheel"] = function(ev) {
-			//console.log(ev, logWindow.scrollTop, (logWindow.scrollHeight - logWindow.offsetHeight));
-			if (ev.wheelDeltaY > 0 && logWindow.scrollTop == 0) {
-				ev.preventDefault();
-			} else if (ev.wheelDeltaY < 0 && logWindow.scrollTop >= (logWindow.scrollHeight - logWindow.offsetHeight)) {
-				ev.preventDefault();
-			}
-		}
-	}
-
 	const statsElements = {
 		mb: h("span", {"className": "inline-stat job-mb"}, "?"),
 		responses: h("span", {"className": "inline-stat job-responses"}, "?"),
