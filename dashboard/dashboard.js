@@ -828,7 +828,6 @@ class ContextMenuRenderer {
 	}
 
 	onContextMenu(ev) {
-		//console.log(ev);
 		if (!this.clickedOnLogWindowURL(ev)) {
 			this.blur();
 			return;
@@ -1050,8 +1049,6 @@ class Dashboard {
 	}
 
 	keyPress(ev) {
-		//console.log(ev);
-
 		// If you press ctrl-f or alt-f in Firefox (tested: 41), it dispatches
 		// the keypress event for 'f'.  We want only the modifier-free
 		// keypresses.
