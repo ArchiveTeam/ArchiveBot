@@ -835,8 +835,9 @@ ContextMenuRenderer.prototype.getSuggestedCommands = function(ident, url) {
 	return this.getPathVariants(path).map(function(p) {
 		return "!ig " + ident + " ^" + reSchema + "://" + regExpEscape(domain + p);
 	}).concat([
-		 "!d " + ident + " 180000 180000"
-		,"!con " + ident + " 1"
+		"!d " + ident + " 180000 180000",
+		"!d " + ident + " 250 375",
+		"!con " + ident + " 1",
 	]);
 };
 
