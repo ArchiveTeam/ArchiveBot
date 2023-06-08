@@ -139,8 +139,6 @@ function getQueryArgs() {
 	return intoObject(pairs.map(function(e) { return split(e, "=", 1); }));
 };
 
-const isChrome = navigator.userAgent.indexOf("Chrome/") != -1;
-
 function addAnyChangeListener(elem, func) {
 	// DOM0 handler for convenient use by Clear button
 	elem.onchange = func;
@@ -984,13 +982,7 @@ function Dashboard() {
 				this.contextMenuRenderer.blur();
 			}
 		};
-		// In Chrome, the native context menu disappears when you wheel around, so
-		// match that behavior for our own context menu.
-		if (isChrome) {
-			document.onwheel = ev => {
-				this.contextMenuRenderer.blur();
-			};
-		}
+		document.onwheel = () => this.contextMenuRenderer.blur();
 	}
 
 	this.jobsRenderer = new JobsRenderer(
