@@ -1,16 +1,16 @@
 "use strict";
 
-const assert = function(condition, message) {
+function assert(condition, message) {
 	if (!condition) {
 		throw message || "Assertion failed";
 	}
 };
 
-const byId = function(id) {
+function byId(id) {
 	return document.getElementById(id);
 };
 
-const text = function(s) {
+function text(s) {
 	return document.createTextNode(s);
 };
 
@@ -20,14 +20,14 @@ const text = function(s) {
  * Returns true if the object is undefined, null, or is a string whose
  * post-trim length is zero.  Otherwise, returns false.
  */
-const isBlank = function(o) {
+function isBlank(o) {
 	return !o || o.trim().length === 0;
 }
 
 /**
  * appendChild but accepts strings and arrays of children|strings
  */
-const appendAny = function(e, thing) {
+function appendAny(e, thing) {
 	if (Array.isArray(thing)) {
 		for (const item of thing) {
 			appendAny(e, item);
@@ -45,7 +45,7 @@ const appendAny = function(e, thing) {
 /**
  * Create DOM element with attributes and children from Array<node|string>|node|string
  */
-const h = function(elem, attrs, thing) {
+function h(elem, attrs, thing) {
 	const e = document.createElement(elem);
 	if (attrs != null) {
 		for (let attr in attrs) {
@@ -64,20 +64,20 @@ const h = function(elem, attrs, thing) {
 	return e;
 };
 
-const href = function(href, text) {
+function href(href, text) {
 	const a = h("a");
 	a.href = href;
 	a.textContent = text;
 	return a;
 };
 
-const removeChildren = function(elem) {
+function removeChildren(elem) {
 	while (elem.firstChild) {
 		elem.removeChild(elem.firstChild);
 	}
 };
 
-const prettyJson = function(obj) {
+function prettyJson(obj) {
 	return JSON.stringify(obj, undefined, 2);
 };
 
@@ -92,7 +92,7 @@ const prettyJson = function(obj) {
  *
  * @return {!Array.<string>} The splitted string, as an array.
  */
-const split = function(s, sep, maxsplit) {
+function split(s, sep, maxsplit) {
 	assert(typeof sep == "string",
 		"arguments[1] of split must be a separator string");
 	if (maxsplit === undefined || maxsplit < 0) {
@@ -109,7 +109,7 @@ const split = function(s, sep, maxsplit) {
 };
 
 // Based on closure-library's goog.string.regExpEscape
-const regExpEscape = function(s) {
+function regExpEscape(s) {
 	let escaped = String(s).replace(/([-()\[\]{}+?*.$\^|,:#<!\\])/g, '\\$1').
 		replace(/\x08/g, '\\x08');
 	if (s.indexOf('[') == -1 && s.indexOf(']') == -1) {
@@ -123,7 +123,7 @@ const regExpEscape = function(s) {
 /**
  * [[1, 2], [3, 4]] -> {1: 2, 3: 4}
  */
-const intoObject = function(arr) {
+function intoObject(arr) {
 	const obj = {};
 	arr.forEach(function(e) {
 		obj[e[0]] = e[1];
@@ -131,7 +131,7 @@ const intoObject = function(arr) {
 	return obj;
 };
 
-const getQueryArgs = function() {
+function getQueryArgs() {
 	const pairs = location.search.replace("?", "").split("&");
 	if (pairs == "") {
 		return {};
@@ -139,15 +139,15 @@ const getQueryArgs = function() {
 	return intoObject(pairs.map(function(e) { return split(e, "=", 1); }));
 };
 
-const getChromeMajorVersion = function() {
+function getChromeMajorVersion() {
 	return Number(navigator.userAgent.match(/Chrome\/(\d+)/)[1]);
 };
 
-const getFirefoxMajorVersion = function() {
+function getFirefoxMajorVersion() {
 	return Number(navigator.userAgent.match(/Firefox\/(\d+)/)[1]);
 };
 
-const getTridentMajorVersion = function() {
+function getTridentMajorVersion() {
 	return Number(navigator.userAgent.match(/Trident\/(\d+)/)[1]);
 };
 
@@ -156,7 +156,7 @@ const isSafari = !isChrome && navigator.userAgent.indexOf("Safari") != -1;
 const isFirefox = navigator.userAgent.indexOf("Firefox") != -1;
 const isTrident = navigator.userAgent.indexOf("Trident/") != -1;
 
-const addAnyChangeListener = function(elem, func) {
+function addAnyChangeListener(elem, func) {
 	// DOM0 handler for convenient use by Clear button
 	elem.onchange = func;
 	elem.addEventListener('keydown', func, false);
@@ -164,14 +164,14 @@ const addAnyChangeListener = function(elem, func) {
 	elem.addEventListener('input', func, false);
 };
 
-const arrayFrom = function(arrayLike) {
+function arrayFrom(arrayLike) {
 	return Array.prototype.slice.call(arrayLike);
 };
 
 /**
  * Returns a function that gets the given property on any object passed in
  */
-const prop = function(name) {
+function prop(name) {
 	return function(obj) {
 		return obj[name];
 	};
@@ -180,7 +180,7 @@ const prop = function(name) {
 /**
  * Returns a function that adds the given class to any element passed in
  */
-const classAdder = function(name) {
+function classAdder(name) {
 	return function(elem) {
 		elem.classList.add(name);
 	};
@@ -189,13 +189,13 @@ const classAdder = function(name) {
 /**
  * Returns a function that removes the given class to any element passed in
  */
-const classRemover = function(name) {
+function classRemover(name) {
 	return function(elem) {
 		elem.classList.remove(name);
 	};
 };
 
-const removeFromArray = function(arr, item) {
+function removeFromArray(arr, item) {
 	const idx = arr.indexOf(item);
 	if (idx != -1) {
 		arr.splice(idx, 1);
@@ -206,7 +206,7 @@ const removeFromArray = function(arr, item) {
 
 
 
-const JobsTracker = function() {
+function JobsTracker() {
 	this.known = {};
 	this.sorted = [];
 	this.finishedArray = [];
@@ -264,7 +264,7 @@ JobsTracker.prototype.hasFatalException = function(ident) {
 
 
 
-const JobRenderInfo = function(logWindow, logSegment, statsElements, jobNote, lineCountWindow, lineCountSegments) {
+function JobRenderInfo(logWindow, logSegment, statsElements, jobNote, lineCountWindow, lineCountSegments) {
 	this.logWindow = logWindow;
 	this.logSegment = logSegment;
 	this.statsElements = statsElements;
@@ -289,11 +289,11 @@ const Reusable = {
 
 
 // http://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript
-const numberWithCommas = function(s_or_n) {
+function numberWithCommas(s_or_n) {
 	return ("" + s_or_n).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 };
 
-const toStringTenths = function(n) {
+function toStringTenths(n) {
 	let s = "" + (Math.round(10 * n) / 10);
 	if (s.indexOf(".") == -1) {
 		s += ".0";
@@ -301,7 +301,7 @@ const toStringTenths = function(n) {
 	return s;
 };
 
-const getTotalResponses = function(jobData) {
+function getTotalResponses(jobData) {
 	return (
 		parseInt(jobData["r1xx"]) +
 		parseInt(jobData["r2xx"]) +
@@ -311,7 +311,7 @@ const getTotalResponses = function(jobData) {
 		parseInt(jobData["runk"]));
 };
 
-const getSummaryResponses = function(jobData) {
+function getSummaryResponses(jobData) {
 	return (
 		"1xx: " + numberWithCommas(jobData["r1xx"]) + "\n" +
 		"2xx: " + numberWithCommas(jobData["r2xx"]) + "\n" +
@@ -323,7 +323,7 @@ const getSummaryResponses = function(jobData) {
 
 
 
-const JobsRenderer = function(container, filterBox, historyLines, showNicks, contextMenuRenderer) {
+function JobsRenderer(container, filterBox, historyLines, showNicks, contextMenuRenderer) {
 	this.container = container;
 	this.filterBox = filterBox;
 	addAnyChangeListener(this.filterBox, () => this.applyFilter());
@@ -812,7 +812,7 @@ JobsRenderer.prototype.toggleAlign = function() {
  * a log window, helping you copy an !ig command based on the URL
  * you right-clicked.
  */
-const ContextMenuRenderer = function() {
+function ContextMenuRenderer() {
 	this.visible = false;
 	this.callAfterBlurFns = [];
 	this.element = byId('context-menu');
@@ -941,7 +941,7 @@ ContextMenuRenderer.prototype.callAfterBlur = function(fn) {
 
 
 
-const BatchingQueue = function(callable, minInterval) {
+function BatchingQueue(callable, minInterval) {
 	this.callable = callable;
 	this._minInterval = minInterval;
 	this.queue = [];
@@ -976,7 +976,7 @@ BatchingQueue.prototype.push = function(v) {
 
 
 
-const Decayer = function(initial, multiplier, max) {
+function Decayer(initial, multiplier, max) {
 	this.initial = initial;
 	this.multiplier = multiplier;
 	this.max = max;
@@ -997,7 +997,7 @@ Decayer.prototype.decay = function() {
 
 
 
-const Dashboard = function() {
+function Dashboard() {
 	this.messageCount = 0;
 
 	const args = getQueryArgs();
