@@ -1126,7 +1126,7 @@ class Dashboard {
 		}
 	}
 
-	getFilter(value) {
+	getFilter() {
 		return byId("filter-box").value;
 	}
 
