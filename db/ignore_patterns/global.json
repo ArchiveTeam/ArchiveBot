@@ -216,7 +216,7 @@
         "^https://discord\\.com/assets/",
         "^https?://s7\\.addthis\\.com/",
         "^https?://www\\.google\\.com/calendar/(render|event)\\?",
-        "^https?://outlook\\.(office|live)\\.com/owa/\\?"
+        "^https?://outlook\\.(office|live)\\.com/owa/?\\?"
     ],
     "type": "ignore_patterns"
 }
