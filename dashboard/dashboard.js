@@ -1,3 +1,8 @@
+/**
+ * This file should be formatted with
+ * rome check dashboard/dashboard.js --apply-unsafe --line-width 120
+ */
+
 "use strict";
 
 function assert(condition, message) {
