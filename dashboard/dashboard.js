@@ -77,6 +77,12 @@ function removeChildren(elem) {
 	}
 };
 
+function addPageStyles(cssText) {
+	const style = document.createElement('style')
+	style.innerHTML = cssText;
+	document.body.appendChild(style);
+}
+
 function prettyJson(obj) {
 	return JSON.stringify(obj, undefined, 2);
 };
@@ -1049,7 +1055,7 @@ class Dashboard {
 		});
 
 		if (!showNicks) {
-			document.write('<style>.job-nick-aligned { width: 0; }</style>');
+			addPageStyles(".job-nick-aligned { width: 0; }");
 		}
 	}
 
