@@ -878,9 +878,18 @@ class ContextMenuRenderer {
 }
 
 class BatchingQueue {
-	constructor(callable, minInterval) {
+	// `callable` is the function to call with the entire queue when we've waited enough
+	// time (`minInterval` milliseconds) or have enough items (`maxItems`).
+	//
+	// We need the second mechanism (`maxItems`) only because Chromium-based browsers
+	// have aggressive timer throttling and quickly stop handling a "recursive" setTimeout
+	// when the tab is in the background. Meanwhile, the page isn't entirely strangled:
+	// WebSocket messages keep getting pumped in, leading to (without this mechanism)
+	// over 100K unprocessed messages in the queue.
+	constructor(callable, minInterval, maxItems) {
 		this.callable = callable;
 		this._minInterval = minInterval;
+		this._maxItems = maxItems;
 		this.queue = [];
 		this._timeout = null;
 	}
@@ -906,7 +915,9 @@ class BatchingQueue {
 
 	push(v) {
 		this.queue.push(v);
-		if (this._timeout === null) {
+		if (this.queue.length >= this._maxItems) {
+			this.callNow();
+		} else if (this._timeout === null) {
 			this._timeout = setTimeout(() => this._runCallable(), this._minInterval);
 		}
 	}
@@ -944,6 +955,7 @@ class Dashboard {
 		// Note that setting batchTimeWhenHidden below 1000ms doesn't really do anything in Chrome, Firefox, and Safari
 		// because (with normal settings) they don't run timers in background tabs more than once every 1000ms.
 		const batchTimeWhenHidden = args.batchTimeWhenHidden ? Number(args.batchTimeWhenHidden) : 1000;
+		const batchMaxItems = args.batchMaxItems ? Number(args.batchMaxItems) : 250;
 		const showNicks = args.showNicks ? Boolean(Number(args.showNicks)) : false;
 		const contextMenu = args.contextMenu ? Boolean(Number(args.contextMenu)) : true;
 		const moreDom = args.moreDom ? Boolean(Number(args.moreDom)) : false;
@@ -1010,7 +1022,7 @@ class Dashboard {
 				for (const item of queue) {
 					this.handleData(JSON.parse(item));
 				}
-			}, batchTimeWhenVisible);
+			}, batchTimeWhenVisible, batchMaxItems);
 
 			this.decayer = new Decayer(1000, 1.5, 60000);
 			this.connectWebSocket();
