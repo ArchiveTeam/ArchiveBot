@@ -438,10 +438,13 @@ class JobsRenderer {
 		} else {
 			attrs = Reusable.obj_className_line_normal;
 		}
+		const url = data.url;
+		// For testing a URL with characters that browsers like to escape, breaking the suggested ignores
+		// url = "http://example.com/m/index.php/{$ibforums-%3Evars[TEAM_ICON_URL]}/t82380.html^hi";
 		logSegment.appendChild(
 			h("div", attrs, [
 				`${data.response_code} ${data.wget_code} `,
-				h("a", { href: data.url, className: "log-url" }, data.url),
+				h("a", { href: url, className: "log-url" }, url),
 			]),
 		);
 		return 1;
@@ -842,7 +845,11 @@ class ContextMenuRenderer {
 		this.element.style.top = `${ev.clientY}px`;
 
 		const ident = ev.target.parentNode.parentNode.parentNode.id.match(/^log-window-(.*)/)[1];
-		const url = ev.target.href;
+		// Get the URL from the .textContent instead of the .href because
+		// browsers URL-encode characters like { } ^ as they are added to
+		// the DOM, while we want the original, unescaped characters to create
+		// the correct ignore pattern.
+		const url = ev.target.textContent;
 		const maxSuggestedIgnores = 8;
 		this.resetEntries(ident, url, maxSuggestedIgnores);
 
