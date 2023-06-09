@@ -945,6 +945,7 @@ class Dashboard {
 		const contextMenu = args.contextMenu ? Boolean(Number(args.contextMenu)) : true;
 		const moreDom = args.moreDom ? Boolean(Number(args.moreDom)) : false;
 		const initialFilter = args.initialFilter ?? "^$";
+		const loadRecent = args.loadRecent ? Boolean(Number(args.loadRecent)) : true; 
 
 		// Append to page title to make it possible to identify the tab in Chrome's task manager
 		if (args.title) {
@@ -984,7 +985,20 @@ class Dashboard {
 
 		const batchTimeWhenHidden = 1000;
 
-		const xhr = new XMLHttpRequest();
+		document.onkeypress = (ev) => this.keyPress(ev);
+
+		// Adjust help text based on URL
+		Array.prototype.slice.call(document.querySelectorAll(".url-q-or-amp")).map((elem) => {
+			if (window.location.search.indexOf("?") !== -1) {
+				elem.textContent = "&";
+			}
+		});
+
+		if (!showNicks) {
+			addPageStyles(".job-nick-aligned { width: 0; }");
+		}
+
+		this.setFilter(initialFilter);
 
 		const finishSetup = () => {
 			this.queue = new BatchingQueue((queue) => {
@@ -1013,41 +1027,37 @@ class Dashboard {
 			);
 		};
 
-		xhr.onload = () => {
-			try {
-				const recentLines = JSON.parse(xhr.responseText);
-				for (const line of recentLines) {
-					this.handleData(line);
-				}
-			} catch (e) {
-				console.log("Failed to load /logs/recent data:", e);
-			}
+		if (loadRecent) {
+			// Continue even if we fail to get /logs/recent data
+			this.loadRecent().finally(finishSetup);
+		} else {
 			finishSetup();
-		};
-		xhr.onerror = () => {
-			// Try to continue despite lack of /logs/recent data
-			finishSetup();
-		};
-		xhr.open("GET", `//${this.host}/logs/recent?cb=${Date.now()}${Math.random()}`);
-		xhr.setRequestHeader("Accept", "application/json");
-		xhr.send("");
-
-		document.onkeypress = (ev) => this.keyPress(ev);
-
-		// Adjust help text based on URL
-		Array.prototype.slice.call(document.querySelectorAll(".url-q-or-amp")).map((elem) => {
-			if (window.location.search.indexOf("?") !== -1) {
-				elem.textContent = "&";
-			}
-		});
-
-		if (!showNicks) {
-			addPageStyles(".job-nick-aligned { width: 0; }");
 		}
-
-		this.setFilter(initialFilter);
 	}
 
+	loadRecent() {
+		return new Promise((resolve, reject) => {
+			const xhr = new XMLHttpRequest();
+			xhr.onload = () => {
+				try {
+					const recentLines = JSON.parse(xhr.responseText);
+					for (const line of recentLines) {
+						this.handleData(line);
+					}
+				} catch (e) {
+					console.log("Failed to load /logs/recent data:", e);
+				}
+				resolve();
+			};
+			xhr.onerror = (ev) => {
+				reject(ev);
+			};
+			xhr.open("GET", `//${this.host}/logs/recent?cb=${Date.now()}${Math.random()}`);
+			xhr.setRequestHeader("Accept", "application/json");
+			xhr.send("");
+		});
+	}
+	
 	keyPress(ev) {
 		// If you press ctrl-f or alt-f in Firefox (tested: 41), it dispatches
 		// the keypress event for 'f'.  We want only the modifier-free

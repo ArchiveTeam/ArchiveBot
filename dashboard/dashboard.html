@@ -433,11 +433,13 @@ kbd {
 				A custom context menu is shown when right-clicking URLs in the log windows below.  It can be disabled by adding <kbd><span class="url-q-or-amp">?</span>contextMenu=0</kbd> to the dashboard URL.  Firefox users: if you see both the normal and custom context menu, make sure <code>dom.event.contextmenu.enabled</code> is set to <code>true</code> in <code>about:config</code>.
 			</p>
 			<p>
-				For easier text selection in the log windows, add <kbd><span class="url-q-or-amp">?</span>moreDom=1</kbd> to the dashboard URL.  (This uses ~25% more memory.)
+				URL parameters:
 			</p>
-			<p>
-				To specify an initial filter (default <kbd>^$</kbd>), add <kbd><span class="url-q-or-amp">?</span>initialFilter=TEXT</kbd> to the dashboard URL.
-			</p>
+			<ul>
+				<li>For easier text selection in the log windows, add <kbd><span class="url-q-or-amp">?</span>moreDom=1</kbd> to the dashboard URL.  (This uses ~25% more memory.)</li>
+				<li>To specify an initial filter (default <kbd>^$</kbd>), add <kbd><span class="url-q-or-amp">?</span>initialFilter=TEXT</kbd> to the dashboard URL.</li>
+				<li>To skip loading of recent (buffered) log data for jobs, add <kbd><span class="url-q-or-amp">?</span>loadRecent=0</kbd> to the dashboard URL.</li>
+			</ul>
 			<p>
 				To change the font used on this page, customize the sans-serif font in your browser's font settings.
 			</p>
