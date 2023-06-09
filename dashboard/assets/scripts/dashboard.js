@@ -1046,22 +1046,31 @@ class Dashboard {
 			const keepReadings = Math.round(3000 / batchTimeWhenVisible);
 			const messagesRate = new RateTracker(keepReadings);
 			const bytesRate = new RateTracker(keepReadings);
+			let newItemsReceived = 0;
+			let newBytesReceived = 0;
+
+			// Keep this outside the BatchingQueue callable so that we detect
+			// when we stop receiving data entirely.
+			setInterval(() => {
+				const msgPerSec = Math.round(messagesRate.getRate(newItemsReceived));
+				const kbPerSec = Math.round(bytesRate.getRate(newBytesReceived / 1000));
+				newItemsReceived = 0;
+				newBytesReceived = 0;
+				byId("meta-info").textContent = `WS:
+${String(msgPerSec).padStart(3, "0")} msg/s,
+${String(kbPerSec).padStart(3, "0")} KB/s`;
+			}, batchTimeWhenVisible);
 
 			this.queue = new BatchingQueue(
 				(queue) => {
 					if (this.debug) {
 						console.log(`Processing ${queue.length} JSON messages`);
 					}
-					let bytesReceived = 0;
+					newItemsReceived += queue.length;
 					for (const item of queue) {
-						bytesReceived += item.length;
+						newBytesReceived += item.length;
 						this.handleData(JSON.parse(item));
 					}
-					const msgPerSec = Math.round(messagesRate.getRate(queue.length));
-					const kbPerSec = Math.round(bytesRate.getRate(bytesReceived / 1000));
-					byId("meta-info").textContent = `WS:
-${String(msgPerSec).padStart(3, "0")} msg/s,
-${String(kbPerSec).padStart(3, "0")} KB/s`;
 				},
 				batchTimeWhenVisible,
 				batchMaxItems,
