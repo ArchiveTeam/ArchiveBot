@@ -960,8 +960,12 @@ class RateTracker {
 		const duration = now - this.timeLast;
 		this._reset();
 		this._addReading(duration, value);
-		const valueSum = this._values.reduce((a, b) => a + b, 0);
-		const durationSum = this._durations.reduce((a, b) => a + b, 0);
+		let valueSum = 0;
+		let durationSum = 0;
+		for (let i = 0; i < this._keepReadings; i++) {
+			valueSum += this._values[i];
+			durationSum += this._durations[i];
+		}
 		return valueSum / durationSum;
 	}
 }
