@@ -69,13 +69,6 @@ function h(elem, attrs, thing) {
 	return e;
 }
 
-function href(href, text) {
-	const a = h("a");
-	a.href = href;
-	a.textContent = text;
-	return a;
-}
-
 function removeChildren(elem) {
 	while (elem.firstChild) {
 		elem.removeChild(elem.firstChild);
