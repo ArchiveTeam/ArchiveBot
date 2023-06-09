@@ -940,11 +940,7 @@ class RateTracker {
 		this._durations = new Array(keepReadings).fill(0);
 		this._values = new Array(keepReadings).fill(0);
 		this._keepReadings = keepReadings;
-		this._reset();
-	}
-
-	_reset() {
-		this.timeLast = Date.now() / 1000;
+		this._timeLast = Date.now() / 1000;
 	}
 
 	_addReading(duration, value) {
@@ -957,8 +953,8 @@ class RateTracker {
 
 	getRate(value) {
 		const now = Date.now() / 1000;
-		const duration = now - this.timeLast;
-		this._reset();
+		const duration = now - this._timeLast;
+		this._timeLast = Date.now() / 1000;
 		this._addReading(duration, value);
 		let valueSum = 0;
 		let durationSum = 0;
