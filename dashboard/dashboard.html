@@ -393,10 +393,19 @@ kbd {
 				This page shows all of the crawls that <a href="http://archiveteam.org/index.php?title=ArchiveBot">ArchiveBot</a> is currently running.
 			</p>
 			<p>
-				To pause scrolling, move your mouse inside a log window.
+				To show or hide a job, click anywhere on its stats line.
+
+				The color coding for the job stats line is:
+					in progress,
+					<span class="job-info-done">finished normally</span>,
+					<span class="job-info-aborted">finished with abort</span>,
+					<span class="job-info-fatal">finished with fatal exception</span>.
 			</p>
 			<p>
-				To show just one job, click anywhere on its stats line.
+				Mouse over the job start date or the response count for additional information.
+			</p>
+			<p>
+				To pause scrolling, move your mouse inside a log window.
 			</p>
 			<p>
 				To clear all finished jobs, reload the page.
@@ -414,35 +423,22 @@ kbd {
 				<li><kbd>?</kbd> - show/hide help text
 			</ul>
 			<p>
-				The color coding for the job stats line is:
-					in progress,
-					<span class="job-info-done">finished normally</span>,
-					<span class="job-info-aborted">finished with abort</span>,
-					<span class="job-info-fatal">finished with fatal exception</span>.
+				Important browser tips:
 			</p>
-			<p>
-				Mouse over the job start date or the response count for additional information.
-			</p>
-			<p>
-				If your adblocker is enabled for this domain, you will see slower performance, and some URLs will not be displayed.
-			</p>
-			<p>
-				Chromium-based browser users (e.g. Chrome, Brave, Edge) may observe very long hangs when returning to this dashboard tab after leaving it in the background.  Run the browser with command-line argument <code>--disable-background-timer-throttling</code> to fix this issue.
-			</p>
-			<p>
-				A custom context menu is shown when right-clicking URLs in the log windows below.  It can be disabled by adding <kbd><span class="url-q-or-amp">?</span>contextMenu=0</kbd> to the dashboard URL.  Firefox users: if you see both the normal and custom context menu, make sure <code>dom.event.contextmenu.enabled</code> is set to <code>true</code> in <code>about:config</code>.
-			</p>
+			<ul>
+				<li><strong>If your adblocker is enabled for this domain, you will see slower performance, and some URLs will not be displayed.</strong></li>
+				<li>Chromium-based browser users (e.g. Chrome, Brave, Edge) may observe very long hangs when returning to this dashboard tab after leaving it in the background.  Run the browser with command-line argument <code>--disable-background-timer-throttling</code> to fix this issue.</li>
+				<li>A custom context menu is shown when right-clicking URLs in the log windows below.  It can be disabled by adding <kbd><span class="url-q-or-amp">?</span>contextMenu=0</kbd> to the dashboard URL.  Firefox users: if you see both the normal and custom context menu, make sure <code>dom.event.contextmenu.enabled</code> is set to <code>true</code> in <code>about:config</code>.</li>
+				<li>To change the font used on this page, customize the sans-serif font in your browser's font settings.</li>
+			</ul>
 			<p>
 				URL parameters:
 			</p>
 			<ul>
-				<li>For easier text selection in the log windows, add <kbd><span class="url-q-or-amp">?</span>moreDom=1</kbd> to the dashboard URL.  (This uses ~25% more memory.)</li>
 				<li>To specify an initial filter (default <kbd>^$</kbd>), add <kbd><span class="url-q-or-amp">?</span>initialFilter=TEXT</kbd> to the dashboard URL.</li>
 				<li>To skip loading of recent (buffered) log data for jobs, add <kbd><span class="url-q-or-amp">?</span>loadRecent=0</kbd> to the dashboard URL.</li>
+				<li>For easier text selection in the log windows, add <kbd><span class="url-q-or-amp">?</span>moreDom=1</kbd> to the dashboard URL.  (This uses ~25% more memory.)</li>
 			</ul>
-			<p>
-				To change the font used on this page, customize the sans-serif font in your browser's font settings.
-			</p>
 			<p>
 				To use ArchiveBot, drop by <a href="https://webirc.hackint.org/#irc://irc.hackint.org/archivebot">#archivebot</a> on hackint.  <a href="http://archivebot.readthedocs.org/en/latest/">Issue commands</a> by typing them into the channel.  You will need channel operator (@) or voice (+) status to issue archiving jobs; just ask for help or leave a message with the website you want to archive.
 			</p>
@@ -451,8 +447,7 @@ kbd {
 			</p>
 			<p>
 				On GitHub at <a href="https://github.com/ArchiveTeam/ArchiveBot">ArchiveTeam/ArchiveBot</a>.
-			</p>
-			<p>
+
 				You can <a href="/beta">try the alternate dashboard (beta) here</a>.
 			</p>
 		</div>
