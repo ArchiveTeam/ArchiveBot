@@ -436,9 +436,10 @@ kbd {
 			</p>
 			<ul>
 				<li>To specify an initial filter (default <kbd>^$</kbd>), add <kbd><span class="url-q-or-amp">?</span>initialFilter=TEXT</kbd> to the dashboard URL.</li>
+				<li>To retain more lines in the log windows, add <kbd><span class="url-q-or-amp">?</span>historyLines=1000</kbd> to the dashboard URL. The default is <code>500</code>, or <code>250</code> on mobile.</li>
 				<li>To update the dashboard more frequently, add <kbd><span class="url-q-or-amp">?</span>batchTimeWhenVisible=33</kbd> to the dashboard URL. The default is <code>125</code> (8 Hz).</li>
 				<li>To skip loading of recent (buffered) log data for jobs, add <kbd><span class="url-q-or-amp">?</span>loadRecent=0</kbd> to the dashboard URL.</li>
-				<li>For easier text selection in the log windows, add <kbd><span class="url-q-or-amp">?</span>moreDom=1</kbd> to the dashboard URL.  (This uses ~25% more memory.)</li>
+				<li>For easier text selection in the log windows, add <kbd><span class="url-q-or-amp">?</span>moreDom=1</kbd> to the dashboard URL. This uses ~25% more memory.</li>
 			</ul>
 			<p>
 				To use ArchiveBot, drop by <a href="https://webirc.hackint.org/#irc://irc.hackint.org/archivebot">#archivebot</a> on hackint.  <a href="https://archivebot.readthedocs.io/en/latest/">Issue commands</a> by typing them into the channel.  You will need channel operator (@) or voice (+) status to issue archiving jobs; just ask for help or leave a message with the website you want to archive.
