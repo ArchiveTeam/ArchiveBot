@@ -1063,10 +1063,9 @@ class Dashboard {
 					}
 					const msgPerSec = Math.round(messagesRate.getRate(queue.length));
 					const kbPerSec = Math.round(bytesRate.getRate(bytesReceived / 1000));
-					byId("meta-info").innerHTML = `WS: ${String(msgPerSec).padStart(3, "0")} msg/s, ${String(kbPerSec).padStart(
-						3,
-						"0",
-					)} KB/s`;
+					byId("meta-info").textContent = `WS:
+						${String(msgPerSec).padStart(3, "0")} msg/s,
+						${String(kbPerSec).padStart(3, "0")} KB/s`;
 				},
 				batchTimeWhenVisible,
 				batchMaxItems,
@@ -1105,7 +1104,7 @@ class Dashboard {
 
 	loadRecent() {
 		return new Promise((resolve, reject) => {
-			byId("meta-info").innerHTML = "Requesting recent data";
+			byId("meta-info").textContent = "Requesting recent data";
 			const xhr = new XMLHttpRequest();
 			xhr.onload = () => {
 				try {
@@ -1124,7 +1123,7 @@ class Dashboard {
 			xhr.onprogress = (ev) => {
 				const percent = Math.round(100 * (ev.loaded / ev.total));
 				const size_mb = Math.round((100 * ev.total) / 1e6) / 100;
-				byId("meta-info").innerHTML = `Recent data: ${percent}% (${size_mb}MB)`;
+				byId("meta-info").textContent = `Recent data: ${percent}% (${size_mb}MB)`;
 			};
 			xhr.open("GET", `//${this.host}/logs/recent?cb=${Date.now()}${Math.random()}`);
 			xhr.setRequestHeader("Accept", "application/json");
