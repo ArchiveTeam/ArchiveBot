@@ -310,7 +310,7 @@ class JobsRenderer {
 		this.renderInfo = {};
 		this.mouseInside = null;
 		this.numCrawls = byId("num-crawls");
-		this.aligned = false;
+		this._aligned = true;
 	}
 
 	_getNextJobInSorted(ident) {
@@ -357,22 +357,30 @@ class JobsRenderer {
 			},
 		};
 
+		const maybeAligned = (className) => {
+			let s = className;
+			if (this._aligned) {
+				s += ` ${className}-aligned`;
+			}
+			return s;
+		};
+
 		const statsElements = {
-			mb: h("span", { className: "inline-stat job-mb" }, "?"),
-			responses: h("span", { className: "inline-stat job-responses" }, "?"),
-			responsesPerSecond: h("span", { className: "inline-stat job-responses-per-second" }, "?"),
-			queueLength: h("span", { className: "inline-stat job-in-queue" }, "? in q."),
-			connections: h("span", { className: "inline-stat job-connections" }, "?"),
-			delay: h("span", { className: "inline-stat job-delay" }, "? ms delay"),
+			mb: h("span", { className: `inline-stat ${maybeAligned("job-mb")}` }, "?"),
+			responses: h("span", { className: `inline-stat ${maybeAligned("job-responses")}` }, "?"),
+			responsesPerSecond: h("span", { className: `inline-stat ${maybeAligned("job-responses-per-second")}` }, "?"),
+			queueLength: h("span", { className: `inline-stat ${maybeAligned("job-in-queue")}` }, "? in q."),
+			connections: h("span", { className: `inline-stat ${maybeAligned("job-connections")}` }, "?"),
+			delay: h("span", { className: `inline-stat ${maybeAligned("job-delay")}` }, "? ms delay"),
 			ignores: h("span", { className: "job-ignores" }, "?"),
 			jobInfo: null /* set later */,
 		};
 
 		const startedISOString = new Date(parseFloat(jobData.started_at) * 1000).toISOString();
-		const jobNote = h("span", { className: "job-note" }, null);
+		const jobNote = h("span", { className: maybeAligned("job-note") }, null);
 
 		statsElements.jobInfo = h("span", { className: "job-info" }, [
-			h("a", { className: "inline-stat job-url", href: jobData.url }, jobData.url),
+			h("a", { className: `inline-stat ${maybeAligned("job-url")}`, href: jobData.url }, jobData.url),
 			// Clicking anywhere in this area will set the filter to a regexp that
 			// matches only this job URL, thus hiding everything but this job.
 			h(
@@ -393,7 +401,11 @@ class JobsRenderer {
 				[
 					" on ",
 					h("span", { className: "inline-stat", title: startedISOString }, startedISOString.split("T")[0].substr(5)),
-					h("span", { className: "inline-stat job-nick" }, this.showNicks ? ` by ${jobData.started_by}` : ""),
+					h(
+						"span",
+						{ className: `inline-stat ${maybeAligned("job-nick")}` },
+						this.showNicks ? ` by ${jobData.started_by}` : "",
+					),
 					jobNote,
 					"; ",
 					statsElements.mb,
@@ -420,8 +432,6 @@ class JobsRenderer {
 		]);
 		this.renderInfo[ident] = new JobRenderInfo(logWindow, logSegment, statsElements, jobNote, 0, [0]);
 		this.container.insertBefore(div, beforeElement);
-		// Set appropriate CSS classes - we might be in aligned mode already
-		this.updateAlign();
 		// Filter hasn't changed, but we might need to filter out the new job, or
 		// add/remove log-window-expanded class
 		this.applyFilter();
@@ -655,13 +665,11 @@ class JobsRenderer {
 		if (matches < this.jobs.sorted.length) {
 			// If you're not seeing all of the log windows, you're probably seeing very
 			// few of them, so you probably want alignment enabled.
-			this.aligned = true;
-			this.updateAlign();
+			this.setAligned(true);
 		} else {
 			// You're seeing all of the log windows, so alignment doesn't help as much
 			// as seeing the full info.
-			this.aligned = false;
-			this.updateAlign();
+			this.setAligned(false);
 		}
 	}
 
@@ -695,8 +703,12 @@ class JobsRenderer {
 		}
 	}
 
-	updateAlign() {
-		const adderOrRemover = this.aligned ? classAdder : classRemover;
+	setAligned(aligned) {
+		if (this._aligned === aligned) {
+			return;
+		}
+		this._aligned = aligned;
+		const adderOrRemover = aligned ? classAdder : classRemover;
 		Array.from(document.querySelectorAll(".job-url")).map(adderOrRemover("job-url-aligned"));
 		Array.from(document.querySelectorAll(".job-note")).map(adderOrRemover("job-note-aligned"));
 		Array.from(document.querySelectorAll(".job-nick")).map(adderOrRemover("job-nick-aligned"));
@@ -711,8 +723,7 @@ class JobsRenderer {
 	}
 
 	toggleAlign() {
-		this.aligned = !this.aligned;
-		this.updateAlign();
+		this.setAligned(!this._aligned);
 	}
 }
 
