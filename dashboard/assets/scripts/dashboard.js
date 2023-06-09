@@ -936,9 +936,10 @@ class Decayer {
 
 class RateTracker {
 	constructor(keepReadings) {
-		this.keepReadings = keepReadings;
-		this._durations = [];
-		this._values = [];
+		this._idx = 0;
+		this._durations = new Array(keepReadings).fill(0);
+		this._values = new Array(keepReadings).fill(0);
+		this._keepReadings = keepReadings;
 		this._reset();
 	}
 
@@ -947,12 +948,11 @@ class RateTracker {
 	}
 
 	_addReading(duration, value) {
-		this._durations.push(duration);
-		this._values.push(value);
-		if (this._durations.length > this.keepReadings) {
-			this._durations.shift();
-			this._values.shift();
-		}
+		const idx = this._idx;
+		this._durations[idx] = duration;
+		this._values[idx] = value;
+		// Loop back to 0 when we reach the end
+		this._idx = (idx + 1) % this._keepReadings;
 	}
 
 	getRate(value) {
@@ -1043,7 +1043,7 @@ class Dashboard {
 		const finishSetup = () => {
 			byId("meta-info").innerHTML = "";
 
-			const keepReadings = Math.min(31, Math.round(2000 / batchTimeWhenVisible));
+			const keepReadings = Math.round(3000 / batchTimeWhenVisible);
 			const messagesRate = new RateTracker(keepReadings);
 			const bytesRate = new RateTracker(keepReadings);
 
