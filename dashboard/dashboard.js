@@ -1028,7 +1028,7 @@ class Dashboard {
 			// Try to continue despite lack of /logs/recent data
 			finishSetup();
 		};
-		xhr.open("GET", `/logs/recent?cb=${Date.now()}${Math.random()}`);
+		xhr.open("GET", `//${this.host}/logs/recent?cb=${Date.now()}${Math.random()}`);
 		xhr.setRequestHeader("Accept", "application/json");
 		xhr.send("");
 
