@@ -779,29 +779,68 @@ class ContextMenuRenderer {
 		return paths;
 	}
 
-	getSuggestedCommands(ident, url) {
+	getSuggestedCommands(ident, url, maxSuggestedIgnores) {
+		// For testing a URL with enough path segments to cause [N more ignore suggestions]
+		// url = "https://example.com/asset/620787/liveblog/api/cms/modules/cms/modules/cms/modules/cms/modules/cms/modules/cms/modules/";
 		const schema = url.split(":")[0];
 		const domain = url.split("/")[2];
 		const withoutQuery = url.split("?")[0];
 		const path = `/${split(withoutQuery, "/", 3)[3]}`;
 		const reSchema = schema.startsWith("http") ? "https?" : "ftp";
-		return this.getPathVariants(path)
-			.map((p) => {
+		const pathVariants = this.getPathVariants(path);
+		let somePathVariants = pathVariants.slice(-maxSuggestedIgnores);
+		let ignoresRemaining = pathVariants.length - somePathVariants.length;
+		// If only 1 more suggested ignore available, just put it in the context menu
+		// to avoid a [... more ignore suggestions] taking up the same amount of space.
+		if (ignoresRemaining === 1) {
+			somePathVariants = pathVariants;
+			ignoresRemaining = 0;
+		}
+		return [
+			ignoresRemaining,
+			somePathVariants.map((p) => {
 				return `!ig ${ident} ^${reSchema}://${regExpEscape(domain + p)}`;
 			})
-			.concat([`!d ${ident} 180000 180000`, `!d ${ident} 250 375`, `!con ${ident} 1`]);
+			.concat([`!d ${ident} 180000 180000`, `!d ${ident} 250 375`, `!con ${ident} 1`])
+		];
 	}
 
-	makeEntries(ident, url) {
-		const commands = this.getSuggestedCommands(ident, url).map((c) => {
-			return h("span", { onclick: this.makeCopyTextFn(c) }, `Copy ${c.replace(` ${ident} `, " … ")}`);
-		});
-		return [
-			// Unfortunately, this does not open it in a background tab
-			// like the real context menu does.
-			h("a", { href: url }, "Open link in new tab"),
-			h("span", { onclick: this.makeCopyTextFn(url) }, "Copy link address"),
-		].concat(commands);
+	makeEntries(ident, url, maxSuggestedIgnores) {
+		const [ignoresRemaining, commands] = this.getSuggestedCommands(ident, url, maxSuggestedIgnores);
+		const entries = [];
+		// Unfortunately, this does not open it in a background tab
+		// like the real context menu does.
+		entries.push(h("a", { href: url }, "Open link in new tab"));
+		entries.push(h("span", { onclick: this.makeCopyTextFn(url) }, "Copy link address"));
+		if (ignoresRemaining) { 
+			entries.push(h("span", {
+				onclick: (ev) => {
+					ev.stopPropagation();
+					this.resetEntries(ident, url, maxSuggestedIgnores + 6);
+				}
+			}, `[${ignoresRemaining} more ignore suggestion${ignoresRemaining === 1 ? "" : "s"}]`));
+		};
+		for (const c of commands) {
+			entries.push(h("span", { onclick: this.makeCopyTextFn(c) }, `Copy ${c.replace(` ${ident} `, " … ")}`));
+		}
+		return entries;
+	}
+
+	resetEntries(ident, url, maxSuggestedIgnores) {
+		console.log("resetEntries", ident, url, maxSuggestedIgnores);
+		removeChildren(this.element);
+		// We put the clipboard-scratchpad in the fixed-positioned
+		// context menu instead of elsewhere on the page, because
+		// we must focus the input box to automatically copy its text,
+		// and the focus operation scrolls to the element on the page,
+		// and we want to avoid such scrolling.
+		appendAny(this.element, h("input", { type: "text", id: "clipboard-scratchpad" }));
+
+		const entries = this.makeEntries(ident, url, maxSuggestedIgnores);
+		for (const entry of entries) {
+			entry.classList.add("context-menu-entry");
+			appendAny(this.element, entry);
+		}
 	}
 
 	onContextMenu(ev) {
@@ -815,21 +854,10 @@ class ContextMenuRenderer {
 		this.element.style.left = `${ev.clientX}px`;
 		this.element.style.top = `${ev.clientY}px`;
 
-		removeChildren(this.element);
-		// We put the clipboard-scratchpad in the fixed-positioned
-		// context menu instead of elsewhere on the page, because
-		// we must focus the input box to automatically copy its text,
-		// and the focus operation scrolls to the element on the page,
-		// and we want to avoid such scrolling.
-		appendAny(this.element, h("input", { type: "text", id: "clipboard-scratchpad" }));
-
-		const url = ev.target.href;
 		const ident = ev.target.parentNode.parentNode.parentNode.id.match(/^log-window-(.*)/)[1];
-		const entries = this.makeEntries(ident, url);
-		for (const entry of entries) {
-			entry.classList.add("context-menu-entry");
-			appendAny(this.element, entry);
-		}
+		const url = ev.target.href;
+		const maxSuggestedIgnores = 8;
+		this.resetEntries(ident, url, maxSuggestedIgnores);
 
 		// If the bottom of the context menu is outside the viewport, move the context
 		// menu up, so that it appears to have opened from its bottom-left corner.
