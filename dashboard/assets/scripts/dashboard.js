@@ -291,14 +291,12 @@ function getTotalResponses(jobData) {
 }
 
 function getSummaryResponses(jobData) {
-	return [
-		`1xx: ${numberWithCommas(jobData.r1xx)}`,
-		`2xx: ${numberWithCommas(jobData.r2xx)}`,
-		`3xx: ${numberWithCommas(jobData.r3xx)}`,
-		`4xx: ${numberWithCommas(jobData.r4xx)}`,
-		`5xx: ${numberWithCommas(jobData.r5xx)}`,
-		`Unknown: ${numberWithCommas(jobData.runk)}`,
-	].join("\n");
+	return `1xx: ${numberWithCommas(jobData.r1xx)}
+2xx: ${numberWithCommas(jobData.r2xx)}
+3xx: ${numberWithCommas(jobData.r3xx)}
+4xx: ${numberWithCommas(jobData.r4xx)}
+5xx: ${numberWithCommas(jobData.r5xx)}
+Unknown: ${numberWithCommas(jobData.runk)}`;
 }
 
 class JobsRenderer {
