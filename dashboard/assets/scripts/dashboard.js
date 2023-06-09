@@ -415,18 +415,7 @@ class JobsRenderer {
 
 		const logWindow = h("div", logWindowAttrs, logSegment);
 		const div = h("div", { id: `log-container-${ident}` }, [
-			h("div", { className: "job-header" }, [
-				statsElements.jobInfo,
-				h("input", {
-					className: "job-ident",
-					type: "text",
-					value: ident,
-					size: "28",
-					spellcheck: "false",
-					readonly: "",
-					onclick: (ev) => ev.target.select(),
-				}),
-			]),
+			h("div", { className: "job-header" }, [statsElements.jobInfo, h("span", { className: "job-ident" }, ident)]),
 			logWindow,
 		]);
 		this.renderInfo[ident] = new JobRenderInfo(logWindow, logSegment, statsElements, jobNote, 0, [0]);
