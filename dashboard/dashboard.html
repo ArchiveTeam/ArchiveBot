@@ -87,6 +87,11 @@ html, body, .job-ident {
 	font-size: 13px;
 }
 
+#read-the-help {
+	padding-top: 0;
+	color: rgb(0 0 0 / 50%);
+}
+
 .job-header {
 	display: flex;
 	align-items: flex-end;
@@ -391,7 +396,7 @@ kbd {
 			<input onclick="ds.setFilter('^$');" type="button" value="None" class="button">
 		</div>
 		<div id="header-right">
-			<div id="meta-info"></div>
+			<div id="meta-info"><span class="adbox">😊</span></div>
 			<input type="button" onclick="ds.toggleAlign()" class="button" value="Align!">
 			<input type="button" onclick="ds.toggleHelp()" class="button" value="Help!">
 		</div>
@@ -465,6 +470,9 @@ kbd {
 			</p>
 		</div>
 	</div>
+	<p id="read-the-help" style="display: none">
+		Please click the 'Help!' button (or <kbd>?</kbd> key) and <strong>disable your ad blocker on this site for the dashboard to function properly</strong>. We do not have any ads.
+	</p>
 	<div id="traffic"></div>
 	<div id="logs"></div>
 </div>

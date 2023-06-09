@@ -964,8 +964,17 @@ class RateTracker {
 	}
 }
 
+function isUblockOriginDoingCosmeticFiltering() {
+	const adbox = document.querySelector(".adbox");
+	return adbox.offsetHeight === 0;
+}
+
 class Dashboard {
 	constructor() {
+		if (isUblockOriginDoingCosmeticFiltering()) {
+			byId("read-the-help").style.display = "block";
+		}
+
 		this.messageCount = 0;
 
 		const args = getQueryArgs();
