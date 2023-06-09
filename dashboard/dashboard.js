@@ -944,6 +944,8 @@ class Dashboard {
 		const showNicks = args.showNicks ? Boolean(Number(args.showNicks)) : false;
 		const contextMenu = args.contextMenu ? Boolean(Number(args.contextMenu)) : true;
 		const moreDom = args.moreDom ? Boolean(Number(args.moreDom)) : false;
+		const initialFilter = args.initialFilter ?? "^$";
+
 		// Append to page title to make it possible to identify the tab in Chrome's task manager
 		if (args.title) {
 			document.title += ` - ${args.title}`;
@@ -1042,6 +1044,8 @@ class Dashboard {
 		if (!showNicks) {
 			addPageStyles(".job-nick-aligned { width: 0; }");
 		}
+
+		this.setFilter(initialFilter);
 	}
 
 	keyPress(ev) {
