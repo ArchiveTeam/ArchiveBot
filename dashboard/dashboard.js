@@ -945,7 +945,8 @@ class Dashboard {
 		const contextMenu = args.contextMenu ? Boolean(Number(args.contextMenu)) : true;
 		const moreDom = args.moreDom ? Boolean(Number(args.moreDom)) : false;
 		const initialFilter = args.initialFilter ?? "^$";
-		const loadRecent = args.loadRecent ? Boolean(Number(args.loadRecent)) : true; 
+		const loadRecent = args.loadRecent ? Boolean(Number(args.loadRecent)) : true;
+		this.debug = args.debug ? Boolean(Number(args.debug)) : false;
 
 		// Append to page title to make it possible to identify the tab in Chrome's task manager
 		if (args.title) {
@@ -1002,7 +1003,9 @@ class Dashboard {
 
 		const finishSetup = () => {
 			this.queue = new BatchingQueue((queue) => {
-				//console.log("Queue has ", queue.length, "items");
+				if (this.debug) {
+					console.log(`Processing ${queue.length} JSON messages`);
+				}
 				for (const item of queue) {
 					this.handleData(JSON.parse(item));
 				}
@@ -1015,10 +1018,14 @@ class Dashboard {
 				"visibilitychange",
 				() => {
 					if (document.hidden) {
-						//console.log("Page has become hidden");
+						if (this.debug) {
+							console.log(`Page has become hidden, setting batch time to ${batchTimeWhenHidden}ms`);
+						}
 						this.queue.setMinInterval(batchTimeWhenHidden);
 					} else {
-						//console.log("Page has become visible");
+						if (this.debug) {
+							console.log(`Page has become visible, setting batch time to ${batchTimeWhenVisible}ms`);
+						}
 						this.queue.setMinInterval(batchTimeWhenVisible);
 						this.queue.callNow();
 					}
