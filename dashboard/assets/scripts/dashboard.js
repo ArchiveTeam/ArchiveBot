@@ -1083,9 +1083,15 @@ ${String(kbPerSec).padStart(3, "0")} KB/s`;
 						console.log(`Processing ${queue.length} JSON messages`);
 					}
 					newItemsReceived += queue.length;
-					for (const item of queue) {
+					// Parse all the objects before calling into DOM updates to try to
+					// be a little faster, at the expense of allocating more memory.
+					const parsed = new Array(queue.length);
+					queue.forEach((item, idx) => {
 						newBytesReceived += item.length;
-						this.handleData(JSON.parse(item));
+						parsed[idx] = JSON.parse(item);
+					});
+					for (const obj of parsed) {
+						this.handleData(obj);
 					}
 				},
 				batchTimeWhenVisible,
