@@ -433,7 +433,7 @@ class JobsRenderer {
 					size: "28",
 					spellcheck: "false",
 					readonly: "",
-					onclick: () => this.select(),
+					onclick: (ev) => ev.target.select(),
 				}),
 			]),
 			logWindow,
