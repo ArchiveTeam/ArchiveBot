@@ -941,6 +941,9 @@ class Dashboard {
 
 		const historyLines = args.historyLines ? Number(args.historyLines) : navigator.userAgent.match(/Mobi/) ? 250 : 500;
 		const batchTimeWhenVisible = args.batchTimeWhenVisible ? Number(args.batchTimeWhenVisible) : 125;
+		// Note that setting batchTimeWhenHidden below 1000ms doesn't really do anything in Chrome, Firefox, and Safari
+		// because (with normal settings) they don't run timers in background tabs more than once every 1000ms.
+		const batchTimeWhenHidden = args.batchTimeWhenHidden ? Number(args.batchTimeWhenHidden) : 1000;
 		const showNicks = args.showNicks ? Boolean(Number(args.showNicks)) : false;
 		const contextMenu = args.contextMenu ? Boolean(Number(args.contextMenu)) : true;
 		const moreDom = args.moreDom ? Boolean(Number(args.moreDom)) : false;
@@ -983,8 +986,6 @@ class Dashboard {
 			showNicks,
 			this.contextMenuRenderer,
 		);
-
-		const batchTimeWhenHidden = 1000;
 
 		document.onkeypress = (ev) => this.keyPress(ev);
 
