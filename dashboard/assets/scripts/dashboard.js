@@ -798,10 +798,11 @@ class ContextMenuRenderer {
 		}
 		return [
 			ignoresRemaining,
-			somePathVariants.map((p) => {
-				return `!ig ${ident} ^${reSchema}://${regExpEscape(domain + p)}`;
-			})
-			.concat([`!d ${ident} 180000 180000`, `!d ${ident} 250 375`, `!con ${ident} 1`])
+			somePathVariants
+				.map((p) => {
+					return `!ig ${ident} ^${reSchema}://${regExpEscape(domain + p)}`;
+				})
+				.concat([`!d ${ident} 180000 180000`, `!d ${ident} 250 375`, `!con ${ident} 1`]),
 		];
 	}
 
@@ -812,14 +813,20 @@ class ContextMenuRenderer {
 		// like the real context menu does.
 		entries.push(h("a", { href: url }, "Open link in new tab"));
 		entries.push(h("span", { onclick: this.makeCopyTextFn(url) }, "Copy link address"));
-		if (ignoresRemaining) { 
-			entries.push(h("span", {
-				onclick: (ev) => {
-					ev.stopPropagation();
-					this.resetEntries(ident, url, maxSuggestedIgnores + 6);
-				}
-			}, `[${ignoresRemaining} more ignore suggestion${ignoresRemaining === 1 ? "" : "s"}]`));
-		};
+		if (ignoresRemaining) {
+			entries.push(
+				h(
+					"span",
+					{
+						onclick: (ev) => {
+							ev.stopPropagation();
+							this.resetEntries(ident, url, maxSuggestedIgnores + 6);
+						},
+					},
+					`[${ignoresRemaining} more ignore suggestion${ignoresRemaining === 1 ? "" : "s"}]`,
+				),
+			);
+		}
 		for (const c of commands) {
 			entries.push(h("span", { onclick: this.makeCopyTextFn(c) }, `Copy ${c.replace(` ${ident} `, " … ")}`));
 		}
@@ -1044,19 +1051,26 @@ class Dashboard {
 			const messagesRate = new RateTracker();
 			const bytesRate = new RateTracker();
 
-			this.queue = new BatchingQueue((queue) => {
-				if (this.debug) {
-					console.log(`Processing ${queue.length} JSON messages`);
-				}
-				let bytesReceived = 0;
-				for (const item of queue) {
-					bytesReceived += item.length;
-					this.handleData(JSON.parse(item));
-				}
-				const msgPerSec = Math.round(messagesRate.getRate(queue.length));
-				const kbPerSec = Math.round(bytesRate.getRate(bytesReceived / 1000));
-				byId("meta-info").innerHTML = `WS: ${String(msgPerSec).padStart(3, "0")} msg/s, ${String(kbPerSec).padStart(3, "0")} KB/s`;
-			}, batchTimeWhenVisible, batchMaxItems);
+			this.queue = new BatchingQueue(
+				(queue) => {
+					if (this.debug) {
+						console.log(`Processing ${queue.length} JSON messages`);
+					}
+					let bytesReceived = 0;
+					for (const item of queue) {
+						bytesReceived += item.length;
+						this.handleData(JSON.parse(item));
+					}
+					const msgPerSec = Math.round(messagesRate.getRate(queue.length));
+					const kbPerSec = Math.round(bytesRate.getRate(bytesReceived / 1000));
+					byId("meta-info").innerHTML = `WS: ${String(msgPerSec).padStart(3, "0")} msg/s, ${String(kbPerSec).padStart(
+						3,
+						"0",
+					)} KB/s`;
+				},
+				batchTimeWhenVisible,
+				batchMaxItems,
+			);
 
 			this.decayer = new Decayer(1000, 1.5, 60000);
 			this.connectWebSocket();
@@ -1109,7 +1123,7 @@ class Dashboard {
 			};
 			xhr.onprogress = (ev) => {
 				const percent = Math.round(100 * (ev.loaded / ev.total));
-				const size_mb = Math.round(100 * ev.total / 1e6) / 100;
+				const size_mb = Math.round((100 * ev.total) / 1e6) / 100;
 				byId("meta-info").innerHTML = `Recent data: ${percent}% (${size_mb}MB)`;
 			};
 			xhr.open("GET", `//${this.host}/logs/recent?cb=${Date.now()}${Math.random()}`);
@@ -1117,7 +1131,7 @@ class Dashboard {
 			xhr.send("");
 		});
 	}
-	
+
 	keyPress(ev) {
 		// If you press ctrl-f or alt-f in Firefox (tested: 41), it dispatches
 		// the keypress event for 'f'.  We want only the modifier-free
