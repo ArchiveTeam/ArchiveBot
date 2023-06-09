@@ -28,6 +28,8 @@ html {
 
 html, body {
 	font-family: sans-serif;
+	/* Keep digits in fonts like San Francisco aligned */
+	font-variant-numeric: tabular-nums;
 	font-size: 13px;
 	/**
 	 * Opt out of Chrome's Scroll Anchoring, which causes this page to
@@ -69,12 +71,17 @@ html, body, .job-ident {
 	font-size: 18px;
 	margin: 0 0 20px 0;
 	display: flex;
-	align-items: flex-end;
+	align-items: flex-start;
 	justify-content: space-between;
 	flex-flow: row nowrap;
 }
 
+#header-right {
+	white-space: nowrap;
+}
+
 #meta-info {
+	color: rgb(0 0 0 / 50%);
 	display: inline-block;
 	padding: 0 8px 0 0;
 	font-size: 13px;
@@ -117,8 +124,6 @@ html, body, .job-ident {
 	vertical-align: bottom;
 	/* Needed to avoid collapsing of leading space */
 	white-space: pre;
-	/* Keep digits in fonts like San Francisco aligned */
-	font-variant-numeric: tabular-nums;
 }
 
 .job-url {
@@ -385,7 +390,7 @@ kbd {
 			<input onclick="ds.setFilter('');" type="button" value="  All  " class="button">
 			<input onclick="ds.setFilter('^$');" type="button" value="None" class="button">
 		</div>
-		<div>
+		<div id="header-right">
 			<div id="meta-info"></div>
 			<input type="button" onclick="ds.toggleAlign()" class="button" value="Align!">
 			<input type="button" onclick="ds.toggleHelp()" class="button" value="Help!">

@@ -947,6 +947,23 @@ class Decayer {
 	}
 }
 
+class RateTracker {
+	constructor() {
+		this.reset();
+	}
+
+	reset() {
+		this.timeLast = Date.now() / 1000;
+	}
+
+	getRate(value) {
+		const now = Date.now() / 1000;
+		const duration = now - this.timeLast;
+		this.reset();
+		return value / duration;
+	}
+}
+
 class Dashboard {
 	constructor() {
 		this.messageCount = 0;
@@ -1015,13 +1032,21 @@ class Dashboard {
 		const finishSetup = () => {
 			byId("meta-info").innerHTML = "";
 
+			const messagesRate = new RateTracker();
+			const bytesRate = new RateTracker();
+
 			this.queue = new BatchingQueue((queue) => {
 				if (this.debug) {
 					console.log(`Processing ${queue.length} JSON messages`);
 				}
+				let bytesReceived = 0;
 				for (const item of queue) {
+					bytesReceived += item.length;
 					this.handleData(JSON.parse(item));
 				}
+				const msgPerSec = Math.round(messagesRate.getRate(queue.length));
+				const kbPerSec = Math.round(bytesRate.getRate(bytesReceived / 1000));
+				byId("meta-info").innerHTML = `WS: ${String(msgPerSec).padStart(3, "0")} msg/s, ${String(kbPerSec).padStart(3, "0")} KB/s`;
 			}, batchTimeWhenVisible, batchMaxItems);
 
 			this.decayer = new Decayer(1000, 1.5, 60000);
