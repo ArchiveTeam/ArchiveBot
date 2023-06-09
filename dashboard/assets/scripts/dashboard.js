@@ -426,7 +426,7 @@ class JobsRenderer {
 		]);
 
 		const logWindow = h("div", logWindowAttrs, logSegment);
-		const div = h("div", { id: `log-container-${ident}` }, [
+		const div = h("div", { className: "log-container", id: `log-container-${ident}` }, [
 			h("div", { className: "job-header" }, [statsElements.jobInfo, h("span", { className: "job-ident" }, ident)]),
 			logWindow,
 		]);
