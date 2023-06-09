@@ -1062,8 +1062,8 @@ class Dashboard {
 					const msgPerSec = Math.round(messagesRate.getRate(queue.length));
 					const kbPerSec = Math.round(bytesRate.getRate(bytesReceived / 1000));
 					byId("meta-info").textContent = `WS:
-						${String(msgPerSec).padStart(3, "0")} msg/s,
-						${String(kbPerSec).padStart(3, "0")} KB/s`;
+${String(msgPerSec).padStart(3, "0")} msg/s,
+${String(kbPerSec).padStart(3, "0")} KB/s`;
 				},
 				batchTimeWhenVisible,
 				batchMaxItems,
