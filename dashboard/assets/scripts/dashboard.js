@@ -1047,7 +1047,8 @@ class Dashboard {
 		const finishSetup = () => {
 			byId("meta-info").innerHTML = "";
 
-			const keepReadings = Math.round(3000 / batchTimeWhenVisible);
+			const rateRefreshInterval = 1000;
+			const keepReadings = Math.round(5000 / rateRefreshInterval);
 			const messagesRate = new RateTracker(keepReadings);
 			const bytesRate = new RateTracker(keepReadings);
 			let newItemsReceived = 0;
@@ -1063,7 +1064,7 @@ class Dashboard {
 				byId("meta-info").textContent = `WS:
 ${String(msgPerSec).padStart(3, "0")} msg/s,
 ${String(kbPerSec).padStart(3, "0")} KB/s`;
-			}, batchTimeWhenVisible);
+			}, rateRefreshInterval);
 
 			this.queue = new BatchingQueue(
 				(queue) => {
