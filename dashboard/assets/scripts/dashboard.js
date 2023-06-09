@@ -442,10 +442,7 @@ class JobsRenderer {
 		// For testing a URL with characters that browsers like to escape, breaking the suggested ignores
 		// url = "http://example.com/m/index.php/{$ibforums-%3Evars[TEAM_ICON_URL]}/t82380.html^hi";
 		logSegment.appendChild(
-			h("div", attrs, [
-				`${data.response_code} ${data.wget_code} `,
-				h("a", { href: url, className: "log-url" }, url),
-			]),
+			h("div", attrs, [`${data.response_code} ${data.wget_code} `, h("a", { href: url, className: "log-url" }, url)]),
 		);
 		return 1;
 	}
