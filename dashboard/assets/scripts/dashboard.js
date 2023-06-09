@@ -1013,6 +1013,8 @@ class Dashboard {
 		this.setFilter(initialFilter);
 
 		const finishSetup = () => {
+			byId("meta-info").innerHTML = "";
+
 			this.queue = new BatchingQueue((queue) => {
 				if (this.debug) {
 					console.log(`Processing ${queue.length} JSON messages`);
@@ -1055,6 +1057,7 @@ class Dashboard {
 
 	loadRecent() {
 		return new Promise((resolve, reject) => {
+			byId("meta-info").innerHTML = "Requesting recent data";
 			const xhr = new XMLHttpRequest();
 			xhr.onload = () => {
 				try {
@@ -1069,6 +1072,11 @@ class Dashboard {
 			};
 			xhr.onerror = (ev) => {
 				reject(ev);
+			};
+			xhr.onprogress = (ev) => {
+				const percent = Math.round(100 * (ev.loaded / ev.total));
+				const size_mb = Math.round(100 * ev.total / 1e6) / 100;
+				byId("meta-info").innerHTML = `Recent data: ${percent}% (${size_mb}MB)`;
 			};
 			xhr.open("GET", `//${this.host}/logs/recent?cb=${Date.now()}${Math.random()}`);
 			xhr.setRequestHeader("Accept", "application/json");

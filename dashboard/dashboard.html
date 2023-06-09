@@ -74,6 +74,12 @@ html, body, .job-ident {
 	flex-flow: row nowrap;
 }
 
+#meta-info {
+	display: inline-block;
+	padding: 0 8px 0 0;
+	font-size: 13px;
+}
+
 .job-header {
 	display: flex;
 	align-items: flex-end;
@@ -380,6 +386,7 @@ kbd {
 			<input onclick="ds.setFilter('^$');" type="button" value="None" class="button">
 		</div>
 		<div>
+			<div id="meta-info"></div>
 			<input type="button" onclick="ds.toggleAlign()" class="button" value="Align!">
 			<input type="button" onclick="ds.toggleHelp()" class="button" value="Help!">
 		</div>
