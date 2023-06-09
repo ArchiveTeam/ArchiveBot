@@ -450,25 +450,6 @@ class JobsRenderer {
 	_renderDownloadLine(data, logSegment) {
 		let attrs;
 		if (data.is_warning) {
-			attrs = { className: "line-warning", href: data.url };
-		} else if (data.is_error) {
-			attrs = { className: "line-error", href: data.url };
-		} else if (data.response_code && data.response_code >= 300 && data.response_code < 400) {
-			attrs = { className: "line-redirect", href: data.url };
-		} else {
-			attrs = { className: "line-normal", href: data.url };
-		}
-		logSegment.appendChild(h("a", attrs, `${data.response_code} ${data.wget_code} ${data.url}`));
-		return 1;
-	}
-
-	/**
-	 * Like _renderDownloadLine, but makes it easier to start a text selection from the
-	 * left or right of the URL.
-	 */
-	_moreDomRenderDownloadLine(data, logSegment) {
-		let attrs;
-		if (data.is_warning) {
 			attrs = Reusable.obj_className_line_warning;
 		} else if (data.is_error) {
 			attrs = Reusable.obj_className_line_error;
@@ -843,13 +824,7 @@ class ContextMenuRenderer {
 		appendAny(this.element, h("input", { type: "text", id: "clipboard-scratchpad" }));
 
 		const url = ev.target.href;
-		let ident;
-		try {
-			ident = ev.target.parentNode.parentNode.id.match(/^log-window-(.*)/)[1];
-		} catch (e) {
-			// moreDom=1
-			ident = ev.target.parentNode.parentNode.parentNode.id.match(/^log-window-(.*)/)[1];
-		}
+		const ident = ev.target.parentNode.parentNode.parentNode.id.match(/^log-window-(.*)/)[1];
 		const entries = this.makeEntries(ident, url);
 		for (const entry of entries) {
 			entry.classList.add("context-menu-entry");
@@ -958,7 +933,6 @@ class Dashboard {
 		const batchMaxItems = args.batchMaxItems ? Number(args.batchMaxItems) : 250;
 		const showNicks = args.showNicks ? Boolean(Number(args.showNicks)) : false;
 		const contextMenu = args.contextMenu ? Boolean(Number(args.contextMenu)) : true;
-		const moreDom = args.moreDom ? Boolean(Number(args.moreDom)) : false;
 		const initialFilter = args.initialFilter ?? "^$";
 		const loadRecent = args.loadRecent ? Boolean(Number(args.loadRecent)) : true;
 		this.debug = args.debug ? Boolean(Number(args.debug)) : false;
@@ -966,10 +940,6 @@ class Dashboard {
 		// Append to page title to make it possible to identify the tab in Chrome's task manager
 		if (args.title) {
 			document.title += ` - ${args.title}`;
-		}
-
-		if (moreDom) {
-			JobsRenderer.prototype._renderDownloadLine = JobsRenderer.prototype._moreDomRenderDownloadLine;
 		}
 
 		this.host = args.host ? args.host : location.hostname;
