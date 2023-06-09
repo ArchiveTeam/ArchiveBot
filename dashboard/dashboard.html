@@ -214,7 +214,8 @@ html, body, .job-ident {
 .log-window {
 	background-color: #FFF7E1;
 	overflow-y: scroll;
-	height: 192px;
+	/* This should be a multiple of (13 + 4)px */
+	height: 204px;
 	border: 1px solid #999;
 	margin: 0 0 1em 0;
 	border-radius: 3px;
@@ -232,7 +233,8 @@ html, body, .job-ident {
 }
 
 .log-window-expanded {
-	height: 384px;
+	/* This should be 2 times the .log-window height */
+	height: 408px;
 }
 
 .line-normal {
