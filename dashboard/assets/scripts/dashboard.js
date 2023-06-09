@@ -935,19 +935,34 @@ class Decayer {
 }
 
 class RateTracker {
-	constructor() {
-		this.reset();
+	constructor(keepReadings) {
+		this.keepReadings = keepReadings;
+		this._durations = [];
+		this._values = [];
+		this._reset();
 	}
 
-	reset() {
+	_reset() {
 		this.timeLast = Date.now() / 1000;
+	}
+
+	_addReading(duration, value) {
+		this._durations.push(duration);
+		this._values.push(value);
+		if (this._durations.length > this.keepReadings) {
+			this._durations.shift();
+			this._values.shift();
+		}
 	}
 
 	getRate(value) {
 		const now = Date.now() / 1000;
 		const duration = now - this.timeLast;
-		this.reset();
-		return value / duration;
+		this._reset();
+		this._addReading(duration, value);
+		const valueSum = this._values.reduce((a, b) => a + b, 0);
+		const durationSum = this._durations.reduce((a, b) => a + b, 0);
+		return valueSum / durationSum;
 	}
 }
 
@@ -1028,8 +1043,9 @@ class Dashboard {
 		const finishSetup = () => {
 			byId("meta-info").innerHTML = "";
 
-			const messagesRate = new RateTracker();
-			const bytesRate = new RateTracker();
+			const keepReadings = Math.min(31, Math.round(2000 / batchTimeWhenVisible));
+			const messagesRate = new RateTracker(keepReadings);
+			const bytesRate = new RateTracker(keepReadings);
 
 			this.queue = new BatchingQueue(
 				(queue) => {
