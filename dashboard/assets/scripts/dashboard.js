@@ -1006,6 +1006,8 @@ class Dashboard {
 		}
 
 		this.messageCount = 0;
+		this.newItemsReceived = 0;
+		this.newBytesReceived = 0;
 
 		const args = getQueryArgs();
 
@@ -1075,16 +1077,14 @@ class Dashboard {
 			const keepReadings = Math.round(5000 / rateRefreshInterval);
 			const messagesRate = new RateTracker(keepReadings);
 			const bytesRate = new RateTracker(keepReadings);
-			let newItemsReceived = 0;
-			let newBytesReceived = 0;
 
 			// Keep this outside the BatchingQueue callable so that we detect
 			// when we stop receiving data entirely.
 			setInterval(() => {
-				const msgPerSec = Math.round(messagesRate.getRate(newItemsReceived));
-				const kbPerSec = Math.round(bytesRate.getRate(newBytesReceived / 1000));
-				newItemsReceived = 0;
-				newBytesReceived = 0;
+				const msgPerSec = Math.round(messagesRate.getRate(this.newItemsReceived));
+				const kbPerSec = Math.round(bytesRate.getRate(this.newBytesReceived / 1000));
+				this.newItemsReceived = 0;
+				this.newBytesReceived = 0;
 				byId("meta-info").textContent = `WS:
 ${String(msgPerSec).padStart(3, "0")} msg/s,
 ${String(kbPerSec).padStart(3, "0")} KB/s`;
@@ -1095,15 +1095,7 @@ ${String(kbPerSec).padStart(3, "0")} KB/s`;
 					if (this.debug) {
 						console.log(`Processing ${queue.length} JSON messages`);
 					}
-					newItemsReceived += queue.length;
-					// Parse all the objects before calling into DOM updates to try to
-					// be a little faster, at the expense of allocating more memory.
-					const parsed = new Array(queue.length);
-					queue.forEach((item, idx) => {
-						newBytesReceived += item.length;
-						parsed[idx] = JSON.parse(item);
-					});
-					for (const obj of parsed) {
+					for (const obj of queue) {
 						this.handleData(obj);
 					}
 				},
@@ -1217,7 +1209,9 @@ ${String(kbPerSec).padStart(3, "0")} KB/s`;
 		this.ws = new WebSocket(`${wsproto}//${this.host}:4568/stream`);
 
 		this.ws.onmessage = (ev) => {
-			this.queue.push(ev.data);
+			this.newItemsReceived += 1;
+			this.newBytesReceived += ev.data.length;
+			this.queue.push(JSON.parse(ev.data));
 		};
 
 		this.ws.onopen = (ev) => {
