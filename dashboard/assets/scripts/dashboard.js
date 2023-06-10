@@ -563,7 +563,7 @@ class JobsRenderer {
 
 		// Update stats
 		info.statsElements.mb.textContent = numberWithCommas(
-			toStringTenths((parseInt(jobData.bytes_downloaded) / (1024 * 1024)).toString()),
+			toStringTenths((parseInt(jobData.bytes_downloaded) / (1000 * 1000)).toString()),
 		);
 		info.statsElements.responses.textContent = `${numberWithCommas(totalResponses)} resp.`;
 		info.statsElements.responses.title = getSummaryResponses(jobData);
