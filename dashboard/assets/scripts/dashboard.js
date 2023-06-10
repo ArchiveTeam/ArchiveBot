@@ -272,7 +272,7 @@ function numberWithCommas(s_or_n) {
 
 function toStringTenths(n) {
 	let s = `${Math.round(10 * n) / 10}`;
-	if (s.indexOf(".") === -1) {
+	if (s !== "NaN" && s.indexOf(".") === -1) {
 		s += ".0";
 	}
 	return s;
