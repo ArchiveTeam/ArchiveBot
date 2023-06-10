@@ -149,6 +149,12 @@ function addAnyChangeListener(elem, func) {
 	elem.addEventListener("input", func, false);
 }
 
+function scrollToBottom(elem) {
+	// Scroll to the bottom. To avoid serious performance problems in Firefox,
+	// use a big number instead of elem.scrollHeight.
+	elem.scrollTop = 999999;
+}
+
 /**
  * Returns a function that gets the given property on any object passed in
  */
@@ -626,9 +632,10 @@ class JobsRenderer {
 				}
 			}
 
-			// Scroll to the bottom. To avoid serious performance problems in Firefox,
-			// use a big number instead of info.logWindow.scrollHeight.
-			info.logWindow.scrollTop = 999999;
+			// If hidden, don't scroll: this saves us reflows and half our CPU time in Firefox.
+			if (!info.logWindow.classList.contains("log-window-hidden")) {
+				scrollToBottom(info.logWindow);
+			}
 		}
 	}
 
@@ -670,6 +677,12 @@ class JobsRenderer {
 			// You're seeing all of the log windows, so alignment doesn't help as much
 			// as seeing the full info.
 			this.setAligned(false);
+		}
+
+		// Hidden log windows aren't scrolled down while lines are added to them,
+		// but now that more are visible, we need to scroll them to the bottom.
+		for (const w of matchedWindows) {
+			scrollToBottom(w);
 		}
 	}
 
