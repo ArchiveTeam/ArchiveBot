@@ -1,0 +1,11 @@
+<nav class="pager">
+    {% if page > 1 %}
+    <a href="?page={{ page - 1 }}" rel="prev">Previous</a>
+    {% endif %}
+
+    {{ page }}
+
+    {% if has_next_page %}
+    <a href="?page={{ page + 1 }}" rel="next">Next</a>
+    {% endif %}
+</nav>

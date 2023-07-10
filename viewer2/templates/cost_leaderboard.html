@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %} Cost Shameboard {% endblock %}
+
+{% block body %}
+<h2>Cost Shameboard</h2>
+
+<table>
+    <tr>
+        <th>Who</th>
+        <th>Size (bytes)</th>
+        <th>Cost (USD)</th>
+    </tr>
+    {% for row in rows %}
+        <tr>
+            <td>{{ row.who }}</td>
+            <td class="numeric">{{ "{}"|format(row.size) }}</td>
+            <td class="numeric">{{ "{:.2}"|format(row.size / 1099511627776 * 2000) }}</td>
+        </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

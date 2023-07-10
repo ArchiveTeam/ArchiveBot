@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %} - ArchiveBot Viewer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {% block head_extra %}{% endblock %}
+    <style>
+        html, body {
+            font-family: sans-serif;
+        }
+        table {
+            border-collapse: collapse;
+        }
+        th {
+            border-width: 0px 0px 0.1em 0px;
+            border-style: ridge;
+            border-color: silver;
+        }
+        td, th {
+            padding: 0.2em;
+        }
+        .numeric {
+            text-align: right;
+        }
+
+        html,body {
+            color: black;
+            background-color: lavender;
+        }
+        a:link {
+            color: navy;
+        }
+        a:visited {
+            color: indigo;
+        }
+        a:hover, a:active {
+            color: red;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            html,body {
+            color: lavender;
+            background-color: #1f1f1f;
+            }
+            a:link {
+                color: lightskyblue;
+            }
+            a:visited {
+                color: orchid;
+            }
+            a:hover, a:active {
+                color: red;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="{{ link_prefix }}">Home</a>
+    </nav>
+    <hr>
+    <div id="body_container" role="main">
+    {% block body %}
+    {% endblock %}
+    </div>
+    <hr>
+    <p>
+        <a href="http://archiveteam.org/index.php?title=ArchiveBot">ArchiveBot Viewer</a>
+        &bullet;
+        <a href="{{ link_prefix }}faq">About & Removal Request</a>
+    </p>
+</body>
+</html>

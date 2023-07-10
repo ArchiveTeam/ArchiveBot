@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %} Item {{ identifier }} {% endblock %}
+
+{% block body %}
+    <h2> Item {{ identifier }} </h2>
+    <p>
+        <a href="https://archive.org/details/{{ identifier }}">View on Internet Archive</a>
+    </p>
+
+    <table>
+        <tr>
+           <th>Filename</th>
+           <th>Size</th>
+           <th></th>
+        </tr>
+        {% for row in rows %}
+            <tr>
+                <td>
+                    {% if !row.job_id.is_empty() %}
+                    <a href="{{ link_prefix }}job/{{ row.job_id }}">
+                        {{ row.filename }}
+                    </a>
+                    {% else %}
+                    {{ row.filename }}
+                    {% endif %}
+                </td>
+                <td class="numeric">{{ row.size }}</td>
+                <td>
+                    <a href="https://archive.org/download/{{ identifier }}/{{ row.filename }}">download</a>
+                    {% if !row.job_id.is_empty() %}
+                        &nbsp;
+                        <a href="{{ link_prefix }}job/{{ row.job_id }}">job</a>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

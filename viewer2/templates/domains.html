@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %} Domains {% endblock %}
+
+{% block body %}
+    <h2>Domains</h2>
+
+    {% include "pager.html" %}
+    <table>
+        <tr>
+            <th>Domains</th>
+        </tr>
+        {% for domain in domains %}
+            <tr>
+                <td><a href="{{ link_prefix }}domain/{{ domain }}">{{ domain }}</a></td>
+            </tr>
+        {% endfor %}
+    </table>
+    {% include "pager.html" %}
+{% endblock %}

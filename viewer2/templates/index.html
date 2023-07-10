@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %} Homepage {% endblock %}
+
+{% block body %}
+    <p>Browse an index of the archives.</p>
+
+    <div>
+        <form method="get" action="{{ link_prefix }}">
+            <label for="form-query">Search by domain or job: </label>
+            <input type="search" name="q" id="form-query" value="{{ query }}">
+            <input type="submit" value="Search">
+        </form>
+
+        <p>Search by full URL is not supported yet.</p>
+
+        {% for search_result in search_results %}
+            {% if search_result.result_type == "domain" %}
+                <a href="{{ link_prefix }}domain/{{ search_result.domain }}">{{ search_result.domain }}</a>
+                <i>{{ search_result.url }}</i>
+            {% else %}
+                <a href="{{ link_prefix }}job/{{ search_result.job_id }}">{{ search_result.job_id }}</a>
+                <i>{{ search_result.domain }} {{ search_result.url }}</i>
+            {% endif %}
+            <br>
+        {% endfor %}
+
+        {% if !query.is_empty() && search_results.is_empty() %}
+            <p><em>No search results.</em></p>
+        {% endif %}
+    </div>
+
+    <br>
+    <a href="{{ link_prefix }}items">Items</a> &ndash; list of items on Internet Archive<br>
+    <a href="{{ link_prefix }}jobs">Jobs</a> &ndash; list of ArchiveBot jobs<br>
+    <a href="{{ link_prefix }}domains">Domains</a> &ndash; list of archived domains<br>
+    <a href="{{ link_prefix }}audit">Audit</a> &ndash; list of incomplete uploads<br>
+    <s><a href="{{ link_prefix }}costs">Costs</a> &ndash; resource usage on Internet Archive by nickname</s>  &ndash; This hasn't been working for years; may be fixed in the future.<br>
+    <a href="{{ link_prefix }}stats">Stats</a> &ndash; graphs of resource usage on Internet Archive<br>
+
+    <p>Last update: {{ last_update }}</p>
+    <p>Attention: Please <a href="{{ link_prefix }}faq">read this</a> to learn how this index works.</p>
+{% endblock %}

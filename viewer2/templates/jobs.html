@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %} Jobs {% endblock %}
+
+{% block body %}
+    {% include "pager.html" %}
+    <table>
+        <tr>
+            <th>Job Identifier</th>
+            <th>Domain</th>
+            <th>URL</th>
+        </tr>
+        {% for row in rows %}
+            <tr>
+                <td><a href="{{ link_prefix }}job/{{ row.job_id }}">{{ row.job_id }}</a></td>
+                <td>{{ row.domain }}</td>
+                <td>{{ row.url }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+    {% include "pager.html" %}
+{% endblock %}
