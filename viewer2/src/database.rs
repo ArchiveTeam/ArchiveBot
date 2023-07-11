@@ -460,7 +460,7 @@ impl Database {
             LIMIT ? OFFSET ?",
         )
         .bind(query)
-        .bind(query)
+        .bind(&query[0..5.min(query.len())])
         .bind(limit)
         .bind(offset)
         .fetch_all(connection)
