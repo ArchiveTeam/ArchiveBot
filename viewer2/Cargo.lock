@@ -140,6 +140,7 @@ dependencies = [
  "chrono",
  "clap",
  "futures",
+ "idna",
  "lazy_static",
  "regex",
  "reqwest",
@@ -152,6 +153,7 @@ dependencies = [
  "tracing",
  "tracing-subscriber",
  "tracing-test",
+ "url",
 ]
 
 [[package]]

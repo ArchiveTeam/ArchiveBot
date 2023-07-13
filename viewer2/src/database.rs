@@ -422,12 +422,14 @@ impl Database {
 
     pub async fn search_full(
         &self,
-        query: &str,
+        query_domain: &str,
+        query_url: &str,
         offset: i64,
         limit: i64,
     ) -> anyhow::Result<Vec<(String, String, String)>> {
         let connection = &mut *self.connection.lock().await;
-        let query = format_fts_query(query);
+        let query_domain = format_fts_query(query_domain);
+        let query_url = format_fts_query(query_url);
         let rows = sqlx::query_as(
             "SELECT id, domain, url FROM jobs_search_index
             WHERE domain MATCH ?
@@ -435,8 +437,8 @@ impl Database {
             ORDER BY rank
             LIMIT ? OFFSET ?",
         )
-        .bind(&query)
-        .bind(&query)
+        .bind(&query_domain)
+        .bind(&query_url)
         .bind(limit)
         .bind(offset)
         .fetch_all(connection)
@@ -451,6 +453,10 @@ impl Database {
         offset: i64,
         limit: i64,
     ) -> anyhow::Result<Vec<(String, String, String)>> {
+        if !query.is_ascii() {
+            return Ok(Vec::new());
+        }
+
         let connection = &mut *self.connection.lock().await;
 
         let rows = sqlx::query_as(

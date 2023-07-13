@@ -358,19 +358,56 @@ impl Backend {
         limit: i64,
         offset: i64,
     ) -> anyhow::Result<Vec<SearchResult>> {
+        let mut rows = Vec::new();
+
+        rows.extend(self.search_job(query, limit, offset).await?);
+        rows.extend(self.search_link(query, full, limit, offset).await?);
+
+        Ok(rows)
+    }
+
+    async fn search_job(
+        &self,
+        query: &str,
+        limit: i64,
+        offset: i64,
+    ) -> anyhow::Result<Vec<SearchResult>> {
+        let rows = self.database.search_job_id(query, offset, limit).await?;
+        let rows = rows
+            .into_iter()
+            .map(|row| SearchResult {
+                result_type: "job".to_string(),
+                job_id: row.0,
+                domain: row.1,
+                url: row.2,
+            })
+            .collect();
+
+        Ok(rows)
+    }
+
+    async fn search_link(
+        &self,
+        query: &str,
+        full: bool,
+        limit: i64,
+        offset: i64,
+    ) -> anyhow::Result<Vec<SearchResult>> {
         let query = query.strip_prefix("https://").unwrap_or(query);
         let query = query.strip_prefix("http://").unwrap_or(query);
         let query = query.strip_prefix("ftp://").unwrap_or(query);
         let query = query.strip_prefix("www.").unwrap_or(query);
+        let query_domain = idna::domain_to_ascii(query).unwrap_or_default();
 
-        let rows = if full {
-            self.database.search_full(query, offset, limit).await?
-        } else {
-            self.database.search_domain(query, offset, limit).await?
+        let rows = {
+            if full {
+                self.database
+                    .search_full(&query_domain, query, offset, limit)
+                    .await?
+            } else {
+                self.database.search_domain(&query_domain, offset, limit).await?
+            }
         };
-        let rows2 = self.database.search_job_id(query, offset, limit).await?;
-
-        let mut result_rows = Vec::new();
 
         let rows = rows.into_iter().map(|row| SearchResult {
             result_type: "domain".to_string(),
@@ -379,17 +416,7 @@ impl Backend {
             url: row.2,
         });
 
-        let rows2 = rows2.into_iter().map(|row| SearchResult {
-            result_type: "job".to_string(),
-            job_id: row.0,
-            domain: row.1,
-            url: row.2,
-        });
-
-        result_rows.extend(rows);
-        result_rows.extend(rows2);
-
-        Ok(result_rows)
+        Ok(rows.collect())
     }
 
     pub async fn get_last_update(&self) -> anyhow::Result<DateTime<Utc>> {
