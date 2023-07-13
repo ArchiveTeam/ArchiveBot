@@ -151,7 +151,7 @@ pub struct FilenameParts {
 
 pub fn parse_filename(filename: &str) -> Option<FilenameParts> {
     lazy_static::lazy_static! {
-        static ref RE: Regex = Regex::new(r"^([\w._@ -]+)-(inf|shallow)-(\d{8})-(\d{6})-?(\w{5})?-?(aborted)?-?(\d+)?.(json|warc\.gz)$").unwrap();
+        static ref RE: Regex = Regex::new(r"^([\w._@ -]+)-(inf|shallow)-(\d{8})-(\d{6})-?(\w{5})?-?(aborted)?-?(\d+|meta)?.(json|warc\.gz)$").unwrap();
     }
 
     RE.captures(filename).map(|captures| FilenameParts {
@@ -189,8 +189,7 @@ mod tests {
 
     #[test]
     fn test_parse_filename_legacy() {
-        let parts =
-            parse_filename("irclog.perlgeek.de-inf-20131101-162719-aborted.json").unwrap();
+        let parts = parse_filename("irclog.perlgeek.de-inf-20131101-162719-aborted.json").unwrap();
 
         assert_eq!(&parts.domain, "irclog.perlgeek.de");
         assert_eq!(&parts.depth, "inf");
@@ -216,9 +215,37 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_filename_json() {
+    fn test_parse_filename_meta() {
         let parts =
-            parse_filename("www.testroniclabs.com-inf-20191014-171816-36aoc.json").unwrap();
+            parse_filename("www.youtube.com-shallow-20200206-145902-8jjc9-meta.warc.gz").unwrap();
+
+        assert_eq!(&parts.domain, "www.youtube.com");
+        assert_eq!(&parts.depth, "shallow");
+        assert_eq!(&parts.date, "20200206");
+        assert_eq!(&parts.time, "145902");
+        assert_eq!(&parts.ident, "8jjc9");
+        assert_eq!(&parts.aborted, "");
+        assert_eq!(&parts.extension, "warc.gz");
+    }
+
+    #[test]
+    fn test_parse_filename_domain_symbols() {
+        let parts =
+            parse_filename("a-b.c@_d-inf-shallow-20200101-010203-metaa-aborted-meta.warc.gz")
+                .unwrap();
+
+        assert_eq!(&parts.domain, "a-b.c@_d-inf");
+        assert_eq!(&parts.depth, "shallow");
+        assert_eq!(&parts.date, "20200101");
+        assert_eq!(&parts.time, "010203");
+        assert_eq!(&parts.ident, "metaa");
+        assert_eq!(&parts.aborted, "aborted");
+        assert_eq!(&parts.extension, "warc.gz");
+    }
+
+    #[test]
+    fn test_parse_filename_json() {
+        let parts = parse_filename("www.testroniclabs.com-inf-20191014-171816-36aoc.json").unwrap();
 
         assert_eq!(&parts.domain, "www.testroniclabs.com");
         assert_eq!(&parts.depth, "inf");
