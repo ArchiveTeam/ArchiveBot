@@ -28,7 +28,6 @@ impl Backend {
         loop {
             self.populate().await?;
             tokio::time::sleep(Duration::from_secs(3600 * 6)).await;
-            tokio::time::sleep(Duration::from_secs(3600 * 99)).await;
         }
     }
 
