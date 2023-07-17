@@ -122,25 +122,6 @@ function regExpEscape(s) {
 	return escaped;
 }
 
-/**
- * [[1, 2], [3, 4]] -> {1: 2, 3: 4}
- */
-function intoObject(arr) {
-	const obj = {};
-	arr.forEach((e) => {
-		obj[e[0]] = e[1];
-	});
-	return obj;
-}
-
-function getQueryArgs() {
-	const pairs = location.search.replace("?", "").split("&");
-	if (pairs === "") {
-		return {};
-	}
-	return intoObject(pairs.map((e) => split(e, "=", 1)));
-}
-
 function addAnyChangeListener(elem, func) {
 	// DOM0 handler for convenient use by Clear button
 	elem.onchange = func;
@@ -1009,7 +990,7 @@ class Dashboard {
 		this.newItemsReceived = 0;
 		this.newBytesReceived = 0;
 
-		const args = getQueryArgs();
+		const args = Object.fromEntries(new URLSearchParams(window.location.search));
 
 		const historyLines = args.historyLines ? Number(args.historyLines) : navigator.userAgent.match(/Mobi/) ? 250 : 500;
 		const batchTimeWhenVisible = args.batchTimeWhenVisible ? Number(args.batchTimeWhenVisible) : 125;
