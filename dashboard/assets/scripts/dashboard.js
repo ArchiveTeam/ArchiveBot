@@ -986,6 +986,22 @@ class Dashboard {
 			byId("read-the-help").style.display = "block";
 		}
 
+		// We automatically scroll log windows to the bottom as lines are added,
+		// and for performance reasons we have `content-visibility: auto` to skip
+		// rendering when they are outside the viewport (at least in Chrome where
+		// this CSS property is supported).
+		//
+		// However, when they are outside the viewport, they fail to get scrolled
+		// to the bottom by `scrollToBottom` because they aren't rendering anything.
+		// Listen to contentvisibilityautostatechange and scroll these log windows
+		// to the bottom after they go back into the viewport and their rendering
+		// is no longer being skipped.
+		document.body.addEventListener("contentvisibilityautostatechange", (ev) => {
+			if (!ev.skipped && ev.target.classList.contains("log-window")) {
+				scrollToBottom(ev.target);
+			}
+		});
+
 		this.messageCount = 0;
 		this.newItemsReceived = 0;
 		this.newBytesReceived = 0;
