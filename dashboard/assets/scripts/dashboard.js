@@ -122,23 +122,12 @@ function regExpEscape(s) {
 	return escaped;
 }
 
-/**
- * [[1, 2], [3, 4]] -> {1: 2, 3: 4}
- */
-function intoObject(arr) {
-	const obj = {};
-	arr.forEach((e) => {
-		obj[e[0]] = e[1];
-	});
-	return obj;
-}
-
 function getQueryArgs() {
 	const pairs = location.search.replace("?", "").split("&");
 	if (pairs === "") {
 		return {};
 	}
-	return intoObject(pairs.map((e) => split(e, "=", 1)));
+	return Object.fromEntries(pairs.map((e) => split(e, "=", 1)));
 }
 
 function addAnyChangeListener(elem, func) {
