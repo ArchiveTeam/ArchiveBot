@@ -310,10 +310,11 @@ impl Database {
 
         let rows = sqlx::query_as(
             "SELECT ia_item_id, filename, job_id FROM files
-            WHERE filename LIKE '%.json' AND job_id NOT NULL
-            AND (ia_item_id, filename) > (?, ?)
-            ORDER BY ia_item_id, filename
-            LIMIT 10000",
+            JOIN jobs ON jobs.id = files.job_id
+            WHERE files.filename LIKE '%.json' AND jobs.url IS NULL
+            AND (files.ia_item_id, files.filename) > (?, ?)
+            ORDER BY files.ia_item_id, files.filename
+            LIMIT 1000",
         )
         .bind(after_id)
         .bind(after_filename)
@@ -333,6 +334,12 @@ impl Database {
         let mut connection = self.connection.lock().await;
         let mut transaction = connection.begin().await?;
 
+        let (domain, old_url, search_id): (String, Option<String>, i64) =
+            sqlx::query_as("SELECT domain, url, search_id FROM jobs WHERE id = ?")
+                .bind(job_id)
+                .fetch_one(&mut *transaction)
+                .await?;
+
         sqlx::query("UPDATE jobs SET url = ?, started_by = ? WHERE id = ?")
             .bind(url)
             .bind(started_by)
@@ -341,15 +348,39 @@ impl Database {
             .await?;
 
         sqlx::query(
-            "UPDATE jobs_search_index SET url = ?
-            WHERE rowid IN (SELECT search_id FROM jobs WHERE id = ?)",
+            "INSERT INTO jobs_search_index (jobs_search_index, rowid, domain, url)
+            VALUES ('delete', ?, ?, ?)",
         )
+        .bind(search_id)
+        .bind(&domain)
+        .bind(old_url)
+        .execute(&mut *transaction)
+        .await?;
+
+        sqlx::query(
+            "INSERT INTO jobs_search_index (rowid, domain, url)
+            VALUES ( ?, ?, ?)",
+        )
+        .bind(search_id)
+        .bind(&domain)
         .bind(url)
-        .bind(job_id)
         .execute(&mut *transaction)
         .await?;
 
         transaction.commit().await?;
+
+        Ok(())
+    }
+
+    pub async fn add_job_url_errored(&self, job_id: &str) -> anyhow::Result<()> {
+        tracing::debug!("add_job_url_errored");
+        let mut connection = self.connection.lock().await;
+
+        sqlx::query("UPDATE jobs SET url = ? WHERE id = ?")
+            .bind("")
+            .bind(job_id)
+            .execute(&mut *connection)
+            .await?;
 
         Ok(())
     }
@@ -408,6 +439,7 @@ impl Database {
         let rows = sqlx::query_as(
             "SELECT id, domain, url FROM jobs_search_index
             WHERE domain MATCH ?
+            GROUP BY domain
             ORDER BY rank
             LIMIT ? OFFSET ?",
         )
@@ -432,8 +464,8 @@ impl Database {
         let query_url = format_fts_query(query_url);
         let rows = sqlx::query_as(
             "SELECT id, domain, url FROM jobs_search_index
-            WHERE domain MATCH ?
-            OR url MATCH ?
+            WHERE jobs_search_index MATCH format('domain:%s OR url:%s', ?, ?)
+            GROUP BY domain, url
             ORDER BY rank
             LIMIT ? OFFSET ?",
         )
@@ -456,6 +488,8 @@ impl Database {
         if !query.is_ascii() {
             return Ok(Vec::new());
         }
+
+        let query = &query.replace('-', "");
 
         let connection = &mut *self.connection.lock().await;
 

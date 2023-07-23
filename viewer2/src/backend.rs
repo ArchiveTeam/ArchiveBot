@@ -64,12 +64,8 @@ impl Backend {
         self.populate_files().await?;
         self.populate_jobs().await?;
         self.populate_daily_stats().await?;
-
-        // FIXME: Takes too long. As of 2023, about 400,000 files will need to be fetched.
-        // This should probably be a background step.
-        // self.populate_json_urls().await?;
-
         self.populate_search().await?;
+        self.populate_json_urls().await?;
 
         tracing::info!("populate steps end");
 
@@ -187,7 +183,7 @@ impl Backend {
                         );
                     }
 
-                    let mut data = jobs_cache.get_mut(&job_id).unwrap();
+                    let data = jobs_cache.get_mut(&job_id).unwrap();
 
                     if aborted {
                         data.abort_count += 1;
@@ -250,6 +246,10 @@ impl Backend {
         let mut client = IAClient::new()?;
 
         let mut after_id = (String::new(), String::new());
+        let mut jobs_processed = 0;
+
+        // As of 2023, about 400,000 files will need to be fetched
+        // so this is a gradual step over many days.
 
         loop {
             let rows = self
@@ -257,24 +257,33 @@ impl Backend {
                 .get_jobs_without_url(&after_id.0, &after_id.1)
                 .await?;
 
-            if rows.is_empty() {
+            if rows.is_empty() || jobs_processed >= 10000 {
                 break;
             }
 
             for (ia_item_id, filename, job_id) in rows {
                 let json_data = client.fetch_item_file(&ia_item_id, &filename).await?;
-                let json_doc = serde_json::from_slice::<JsonMetadata>(&json_data)?;
 
-                self.database
-                    .add_job_url(
-                        &job_id,
-                        json_doc.url.as_deref().unwrap_or_default(),
-                        json_doc.started_by.as_deref().unwrap_or_default(),
-                    )
-                    .await?;
+                match serde_json::from_slice::<JsonMetadata>(&json_data) {
+                    Ok(json_doc) => {
+                        self.database
+                            .add_job_url(
+                                &job_id,
+                                json_doc.url.as_deref().unwrap_or_default(),
+                                json_doc.started_by.as_deref().unwrap_or_default(),
+                            )
+                            .await?;
+                    }
+                    Err(error) => {
+                        self.database.add_job_url_errored(&job_id).await?;
+                        tracing::error!(error = ?error);
+                    }
+                }
+
                 tokio::time::sleep(Duration::from_secs_f64(0.5)).await;
 
                 after_id = (ia_item_id, filename);
+                jobs_processed += 1;
             }
         }
 
@@ -404,7 +413,9 @@ impl Backend {
                     .search_full(&query_domain, query, offset, limit)
                     .await?
             } else {
-                self.database.search_domain(&query_domain, offset, limit).await?
+                self.database
+                    .search_domain(&query_domain, offset, limit)
+                    .await?
             }
         };
 
