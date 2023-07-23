@@ -362,6 +362,7 @@ async fn jobs_handler(
 struct JobTemplate {
     link_prefix: String,
     job_id: String,
+    formatted_job_id: String,
     rows: Vec<JobRow>,
 }
 
@@ -379,6 +380,7 @@ async fn job_handler(
 
     Ok(JobTemplate {
         link_prefix: state.link_prefix,
+        formatted_job_id: format_job_id(&job_id),
         job_id,
         rows,
     })
@@ -424,4 +426,12 @@ async fn api_v2_search_handler(
         .await?;
 
     Ok(Json(search_results))
+}
+
+fn format_job_id(job_id: &str) -> String {
+    if job_id.is_ascii() && job_id.len() == 19 {
+        format!("{}-{}-{}", &job_id[0..8], &job_id[8..14], &job_id[14..19])
+    } else {
+        job_id.to_string()
+    }
 }
