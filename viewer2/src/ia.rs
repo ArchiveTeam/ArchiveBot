@@ -151,7 +151,7 @@ pub struct FilenameParts {
 
 pub fn parse_filename(filename: &str) -> Option<FilenameParts> {
     lazy_static::lazy_static! {
-        static ref RE: Regex = Regex::new(r"^([\w._@ -]+)-(inf|shallow)-(\d{8})-(\d{6})-?(\w{5})?-?(aborted)?-?(\d+|meta)?.(json|warc\.gz)$").unwrap();
+        static ref RE: Regex = Regex::new(r"^([\w._@% -]+)-(inf|shallow)-(\d{8})-(\d{6})-?(\w{5})?-?(aborted)?-?(\d+|meta)?.(json|warc\.gz)$").unwrap();
     }
 
     RE.captures(filename).map(|captures| FilenameParts {
@@ -231,10 +231,10 @@ mod tests {
     #[test]
     fn test_parse_filename_domain_symbols() {
         let parts =
-            parse_filename("a-b.c@_d-inf-shallow-20200101-010203-metaa-aborted-meta.warc.gz")
+            parse_filename("a-b.c@_d%e-inf-shallow-20200101-010203-metaa-aborted-meta.warc.gz")
                 .unwrap();
 
-        assert_eq!(&parts.domain, "a-b.c@_d-inf");
+        assert_eq!(&parts.domain, "a-b.c@_d%e-inf");
         assert_eq!(&parts.depth, "shallow");
         assert_eq!(&parts.date, "20200101");
         assert_eq!(&parts.time, "010203");
