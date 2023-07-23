@@ -14,6 +14,7 @@ clap = { version = "4.3.5", features = ["derive"] }
 futures = "0.3.28"
 idna = "0.4.0"
 lazy_static = "1.4.0"
+percent-encoding = "2.3.0"
 regex = "1.8.4"
 reqwest = { version = "0.11.18", default-features = false, features = ["rustls-tls", "gzip", "brotli", "json"] }
 serde = { version = "1.0.164", features = ["derive"] }

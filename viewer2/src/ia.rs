@@ -10,6 +10,17 @@ const USER_AGENT: &str = "ArchiveBotViewer/2.0 (ArchiveTeam)";
 const SEARCH_URL: &str = "https://archive.org/services/search/v1/scrape";
 const ITEM_URL: &str = "https://archive.org/details/";
 const DOWNLOAD_URL: &str = "https://archive.org/download/";
+const FILENAME_ESCAPE_SET: percent_encoding::AsciiSet = percent_encoding::CONTROLS
+    .add(b' ')
+    .add(b'"')
+    .add(b'#')
+    .add(b'<')
+    .add(b'>')
+    .add(b'?')
+    .add(b'`')
+    .add(b'{')
+    .add(b'}')
+    .add(b'%');
 
 #[derive(Debug, Deserialize)]
 struct IASearchResult {
@@ -123,9 +134,14 @@ impl IAClient {
         identifier: &str,
         filename: &str,
     ) -> anyhow::Result<Vec<u8>> {
+        let escaped_filename =
+            percent_encoding::utf8_percent_encode(filename, &FILENAME_ESCAPE_SET);
         let request = self
             .client
-            .get(format!("{}{}/{}", DOWNLOAD_URL, identifier, filename))
+            .get(format!(
+                "{}{}/{}",
+                DOWNLOAD_URL, identifier, escaped_filename
+            ))
             .build()?;
 
         tracing::info!(url = %request.url(), "request");

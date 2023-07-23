@@ -142,6 +142,7 @@ dependencies = [
  "futures",
  "idna",
  "lazy_static",
+ "percent-encoding",
  "regex",
  "reqwest",
  "serde",
