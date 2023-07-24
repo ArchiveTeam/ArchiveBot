@@ -14,7 +14,7 @@
         <tr>
             <td>{{ row.who }}</td>
             <td class="numeric">{{ "{}"|format(row.size) }}</td>
-            <td class="numeric">{{ "{:.2}"|format(row.size / 1099511627776 * 2000) }}</td>
+            <td class="numeric">{{ "{:.2}"|format(row.cost) }}</td>
         </tr>
     {% endfor %}
 </table>

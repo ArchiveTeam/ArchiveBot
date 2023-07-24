@@ -557,6 +557,7 @@ impl Backend {
             .map(|row| CostRow {
                 who: row.0,
                 size: row.1,
+                cost: row.1 as f64 / 1099511627776.0 * 2000.0
             })
             .collect();
 
@@ -603,4 +604,5 @@ pub struct JobRow {
 pub struct CostRow {
     pub who: String,
     pub size: i64,
+    pub cost: f64,
 }
