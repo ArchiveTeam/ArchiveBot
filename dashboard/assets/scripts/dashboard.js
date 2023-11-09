@@ -663,6 +663,10 @@ class JobsRenderer {
 		// Hidden log windows aren't scrolled down while lines are added to them,
 		// but now that more are visible, we need to scroll them to the bottom.
 		for (const w of matchedWindows) {
+			// Don't scroll log windows we're mousing over
+			if (w.classList.contains("log-window-stopped")) {
+				continue;
+			}
 			scrollToBottom(w);
 		}
 	}
