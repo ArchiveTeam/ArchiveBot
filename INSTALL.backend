@@ -9,7 +9,7 @@ To run the backend, you will need:
 - Bundler
 - ExecJS supported runtime (for the dashboard)
   (see https://github.com/sstephenson/execjs)
-- Python 3.6+ and websockets (for the dashboard WebSocket)
+- Python 3.6+ and websockets 7.0 (for the dashboard WebSocket)
 
 (Little known fact: ArchiveBot is made to be as hard as possible to set
 up. If you have trouble with these instructions, drop by in IRC for
@@ -26,7 +26,7 @@ Quick install, for Debian and Debian-esque systems like Ubuntu:
     cd ArchiveBot
     git submodule update --init
     bundle install
-    pip install websockets  # Or apt install python3-websockets, or whichever method you prefer.
+    pip install websockets==7.0  # Or apt install python3-websockets, or whichever method you prefer, but it must be version 7.0.
 
 
 ** STEP 2: INSTALL REDIS **
