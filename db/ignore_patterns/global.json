@@ -214,7 +214,8 @@
         "^https?://platform\\.iteratehq\\.com/[0-9a-f-]+\\.png$",
         "^https?://accounts\\.google\\.com/(ServiceLogin|AccountChooser)\\?",
         "^https://discord\\.com/assets/",
-        "^https?://s7\\.addthis\\.com/"
+        "^https?://s7\\.addthis\\.com/",
+        "^https?://github\\.com/zloirock/core-js/"
     ],
     "type": "ignore_patterns"
 }
