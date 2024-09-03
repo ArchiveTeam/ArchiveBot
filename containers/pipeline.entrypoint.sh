@@ -7,6 +7,8 @@ NAME=${ARCHIVEBOT_PIPE_NAME:-pipeline}
 ARCHIVEBOT_PIPE_LOGS_DIR=${ARCHIVEBOT_PIPE_LOGS_DIR:-/pipeline/logs}
 ARCHIVEBOT_PIPE_AO_ONLY=${ARCHIVEBOT_PIPE_AO_ONLY:-0}
 ARCHIVEBOT_PIPE_LARGE=${ARCHIVEBOT_PIPE_LARGE:-0}
+BEFORE_PIPE=${ARCHIVEBOT_PIPE_BEFORE_PIPE:-}
+AFTER_PIPE=${ARCHIVEBOT_PIPE_AFTER_PIPE:-}
 # set AO_ONLY only if ARCHIVEBOT_PIPE_AO_ONLY is different than 0
 if [ "$ARCHIVEBOT_PIPE_AO_ONLY" -ne 0 ]; then
     AO_ONLY=1
@@ -24,8 +26,10 @@ export OPENSSL_CONF=${ARCHIVEBOT_PIPE_OPENSSL_CONF:-/home/archivebot/ArchiveBot/
 export REDIS_URL=${ARCHIVEBOT_PIPE_REDIS_URL:-redis://autossh:6379/0}
 export NO_SCREEN=1
 exec sudo -E -u archivebot \
+    $BEFORE_PIPE \
     run-pipeline3 pipeline.py \
     --disable-web-server \
     --concurrent $CONCURRENCY \
     $NAME \
-    | tee $ARCHIVEBOT_PIPE_LOGS_DIR/$BOOT.log.zst
+    $AFTER_PIPE \
+    | tee $ARCHIVEBOT_PIPE_LOGS_DIR/$BOOT.log
