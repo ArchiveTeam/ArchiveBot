@@ -340,13 +340,6 @@ impl Database {
                 .fetch_one(&mut *transaction)
                 .await?;
 
-        sqlx::query("UPDATE jobs SET url = ?, started_by = ? WHERE id = ?")
-            .bind(url)
-            .bind(started_by)
-            .bind(job_id)
-            .execute(&mut *transaction)
-            .await?;
-
         sqlx::query(
             "INSERT INTO jobs_search_index (jobs_search_index, rowid, domain, url)
             VALUES ('delete', ?, ?, ?)",
@@ -356,6 +349,13 @@ impl Database {
         .bind(old_url)
         .execute(&mut *transaction)
         .await?;
+
+        sqlx::query("UPDATE jobs SET url = ?, started_by = ? WHERE id = ?")
+            .bind(url)
+            .bind(started_by)
+            .bind(job_id)
+            .execute(&mut *transaction)
+            .await?;
 
         sqlx::query(
             "INSERT INTO jobs_search_index (rowid, domain, url)
