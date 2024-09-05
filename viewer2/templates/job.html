@@ -16,13 +16,13 @@
         {% for row in rows %}
             <tr>
                 <td>
-                    <a href="https://archive.org/download/{{ row.ia_item_id }}/{{ row.filename }}">
+                    <a href="https://archive.org/download/{{ row.ia_item_id|urlencode }}/{{ row.filename|urlencode }}">
                         {{ row.filename }}
                     </a>
                 </td>
                 <td>{{ row.size }}</td>
                 <td>
-                    <a href="{{ link_prefix }}item/{{ row.ia_item_id }}">
+                    <a href="{{ link_prefix }}item/{{ row.ia_item_id|urlencode }}">
                     {{ row.ia_item_id }}
                     </a>
                 </td>

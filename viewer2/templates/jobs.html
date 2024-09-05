@@ -11,7 +11,7 @@
         </tr>
         {% for row in rows %}
             <tr>
-                <td><a href="{{ link_prefix }}job/{{ row.job_id }}">{{ row.job_id }}</a></td>
+                <td><a href="{{ link_prefix }}job/{{ row.job_id|urlencode }}">{{ row.job_id }}</a></td>
                 <td>{{ row.domain }}</td>
                 <td>{{ row.url }}</td>
             </tr>

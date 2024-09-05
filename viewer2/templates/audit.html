@@ -11,7 +11,7 @@
     </tr>
     {% for item in no_json_items %}
         <tr>
-            <td><a href="{{ link_prefix }}job/{{ item.job_id }}">{{ item.job_id }}</a></td>
+            <td><a href="{{ link_prefix }}job/{{ item.job_id|urlencode }}">{{ item.job_id }}</a></td>
             <td>{{ item.domain }}</td>
         </tr>
     {% endfor %}
@@ -26,7 +26,7 @@
     </tr>
     {% for item in no_warc_items %}
         <tr>
-            <td><a href="{{ link_prefix }}job/{{ item.job_id }}">{{ item.job_id }}</a></td>
+            <td><a href="{{ link_prefix }}job/{{ item.job_id|urlencode }}">{{ item.job_id }}</a></td>
             <td>{{ item.domain }}</td>
         </tr>
     {% endfor %}

@@ -11,7 +11,7 @@
         </tr>
         {% for domain in domains %}
             <tr>
-                <td><a href="{{ link_prefix }}domain/{{ domain }}">{{ domain }}</a></td>
+                <td><a href="{{ link_prefix }}domain/{{ domain|urlencode }}">{{ domain }}</a></td>
             </tr>
         {% endfor %}
     </table>

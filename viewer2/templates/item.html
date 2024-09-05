@@ -17,7 +17,7 @@
             <tr>
                 <td>
                     {% if !row.job_id.is_empty() %}
-                    <a href="{{ link_prefix }}job/{{ row.job_id }}">
+                    <a href="{{ link_prefix }}job/{{ row.job_id|urlencode }}">
                         {{ row.filename }}
                     </a>
                     {% else %}
@@ -26,10 +26,10 @@
                 </td>
                 <td class="numeric">{{ row.size }}</td>
                 <td>
-                    <a href="https://archive.org/download/{{ identifier }}/{{ row.filename }}">download</a>
+                    <a href="https://archive.org/download/{{ identifier|urlencode }}/{{ row.filename|urlencode }}">download</a>
                     {% if !row.job_id.is_empty() %}
                         &nbsp;
-                        <a href="{{ link_prefix }}job/{{ row.job_id }}">job</a>
+                        <a href="{{ link_prefix }}job/{{ row.job_id|urlencode }}">job</a>
                     {% endif %}
                 </td>
             </tr>

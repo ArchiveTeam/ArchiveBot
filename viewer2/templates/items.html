@@ -11,7 +11,7 @@
         </tr>
         {% for identifier in identifiers %}
             <tr>
-                <td><a href="{{ link_prefix}}item/{{ identifier }}">{{ identifier }}</a></td>
+                <td><a href="{{ link_prefix}}item/{{ identifier|urlencode }}">{{ identifier }}</a></td>
             </tr>
         {% endfor %}
     </table>

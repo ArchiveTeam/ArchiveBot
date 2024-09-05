@@ -13,10 +13,10 @@
 
         {% for search_result in search_results %}
             {% if search_result.result_type == "domain" %}
-                <a href="{{ link_prefix }}domain/{{ search_result.domain }}">{{ search_result.domain }}</a>
+                <a href="{{ link_prefix }}domain/{{ search_result.domain|urlencode }}">{{ search_result.domain }}</a>
                 <i>{{ search_result.url }}</i>
             {% else %}
-                <a href="{{ link_prefix }}job/{{ search_result.job_id }}">{{ search_result.job_id }}</a>
+                <a href="{{ link_prefix }}job/{{ search_result.job_id|urlencode }}">{{ search_result.job_id }}</a>
                 <i>{{ search_result.domain }} {{ search_result.url }}</i>
             {% endif %}
             <br>
