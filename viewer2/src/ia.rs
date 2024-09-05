@@ -187,6 +187,19 @@ pub fn parse_filename(filename: &str) -> Option<FilenameParts> {
     })
 }
 
+fn parse_int<'de, D>(deserializer: D) -> Result<i64, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    Ok(match Value::deserialize(deserializer)? {
+        Value::String(s) => s.parse::<i64>().map_err(serde::de::Error::custom)?,
+        Value::Number(num) => num
+            .as_i64()
+            .ok_or_else(|| serde::de::Error::custom("invalid number"))?,
+        _ => return Err(serde::de::Error::custom("wrong type")),
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -271,17 +284,4 @@ mod tests {
         assert_eq!(&parts.aborted, "");
         assert_eq!(&parts.extension, "json");
     }
-}
-
-fn parse_int<'de, D>(deserializer: D) -> Result<i64, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    Ok(match Value::deserialize(deserializer)? {
-        Value::String(s) => s.parse::<i64>().map_err(serde::de::Error::custom)?,
-        Value::Number(num) => num
-            .as_i64()
-            .ok_or_else(|| serde::de::Error::custom("invalid number"))?,
-        _ => return Err(serde::de::Error::custom("wrong type")),
-    })
 }

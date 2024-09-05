@@ -5,10 +5,11 @@ use axum::{
     extract::{Path, Query, State},
     response::IntoResponse,
     routing::get,
-    Json, Router, Server,
+    Json, Router,
 };
 use chrono::{DateTime, Datelike, NaiveDate, Utc};
 use serde::Deserialize;
+use tokio::net::TcpListener;
 
 use crate::backend::{
     AuditItem, Backend, CostRow, DomainRow, ItemRow, JobRow, JobsRow, SearchResult,
@@ -46,9 +47,8 @@ pub async fn run(address: SocketAddr, link_prefix: &str, backend: Backend) -> an
 
     let app = Router::new().nest(link_prefix, router);
 
-    Server::bind(&address)
-        .serve(app.into_make_service())
-        .await?;
+    let listener = TcpListener::bind(address).await?;
+    axum::serve(listener, app.into_make_service()).await?;
 
     Ok(())
 }

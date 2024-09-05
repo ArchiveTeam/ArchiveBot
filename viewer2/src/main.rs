@@ -83,7 +83,7 @@ async fn main_inner() -> anyhow::Result<()> {
     init_logging();
 
     let mut backend = backend::Backend::open(&args.data_dir).await?;
-    let address = (args.host, args.port).try_into()?;
+    let address = (args.host, args.port).into();
     let web_future = web::run(address, &args.prefix, backend.clone());
     let backend_future = async {
         match args.backend_action {

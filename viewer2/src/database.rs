@@ -5,7 +5,7 @@ use std::{
     time::{SystemTime, UNIX_EPOCH},
 };
 
-use chrono::{DateTime, NaiveDate, NaiveDateTime, Utc};
+use chrono::{DateTime, NaiveDate, Utc};
 use sqlx::{migrate::Migrator, Connection, SqliteConnection};
 use tokio::sync::Mutex;
 
@@ -61,7 +61,7 @@ impl Database {
         let mut guard = self.connection.lock().await;
         let old_connection = std::mem::replace(&mut *guard, dummy_connection);
 
-        old_connection.close();
+        old_connection.close().await?;
 
         Ok(())
     }
@@ -73,7 +73,7 @@ impl Database {
         let row = sqlx::query_scalar("SELECT value FROM app_metadata WHERE key = 'last_update'")
             .fetch_optional(&mut *connection)
             .await?;
-        let oldest_date = DateTime::from_utc(NaiveDateTime::from_timestamp_opt(0, 0).unwrap(), Utc);
+        let oldest_date = DateTime::from_timestamp(0, 0).unwrap();
 
         match row {
             Some(row) => Ok(row),

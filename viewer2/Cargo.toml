@@ -7,22 +7,22 @@ publish = false
 [dependencies]
 anyhow = "1.0.71"
 askama = { version = "0.12.0", features = ["with-axum"] }
-askama_axum = "0.3.0"
-axum = "0.6.18"
+askama_axum = "0.4.0"
+axum = "0.7.5"
 chrono = { version = "0.4.26", features = ["serde"] }
 clap = { version = "4.3.5", features = ["derive"] }
 futures = "0.3.28"
-idna = "0.4.0"
+idna = "1.0.2"
 lazy_static = "1.4.0"
 percent-encoding = "2.3.0"
 regex = "1.8.4"
-reqwest = { version = "0.11.18", default-features = false, features = ["rustls-tls", "gzip", "brotli", "json"] }
+reqwest = { version = "0.12.7", default-features = false, features = ["rustls-tls", "gzip", "brotli", "json"] }
 serde = { version = "1.0.164", features = ["derive"] }
 serde_json = "1.0.97"
-sqlx = { version = "0.7.0", features = ["runtime-tokio-rustls", "sqlite", "macros", "migrate", "chrono"] }
+sqlx = { version = "0.8.2", features = ["runtime-tokio-rustls", "sqlite", "macros", "migrate", "chrono"] }
 tokio = { version = "1.28.2", features = ["full"] }
 tokio-util = "0.7.8"
-tower = "0.4.13"
+tower = "0.5.0"
 tracing = "0.1.37"
 tracing-subscriber = "0.3.17"
 url = "2.4.0"
