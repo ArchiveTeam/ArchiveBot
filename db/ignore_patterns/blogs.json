@@ -33,9 +33,7 @@
         "^https?://www\\.dreamwidth\\.org/tools/(memadd|tellafriend)\\?",
         "^https?://[^\\.]+\\.dreamwidth\\.org/.+[\\?&]mode=reply",
         "[?&]SuperSocializerAuth=(LiveJournal|Twitch|Twitter|Xing)(&|$)",
-        "^https?://wordpress\\.com/log-in\\?",
-        "^https?://www\\.google\\.com/calendar/render\\?",
-        "^https?://outlook\\.(office|live)\\.com/owa\\?"
+        "^https?://wordpress\\.com/log-in\\?"
     ],
     "type": "ignore_patterns"
 }
