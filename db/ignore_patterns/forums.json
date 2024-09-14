@@ -66,7 +66,10 @@
         "/discussion/comment/\\d+/(cry|persevere|triumph|frowning|anguished|fearful|weary|sleepy|tired_face|grimace|bawling|open_mouth|hushed|cold_sweat|scream|astonished|flushed|sleeping|dizzy|no_mouth|mask|star|cookie|warning|mrgreen|heart|heartbreak|kiss|\\+1|-1|grey_question|trollface|grey_question)\\.png",
         "/discussion/\\d+/(cry|persevere|triumph|frowning|anguished|fearful|weary|sleepy|tired_face|grimace|bawling|open_mouth|hushed|cold_sweat|scream|astonished|flushed|sleeping|dizzy|no_mouth|mask|star|cookie|warning|mrgreen|heart|heartbreak|kiss|\\+1|-1|grey_question|trollface|grey_question)\\.png",
         "/discussion/votecomment/",
-        "/discussion/flag/"
+        "/discussion/flag/",
+        "/posts/\\d+/share$",
+        "/threads/[^/]*\\.\\d+/page-%page%$",
+        "/threads/[^/]*\\.\\d+/poll/vote$"
     ],
     "type": "ignore_patterns"
 }
