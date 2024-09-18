@@ -124,7 +124,7 @@ VERSION = pipeline_version()
 DEFAULT_USER_AGENT = \
     'ArchiveTeam ArchiveBot/%s (wpull %s) and not Mozilla/5.0 ' \
     '(Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) ' \
-    'Chrome/95.0.4638.54 Safari/537.36' % (VERSION, wpull_version())
+    'Chrome/128.0.0.0 Safari/537.36' % (VERSION, wpull_version())
 
 _, _, _, pipeline_id = monitoring.pipeline_id()
 
