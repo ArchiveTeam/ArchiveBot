@@ -1,0 +1,12 @@
+{
+	"name": "dspace6",
+	"patterns": [
+		"/discover\\?((.*&)?filtertype(_\\d+)?=){2}",
+		"/search-filter\\?(.*&)?filtertype(_\\d+)?=",
+		"/simple-search\\?((.*&)?(filter_type(_\\d+)?|filtertype)=){2}",
+		"/simple-search\\?(?=(.*&)?(filter_type(_\\d+)?|filtertype)=)(.*&)?(author|subject|dateIssued)_page=",
+		"[?&]dateIssued_page=\\d{2,}(&|$)",
+		"[?&]starts_with="
+	],
+	"type": "ignore_patterns"
+}

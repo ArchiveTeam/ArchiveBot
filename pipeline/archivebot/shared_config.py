@@ -1,12 +1,16 @@
 import os
 import yaml
+try:
+	from yaml import CLoader as Loader
+except ImportError:
+	from yaml import Loader
 
 def config():
     my_dir = os.path.dirname(__file__)
     config_file = os.path.join(my_dir, '../../lib/shared_config.yml')
 
     with open(config_file, 'r') as f:
-        return yaml.load(f.read())
+        return yaml.load(f.read(), Loader = Loader)
 
 def log_channel():
     c = config()

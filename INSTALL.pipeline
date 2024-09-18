@@ -67,7 +67,7 @@ actually has.
 As user archivebot, in the FIRST tmux session:
 
     autossh -C -L 127.0.0.1:16379:127.0.0.1:6379 \
-      YOUR-USERNAME-GOES-HERE@archivebot.at.ninjawedding.org -N
+      YOUR-USERNAME-GOES-HERE@CONTROL-NODE-GOES-HERE -N
 
 
 As user archivebot, in the SECOND tmux session:
@@ -122,16 +122,14 @@ link to it, like this:
 
 As user archivebot, in the THIRD tmux session:
 
-    export RSYNC_URL=rsync://fos.textfiles.com/archivebot/
+    export RSYNC_URL=UPLOAD-URL-GOES-HERE
     ~/ArchiveBot/uploader/uploader.py $HOME/warcs4fos
 
 If you start multiple pipelines, you can safely point them to the
 same FINISHED_WARCS_DIR and run just one uploader.
 
 Check out the ArchiveBot dashboard to make sure everything is 
-working like it ought to:
-
-http://dashboard.at.ninjawedding.org/
+working like it ought to.
 
 
 ** STEP 5: MISCELLANEOUS **

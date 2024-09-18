@@ -194,10 +194,7 @@ Accepted parameters
 
 ``--youtube-dl``
     .. warning::
-      This is an often-glitchy feature and not all pipelines support it.  To find 
-      a pipeline that supports youtube-dl, use the `ArchiveBot pipeline monitor 
-      page <http://dashboard.at.ninjawedding.org/pipelines>`_ and look for a
-      pipeline whose version is newer than 20150512.01.  Also note that this 
+      This is an often-glitchy and/or broken feature.  Also note that this 
       command will only work when using ``!archiveonly`` or ``!ao`` to crawl specific 
       individual web pages with embedded video, and this will not work recursively 
       on an entire ``!archive`` or ``!a`` website grab.
@@ -324,7 +321,7 @@ Examples
 5.  Say you have this URL file::
 
         http://www.example.com/foo.html
-        http://www.bar.org:8080/qux.html
+        http://example.net:8080/qux.html
 
     and you submit it as an ``!archiveonly < FILE`` job.
 
@@ -332,9 +329,9 @@ Examples
     ``{primary_url}`` will be ``http://www.example.com/foo.html`` and
     ``{primary_netloc}`` will be ``www.example.com``.
 
-    When retriving requisites of ``http://www.bar.org:8080/qux.html```,
-    ``{primary_url}`` will be ``http://www.bar.org:8080/qux.html`` and
-    ``{primary_netloc}`` will be ``www.bar.org:8080``.
+    When retriving requisites of ``http://example.net:8080/qux.html```,
+    ``{primary_url}`` will be ``http://example.net:8080/qux.html`` and
+    ``{primary_netloc}`` will be ``example.net:8080``.
 
 unignore
 ========

@@ -22,6 +22,8 @@
 		"^https?://github\\.com/[^/]+/[^/]+/(issues|pull)/[^/]+/hovercard$",
 		"^https?://github\\.com/[^/]+/[^/]+/packages\\?(.*&)?sort_by=",
 		"^https?://github\\.com/[^/]+/[^/]+/used_by_list$",
+		"^https?://github\\.com/[^/]+/[^/]+/sponsor_button$",
+		"^https?://github\\.com/[^/]+/[^/]+/hovercards/citation/sidebar_partial\\?tree_name=",
 		"^https?://github\\.com/.*/(contributions-spider-graph|drag-drop|jump-to|profile-pins-element|randomColor|sortable-behavior|tweetsodium|user-status-submit)\\.js$"
 	],
 	"type": "ignore_patterns"
