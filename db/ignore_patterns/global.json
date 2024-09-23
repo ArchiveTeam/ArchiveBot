@@ -216,6 +216,7 @@
         "^https?://accounts\\.google\\.com/(ServiceLogin|AccountChooser)\\?",
         "^https://discord\\.com/assets/",
         "^https?://s7\\.addthis\\.com/",
+        "^https?://github\\.com/zloirock/core-js/",
         "^https?://www\\.google\\.com/calendar/(render|event)\\?",
         "^https?://outlook\\.(office|live)\\.com/owa/?\\?"
     ],
