@@ -12,7 +12,8 @@
 		"^https?://video\\.csfd\\.cz/files/videos/",
 		"^https?://assets\\d*\\.ign\\.com/videos/zencoder/.*\\.mp4$",
 		"^https?://s3\\.amazonaws\\.com/o\\.videoarchive\\.ign\\.com/.*\\.mp4$",
-		"^https?://(cuts\\.diamond|mlb-cuts-diamond)\\.mlb\\.com/FORGE/.*\\.mp4$"
+		"^https?://(cuts\\.diamond|mlb-cuts-diamond)\\.mlb\\.com/FORGE/.*\\.mp4$",
+		"^https?://video\\.seattle\\.gov/"
 	],
 	"type": "ignore_patterns"
 }
