@@ -219,7 +219,8 @@
         "^https?://s7\\.addthis\\.com/",
         "^https?://github\\.com/zloirock/core-js/",
         "^https?://www\\.google\\.com/calendar/(render|event)\\?",
-        "^https?://outlook\\.(office|live)\\.com/owa/?\\?"
+        "^https?://outlook\\.(office|live)\\.com/owa/?\\?",
+        "^https?://twemoji\\.maxcdn\\.com/"
     ],
     "type": "ignore_patterns"
 }
