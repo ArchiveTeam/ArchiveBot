@@ -1,0 +1,11 @@
+{
+    "agents": [
+        {
+            "aliases": [
+                "wii"
+            ],
+            "name": "Opera/9.10 (Nintendo Wii; U; ; 3642; en)"
+        }
+    ],
+    "type": "user_agents"
+}
