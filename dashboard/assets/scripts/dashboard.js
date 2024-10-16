@@ -693,7 +693,13 @@ class JobsRenderer {
 		this.firstFilterMatch = null;
 		for (const job of this.jobs.sorted) {
 			const w = this.renderInfo[job.ident].logWindow;
-			if (!query.test(job.url)) {
+			const show =
+			(byId("filter-job-id").checked && query.test(job.ident)) ||
+			(byId("filter-job-url").checked && query.test(job.url)) ||
+			(byId("filter-job-note").checked && query.test(job.note)) ||
+			(byId("filter-job-pipeline").checked && (query.test(job.pipeline_id) || query.test(this.pipelines[job.pipeline_id]))) ||
+			(this.showNicks && byId("filter-job-nick").checked && query.test(job.started_by));
+			if (!show) {
 				w.classList.add("log-window-hidden");
 
 				unmatchedWindows.push(w);
@@ -1086,6 +1092,11 @@ class Dashboard {
 		const showNicks = args.showNicks ? Boolean(Number(args.showNicks)) : false;
 		const contextMenu = args.contextMenu ? Boolean(Number(args.contextMenu)) : true;
 		this.initialFilter = args.initialFilter ?? "^$";
+		const filterJobID = args.filterJobID ? Boolean(Number(args.filterJobID)) : true;
+		const filterJobURL = args.filterJobURL ? Boolean(Number(args.filterJobURL)) : true;
+		const filterJobNote = args.filterJobNote ? Boolean(Number(args.filterJobNote)) : true;
+		const filterJobPipe = args.filterJobPipe ? Boolean(Number(args.filterJobPipe)) : true;
+		const filterJobNick = args.filterJobNick ? Boolean(Number(args.filterJobNick)) : true;
 		const showAllHeaders = args.showAllHeaders ? Boolean(Number(args.showAllHeaders)) : true;
 		const showRunningJobs = args.showRunningJobs ? Boolean(Number(args.showRunningJobs)) : true;
 		const showFinishedJobs = args.showFinishedJobs ? Boolean(Number(args.showFinishedJobs)) : true;
@@ -1144,6 +1155,29 @@ class Dashboard {
 
 		if (!showNicks) {
 			addPageStyles(".job-nick-aligned { width: 0; }");
+		} else {
+			byId("filter-types").lastChild.after(
+				h("input", {
+					type: "checkbox",
+					id: "filter-job-nick",
+					onclick: () => { ds.jobsRenderer.applyFilter(); },
+					checked: true,
+				})
+			);
+			byId("filter-types").lastChild.after("\n\t\t\t");
+			byId("filter-types").lastChild.after(
+				h("label", { className: "filter-job", htmlFor: "filter-job-nick", textContent: "Nick" }),
+			);
+			byId("filter-types").lastChild.after(h("br"));
+			byId("filter-types").lastChild.after("\n");
+		}
+
+		byId("filter-job-id").checked = filterJobID;
+		byId("filter-job-url").checked = filterJobURL;
+		byId("filter-job-note").checked = filterJobNote;
+		byId("filter-job-pipeline").checked = filterJobPipe;
+		if (showNicks) {
+			byId("filter-job-nick").checked = filterJobNick;
 		}
 
 		if (args.initialFilter != null) {
@@ -1329,6 +1363,12 @@ ${String(kbPerSec).padStart(3, "0")} KB/s`;
 			ds.showFatalJobs(!byId("show-fatal-jobs").checked);
 		} else if (ev.which === 115 /* s */) {
 			ds.showAbortedJobs(!byId("show-aborted-jobs").checked);
+		} else if (ev.which === 117 /* u */) {
+			byId("filter-job-url").click();
+		} else if (ev.which === 101 /* e */) {
+			byId("filter-job-note").click();
+		} else if (ev.which === 112 /* p */) {
+			byId("filter-job-pipeline").click();
 		}
 	}
 
