@@ -448,7 +448,21 @@ kbd {
 			<a href="https://wiki.archiveteam.org/index.php?title=ArchiveBot" class="underlined-a">ArchiveBot</a>
 			tracking <span id="num-crawls">0</span> crawls.
 			See also <a href="pipelines" class="underlined-a">pipeline</a> or <a href="logs/recent" class="underlined-a">job</a> reports.
-			Logs <input id="filter-box" type="text" size="21" title="Show logs for jobs matching this regular expression. For example ^https?://.*">
+			<details class="drop-down">
+			<summary>Logs</summary>
+			<div id="filter-types">
+			Search:<br>
+			<input type="checkbox" id="filter-job-id" onclick="ds.jobsRenderer.applyFilter();" checked>
+			<label class="filter-job" for="filter-job-id">ID</label><br>
+			<input type="checkbox" id="filter-job-url" onclick="ds.jobsRenderer.applyFilter();" accesskey="u" checked>
+			<label class="filter-job" for="filter-job-url">URL</label><br>
+			<input type="checkbox" id="filter-job-note" onclick="ds.jobsRenderer.applyFilter();" accesskey="e" checked>
+			<label class="filter-job" for="filter-job-note" title="Explain">Note</label><br>
+			<input type="checkbox" id="filter-job-pipeline" onclick="ds.jobsRenderer.applyFilter();" accesskey="p" checked>
+			<label class="filter-job" for="filter-job-pipeline">Pipe</label><br>
+			</div>
+			</details>
+			<input id="filter-box" type="text" size="21" title="Show logs for jobs matching this regular expression. For example ^https?://.*">
 			<input id="set-filter-all" onclick="ds.setFilter('');" type="button" value="All"  class="button">
 			<input id="set-filter-none" onclick="ds.setFilter('^$');" type="button" value="None" class="button">
 			<input type="checkbox" id="show-all-headers" onclick="ds.showAllHeaders(this.checked);">
@@ -521,6 +535,9 @@ kbd {
 				<li><kbd>b</kbd> - show/hide header+log for failed jobs
 				<li><kbd>c</kbd> - show/hide header+log for fatal jobs
 				<li><kbd>s</kbd> - show/hide header+log for aborted jobs
+				<li><kbd>u</kbd> - enable/disable URL search for job log filter
+				<li><kbd>e</kbd> - enable/disable note/explain search for job log filter
+				<li><kbd>p</kbd> - enable/disable pipeline search for job log filter
 				<li><kbd>?</kbd> - show/hide help text
 			</ul>
 			<p>
@@ -537,6 +554,12 @@ kbd {
 			</p>
 			<ul>
 				<li>To specify an initial filter, add <kbd><span class="url-q-or-amp">?</span>initialFilter=TEXT</kbd> to the dashboard URL. The default is <kbd>^$</kbd>.</li>
+				<li>To initially disable filtering by job details, add these to the dashboard URL. The default is to filter by them.
+					<kbd><span class="url-q-or-amp">?</span>filterJobID=0</kbd>
+					<kbd><span class="url-q-or-amp">?</span>filterJobURL=0</kbd>
+					<kbd><span class="url-q-or-amp">?</span>filterJobNote=0</kbd>
+					<kbd><span class="url-q-or-amp">?</span>filterJobPipe=0</kbd>
+				</li>
 				<li>To initially hide headers for hidden job logs, add <kbd><span class="url-q-or-amp">?</span>showAllHeaders=0</kbd> to the dashboard URL. The default is to show them.</li>
 				<li>To initially hide different job types, add these to the dashboard URL. The default is to show them.
 					<kbd><span class="url-q-or-amp">?</span>showRunningJobs=0</kbd>
