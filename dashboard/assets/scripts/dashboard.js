@@ -621,14 +621,15 @@ class JobsRenderer {
 	}
 
 	applyFilter() {
-		const query = this.filterBox.value;
+		const query = RegExp(this.filterBox.value);
 		let matches = 0;
 		const matchedWindows = [];
 		const unmatchedWindows = [];
 		this.firstFilterMatch = null;
 		for (const job of this.jobs.sorted) {
 			const w = this.renderInfo[job.ident].logWindow;
-			if (!RegExp(query).test(job.url)) {
+			const show = query.test(job.url) || (this.showNicks && query.test(job.started_by));
+			if (!show) {
 				w.classList.add("log-window-hidden");
 
 				unmatchedWindows.push(w);
