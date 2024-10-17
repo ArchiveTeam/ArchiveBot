@@ -220,7 +220,8 @@
         "^https?://github\\.com/zloirock/core-js/",
         "^https?://www\\.google\\.com/calendar/(render|event)\\?",
         "^https?://outlook\\.(office|live)\\.com/owa/?\\?",
-        "^https?://twemoji\\.maxcdn\\.com/"
+        "^https?://twemoji\\.maxcdn\\.com/",
+        "^https?://cct\\.google/"
     ],
     "type": "ignore_patterns"
 }
