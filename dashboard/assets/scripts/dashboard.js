@@ -1021,6 +1021,7 @@ class Dashboard {
 		const showNicks = args.showNicks ? Boolean(Number(args.showNicks)) : false;
 		const contextMenu = args.contextMenu ? Boolean(Number(args.contextMenu)) : true;
 		const initialFilter = args.initialFilter ?? "^$";
+		const showAllHeaders = args.showAllHeaders ? Boolean(Number(args.showAllHeaders)) : true;
 		const loadRecent = args.loadRecent ? Boolean(Number(args.loadRecent)) : true;
 		this.debug = args.debug ? Boolean(Number(args.debug)) : false;
 
@@ -1068,6 +1069,8 @@ class Dashboard {
 		if (!showNicks) {
 			addPageStyles(".job-nick-aligned { width: 0; }");
 		}
+
+		this.showAllHeaders(showAllHeaders);
 
 		this.setFilter(initialFilter);
 
@@ -1248,6 +1251,11 @@ ${String(kbPerSec).padStart(3, "0")} KB/s`;
 	setFilter(value) {
 		byId("filter-box").value = value;
 		byId("filter-box").onchange();
+	}
+
+	showAllHeaders(value) {
+		byId('show-all-headers').checked = value;
+		byId('hide-headers').sheet.disabled = value;
 	}
 }
 

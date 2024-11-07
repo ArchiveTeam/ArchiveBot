@@ -391,6 +391,12 @@ kbd {
 	top: 0;
 }
 </style>
+<style id="hide-headers">
+.log-container:has(.log-window-hidden) {
+	display: none;
+	content-visibility: hidden;
+}
+</style>
 <div id="context-menu"></div>
 <div class="padded-page">
 	<div class="header">
@@ -401,6 +407,8 @@ kbd {
 			Show: <input id="filter-box" type="text" size="21">
 			<input onclick="ds.setFilter('');" type="button" value="  All  " class="button">
 			<input onclick="ds.setFilter('^$');" type="button" value="None" class="button">
+			<input type="checkbox" id="show-all-headers" onclick="ds.showAllHeaders(this.checked);">
+			<label for="show-all-headers">Show all headers</label>
 		</div>
 		<div id="header-right">
 			<div id="meta-info"><span class="adbox">😊</span></div>
