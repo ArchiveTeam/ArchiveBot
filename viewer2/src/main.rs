@@ -3,12 +3,14 @@ mod database;
 mod ia;
 mod web;
 
-use std::{fmt::Display, net::IpAddr, path::PathBuf, process::ExitCode, time::Duration};
+use std::{fmt::Display, net::IpAddr, path::PathBuf, process::ExitCode, sync::LazyLock, time::{Duration, Instant}};
 
 use clap::Parser;
 use tokio_util::sync::CancellationToken;
 use tracing::Level;
 use tracing_subscriber::prelude::*;
+
+static START_TIME: LazyLock<Instant> = LazyLock::new(Instant::now);
 
 #[derive(Parser, Debug)]
 #[command(author, version)]
@@ -78,6 +80,8 @@ async fn main() -> ExitCode {
 }
 
 async fn main_inner() -> anyhow::Result<()> {
+    let _ = *START_TIME;
+
     let args = Args::parse();
 
     init_logging();

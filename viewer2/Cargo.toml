@@ -3,6 +3,7 @@ name = "archivebot-viewer"
 version = "0.0.0"
 edition = "2021"
 publish = false
+rust-version = "1.80"
 
 [dependencies]
 anyhow = "1.0.71"
@@ -12,6 +13,7 @@ axum = "0.7.5"
 chrono = { version = "0.4.26", features = ["serde"] }
 clap = { version = "4.3.5", features = ["derive"] }
 futures = "0.3.28"
+git-version = "0.3.9"
 idna = "1.0.2"
 lazy_static = "1.4.0"
 percent-encoding = "2.3.0"

@@ -38,5 +38,12 @@
     <a href="{{ link_prefix }}stats">Stats</a> &ndash; graphs of resource usage on Internet Archive<br>
 
     <p>Last update: {{ last_update }}</p>
+    <details>
+        <summary>Debug info</summary>
+        <ul>
+            <li>Git commit hash: {{ git_hash }}</li>
+            <li>Executable uptime: {{ uptime.0 }}d {{ uptime.1 }}h {{ uptime.2 }}m {{ uptime.3 }}s</li>
+        </ul>
+    </details>
     <p>Attention: Please <a href="{{ link_prefix }}faq">read this</a> to learn how this index works.</p>
 {% endblock %}

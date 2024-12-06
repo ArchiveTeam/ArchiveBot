@@ -11,8 +11,9 @@ use chrono::{DateTime, Datelike, NaiveDate, Utc};
 use serde::Deserialize;
 use tokio::net::TcpListener;
 
-use crate::backend::{
-    AuditItem, Backend, CostRow, DomainRow, ItemRow, JobRow, JobsRow, SearchResult,
+use crate::{
+    backend::{AuditItem, Backend, CostRow, DomainRow, ItemRow, JobRow, JobsRow, SearchResult},
+    START_TIME,
 };
 
 const PAGE_LIMIT: i64 = 1000;
@@ -130,6 +131,8 @@ struct IndexTemplate {
     query: String,
     search_results: Vec<SearchResult>,
     last_update: DateTime<Utc>,
+    git_hash: &'static str,
+    uptime: (u32, u8, u8, u8), // (days, hours, minutes, seconds)
 }
 
 async fn index_handler(
@@ -146,11 +149,19 @@ async fn index_handler(
     };
     let last_update = state.backend.get_last_update().await?;
 
+    let uptime = START_TIME.elapsed();
+    let uptime_sec = (uptime.as_secs() % 60) as u8;
+    let uptime_min = (uptime.as_secs() / 60 % 60) as u8;
+    let uptime_hour = (uptime.as_secs() / 3600 % 60) as u8;
+    let uptime_day = (uptime.as_secs() / 86400) as u32;
+
     Ok(IndexTemplate {
         link_prefix: state.link_prefix,
         query: search_params.q,
         search_results,
         last_update,
+        git_hash: git_version::git_version!(fallback = "unknown"),
+        uptime: (uptime_day, uptime_hour, uptime_min, uptime_sec),
     })
 }
 
