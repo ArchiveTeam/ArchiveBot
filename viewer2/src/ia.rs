@@ -133,7 +133,7 @@ impl IAClient {
         &mut self,
         identifier: &str,
         filename: &str,
-    ) -> anyhow::Result<Vec<u8>> {
+    ) -> reqwest::Result<Vec<u8>> {
         let escaped_filename =
             percent_encoding::utf8_percent_encode(filename, &FILENAME_ESCAPE_SET);
         let request = self

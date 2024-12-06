@@ -262,7 +262,16 @@ impl Backend {
             }
 
             for (ia_item_id, filename, job_id) in rows {
-                let json_data = client.fetch_item_file(&ia_item_id, &filename).await?;
+                let response = client.fetch_item_file(&ia_item_id, &filename).await;
+
+                if let Err(error) = &response {
+                    if let Some(reqwest::StatusCode::NOT_FOUND) = error.status() {
+                        tracing::warn!(filename, ?error, "skipping");
+                        continue;
+                    }
+                }
+
+                let json_data = response?;
 
                 match serde_json::from_slice::<JsonMetadata>(&json_data) {
                     Ok(json_doc) => {
