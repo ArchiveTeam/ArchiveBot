@@ -37,6 +37,7 @@
         "/index\\.php\\?app=core&module=system&controller=login",
         "/index\\.php\\?app=core&module=reports&rcom=post",
         "/index\\.php\\?act=(Login|Post|Forward)",
+        "/index\\.php\\?action=(login|register|activate)",
         "/new_reply_form\\.asp\\?",
         "/pm_buddy_list\\.asp\\?",
         "/pm_new_message_form\\.asp\\?",
