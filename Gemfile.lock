@@ -58,7 +58,7 @@ GEM
     erubis (2.7.0)
     faraday (0.9.0)
       multipart-post (>= 1.2, < 3)
-    ffi (1.9.3)
+    ffi (1.12.2)
     ffi-rzmq (2.0.5)
       ffi-rzmq-core (>= 1.0.6)
     ffi-rzmq-core (1.0.6)
@@ -358,7 +358,7 @@ DEPENDENCIES
   cinch (~> 2.2.0)
   cucumber
   erubis
-  ffi-rzmq (~>2.0)
+  ffi-rzmq (~> 2.0)
   hiredis
   json
   listen (~> 2.0)
