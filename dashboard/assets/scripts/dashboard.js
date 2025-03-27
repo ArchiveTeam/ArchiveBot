@@ -122,14 +122,6 @@ function regExpEscape(s) {
 	return escaped;
 }
 
-function addAnyChangeListener(elem, func) {
-	// DOM0 handler for convenient use by Clear button
-	elem.onchange = func;
-	elem.addEventListener("keydown", func, false);
-	elem.addEventListener("paste", func, false);
-	elem.addEventListener("input", func, false);
-}
-
 function scrollToBottom(elem) {
 	// Scroll to the bottom. To avoid serious performance problems in Firefox,
 	// use a big number instead of elem.scrollHeight.
@@ -284,7 +276,25 @@ class JobsRenderer {
 	constructor(container, filterBox, historyLines, showNicks, contextMenuRenderer) {
 		this.container = container;
 		this.filterBox = filterBox;
-		addAnyChangeListener(this.filterBox, () => this.applyFilter());
+		this.filterTimeout = null;
+		this.filterBox.onchange = (e) => {
+			const repeats = [
+					"insertText",
+					"deleteContent",
+					"deleteContentForward",
+					"deleteContentBackward",
+			];
+			let ms = e && e.inputType && repeats.includes(e.inputType) ? 100 : 0;
+			ms = !this.filterBox.value ? 0 : ms;
+			clearTimeout(this.filterTimeout);
+			this.filterTimeout = setTimeout(() => {
+				if (this.filterBox.value !== this.filterBox.old) {
+					this.applyFilter();
+					this.filterBox.old = this.filterBox.value;
+				}
+			}, ms);
+		};
+		this.filterBox.oninput = this.filterBox.onchange;
 		this.filterBox.onkeypress = (ev) => {
 			// Don't let `j` or `k` in the filter box cause the job window to switch
 			ev.stopPropagation();
