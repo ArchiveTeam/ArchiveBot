@@ -492,10 +492,12 @@ class JobsRenderer {
 			logSegment.appendChild(h("div", Reusable.obj_className_line_stdout, line));
 			renderedLines += 1;
 
-			// Check for 'Finished RsyncUpload for Item'
-			// instead of 'Starting MarkItemAsDone for Item'
-			// because the latter is often missing
-			if (/^Finished RsyncUpload for Item/.test(line)) {
+			// Check for several completion messages
+			// because some of them are often missing
+			// Ignore error jobs as they get done messages.
+			if (!info.statsElements.jobInfo.classList.contains("job-info-fatal") &&
+			    !info.statsElements.jobInfo.classList.contains("job-info-aborted") &&
+			    /^ *[1-9][0-9]* bytes\.$|^Starting (RelabelIfAborted|MarkItemAsDone) for Item$|^Finished (WgetDownload|MoveFiles|StopHeartbeat) for Item$/.test(line)) {
 				info.statsElements.jobInfo.classList.add("job-info-done");
 				this.jobs.markFinished(ident);
 			} else if (
