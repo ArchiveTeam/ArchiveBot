@@ -225,10 +225,11 @@ class JobsTracker {
 }
 
 class JobRenderInfo {
-	constructor(logWindow, logSegment, statsElements, jobNote, lineCountWindow, lineCountSegments) {
+	constructor(logWindow, logSegment, statsElements, jobUrl, jobNote, lineCountWindow, lineCountSegments) {
 		this.logWindow = logWindow;
 		this.logSegment = logSegment;
 		this.statsElements = statsElements;
+		this.jobUrl = jobUrl;
 		this.jobNote = jobNote;
 		this.lineCountWindow = lineCountWindow;
 		this.lineCountSegments = lineCountSegments;
@@ -411,13 +412,14 @@ class JobsRenderer {
 				],
 			),
 		]);
+		const jobUrl = statsElements.jobInfo.querySelector(".job-url");
 
 		const logWindow = h("div", logWindowAttrs, logSegment);
 		const div = h("div", { className: "log-container", id: `log-container-${ident}` }, [
 			h("div", { className: "job-header" }, [statsElements.jobInfo, h("span", { className: "job-ident" }, ident)]),
 			logWindow,
 		]);
-		this.renderInfo[ident] = new JobRenderInfo(logWindow, logSegment, statsElements, jobNote, 0, [0]);
+		this.renderInfo[ident] = new JobRenderInfo(logWindow, logSegment, statsElements, jobUrl, jobNote, 0, [0]);
 		this.container.insertBefore(div, beforeElement);
 		// Filter hasn't changed, but we might need to filter out the new job, or
 		// add/remove log-window-expanded class
@@ -580,6 +582,11 @@ class JobsRenderer {
 
 		// Update note
 		info.jobNote.textContent = isBlank(jobData.note) ? "" : ` (${jobData.note})`;
+		if (isBlank(jobData.note)) {
+			info.jobUrl.removeAttribute("title");
+		} else {
+			info.jobUrl.title = jobData.note;
+		}
 
 		info.lineCountWindow += linesRendered;
 		info.lineCountSegments[info.lineCountSegments.length - 1] += linesRendered;
