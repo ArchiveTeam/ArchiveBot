@@ -1029,7 +1029,7 @@ class Dashboard {
 		const batchMaxItems = args.batchMaxItems ? Number(args.batchMaxItems) : 250;
 		const showNicks = args.showNicks ? Boolean(Number(args.showNicks)) : false;
 		const contextMenu = args.contextMenu ? Boolean(Number(args.contextMenu)) : true;
-		const initialFilter = args.initialFilter ?? "^$";
+		this.initialFilter = args.initialFilter ?? "^$";
 		const loadRecent = args.loadRecent ? Boolean(Number(args.loadRecent)) : true;
 		this.debug = args.debug ? Boolean(Number(args.debug)) : false;
 
@@ -1078,7 +1078,19 @@ class Dashboard {
 			addPageStyles(".job-nick-aligned { width: 0; }");
 		}
 
-		this.setFilter(initialFilter);
+		if (args.initialFilter != null) {
+			byId("set-filter-none").after(
+				h("input", {
+					className: "button",
+					type: "button",
+					id: "set-filter-initial",
+					onclick: () => { ds.setFilter(ds.initialFilter) },
+					value: "Initial",
+				})
+			);
+			byId("set-filter-none").after("\n");
+		}
+		this.setFilter(this.initialFilter);
 
 		const finishSetup = () => {
 			byId("meta-info").innerHTML = "";
@@ -1200,6 +1212,8 @@ ${String(kbPerSec).padStart(3, "0")} KB/s`;
 			ev.preventDefault();
 			byId("filter-box").focus();
 			byId("filter-box").select();
+		} else if (ev.which === 105 /* i */) {
+			ds.setFilter(ds.initialFilter);
 		} else if (ev.which === 118 /* v */) {
 			window.open(this.jobsRenderer.firstFilterMatch.url);
 		}
