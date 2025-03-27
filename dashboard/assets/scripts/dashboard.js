@@ -1041,6 +1041,10 @@ class Dashboard {
 		const contextMenu = args.contextMenu ? Boolean(Number(args.contextMenu)) : true;
 		this.initialFilter = args.initialFilter ?? "^$";
 		const showAllHeaders = args.showAllHeaders ? Boolean(Number(args.showAllHeaders)) : true;
+		const showRunningJobs = args.showRunningJobs ? Boolean(Number(args.showRunningJobs)) : true;
+		const showFinishedJobs = args.showFinishedJobs ? Boolean(Number(args.showFinishedJobs)) : true;
+		const showFatalJobs = args.showFatalJobs ? Boolean(Number(args.showFatalJobs)) : true;
+		const showAbortedJobs = args.showAbortedJobs ? Boolean(Number(args.showAbortedJobs)) : true;
 		const loadRecent = args.loadRecent ? Boolean(Number(args.loadRecent)) : true;
 		this.debug = args.debug ? Boolean(Number(args.debug)) : false;
 
@@ -1108,6 +1112,11 @@ class Dashboard {
 		this.setFilter(this.initialFilter);
 
 		this.showAllHeaders(showAllHeaders);
+
+		this.showRunningJobs(showRunningJobs);
+		this.showFinishedJobs(showFinishedJobs);
+		this.showFatalJobs(showFatalJobs);
+		this.showAbortedJobs(showAbortedJobs);
 
 		const finishSetup = () => {
 			byId("meta-info").innerHTML = "";
@@ -1235,6 +1244,14 @@ ${String(kbPerSec).padStart(3, "0")} KB/s`;
 			window.open(this.jobsRenderer.firstFilterMatch.url);
 		} else if (ev.which === 104 /* h */) {
 			ds.showAllHeaders(!byId("show-all-headers").checked);
+		} else if (ev.which === 114 /* r */) {
+			ds.showRunningJobs(!byId("show-running-jobs").checked);
+		} else if (ev.which === 100 /* d */) {
+			ds.showFinishedJobs(!byId("show-finished-jobs").checked);
+		} else if (ev.which === 99 /* c */) {
+			ds.showFatalJobs(!byId("show-fatal-jobs").checked);
+		} else if (ev.which === 115 /* s */) {
+			ds.showAbortedJobs(!byId("show-aborted-jobs").checked);
 		}
 	}
 
@@ -1293,6 +1310,26 @@ ${String(kbPerSec).padStart(3, "0")} KB/s`;
 	showAllHeaders(value) {
 		byId('show-all-headers').checked = value;
 		byId('hide-headers').sheet.disabled = value;
+	}
+
+	showRunningJobs(value) {
+		byId('show-running-jobs').checked = value;
+		byId('hide-running').sheet.disabled = value;
+	}
+
+	showFinishedJobs(value) {
+		byId('show-finished-jobs').checked = value;
+		byId('hide-done').sheet.disabled = value;
+	}
+
+	showFatalJobs(value) {
+		byId('show-fatal-jobs').checked = value;
+		byId('hide-fatal').sheet.disabled = value;
+	}
+
+	showAbortedJobs(value) {
+		byId('show-aborted-jobs').checked = value;
+		byId('hide-aborted').sheet.disabled = value;
 	}
 }
 
