@@ -1030,6 +1030,7 @@ class Dashboard {
 		const showNicks = args.showNicks ? Boolean(Number(args.showNicks)) : false;
 		const contextMenu = args.contextMenu ? Boolean(Number(args.contextMenu)) : true;
 		this.initialFilter = args.initialFilter ?? "^$";
+		const showAllHeaders = args.showAllHeaders ? Boolean(Number(args.showAllHeaders)) : true;
 		const loadRecent = args.loadRecent ? Boolean(Number(args.loadRecent)) : true;
 		this.debug = args.debug ? Boolean(Number(args.debug)) : false;
 
@@ -1091,6 +1092,8 @@ class Dashboard {
 			byId("set-filter-none").after("\n");
 		}
 		this.setFilter(this.initialFilter);
+
+		this.showAllHeaders(showAllHeaders);
 
 		const finishSetup = () => {
 			byId("meta-info").innerHTML = "";
@@ -1216,6 +1219,8 @@ ${String(kbPerSec).padStart(3, "0")} KB/s`;
 			ds.setFilter(ds.initialFilter);
 		} else if (ev.which === 118 /* v */) {
 			window.open(this.jobsRenderer.firstFilterMatch.url);
+		} else if (ev.which === 104 /* h */) {
+			ds.showAllHeaders(!byId("show-all-headers").checked);
 		}
 	}
 
@@ -1271,6 +1276,11 @@ ${String(kbPerSec).padStart(3, "0")} KB/s`;
 	setFilter(value) {
 		byId("filter-box").value = value;
 		byId("filter-box").onchange();
+	}
+
+	showAllHeaders(value) {
+		byId('show-all-headers').checked = value;
+		byId('hide-headers').sheet.disabled = value;
 	}
 }
 
