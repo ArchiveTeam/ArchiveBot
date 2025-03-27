@@ -399,8 +399,8 @@ kbd {
 			tracking <span id="num-crawls">0</span> crawls.
 			See also <a href="pipelines" class="underlined-a">pipeline</a> or <a href="logs/recent" class="underlined-a">job</a> reports.
 			Logs <input id="filter-box" type="text" size="21" title="Show logs for jobs matching this regular expression. For example ^https?://.*">
-			<input onclick="ds.setFilter('');" type="button" value="  All  " class="button">
-			<input onclick="ds.setFilter('^$');" type="button" value="None" class="button">
+			<input id="set-filter-all" onclick="ds.setFilter('');" type="button" value="All"  class="button">
+			<input id="set-filter-none" onclick="ds.setFilter('^$');" type="button" value="None" class="button">
 		</div>
 		<div id="header-right">
 			<div id="meta-info"><span class="adbox">😊</span></div>
