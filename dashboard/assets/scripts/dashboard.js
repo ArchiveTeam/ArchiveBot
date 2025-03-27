@@ -1040,6 +1040,8 @@ class Dashboard {
 		}
 
 		this.host = args.host ? args.host : location.hostname;
+		this.port = args.port ? `:${Number(args.port)}` : '';
+
 		this.dumpTraffic = args.dumpMax && Number(args.dumpMax) > 0;
 		if (this.dumpTraffic) {
 			this.dumpMax = Number(args.dumpMax);
@@ -1182,7 +1184,7 @@ ${String(kbPerSec).padStart(3, "0")} KB/s`;
 				const size_mb = Math.round((100 * ev.total) / 1e6) / 100;
 				byId("meta-info").textContent = `Recent data: ${percent}% (${size_mb}MB)`;
 			};
-			xhr.open("GET", `//${this.host}/logs/recent?cb=${Date.now()}${Math.random()}`);
+			xhr.open("GET", `//${this.host}${this.port}/logs/recent?cb=${Date.now()}${Math.random()}`);
 			xhr.setRequestHeader("Accept", "application/json");
 			xhr.send("");
 		});
