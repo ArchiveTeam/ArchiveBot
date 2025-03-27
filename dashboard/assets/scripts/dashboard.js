@@ -1039,6 +1039,8 @@ class Dashboard {
 
 		this.host = args.host ? args.host : location.hostname;
 		this.port = args.port ? `:${Number(args.port)}` : '';
+		const wsproto = window.location.protocol === "https:" ? "wss:" : "ws:";
+		this.websocketUrl = args.websocketUrl ?? `${wsproto}//${this.host}:4568/stream`;
 
 		this.dumpTraffic = args.dumpMax && Number(args.dumpMax) > 0;
 		if (this.dumpTraffic) {
@@ -1233,9 +1235,7 @@ ${String(kbPerSec).padStart(3, "0")} KB/s`;
 	}
 
 	connectWebSocket() {
-		const wsproto = window.location.protocol === "https:" ? "wss:" : "ws:";
-
-		this.ws = new WebSocket(`${wsproto}//${this.host}:4568/stream`);
+		this.ws = new WebSocket(this.websocketUrl);
 
 		this.ws.onmessage = (ev) => {
 			this.newItemsReceived += 1;
