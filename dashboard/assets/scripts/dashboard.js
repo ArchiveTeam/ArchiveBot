@@ -497,9 +497,12 @@ class JobsRenderer {
 			// Ignore error jobs as they get done messages.
 			if (!info.statsElements.jobInfo.classList.contains("job-info-fatal") &&
 			    !info.statsElements.jobInfo.classList.contains("job-info-aborted") &&
+			    !info.statsElements.jobInfo.classList.contains("job-info-failed") &&
 			    /^ *[1-9][0-9]* bytes\.$|^Starting (RelabelIfAborted|MarkItemAsDone) for Item$|^Finished (WgetDownload|MoveFiles|StopHeartbeat) for Item$/.test(line)) {
 				info.statsElements.jobInfo.classList.add("job-info-done");
 				this.jobs.markFinished(ident);
+			} else if (/^ *0 bytes\.$/.test(line)) {
+				info.statsElements.jobInfo.classList.add("job-info-failed");
 			} else if (
 				/^CRITICAL (Sorry|Please report)|^ERROR Fatal exception|No space left on device|^Fatal Python error:|^(Thread|Current thread) 0x/.test(
 					line,
@@ -520,6 +523,7 @@ class JobsRenderer {
 			} else if (/^Received item /.test(line)) {
 				// Clear other statuses if a job restarts with the same job ID
 				info.statsElements.jobInfo.classList.remove("job-info-done");
+				info.statsElements.jobInfo.classList.remove("job-info-failed");
 				info.statsElements.jobInfo.classList.remove("job-info-fatal");
 				info.statsElements.jobInfo.classList.remove("job-info-aborted");
 				this.jobs.markUnfinished(ident);
@@ -1045,6 +1049,7 @@ class Dashboard {
 		const showAllHeaders = args.showAllHeaders ? Boolean(Number(args.showAllHeaders)) : true;
 		const showRunningJobs = args.showRunningJobs ? Boolean(Number(args.showRunningJobs)) : true;
 		const showFinishedJobs = args.showFinishedJobs ? Boolean(Number(args.showFinishedJobs)) : true;
+		const showFailedJobs = args.showFailedJobs ? Boolean(Number(args.showFailedJobs)) : true;
 		const showFatalJobs = args.showFatalJobs ? Boolean(Number(args.showFatalJobs)) : true;
 		const showAbortedJobs = args.showAbortedJobs ? Boolean(Number(args.showAbortedJobs)) : true;
 		const loadRecent = args.loadRecent ? Boolean(Number(args.loadRecent)) : true;
@@ -1117,6 +1122,7 @@ class Dashboard {
 
 		this.showRunningJobs(showRunningJobs);
 		this.showFinishedJobs(showFinishedJobs);
+		this.showFailedJobs(showFailedJobs);
 		this.showFatalJobs(showFatalJobs);
 		this.showAbortedJobs(showAbortedJobs);
 
@@ -1250,6 +1256,8 @@ ${String(kbPerSec).padStart(3, "0")} KB/s`;
 			ds.showRunningJobs(!byId("show-running-jobs").checked);
 		} else if (ev.which === 100 /* d */) {
 			ds.showFinishedJobs(!byId("show-finished-jobs").checked);
+		} else if (ev.which === 98 /* b */) {
+			ds.showFailedJobs(!byId("show-failed-jobs").checked);
 		} else if (ev.which === 99 /* c */) {
 			ds.showFatalJobs(!byId("show-fatal-jobs").checked);
 		} else if (ev.which === 115 /* s */) {
@@ -1322,6 +1330,11 @@ ${String(kbPerSec).padStart(3, "0")} KB/s`;
 	showFinishedJobs(value) {
 		byId('show-finished-jobs').checked = value;
 		byId('hide-done').sheet.disabled = value;
+	}
+
+	showFailedJobs(value) {
+		byId('show-failed-jobs').checked = value;
+		byId('hide-failed').sheet.disabled = value;
 	}
 
 	showFatalJobs(value) {

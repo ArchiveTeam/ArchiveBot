@@ -136,6 +136,10 @@ html, body, .job-ident {
 	color: #DD0000 !important;
 }
 
+.job-info-failed {
+	color: #CC7676 !important;
+}
+
 .inline-stat {
 	/* Needed for 'Align!' feature */
 	display: inline-block;
@@ -408,6 +412,7 @@ kbd {
 <style id="hide-running">
 .log-container:not(
 	:has(.job-info-done),
+	:has(.job-info-failed),
 	:has(.job-info-fatal),
 	:has(.job-info-aborted)
 ) {
@@ -417,6 +422,12 @@ kbd {
 </style>
 <style id="hide-done">
 .log-container:has(.job-info-done) {
+	display: none;
+	content-visibility: hidden;
+}
+</style>
+<style id="hide-failed">
+.log-container:has(.job-info-failed) {
 	display: none;
 	content-visibility: hidden;
 }
@@ -452,6 +463,8 @@ kbd {
 			<label for="show-running-jobs">Running</label><br>
 			<input type="checkbox" id="show-finished-jobs" onclick="ds.showFinishedJobs(this.checked);" accesskey="d">
 			<label class="job-info-done" for="show-finished-jobs">Finished</label><br>
+			<input type="checkbox" id="show-failed-jobs" onclick="ds.showFailedJobs(this.checked);" accesskey="b">
+			<label class="job-info-failed" for="show-failed-jobs">Failed</label><br>
 			<input type="checkbox" id="show-fatal-jobs" onclick="ds.showFatalJobs(this.checked);" accesskey="c">
 			<label class="job-info-fatal" for="show-fatal-jobs">Fatal</label><br>
 			<input type="checkbox" id="show-aborted-jobs" onclick="ds.showAbortedJobs(this.checked);" accesskey="s">
@@ -483,6 +496,7 @@ kbd {
 				The color coding for the job header is:
 					in progress,
 					<span class="job-info-done">finished normally</span>,
+					<span class="job-info-failed">finished with failure</span>,
 					<span class="job-info-aborted">finished with abort</span>,
 					<span class="job-info-fatal">finished with fatal exception</span>.
 			</p>
@@ -509,6 +523,7 @@ kbd {
 				<li><kbd>h</kbd> - show/hide headers for hidden job logs
 				<li><kbd>r</kbd> - show/hide header+log for running jobs
 				<li><kbd>d</kbd> - show/hide header+log for finished jobs
+				<li><kbd>b</kbd> - show/hide header+log for failed jobs
 				<li><kbd>c</kbd> - show/hide header+log for fatal jobs
 				<li><kbd>s</kbd> - show/hide header+log for aborted jobs
 				<li><kbd>?</kbd> - show/hide help text
@@ -531,6 +546,7 @@ kbd {
 				<li>To initially hide different job types, add these to the dashboard URL. The default is to show them.
 					<kbd><span class="url-q-or-amp">?</span>showRunningJobs=0</kbd>
 					<kbd><span class="url-q-or-amp">?</span>showFinishedJobs=0</kbd>
+					<kbd><span class="url-q-or-amp">?</span>showFailedJobs=0</kbd>
 					<kbd><span class="url-q-or-amp">?</span>showFatalJobs=0</kbd>
 					<kbd><span class="url-q-or-amp">?</span>showAbortedJobs=0</kbd>
 				</li>
