@@ -391,6 +391,12 @@ kbd {
 	top: 0;
 }
 </style>
+<style id="hide-headers">
+.log-container:has(.log-window-hidden) {
+	display: none;
+	content-visibility: hidden;
+}
+</style>
 <div id="context-menu"></div>
 <div class="padded-page">
 	<div class="header">
@@ -401,6 +407,8 @@ kbd {
 			Logs <input id="filter-box" type="text" size="21" title="Show logs for jobs matching this regular expression. For example ^https?://.*">
 			<input id="set-filter-all" onclick="ds.setFilter('');" type="button" value="All"  class="button">
 			<input id="set-filter-none" onclick="ds.setFilter('^$');" type="button" value="None" class="button">
+			<input type="checkbox" id="show-all-headers" onclick="ds.showAllHeaders(this.checked);">
+			<label for="show-all-headers">All headers</label>
 		</div>
 		<div id="header-right">
 			<div id="meta-info"><span class="adbox">😊</span></div>
@@ -449,6 +457,7 @@ kbd {
 				<li><kbd>f</kbd> - move focus to filter box
 				<li><kbd>i</kbd> - use the initial job log filter
 				<li><kbd>v</kbd> - open the job URL of the first-shown job log
+				<li><kbd>h</kbd> - show/hide headers for hidden job logs
 				<li><kbd>?</kbd> - show/hide help text
 			</ul>
 			<p>
@@ -465,6 +474,7 @@ kbd {
 			</p>
 			<ul>
 				<li>To specify an initial filter, add <kbd><span class="url-q-or-amp">?</span>initialFilter=TEXT</kbd> to the dashboard URL. The default is <kbd>^$</kbd>.</li>
+				<li>To initially hide headers for hidden job logs, add <kbd><span class="url-q-or-amp">?</span>showAllHeaders=0</kbd> to the dashboard URL. The default is to show them.</li>
 				<li>To retain more lines in the log windows, add <kbd><span class="url-q-or-amp">?</span>historyLines=1000</kbd> to the dashboard URL. The default is <code>500</code>, or <code>250</code> on mobile.</li>
 				<li>To update the dashboard more frequently, add <kbd><span class="url-q-or-amp">?</span>batchTimeWhenVisible=33</kbd> to the dashboard URL. The default is <code>125</code> (8 Hz).</li>
 				<li>To skip loading of recent (buffered) log data for jobs, add <kbd><span class="url-q-or-amp">?</span>loadRecent=0</kbd> to the dashboard URL. Inactive jobs will not appear.</li>
