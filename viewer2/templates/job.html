@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %} Job {{ job_id }} {% endblock %}
+{% block head_extra %}
+<meta name="robots" content="noindex">
+{% endblock %}
+
+{% block body %}
+    <h2>Job {{ formatted_job_id }}</h2>
+
+    <table>
+        <tr>
+           <th>Filename</th>
+           <th>Size</th>
+           <th>IA Identifier</th>
+        </tr>
+        {% for row in rows %}
+            <tr>
+                <td>
+                    <a href="https://archive.org/download/{{ row.ia_item_id|urlencode }}/{{ row.filename|urlencode }}">
+                        {{ row.filename }}
+                    </a>
+                </td>
+                <td>{{ row.size }}</td>
+                <td>
+                    <a href="{{ link_prefix }}item/{{ row.ia_item_id|urlencode }}">
+                    {{ row.ia_item_id }}
+                    </a>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

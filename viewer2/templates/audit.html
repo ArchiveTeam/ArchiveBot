@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %} Audit {% endblock %}
+
+{% block body %}
+<h2>No JSON</h2>
+
+<table>
+    <tr>
+        <th>Job</th>
+        <th>Domain</th>
+    </tr>
+    {% for item in no_json_items %}
+        <tr>
+            <td><a href="{{ link_prefix }}job/{{ item.job_id|urlencode }}">{{ item.job_id }}</a></td>
+            <td>{{ item.domain }}</td>
+        </tr>
+    {% endfor %}
+</table>
+
+<h2>No WARC</h2>
+
+<table>
+    <tr>
+        <th>Job</th>
+        <th>Domain</th>
+    </tr>
+    {% for item in no_warc_items %}
+        <tr>
+            <td><a href="{{ link_prefix }}job/{{ item.job_id|urlencode }}">{{ item.job_id }}</a></td>
+            <td>{{ item.domain }}</td>
+        </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

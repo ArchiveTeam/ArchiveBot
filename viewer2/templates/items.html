@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %} Items {% endblock %}
+
+{% block body %}
+    <h2>Items</h2>
+
+    {% include "pager.html" %}
+    <table>
+        <tr>
+            <th>IA Identifier</th>
+        </tr>
+        {% for identifier in identifiers %}
+            <tr>
+                <td><a href="{{ link_prefix}}item/{{ identifier|urlencode }}">{{ identifier }}</a></td>
+            </tr>
+        {% endfor %}
+    </table>
+    {% include "pager.html" %}
+{% endblock %}

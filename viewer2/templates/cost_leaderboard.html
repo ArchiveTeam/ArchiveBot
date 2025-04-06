@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %} Cost Shameboard {% endblock %}
+
+{% block body %}
+<h2>Cost Shameboard</h2>
+
+<table>
+    <tr>
+        <th>Who</th>
+        <th>Size (bytes)</th>
+        <th>Cost (USD)</th>
+    </tr>
+    {% for row in rows %}
+        <tr>
+            <td>{{ row.who }}</td>
+            <td class="numeric">{{ "{}"|format(row.size) }}</td>
+            <td class="numeric">{{ "{:.2}"|format(row.cost) }}</td>
+        </tr>
+    {% endfor %}
+</table>
+
+<p>This table is not accurate and not complete until all metadata has been fully processed by the viewer.</p>
+
+{% endblock %}
