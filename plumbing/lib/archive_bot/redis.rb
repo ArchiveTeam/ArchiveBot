@@ -1,7 +1,7 @@
 require File.expand_path('../../archive_bot', __FILE__)
 
 require 'redis'
-
+require 'hiredis-client'
 module ArchiveBot
   module Redis
     ##
@@ -12,7 +12,7 @@ module ArchiveBot
 
       ::Redis.new(url: url, driver: :hiredis)
     end
-    
+
     ##
     # Returns the Redis pubsub channel where job status notifications will be
     # sent.

@@ -1,0 +1,50 @@
+# deploying an archivebot...
+version: '3.8'
+networks:
+  autossh:
+  default:
+services:
+  autossh:
+    restart: unless-stopped
+    command: ["autossh"]
+    environment:
+    - ARCHIVEBOT_PIPE_AUTOSSH_TARGET=${ARCHIVEBOT_PIPE_AUTOSSH_TARGET}
+    - ARCHIVEBOT_PIPE_NAME=${ARCHIVEBOT_PIPE_NAME}
+    build:
+      context: ..
+      dockerfile: containers/openssh.Dockerfile
+    networks:
+      - autossh
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 64M
+        reservations:
+          cpus: '0.01'
+          memory: 16M
+    volumes:
+    - ./data/pipeline/autossh:/autossh
+  pipeline:
+    build:
+      context: ..
+      dockerfile: containers/pipeline.Dockerfile
+    environment:
+      - ARCHIVEBOT_PIPE_REDIS_URL=${ARCHIVEBOT_PIPE_REDIS_URL}
+      - FINISHED_WARCS_DIR=/pipeline/finished
+      - ARCHIVEBOT_PIPE_LOGS_DIR=/pipeline/logs
+      - ARCHIVEBOT_PIPE_NAME=${ARCHIVEBOT_PIPE_NAME}
+    networks:
+      - autossh
+      - default
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1024M
+        reservations:
+          cpus: '0.05'
+          memory: 64M
+    volumes:
+    - ./data/pipeline/finished:/pipeline/finished
+    - ./data/pipeline/logs:/pipeline/logs
