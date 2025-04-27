@@ -4,7 +4,7 @@
 			"aliases": [
 				"curl"
 			],
-			"name": "curl/7.75.0"
+			"name": "curl/8.10.1"
 		}
 	],
 	"type": "user_agents"
