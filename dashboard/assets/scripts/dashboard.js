@@ -370,7 +370,11 @@ class JobsRenderer {
 			queueLength: h("span", { className: `inline-stat ${maybeAligned("job-in-queue")}` }, "? in q."),
 			connections: h("span", { className: `inline-stat ${maybeAligned("job-connections")}` }, "?"),
 			delay: h("span", { className: `inline-stat ${maybeAligned("job-delay")}` }, "? ms delay"),
-			ignores: h("span", { className: "job-ignores" }, "?"),
+			ignores: h("a", {
+				className: "job-ignores",
+				href: `//${ds.host}${ds.port}/ignores/${ident}?compact=true`,
+				onclick: (ev) => { ev.stopPropagation(); },
+			}, "?" ),
 			jobInfo: null /* set later */,
 		};
 
