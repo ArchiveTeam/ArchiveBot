@@ -178,7 +178,7 @@ class Brain
 
   def show_pending(m)
     if redis.llen('pending') > 10
-      privmsg(m, "Too many pending jobs to reply to !pending, please use the dashboard instead.")
+      privmsg(m, 'Too many pending jobs to reply to !pending, please use the dashboard instead. http://archivebot.com/pending')
       return
     end
 
@@ -194,6 +194,7 @@ class Brain
 
       privmsg(m, msg)
     end
+    privmsg(m, 'Other pending queues: http://archivebot.com/pending')
   end
 
   def add_note(m, job, note, need_auth=true)
