@@ -11,12 +11,12 @@ require File.expand_path('../finish_message_generation', __FILE__)
 #
 # ArchiveBot users receive messages like this:
 #
-#   someone: Your job for http://www.example.com has finished.
+#   someone: Your job for http://www.example.com has finished. f4pg9usx4j96ki3zczwlczu51
 #   someone: n of your jobs have finished.
 #
 # For aborted jobs, the messages are similar:
 #
-#   someone: Your job for http://www.example.com was aborted.
+#   someone: Your job for http://www.example.com was aborted. f4pg9usx4j96ki3zczwlczu51
 #   someone: n of your jobs were aborted.
 # 
 # We coalesce messages to avoid flooding channels with notifications.
