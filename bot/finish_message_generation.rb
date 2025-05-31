@@ -13,9 +13,9 @@ module FinishMessageGeneration
       by_user.each do |user, infos|
         infos.each do |info|
           if info['aborted']
-            list << "#{user}: Your job for #{info['url']} was aborted."
+            list << "#{user}: Your job for #{info['url']} was aborted. #{info['ident']}"
           else
-            list << "#{user}: Your job for #{info['url']} has finished."
+            list << "#{user}: Your job for #{info['url']} has finished. #{info['ident']}"
           end
         end
       end
