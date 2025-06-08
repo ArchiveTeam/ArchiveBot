@@ -1,0 +1,214 @@
+# deploying an archivebot...
+version: '3.8'
+networks:
+  # publicly accessible network
+  frontend:
+    name: archivebot-frontend
+  # stuff that needs to talk to zeromq.
+  zeromq:
+    name: archivebot-zeromq
+  # redis, couchdb, and the backend services
+  redis:
+    name: archivebot-redis
+  couchdb:
+    name: archivebot-couchdb
+services:
+  valkey:
+    build:
+      context: ..
+      dockerfile: containers/valkey.Dockerfile
+    volumes:
+      - ./data/backend/valkey:/var/lib/valkey
+    environment:
+      - VALKEY_PASSWORD=${REDIS_PASSWORD}
+    networks:
+      - redis
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1024M
+        reservations:
+          cpus: '0.05'
+          memory: 64M
+  couchdb:
+    build:
+      context: ..
+      dockerfile: containers/couchdb.Dockerfile
+    volumes:
+      - ./data/backend/couchdb:/opt/couchdb/data
+    environment:
+      - COUCHDB_USER=${COUCHDB_USER}
+      - COUCHDB_PASSWORD=${COUCHDB_PASSWORD}
+    networks:
+      - couchdb
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1024M
+        reservations:
+          cpus: '0.05'
+          memory: 64M
+  ircbot:
+    build:
+      context: ..
+      dockerfile: containers/backend.Dockerfile
+    environment:
+      - ARCHIVEBOT_IRC_URL=${ARCHIVEBOT_IRC_URL}
+      - ARCHIVEBOT_IRC_NICK=${ARCHIVEBOT_IRC_NICK}
+      - ARCHIVEBOT_IRC_CHANNEL=${ARCHIVEBOT_IRC_CHANNEL}
+      - ARCHIVEBOT_IRC_PASSWORD=${ARCHIVEBOT_IRC_PASSWORD}
+      - ARCHIVEBOT_COUCHDB_URL=${ARCHIVEBOT_COUCHDB_URL}
+      - ARCHIVEBOT_REDIS_URL=${ARCHIVEBOT_REDIS_URL}
+    command: ["ircbot"]
+    networks:
+      - couchdb
+      - redis
+      - zeromq
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1024M
+        reservations:
+          cpus: '0.05'
+          memory: 64M
+  updates-listener:
+    build:
+      context: ..
+      dockerfile: containers/backend.Dockerfile
+    command: ["updates-listener"]
+    environment:
+      - ARCHIVEBOT_ZEROMQ_BIND_URL=${ARCHIVEBOT_ZEROMQ_BIND_URL}
+      - ARCHIVEBOT_REDIS_URL=${ARCHIVEBOT_REDIS_URL}
+      - ARCHIVEBOT_COUCHDB_URL=${ARCHIVEBOT_COUCHDB_URL}
+    networks:
+      - couchdb
+      - zeromq
+      - redis
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1024M
+        reservations:
+          cpus: '0.05'
+          memory: 64M
+  dashboard:
+    build:
+      context: ..
+      dockerfile: containers/backend.Dockerfile
+    command: ["dashboard"]
+    environment:
+      - ARCHIVEBOT_DASHBOARD_URL=${ARCHIVEBOT_DASHBOARD_URL}
+      - ARCHIVEBOT_REDIS_URL=${ARCHIVEBOT_REDIS_URL}
+      - ARCHIVEBOT_COUCHDB_URL=${ARCHIVEBOT_COUCHDB_URL}
+    networks:
+      - couchdb
+      - frontend
+      - zeromq
+      - redis
+    ports:
+      - "4567:4567"
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1024M
+        reservations:
+          cpus: '0.05'
+          memory: 64M
+  websocket:
+    image: ghcr.io/iakat/archivebot-dashboard-repeater
+    environment:
+      - UPSTREAM=${ARCHIVEBOT_ZEROMQ_URL}
+    ports:
+      - "4568:4568"
+    networks:
+      - zeromq
+      - frontend
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1024M
+        reservations:
+          cpus: '0.05'
+          memory: 64M
+  cogs:
+    build:
+      context: ..
+      dockerfile: containers/backend.Dockerfile
+    command: ["cogs"]
+    environment:
+      - ARCHIVEBOT_REDIS_URL=${ARCHIVEBOT_REDIS_URL}
+      - ARCHIVEBOT_COUCHDB_URL=${ARCHIVEBOT_COUCHDB_URL}
+    networks:
+      - redis
+      - couchdb
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1024M
+        reservations:
+          cpus: '0.05'
+          memory: 64M
+  analyzer:
+    build:
+      context: ..
+      dockerfile: containers/backend.Dockerfile
+    command: ["analyzer"]
+    environment:
+      - ARCHIVEBOT_REDIS_URL=${ARCHIVEBOT_REDIS_URL}
+      - ARCHIVEBOT_COUCHDB_URL=${ARCHIVEBOT_COUCHDB_URL}
+    networks:
+      - redis
+      - couchdb
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1024M
+        reservations:
+          cpus: '0.05'
+          memory: 64M
+  trimmer:
+    build:
+      context: ..
+      dockerfile: containers/backend.Dockerfile
+    command: ["trimmer"]
+    environment:
+      - ARCHIVEBOT_REDIS_URL=${ARCHIVEBOT_REDIS_URL}
+      - ARCHIVEBOT_COUCHDB_URL=${ARCHIVEBOT_COUCHDB_URL}
+    networks:
+      - redis
+      - couchdb
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1024M
+        reservations:
+          cpus: '0.05'
+          memory: 64M
+  openssh:
+    networks:
+    - redis
+    build:
+      context: ..
+      dockerfile: containers/openssh.Dockerfile
+    ports:
+      - "922:22"
+    command: ["openssh"]
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 64M
+        reservations:
+          cpus: '0.01'
+          memory: 16M
+    volumes:
+      - ./data/backend/openssh:/home/pipeline/.ssh
