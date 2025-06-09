@@ -1,5 +1,8 @@
 *.sw?
 *.rdb
+.DS_Store
+Thumbs.db
+desktop.ini
 
 data
 ./wget-lua
