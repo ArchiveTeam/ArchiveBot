@@ -1,0 +1,12 @@
+{
+	"name": "bugzilla",
+	"patterns": [
+		"/[^.]+\.cgi\?(|.*&)GoAheadAndLogIn=1$",
+		"/attachment\.cgi\?bugid=[0-9]+&action=enter$",
+		"/enter_bug\.cgi\?cloned_bug_id=[0-9]+$",
+		"/buglist\.cgi.*[?&]order=[^&]+%2C",
+		"/buglist\.cgi.*[?&]title=.*&title=",
+		"/buglist\.cgi\?.*&component=[^&]+&product=[^&]+.*&order="
+	],
+	"type": "ignore_patterns"
+}
