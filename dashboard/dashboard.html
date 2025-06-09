@@ -57,6 +57,14 @@ html, body, .job-ident {
 	font-size: 18px;
 }
 
+#jobs {
+	display: inline flex;
+}
+
+#show-jobs {
+       float: inline-start;
+}
+
 .padded-page {
 	padding: 20px 27px 20px 27px;
 }
@@ -126,6 +134,10 @@ html, body, .job-ident {
 
 .job-info-fatal {
 	color: #DD0000 !important;
+}
+
+.job-info-failed {
+	color: #CC7676 !important;
 }
 
 .inline-stat {
@@ -391,6 +403,47 @@ kbd {
 	top: 0;
 }
 </style>
+<style id="hide-headers">
+.log-container:has(.log-window-hidden) {
+	display: none;
+	content-visibility: hidden;
+}
+</style>
+<style id="hide-running">
+.log-container:not(
+	:has(.job-info-done),
+	:has(.job-info-failed),
+	:has(.job-info-fatal),
+	:has(.job-info-aborted)
+) {
+	display: none;
+	content-visibility: hidden;
+}
+</style>
+<style id="hide-done">
+.log-container:has(.job-info-done) {
+	display: none;
+	content-visibility: hidden;
+}
+</style>
+<style id="hide-failed">
+.log-container:has(.job-info-failed) {
+	display: none;
+	content-visibility: hidden;
+}
+</style>
+<style id="hide-fatal">
+.log-container:has(.job-info-fatal) {
+	display: none;
+	content-visibility: hidden;
+}
+</style>
+<style id="hide-aborted">
+.log-container:has(.job-info-aborted) {
+	display: none;
+	content-visibility: hidden;
+}
+</style>
 <div id="context-menu"></div>
 <div class="padded-page">
 	<div class="header">
@@ -398,9 +451,26 @@ kbd {
 			<a href="https://wiki.archiveteam.org/index.php?title=ArchiveBot" class="underlined-a">ArchiveBot</a>
 			tracking <span id="num-crawls">0</span> crawls.
 			See also <a href="pipelines" class="underlined-a">pipeline</a> or <a href="logs/recent" class="underlined-a">job</a> reports.
-			Show: <input id="filter-box" type="text" size="21">
-			<input onclick="ds.setFilter('');" type="button" value="  All  " class="button">
-			<input onclick="ds.setFilter('^$');" type="button" value="None" class="button">
+			Logs <input id="filter-box" type="text" size="21" title="Show logs for jobs matching this regular expression. For example ^https?://.*">
+			<input id="set-filter-all" onclick="ds.setFilter('');" type="button" value="All"  class="button">
+			<input id="set-filter-none" onclick="ds.setFilter('^$');" type="button" value="None" class="button">
+			<input type="checkbox" id="show-all-headers" onclick="ds.showAllHeaders(this.checked);">
+			<label for="show-all-headers">All headers</label>
+			<details id="jobs">
+			<summary>Jobs</summary>
+			<div id="show-jobs">
+			<input type="checkbox" id="show-running-jobs" onclick="ds.showRunningJobs(this.checked);" accesskey="r">
+			<label for="show-running-jobs">Running</label><br>
+			<input type="checkbox" id="show-finished-jobs" onclick="ds.showFinishedJobs(this.checked);" accesskey="d">
+			<label class="job-info-done" for="show-finished-jobs">Finished</label><br>
+			<input type="checkbox" id="show-failed-jobs" onclick="ds.showFailedJobs(this.checked);" accesskey="b">
+			<label class="job-info-failed" for="show-failed-jobs">Failed</label><br>
+			<input type="checkbox" id="show-fatal-jobs" onclick="ds.showFatalJobs(this.checked);" accesskey="c">
+			<label class="job-info-fatal" for="show-fatal-jobs">Fatal</label><br>
+			<input type="checkbox" id="show-aborted-jobs" onclick="ds.showAbortedJobs(this.checked);" accesskey="s">
+			<label class="job-info-aborted" for="show-aborted-jobs">Aborted</label><br>
+			</div>
+			</details>
 		</div>
 		<div id="header-right">
 			<div id="meta-info"><span class="adbox">😊</span></div>
@@ -418,16 +488,20 @@ kbd {
 				This page shows all of the crawls that <a href="https://wiki.archiveteam.org/index.php?title=ArchiveBot">ArchiveBot</a> is currently running.
 			</p>
 			<p>
-				To show or hide a job, click anywhere on its stats line.
+				Each job has a header with the URL, note, request/queue stats, options and an identifier.
+			</p>
+			<p>
+				To show or hide a job, click anywhere on its header.
 
-				The color coding for the job stats line is:
+				The color coding for the job header is:
 					in progress,
 					<span class="job-info-done">finished normally</span>,
+					<span class="job-info-failed">finished with failure</span>,
 					<span class="job-info-aborted">finished with abort</span>,
 					<span class="job-info-fatal">finished with fatal exception</span>.
 			</p>
 			<p>
-				Mouse over the job start date or the response count for additional information.
+				Mouse over the job URL, start date, response count or the queue count for additional information.
 			</p>
 			<p>
 				To pause scrolling, move your mouse inside a log window.
@@ -439,12 +513,19 @@ kbd {
 				Keyboard shortcuts:
 			</p>
 			<ul>
-				<li><kbd>j</kbd> - show next job window
-				<li><kbd>k</kbd> - show previous job window
-				<li><kbd>a</kbd> - show all job windows
-				<li><kbd>n</kbd> - hide all job windows
+				<li><kbd>j</kbd> - show next job log
+				<li><kbd>k</kbd> - show previous job log
+				<li><kbd>a</kbd> - show all job log
+				<li><kbd>n</kbd> - hide all job log
 				<li><kbd>f</kbd> - move focus to filter box
-				<li><kbd>v</kbd> - open the job URL of the first-shown job window
+				<li><kbd>i</kbd> - use the initial job log filter
+				<li><kbd>v</kbd> - open the job URL of the first-shown job log
+				<li><kbd>h</kbd> - show/hide headers for hidden job logs
+				<li><kbd>r</kbd> - show/hide header+log for running jobs
+				<li><kbd>d</kbd> - show/hide header+log for finished jobs
+				<li><kbd>b</kbd> - show/hide header+log for failed jobs
+				<li><kbd>c</kbd> - show/hide header+log for fatal jobs
+				<li><kbd>s</kbd> - show/hide header+log for aborted jobs
 				<li><kbd>?</kbd> - show/hide help text
 			</ul>
 			<p>
@@ -461,9 +542,23 @@ kbd {
 			</p>
 			<ul>
 				<li>To specify an initial filter, add <kbd><span class="url-q-or-amp">?</span>initialFilter=TEXT</kbd> to the dashboard URL. The default is <kbd>^$</kbd>.</li>
+				<li>To initially hide headers for hidden job logs, add <kbd><span class="url-q-or-amp">?</span>showAllHeaders=0</kbd> to the dashboard URL. The default is to show them.</li>
+				<li>To initially hide different job types, add these to the dashboard URL. The default is to show them.
+					<kbd><span class="url-q-or-amp">?</span>showRunningJobs=0</kbd>
+					<kbd><span class="url-q-or-amp">?</span>showFinishedJobs=0</kbd>
+					<kbd><span class="url-q-or-amp">?</span>showFailedJobs=0</kbd>
+					<kbd><span class="url-q-or-amp">?</span>showFatalJobs=0</kbd>
+					<kbd><span class="url-q-or-amp">?</span>showAbortedJobs=0</kbd>
+				</li>
 				<li>To retain more lines in the log windows, add <kbd><span class="url-q-or-amp">?</span>historyLines=1000</kbd> to the dashboard URL. The default is <code>500</code>, or <code>250</code> on mobile.</li>
 				<li>To update the dashboard more frequently, add <kbd><span class="url-q-or-amp">?</span>batchTimeWhenVisible=33</kbd> to the dashboard URL. The default is <code>125</code> (8 Hz).</li>
 				<li>To skip loading of recent (buffered) log data for jobs, add <kbd><span class="url-q-or-amp">?</span>loadRecent=0</kbd> to the dashboard URL. Inactive jobs will not appear.</li>
+				<li>To append some text to the page title, add <kbd><span class="url-q-or-amp">?</span>title=TEXT</kbd> to the dashboard URL.</li>
+				<li>To override the hostname of the logs server, add <kbd><span class="url-q-or-amp">?</span>host=TEXT</kbd> to the dashboard URL.</li>
+				<li>To override the port of the recent logs server, add <kbd><span class="url-q-or-amp">?</span>port=TEXT</kbd> to the dashboard URL.</li>
+				<li>To override the URL of the logs stream, add <kbd><span class="url-q-or-amp">?</span>websocketUrl=ws://localhost:4568/stream</kbd> to the dashboard URL.</li>
+				<li>To view the first two JSON messages of the logs stream, add <kbd><span class="url-q-or-amp">?</span>dumpMax=2</kbd> to the dashboard URL.</li>
+				<li>To enable debug messages in the browser console, add <kbd><span class="url-q-or-amp">?</span>debug=1</kbd> to the dashboard URL.</li>
 			</ul>
 			<p>
 				To use ArchiveBot, drop by <a href="https://webirc.hackint.org/#irc://irc.hackint.org/archivebot">#archivebot</a> on hackint. <a href="https://archivebot.readthedocs.io/en/latest/">Issue commands</a> by typing them into the channel. You will need channel operator (@) or voice (+) status to issue archiving jobs; just ask for help or leave a message with the website you want to archive.

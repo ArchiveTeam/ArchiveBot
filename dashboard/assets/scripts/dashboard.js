@@ -122,14 +122,6 @@ function regExpEscape(s) {
 	return escaped;
 }
 
-function addAnyChangeListener(elem, func) {
-	// DOM0 handler for convenient use by Clear button
-	elem.onchange = func;
-	elem.addEventListener("keydown", func, false);
-	elem.addEventListener("paste", func, false);
-	elem.addEventListener("input", func, false);
-}
-
 function scrollToBottom(elem) {
 	// Scroll to the bottom. To avoid serious performance problems in Firefox,
 	// use a big number instead of elem.scrollHeight.
@@ -225,10 +217,11 @@ class JobsTracker {
 }
 
 class JobRenderInfo {
-	constructor(logWindow, logSegment, statsElements, jobNote, lineCountWindow, lineCountSegments) {
+	constructor(logWindow, logSegment, statsElements, jobUrl, jobNote, lineCountWindow, lineCountSegments) {
 		this.logWindow = logWindow;
 		this.logSegment = logSegment;
 		this.statsElements = statsElements;
+		this.jobUrl = jobUrl;
 		this.jobNote = jobNote;
 		this.lineCountWindow = lineCountWindow;
 		this.lineCountSegments = lineCountSegments;
@@ -283,7 +276,25 @@ class JobsRenderer {
 	constructor(container, filterBox, historyLines, showNicks, contextMenuRenderer) {
 		this.container = container;
 		this.filterBox = filterBox;
-		addAnyChangeListener(this.filterBox, () => this.applyFilter());
+		this.filterTimeout = null;
+		this.filterBox.onchange = (e) => {
+			const repeats = [
+					"insertText",
+					"deleteContent",
+					"deleteContentForward",
+					"deleteContentBackward",
+			];
+			let ms = e && e.inputType && repeats.includes(e.inputType) ? 100 : 0;
+			ms = !this.filterBox.value ? 0 : ms;
+			clearTimeout(this.filterTimeout);
+			this.filterTimeout = setTimeout(() => {
+				if (this.filterBox.value !== this.filterBox.old) {
+					this.applyFilter();
+					this.filterBox.old = this.filterBox.value;
+				}
+			}, ms);
+		};
+		this.filterBox.oninput = this.filterBox.onchange;
 		this.filterBox.onkeypress = (ev) => {
 			// Don't let `j` or `k` in the filter box cause the job window to switch
 			ev.stopPropagation();
@@ -359,7 +370,11 @@ class JobsRenderer {
 			queueLength: h("span", { className: `inline-stat ${maybeAligned("job-in-queue")}` }, "? in q."),
 			connections: h("span", { className: `inline-stat ${maybeAligned("job-connections")}` }, "?"),
 			delay: h("span", { className: `inline-stat ${maybeAligned("job-delay")}` }, "? ms delay"),
-			ignores: h("span", { className: "job-ignores" }, "?"),
+			ignores: h("a", {
+				className: "job-ignores",
+				href: `//${ds.host}${ds.port}/ignores/${ident}?compact=true`,
+				onclick: (ev) => { ev.stopPropagation(); },
+			}, "?" ),
 			jobInfo: null /* set later */,
 		};
 
@@ -411,13 +426,14 @@ class JobsRenderer {
 				],
 			),
 		]);
+		const jobUrl = statsElements.jobInfo.querySelector(".job-url");
 
 		const logWindow = h("div", logWindowAttrs, logSegment);
 		const div = h("div", { className: "log-container", id: `log-container-${ident}` }, [
 			h("div", { className: "job-header" }, [statsElements.jobInfo, h("span", { className: "job-ident" }, ident)]),
 			logWindow,
 		]);
-		this.renderInfo[ident] = new JobRenderInfo(logWindow, logSegment, statsElements, jobNote, 0, [0]);
+		this.renderInfo[ident] = new JobRenderInfo(logWindow, logSegment, statsElements, jobUrl, jobNote, 0, [0]);
 		this.container.insertBefore(div, beforeElement);
 		// Filter hasn't changed, but we might need to filter out the new job, or
 		// add/remove log-window-expanded class
@@ -480,12 +496,17 @@ class JobsRenderer {
 			logSegment.appendChild(h("div", Reusable.obj_className_line_stdout, line));
 			renderedLines += 1;
 
-			// Check for 'Finished RsyncUpload for Item'
-			// instead of 'Starting MarkItemAsDone for Item'
-			// because the latter is often missing
-			if (/^Finished RsyncUpload for Item/.test(line)) {
+			// Check for several completion messages
+			// because some of them are often missing
+			// Ignore error jobs as they get done messages.
+			if (!info.statsElements.jobInfo.classList.contains("job-info-fatal") &&
+			    !info.statsElements.jobInfo.classList.contains("job-info-aborted") &&
+			    !info.statsElements.jobInfo.classList.contains("job-info-failed") &&
+			    /^ *[1-9][0-9]* bytes\.$|^Starting (RelabelIfAborted|MarkItemAsDone) for Item$|^Finished (WgetDownload|MoveFiles|StopHeartbeat) for Item$/.test(line)) {
 				info.statsElements.jobInfo.classList.add("job-info-done");
 				this.jobs.markFinished(ident);
+			} else if (/^ *0 bytes\.$/.test(line)) {
+				info.statsElements.jobInfo.classList.add("job-info-failed");
 			} else if (
 				/^CRITICAL (Sorry|Please report)|^ERROR Fatal exception|No space left on device|^Fatal Python error:|^(Thread|Current thread) 0x/.test(
 					line,
@@ -506,6 +527,7 @@ class JobsRenderer {
 			} else if (/^Received item /.test(line)) {
 				// Clear other statuses if a job restarts with the same job ID
 				info.statsElements.jobInfo.classList.remove("job-info-done");
+				info.statsElements.jobInfo.classList.remove("job-info-failed");
 				info.statsElements.jobInfo.classList.remove("job-info-fatal");
 				info.statsElements.jobInfo.classList.remove("job-info-aborted");
 				this.jobs.markUnfinished(ident);
@@ -580,6 +602,11 @@ class JobsRenderer {
 
 		// Update note
 		info.jobNote.textContent = isBlank(jobData.note) ? "" : ` (${jobData.note})`;
+		if (isBlank(jobData.note)) {
+			info.jobUrl.removeAttribute("title");
+		} else {
+			info.jobUrl.title = jobData.note;
+		}
 
 		info.lineCountWindow += linesRendered;
 		info.lineCountSegments[info.lineCountSegments.length - 1] += linesRendered;
@@ -621,14 +648,16 @@ class JobsRenderer {
 	}
 
 	applyFilter() {
-		const query = this.filterBox.value;
+		const query = RegExp(this.filterBox.value);
 		let matches = 0;
 		const matchedWindows = [];
 		const unmatchedWindows = [];
 		this.firstFilterMatch = null;
 		for (const job of this.jobs.sorted) {
 			const w = this.renderInfo[job.ident].logWindow;
-			if (!RegExp(query).test(job.url)) {
+			const show = query.test(job.url) ||
+			(this.showNicks && query.test(job.started_by));
+			if (!show) {
 				w.classList.add("log-window-hidden");
 
 				unmatchedWindows.push(w);
@@ -1020,7 +1049,13 @@ class Dashboard {
 		const batchMaxItems = args.batchMaxItems ? Number(args.batchMaxItems) : 250;
 		const showNicks = args.showNicks ? Boolean(Number(args.showNicks)) : false;
 		const contextMenu = args.contextMenu ? Boolean(Number(args.contextMenu)) : true;
-		const initialFilter = args.initialFilter ?? "^$";
+		this.initialFilter = args.initialFilter ?? "^$";
+		const showAllHeaders = args.showAllHeaders ? Boolean(Number(args.showAllHeaders)) : true;
+		const showRunningJobs = args.showRunningJobs ? Boolean(Number(args.showRunningJobs)) : true;
+		const showFinishedJobs = args.showFinishedJobs ? Boolean(Number(args.showFinishedJobs)) : true;
+		const showFailedJobs = args.showFailedJobs ? Boolean(Number(args.showFailedJobs)) : true;
+		const showFatalJobs = args.showFatalJobs ? Boolean(Number(args.showFatalJobs)) : true;
+		const showAbortedJobs = args.showAbortedJobs ? Boolean(Number(args.showAbortedJobs)) : true;
 		const loadRecent = args.loadRecent ? Boolean(Number(args.loadRecent)) : true;
 		this.debug = args.debug ? Boolean(Number(args.debug)) : false;
 
@@ -1030,6 +1065,10 @@ class Dashboard {
 		}
 
 		this.host = args.host ? args.host : location.hostname;
+		this.port = args.port ? `:${Number(args.port)}` : '';
+		const wsproto = window.location.protocol === "https:" ? "wss:" : "ws:";
+		this.websocketUrl = args.websocketUrl ?? `${wsproto}//${this.host}:4568/stream`;
+
 		this.dumpTraffic = args.dumpMax && Number(args.dumpMax) > 0;
 		if (this.dumpTraffic) {
 			this.dumpMax = Number(args.dumpMax);
@@ -1069,7 +1108,27 @@ class Dashboard {
 			addPageStyles(".job-nick-aligned { width: 0; }");
 		}
 
-		this.setFilter(initialFilter);
+		if (args.initialFilter != null) {
+			byId("set-filter-none").after(
+				h("input", {
+					className: "button",
+					type: "button",
+					id: "set-filter-initial",
+					onclick: () => { ds.setFilter(ds.initialFilter) },
+					value: "Initial",
+				})
+			);
+			byId("set-filter-none").after("\n");
+		}
+		this.setFilter(this.initialFilter);
+
+		this.showAllHeaders(showAllHeaders);
+
+		this.showRunningJobs(showRunningJobs);
+		this.showFinishedJobs(showFinishedJobs);
+		this.showFailedJobs(showFailedJobs);
+		this.showFatalJobs(showFatalJobs);
+		this.showAbortedJobs(showAbortedJobs);
 
 		const finishSetup = () => {
 			byId("meta-info").innerHTML = "";
@@ -1158,7 +1217,7 @@ ${String(kbPerSec).padStart(3, "0")} KB/s`;
 				const size_mb = Math.round((100 * ev.total) / 1e6) / 100;
 				byId("meta-info").textContent = `Recent data: ${percent}% (${size_mb}MB)`;
 			};
-			xhr.open("GET", `//${this.host}/logs/recent?cb=${Date.now()}${Math.random()}`);
+			xhr.open("GET", `//${this.host}${this.port}/logs/recent?cb=${Date.now()}${Math.random()}`);
 			xhr.setRequestHeader("Accept", "application/json");
 			xhr.send("");
 		});
@@ -1191,8 +1250,22 @@ ${String(kbPerSec).padStart(3, "0")} KB/s`;
 			ev.preventDefault();
 			byId("filter-box").focus();
 			byId("filter-box").select();
+		} else if (ev.which === 105 /* i */) {
+			ds.setFilter(ds.initialFilter);
 		} else if (ev.which === 118 /* v */) {
 			window.open(this.jobsRenderer.firstFilterMatch.url);
+		} else if (ev.which === 104 /* h */) {
+			ds.showAllHeaders(!byId("show-all-headers").checked);
+		} else if (ev.which === 114 /* r */) {
+			ds.showRunningJobs(!byId("show-running-jobs").checked);
+		} else if (ev.which === 100 /* d */) {
+			ds.showFinishedJobs(!byId("show-finished-jobs").checked);
+		} else if (ev.which === 98 /* b */) {
+			ds.showFailedJobs(!byId("show-failed-jobs").checked);
+		} else if (ev.which === 99 /* c */) {
+			ds.showFatalJobs(!byId("show-fatal-jobs").checked);
+		} else if (ev.which === 115 /* s */) {
+			ds.showAbortedJobs(!byId("show-aborted-jobs").checked);
 		}
 	}
 
@@ -1205,9 +1278,7 @@ ${String(kbPerSec).padStart(3, "0")} KB/s`;
 	}
 
 	connectWebSocket() {
-		const wsproto = window.location.protocol === "https:" ? "wss:" : "ws:";
-
-		this.ws = new WebSocket(`${wsproto}//${this.host}:4568/stream`);
+		this.ws = new WebSocket(this.websocketUrl);
 
 		this.ws.onmessage = (ev) => {
 			this.newItemsReceived += 1;
@@ -1248,6 +1319,36 @@ ${String(kbPerSec).padStart(3, "0")} KB/s`;
 	setFilter(value) {
 		byId("filter-box").value = value;
 		byId("filter-box").onchange();
+	}
+
+	showAllHeaders(value) {
+		byId('show-all-headers').checked = value;
+		byId('hide-headers').sheet.disabled = value;
+	}
+
+	showRunningJobs(value) {
+		byId('show-running-jobs').checked = value;
+		byId('hide-running').sheet.disabled = value;
+	}
+
+	showFinishedJobs(value) {
+		byId('show-finished-jobs').checked = value;
+		byId('hide-done').sheet.disabled = value;
+	}
+
+	showFailedJobs(value) {
+		byId('show-failed-jobs').checked = value;
+		byId('hide-failed').sheet.disabled = value;
+	}
+
+	showFatalJobs(value) {
+		byId('show-fatal-jobs').checked = value;
+		byId('hide-fatal').sheet.disabled = value;
+	}
+
+	showAbortedJobs(value) {
+		byId('show-aborted-jobs').checked = value;
+		byId('hide-aborted').sheet.disabled = value;
 	}
 }
 
