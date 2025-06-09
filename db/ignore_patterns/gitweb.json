@@ -1,0 +1,11 @@
+{
+    "name": "gitweb",
+    "patterns": [
+        "[?;&]a=commit($|[;&])",
+        "[?;&]a=commitdiff($|[;&])",
+        "[?;&]hb?=[0-9a-f]+($|[;&])",
+        "[?;&]a=blob_plain[;&]f=[^;&]*[;&]hb=refs/[^;&]*($|[;&])",
+        "[?;&]a=history[;&]f=[^;&]+([;&]hb=HEAD)($|[;&])"
+    ],
+    "type": "ignore_patterns"
+}
