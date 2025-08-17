@@ -1,0 +1,10 @@
+{
+    "name": "substack",
+    "patterns": [
+        "^https?://({primary_netloc}|[^/]*\\.substack\\.com)/.*/(h_\\d+|w_\\d+|c_fill|c_limit|fl_progressive:steep|f_webp|f_auto|q_auto:good)",
+        "^https?://({primary_netloc}|[^/]*\\.substack\\.com)/.*/g_auto/https%3A%2F%2Fsubstack\\.com%2Fimg%2Favatars%2Flogged-out\\.png",
+        "^https?://({primary_netloc}|[^/]*\\.substack\\.com)/.*/https%3A%2F%2F[^%]+\\.s3\\.amazonaws\\.com%2Fpublic%2Fimages%2F",
+        "^https?://({primary_netloc}|substack\\.com)/(sign-in|subscribe)"
+    ],
+    "type": "ignore_patterns"
+}
