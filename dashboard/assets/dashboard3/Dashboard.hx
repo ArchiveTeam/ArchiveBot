@@ -166,6 +166,7 @@ class Job {
                 logLineDiv.classList.add("text-success");
             } else if (logLine.isWarning) {
                 logLineDiv.classList.add("bg-warning");
+                logLineDiv.classList.add("text-dark");
             } else if (logLine.isError) {
                 logLineDiv.classList.add("bg-danger");
             } else if (logLine.message != null || logLine.pattern != null) {
