@@ -10,7 +10,8 @@
 <link rel="alternate" type="application/rss+xml" title="RSS Feed" href="/feed/archivebot.rss">
 <link rel="alternate" type="application/atom+xml" title="Atom Feed" href="/feed/archivebot.atom">
 <link rel="icon" type="image/png" href="/assets/favicon.png">
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" integrity="sha256-2FMn2Zx6PuH5tdBQDRNwrOo60ts5wWPC9R8jK67b3t4=" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" integrity="sha256-pdY4ejLKO67E0CM2tbPtq1DJ3VGDVVdqAR6j3ZwdiE4=" crossorigin="anonymous">
 <title>ArchiveBot dashboard 3.0</title>
 <style>
 html {
@@ -19,7 +20,6 @@ html {
 }
 
 html, body {
-	background-color: ghostwhite;
 	padding-left: 1em;
 	padding-right: 1em;
 }
@@ -142,10 +142,10 @@ a.job-log-line-url {
 	<a href="http://archiveteam.org/index.php?title=ArchiveBot" class="underlined-a">ArchiveBot</a>
 	tracking ~<span id="num-crawls" ng-bind="jobs.length"></span> crawls.
 	See also <a href="pipelines" class="underlined-a">pipeline</a> or <a href="logs/recent" class="underlined-a">job</a> reports.
-	<button ng-click="helpVisible = true" class="btn btn-default" ng-hide="helpVisible">Help!</button>
+	<button ng-click="helpVisible = true" class="btn btn-info" ng-hide="helpVisible">Help!</button>
 </div>
 
-<div id="help" ng-show="helpVisible" class="well">
+<div id="help" ng-show="helpVisible" class="card p-3 rounded">
 	<p>
 		This page shows all of the crawls that <a href="http://archiveteam.org/index.php?title=ArchiveBot">ArchiveBot</a> is currently running.
 	</p>
@@ -174,7 +174,7 @@ a.job-log-line-url {
 <div>
 	<label for="filterBox">Filter:</label>
 	<input type="search" ng-model="filterQuery" id="filterBox" placeholder="{{ :: showNicks ? 'URL, ident, or nick' : 'URL or ident'}}">
-	<button class="btn btn-default" ng-click="applyFilterQuery('')"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Clear</button>
+	<button class="btn btn-secondary" ng-click="applyFilterQuery('')"><span class="bi bi-x" aria-hidden="true"></span> Clear</button>
 </div>
 
 <div>
@@ -188,15 +188,15 @@ a.job-log-line-url {
 	<label for="fastCheckbox">Go fast</label>
 </div>
 
-<table id="dashboardTable" class="table table-condensed table-striped table-bordered">
+<table id="dashboardTable" class="table table-sm table-striped table-bordered">
 	<tr>
-		<th class="col-sm-4 tablesort" ng-click="sortParam = 'url'">URL<span class="caret" ng-if="sortParam == 'url'"></span></th>
-		<th class="col-sm-2 tablesort" ng-click="sortParam = 'startedBy'" ng-show="::showNicks">Started by<span class="caret" ng-if="sortParam == 'startedBy'"></span></th>
-		<th class="col-sm-1 tablesort" ng-click="sortParam = 'startedAt'">Started<span class="caret" ng-if="sortParam == 'startedAt'"></span></th>
-		<th class="col-sm-1 tablesort" ng-click="sortParam = 'itemsDownloaded'">Fetched<span class="caret" ng-if="sortParam == 'itemsDownloaded'"></span></th>
-		<th class="col-sm-1 tablesort" ng-click="sortParam = 'bytesDownloaded'">Size<span class="caret" ng-if="sortParam == 'bytesDownloaded'"></span></th>
-		<th class="col-sm-1 tablesort" ng-click="sortParam = 'queueRemaining'">Remain<span class="caret" ng-if="sortParam == 'queueRemaining'"></span></th>
-		<th class="col-sm-2 tablesort" ng-click="sortParam = 'ident'">Ident<span class="caret" ng-if="sortParam == 'ident'"></span></th>
+		<th class="col-4 tablesort" ng-click="sortParam = 'url'">URL<span class="bi bi-chevron-down" ng-if="sortParam == 'url'"></span></th>
+		<th class="col-2 tablesort" ng-click="sortParam = 'startedBy'" ng-show="::showNicks">Started by<span class="bi bi-chevron-down" ng-if="sortParam == 'startedBy'"></span></th>
+		<th class="col-1 tablesort" ng-click="sortParam = 'startedAt'">Started<span class="bi bi-chevron-down" ng-if="sortParam == 'startedAt'"></span></th>
+		<th class="col-1 tablesort" ng-click="sortParam = 'itemsDownloaded'">Fetched<span class="bi bi-chevron-down" ng-if="sortParam == 'itemsDownloaded'"></span></th>
+		<th class="col-1 tablesort" ng-click="sortParam = 'bytesDownloaded'">Size<span class="bi bi-chevron-down" ng-if="sortParam == 'bytesDownloaded'"></span></th>
+		<th class="col-1 tablesort" ng-click="sortParam = 'queueRemaining'">Remain<span class="bi bi-chevron-down" ng-if="sortParam == 'queueRemaining'"></span></th>
+		<th class="col-2 tablesort" ng-click="sortParam = 'ident'">Ident<span class="bi bi-chevron-down" ng-if="sortParam == 'ident'"></span></th>
 	</tr>
 
 	<tr class="job-summary" ng-repeat-start="job in jobs | filter: filterOperator | orderBy:sortParam:true">
@@ -214,7 +214,7 @@ a.job-log-line-url {
 		<td colspan="{{ :: showNicks ? 7 : 6}}">
 			<div class="job-detail-container container-fluid">
 				<div class="row">
-					<div class="job-detail-datatable col-sm-3" ng-class="{ 'height-limit-small': !job.fullview, 'height-limit-big': job.fullview }">
+					<div class="job-detail-datatable col-3" ng-class="{ 'height-limit-small': !job.fullview, 'height-limit-big': job.fullview }">
 						<p title="Note" ng-bind="job.note"></p>
 						<p title="Speed">
 							<span ng-bind="job.concurrency"></span> with
@@ -227,26 +227,26 @@ a.job-log-line-url {
 							<div class="progress-bar"
 								style="width: {{ job.r1xx / (job.totalResponses + job.queueRemaining) * 100 }}%;">
 							</div>
-							<div class="progress-bar progress-bar-success"
+							<div class="progress-bar bg-success"
 								style="width: {{ job.r2xx / (job.totalResponses + job.queueRemaining) * 100 }}%;">
 							</div>
-							<div class="progress-bar progress-bar-info"
+							<div class="progress-bar bg-info"
 								style="width: {{ job.r3xx / (job.totalResponses + job.queueRemaining) * 100 }}%;">
 							</div>
-							<div class="progress-bar progress-bar-warning"
+							<div class="progress-bar bg-warning"
 								style="width: {{ job.r4xx / (job.totalResponses + job.queueRemaining) * 100 }}%;">
 							</div>
-							<div class="progress-bar progress-bar-danger"
+							<div class="progress-bar bg-danger"
 								style="width: {{ job.r5xx / (job.totalResponses + job.queueRemaining) * 100 }}%;">
 							</div>
-							<div class="progress-bar progress-bar-danger progress-bar-striped"
+							<div class="progress-bar bg-danger progress-bar-striped"
 								style="width: {{ job.errorCount / (job.totalResponses + job.queueRemaining) * 100 }}%;">
 							</div>
-							<span class="sr-only">
+							<span class="visually-hidden">
 								{{ job.itemsDownloaded / job.queueRemaining * 100 | number}}% complete.
 							</span>
 						</div>
-						<table class="table table-condensed table-striped table-bordered" ng-if="job.showResponseBreakdown">
+						<table class="table table-sm table-striped table-bordered" ng-if="job.showResponseBreakdown">
 							<tr>
 								<th>Done</th>
 								<td ng-bind="job.itemsDownloaded|number" class="numeric"></td>
@@ -297,8 +297,8 @@ a.job-log-line-url {
 						</p>
 					</div>
 
-					<div class="col-sm-9">
-						<div id="job-log-{{:: job.ident }}" class="job-log well well-sm"
+					<div class="col-9">
+						<div id="job-log-{{:: job.ident }}" class="job-log card p-3 rounded"
 						ng-class="{ 'height-limit-small': !job.fullview, 'height-limit-big': job.fullview, 'autoscroll': !job.logPaused, 'job-log-paused': job.logPaused }"
 						ng-mouseover="job.logPaused = true" ng-mouseleave="job.logPaused = false"
 						></div>
@@ -308,11 +308,11 @@ a.job-log-line-url {
 				</div>
 
 				<div class="row">
-					<div class="col-xs-1">
-						<button class="btn btn-block btn-default btn-xs" ng-click="applyFilterQuery(job.ident)"><span class="glyphicon glyphicon-filter" aria-label="Show only this job"></span></button>
+					<div class="col-1 gy-3">
+						<button class="btn w-100 btn-secondary btn-sm" ng-click="applyFilterQuery(job.ident)"><span class="bi bi-funnel" aria-label="Show only this job"></span></button>
 					</div>
-					<div class="col-xs-11">
-						<button class="job-detail-handle btn btn-default btn-block btn-xs" ng-click="job.fullview = !job.fullview; job.logPaused = job.fullview;" ng-class="{ 'job-detail-handle-active': job.fullview }" aria-label="Toggle detail full view">• • •</button>
+					<div class="col-11 gy-3">
+						<button class="job-detail-handle btn btn-success w-100 btn-sm" ng-click="job.fullview = !job.fullview; job.logPaused = job.fullview;" ng-class="{ 'job-detail-handle-active': job.fullview }" aria-label="Toggle detail full view">• • •</button>
 					</div>
 				</div>
 
