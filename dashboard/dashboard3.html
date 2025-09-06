@@ -143,6 +143,18 @@ a.job-log-line-url {
 	tracking ~<span id="num-crawls" ng-bind="jobs.length"></span> crawls.
 	See also <a href="pipelines" class="underlined-a">pipeline</a> or <a href="logs/recent" class="underlined-a">job</a> reports.
 	<button ng-click="helpVisible = true" class="btn btn-info" ng-hide="helpVisible">Help!</button>
+	<button id="btnThemeSwitch" class="btn btn-secondary" ng-hide="helpVisible">Switch Dark/Light mode</button>
+	<script>
+		document.documentElement.setAttribute('data-bs-theme', (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'))
+		document.getElementById('btnThemeSwitch').addEventListener('click',()=>{
+			if (document.documentElement.getAttribute('data-bs-theme') == 'dark') {
+				document.documentElement.setAttribute('data-bs-theme','light')
+			}
+			else {
+				document.documentElement.setAttribute('data-bs-theme','dark')
+			}
+		})
+	</script>
 </div>
 
 <div id="help" ng-show="helpVisible" class="card p-3 rounded">
