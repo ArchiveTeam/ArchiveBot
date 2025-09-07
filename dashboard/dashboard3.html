@@ -225,7 +225,7 @@ a.job-log-line-url {
 	<tr class="job-detail" ng-repeat-end ng-if="!hideDetails">
 		<td colspan="{{ :: showNicks ? 7 : 6}}">
 			<div class="job-detail-container container-fluid">
-				<div class="row">
+				<div class="row mt-2">
 					<div class="job-detail-datatable col-3" ng-class="{ 'height-limit-small': !job.fullview, 'height-limit-big': job.fullview }">
 						<p title="Note" ng-bind="job.note"></p>
 						<p title="Speed">
@@ -321,7 +321,7 @@ a.job-log-line-url {
 					</div>
 				</div>
 
-				<div class="row">
+				<div class="row mb-2">
 					<div class="col-1 gy-3">
 						<button class="btn w-100 btn-secondary btn-sm" ng-click="applyFilterQuery(job.ident)"><span class="bi bi-funnel" aria-label="Show only this job"></span></button>
 					</div>
