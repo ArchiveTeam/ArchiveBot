@@ -12,7 +12,9 @@
 <link rel="icon" type="image/png" href="/assets/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital@1&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" integrity="sha256-2FMn2Zx6PuH5tdBQDRNwrOo60ts5wWPC9R8jK67b3t4=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" integrity="sha256-pdY4ejLKO67E0CM2tbPtq1DJ3VGDVVdqAR6j3ZwdiE4=" crossorigin="anonymous">
 <title>ArchiveBot dashboard 3.0</title>
@@ -217,13 +219,13 @@ a.job-log-line-url {
 
 <table id="dashboardTable" class="table table-sm table-striped table-bordered">
 	<tr>
-		<th class="col-4 tablesort" ng-click="sortParam = 'url'">URL<span class="bi bi-chevron-down" ng-if="sortParam == 'url'"></span></th>
-		<th class="col-2 tablesort" ng-click="sortParam = 'startedBy'" ng-show="::showNicks">Started by<span class="bi bi-chevron-down" ng-if="sortParam == 'startedBy'"></span></th>
-		<th class="col-1 tablesort" ng-click="sortParam = 'startedAt'">Started<span class="bi bi-chevron-down" ng-if="sortParam == 'startedAt'"></span></th>
-		<th class="col-1 tablesort" ng-click="sortParam = 'itemsDownloaded'">Fetched<span class="bi bi-chevron-down" ng-if="sortParam == 'itemsDownloaded'"></span></th>
-		<th class="col-1 tablesort" ng-click="sortParam = 'bytesDownloaded'">Size<span class="bi bi-chevron-down" ng-if="sortParam == 'bytesDownloaded'"></span></th>
-		<th class="col-1 tablesort" ng-click="sortParam = 'queueRemaining'">Remain<span class="bi bi-chevron-down" ng-if="sortParam == 'queueRemaining'"></span></th>
-		<th class="col-2 tablesort" ng-click="sortParam = 'ident'">Ident<span class="bi bi-chevron-down" ng-if="sortParam == 'ident'"></span></th>
+		<th class="col-4 tablesort" ng-click="sortParam = 'url'">URL<span class="bi bi-chevron-down float-end" ng-if="sortParam == 'url'"></span></th>
+		<th class="col-2 tablesort" ng-click="sortParam = 'startedBy'" ng-show="::showNicks">Started by<span class="bi bi-chevron-down float-end" ng-if="sortParam == 'startedBy'"></span></th>
+		<th class="col-1 tablesort" ng-click="sortParam = 'startedAt'">Started<span class="bi bi-chevron-down float-end" ng-if="sortParam == 'startedAt'"></span></th>
+		<th class="col-1 tablesort" ng-click="sortParam = 'itemsDownloaded'">Fetched<span class="bi bi-chevron-down float-end" ng-if="sortParam == 'itemsDownloaded'"></span></th>
+		<th class="col-1 tablesort" ng-click="sortParam = 'bytesDownloaded'">Size<span class="bi bi-chevron-down float-end" ng-if="sortParam == 'bytesDownloaded'"></span></th>
+		<th class="col-1 tablesort" ng-click="sortParam = 'queueRemaining'">Remain<span class="bi bi-chevron-down float-end" ng-if="sortParam == 'queueRemaining'"></span></th>
+		<th class="col-2 tablesort" ng-click="sortParam = 'ident'">Ident<span class="bi bi-chevron-down float-end" ng-if="sortParam == 'ident'"></span></th>
 	</tr>
 
 	<tr class="job-summary" ng-repeat-start="job in jobs | filter: filterOperator | orderBy:sortParam:true">
