@@ -34,11 +34,17 @@ html, body {
 }
 
 #message_box {
-	padding: 0.5em;
 	position: fixed;
-	top: 0px;
-	right: 0px;
-	opacity: 0.8;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	max-width: 90%;
+	width: min(40rem, 100%);
+	box-sizing: border-box;
+	opacity: 0.95;
+	text-align: center;
+	padding: 0.75rem 1rem;
+	z-index: 9999;
 }
 
 #body-wrapper {
