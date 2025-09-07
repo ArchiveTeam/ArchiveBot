@@ -54,6 +54,36 @@ Job.prototype = {
 		}
 		return sum / 60.0;
 	}
+	,getTextColor: function(logLine) {
+		if(logLine.responseCode == 200) {
+			return "text-success";
+		}
+		if(logLine.responseCode >= 100 && logLine.responseCode < 200) {
+			return "text-primary";
+		}
+		if(logLine.responseCode >= 201 && logLine.responseCode < 300) {
+			return "text-success-emphasis";
+		}
+		if(logLine.responseCode >= 300 && logLine.responseCode < 400) {
+			return "text-info";
+		}
+		if(logLine.responseCode >= 400 && logLine.responseCode < 500) {
+			return "text-warning";
+		}
+		if(logLine.responseCode >= 500 && logLine.responseCode < 600) {
+			return "text-danger";
+		}
+		if(logLine.isWarning) {
+			return "text-warning";
+		}
+		if(logLine.isError) {
+			return "text-danger";
+		}
+		if(logLine.message != null || logLine.pattern != null) {
+			return "text-muted";
+		}
+		return "";
+	}
 	,consumeLogEvent: function(logEvent,maxScrollback) {
 		var jobData = logEvent.job_data;
 		this.aborted = jobData.aborted;
@@ -118,14 +148,9 @@ Job.prototype = {
 			++_g;
 			var logLineDiv = window.document.createElement("div");
 			logLineDiv.className = "job-log-line";
-			if(logLine.responseCode == 200) {
-				logLineDiv.classList.add("text-success");
-			} else if(logLine.isWarning) {
-				logLineDiv.classList.add("text-warning");
-			} else if(logLine.isError) {
-				logLineDiv.classList.add("text-danger");
-			} else if(logLine.message != null || logLine.pattern != null) {
-				logLineDiv.classList.add("text-muted");
+			var logColor = this.getTextColor(logLine);
+			if(logColor != "") {
+				logLineDiv.classList.add(logColor);
 			}
 			if(logLine.responseCode > 0 || logLine.wgetCode != null) {
 				var text;
@@ -384,7 +409,7 @@ Dashboard.prototype = {
 			job = new Job(ident);
 			this.jobMap.h[ident] = job;
 			this.jobs.push(job);
-			console.log("Dashboard.hx:474:","Load job " + ident);
+			console.log("Dashboard.hx:509:","Load job " + ident);
 		} else {
 			job = this.jobMap.h[ident];
 		}

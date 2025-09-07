@@ -90,6 +90,46 @@ class Job {
         return sum / 60.0;
     }
 
+    private function getTextColor(logLine):String {
+        // response codes:
+        // 200 OK
+        if (logLine.responseCode == 200) {
+            return "text-success";
+        }
+        // 100s
+        if (logLine.responseCode >= 100 && logLine.responseCode < 200) {
+            return "text-primary";
+        }
+        // 200s (we already checked 200)
+        if (logLine.responseCode >= 201 && logLine.responseCode < 300) {
+            return "text-success-emphasis";
+        }
+        // 300s
+        if (logLine.responseCode >= 300 && logLine.responseCode < 400) {
+            return "text-info";
+        }
+        // 400s
+        if (logLine.responseCode >= 400 && logLine.responseCode < 500) {
+            return "text-warning";
+        }
+        // 500s
+        if (logLine.responseCode >= 500 && logLine.responseCode < 600) {
+            return "text-danger";
+        }
+
+        // warning levels / misc.
+        if (logLine.isWarning) {
+            return "text-warning";
+        }
+        if (logLine.isError) {
+            return "text-danger";
+        }
+        if (logLine.message != null || logLine.pattern != null) {
+            return "text-muted";
+        }
+        return "";  // fallback, no coloring
+    }
+
     public function consumeLogEvent(logEvent:Dynamic, maxScrollback:Int) {
         var jobData:Dynamic = logEvent.job_data;
 
@@ -162,14 +202,9 @@ class Job {
 
             logLineDiv.className = "job-log-line";
 
-            if (logLine.responseCode == 200) {
-                logLineDiv.classList.add("text-success");
-            } else if (logLine.isWarning) {
-                logLineDiv.classList.add("text-warning");
-            } else if (logLine.isError) {
-                logLineDiv.classList.add("text-danger");
-            } else if (logLine.message != null || logLine.pattern != null) {
-                logLineDiv.classList.add("text-muted");
+            var logColor = getTextColor(logLine);
+            if (logColor != "") {
+                logLineDiv.classList.add(logColor);
             }
 
             if (logLine.responseCode > 0 || logLine.wgetCode != null) {
