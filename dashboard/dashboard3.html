@@ -309,12 +309,14 @@ a.job-log-line-url {
 						</p>
 					</div>
 
-					<div class="col-9">
+					<div class="col-9" style="position: relative;">
 						<div id="job-log-{{:: job.ident }}" class="job-log card p-3 rounded"
 						ng-class="{ 'height-limit-small': !job.fullview, 'height-limit-big': job.fullview, 'autoscroll': !job.logPaused, 'job-log-paused': job.logPaused }"
 						ng-mouseover="job.logPaused = true" ng-mouseleave="job.logPaused = false"
 						></div>
-						<div class="autoscroll-paused bg-info" ng-show="job.logPaused">Paused</div>
+						<div class="position-absolute top-0 m-2 badge rounded-pill bg-info-subtle text-info-emphasis border border-info-subtle p-2 z-2 pe-none" ng-show="job.logPaused">
+							<i class="bi bi-pause-fill" aria-hidden="true"></i> Paused
+						</div>
 						{{:: job.attachAntiScroll() }}
 					</div>
 				</div>
