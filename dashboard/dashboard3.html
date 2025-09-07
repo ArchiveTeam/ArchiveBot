@@ -33,6 +33,30 @@ html, body {
 	font-size: larger;
 }
 
+.banner-controls {
+	position: absolute;
+	right: 0.75rem;
+	top: 50%;
+	transform: translateY(-50%);
+	display: flex;
+	gap: 0.5rem;
+	align-items: center;
+	z-index: 10;
+}
+
+@media (max-width: 576px) {
+	#banner {
+		padding-right: 1rem;
+	}
+
+	.banner-controls {
+		position: static;
+		transform: none;
+		margin-top: 0.5rem;
+		justify-content: flex-end;
+	}
+}
+
 #message_box {
 	position: fixed;
 	top: 50%;
@@ -159,6 +183,35 @@ a.job-log-line-url {
 	top: 1em;
 	z-index: 999;
 }
+
+.settings {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1em;
+	align-items: center;
+}
+
+.settings > div {
+	flex: 0 1 auto;
+	min-width: max-content;
+}
+
+@media (max-width: 576px) {
+	.settings {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.5em;
+	}
+
+	.settings label {
+		white-space: nowrap;
+	}
+
+	#filterBox {
+		max-width: 100%;
+		width: 100%;
+	}
+}
 </style>
 </head>
 <body ng-controller="DashboardController">
@@ -172,22 +225,24 @@ a.job-log-line-url {
 		<a href="http://archiveteam.org/index.php?title=ArchiveBot" class="underlined-a">ArchiveBot</a>
 		tracking ~<span id="num-crawls" ng-bind="jobs.length"></span> crawls.
 		See also <a href="pipelines" class="underlined-a">pipeline</a> or <a href="logs/recent" class="underlined-a">job</a> reports.
-		<button ng-click="helpVisible = true" class="btn btn-info" ng-hide="helpVisible">Help!</button>
-		<button id="btnThemeSwitch" class="btn btn-secondary" ng-hide="helpVisible">Switch Dark/Light mode</button>
-		<script>
-			document.documentElement.setAttribute('data-bs-theme', (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'))
-			document.getElementById('btnThemeSwitch').addEventListener('click',()=>{
-				if (document.documentElement.getAttribute('data-bs-theme') == 'dark') {
-					document.documentElement.setAttribute('data-bs-theme','light')
-				}
-				else {
-					document.documentElement.setAttribute('data-bs-theme','dark')
-				}
-			})
-		</script>
+		<div class="banner-controls">
+			<button ng-click="helpVisible = true" class="btn btn-info" ng-hide="helpVisible">Help!</button>
+			<button id="btnThemeSwitch" class="btn btn-secondary" ng-hide="helpVisible"><span class="bi bi-palette-fill" aria-label="Switch Dark/Light mode"></span></button>
+			<script>
+				document.documentElement.setAttribute('data-bs-theme', (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'))
+				document.getElementById('btnThemeSwitch').addEventListener('click',()=>{
+					if (document.documentElement.getAttribute('data-bs-theme') == 'dark') {
+						document.documentElement.setAttribute('data-bs-theme','light')
+					}
+					else {
+						document.documentElement.setAttribute('data-bs-theme','dark')
+					}
+				})
+			</script>
+		</div>
 	</div>
 
-	<div id="help" ng-show="helpVisible" class="card p-3 rounded">
+	<div id="help" ng-show="helpVisible" class="card p-3 rounded mt-3 mb-3">
 		<p>
 			This page shows all of the crawls that <a href="http://archiveteam.org/index.php?title=ArchiveBot">ArchiveBot</a> is currently running.
 		</p>
@@ -206,28 +261,33 @@ a.job-log-line-url {
 		<p>
 			GitHub: <a href="https://github.com/ArchiveTeam/ArchiveBot">ArchiveBot</a>.
 		</p>
-		<p><button ng-click="helpVisible = false" class="btn btn-primary">OK!</button>
+		<button ng-click="helpVisible = false" class="btn btn-primary">OK!</button>
 	</div>
 
 	<div id="message_box" class="alert alert-info">
 		Loading...
 	</div>
 
-	<div>
-		<label for="filterBox">Filter:</label>
-		<input type="search" ng-model="filterQuery" id="filterBox" placeholder="{{ :: showNicks ? 'URL, ident, or nick' : 'URL or ident'}}">
-		<button class="btn btn-secondary" ng-click="applyFilterQuery('')"><span class="bi bi-x" aria-hidden="true"></span> Clear</button>
-	</div>
+	<div class="settings">
+		<div>
+			<label for="filterBox">Filter:</label>
+			<input type="search" ng-model="filterQuery" id="filterBox" placeholder="{{ :: showNicks ? 'URL, ident, or nick' : 'URL or ident'}}">
+		</div>
 
-	<div>
-		<input type="checkbox" ng-model="hideDetails" id="detailsCheckbox">
-		<label for="detailsCheckbox">Hide Details</label>
-		
-		<input type="checkbox" ng-model="paused" id="pauseCheckbox">
-		<label for="pauseCheckbox">Pause</label>
-		
-		<input type="checkbox" ng-model="drawInterval" ng-true-value="250" ng-false-value="1000" id="fastCheckbox">
-		<label for="fastCheckbox">Go fast</label>
+		<div>
+			<input type="checkbox" ng-model="hideDetails" id="detailsCheckbox">
+			<label for="detailsCheckbox">Hide Details</label>
+		</div>
+
+		<div>
+			<input type="checkbox" ng-model="paused" id="pauseCheckbox">
+			<label for="pauseCheckbox">Pause</label>
+		</div>
+
+		<div>
+			<input type="checkbox" ng-model="drawInterval" ng-true-value="250" ng-false-value="1000" id="fastCheckbox">
+			<label for="fastCheckbox">Go fast</label>
+		</div>
 	</div>
 </div>
 
@@ -356,7 +416,7 @@ a.job-log-line-url {
 
 				<div class="row mb-2">
 					<div class="col-1 gy-3">
-						<button class="btn w-100 btn-secondary btn-sm" ng-click="applyFilterQuery(job.ident)"><span class="bi bi-funnel" aria-label="Show only this job"></span></button>
+						<button class="btn w-100 btn-secondary btn-sm" ng-click="applyFilterQuery(job.ident)"><span class="bi bi-funnel-fill" aria-label="Show only this job"></span></button>
 					</div>
 					<div class="col-11 gy-3">
 						<button class="job-detail-handle btn btn-success w-100 btn-sm" ng-click="job.fullview = !job.fullview; job.logPaused = job.fullview;" ng-class="{ 'job-detail-handle-active': job.fullview }" aria-label="Toggle detail full view">• • •</button>
