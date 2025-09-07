@@ -165,10 +165,9 @@ class Job {
             if (logLine.responseCode == 200) {
                 logLineDiv.classList.add("text-success");
             } else if (logLine.isWarning) {
-                logLineDiv.classList.add("bg-warning");
-                logLineDiv.classList.add("text-dark");
+                logLineDiv.classList.add("text-warning");
             } else if (logLine.isError) {
-                logLineDiv.classList.add("bg-danger");
+                logLineDiv.classList.add("text-danger");
             } else if (logLine.message != null || logLine.pattern != null) {
                 logLineDiv.classList.add("text-muted");
             }

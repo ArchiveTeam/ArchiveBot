@@ -121,10 +121,9 @@ Job.prototype = {
 			if(logLine.responseCode == 200) {
 				logLineDiv.classList.add("text-success");
 			} else if(logLine.isWarning) {
-				logLineDiv.classList.add("bg-warning");
-				logLineDiv.classList.add("text-dark");
+				logLineDiv.classList.add("text-warning");
 			} else if(logLine.isError) {
-				logLineDiv.classList.add("bg-danger");
+				logLineDiv.classList.add("text-danger");
 			} else if(logLine.message != null || logLine.pattern != null) {
 				logLineDiv.classList.add("text-muted");
 			}
@@ -385,7 +384,7 @@ Dashboard.prototype = {
 			job = new Job(ident);
 			this.jobMap.h[ident] = job;
 			this.jobs.push(job);
-			console.log("Dashboard.hx:475:","Load job " + ident);
+			console.log("Dashboard.hx:474:","Load job " + ident);
 		} else {
 			job = this.jobMap.h[ident];
 		}
