@@ -153,6 +153,12 @@ a.job-log-line-url {
 .pipeline {
     font-size: smaller;
 }
+
+.stick {
+	position: sticky;
+	top: 1em;
+	z-index: 999;
+}
 </style>
 </head>
 <body ng-controller="DashboardController">
@@ -161,67 +167,71 @@ a.job-log-line-url {
 	<p class="bg-warning">Yo buddy! You're gonna need JavaScript (ES5+) and WebSocket -&gt; TCP:4568 in order to view this fancy dashboard.</p>
 </noscript>
 
-<div id="banner">
-	<a href="http://archiveteam.org/index.php?title=ArchiveBot" class="underlined-a">ArchiveBot</a>
-	tracking ~<span id="num-crawls" ng-bind="jobs.length"></span> crawls.
-	See also <a href="pipelines" class="underlined-a">pipeline</a> or <a href="logs/recent" class="underlined-a">job</a> reports.
-	<button ng-click="helpVisible = true" class="btn btn-info" ng-hide="helpVisible">Help!</button>
-	<button id="btnThemeSwitch" class="btn btn-secondary" ng-hide="helpVisible">Switch Dark/Light mode</button>
-	<script>
-		document.documentElement.setAttribute('data-bs-theme', (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'))
-		document.getElementById('btnThemeSwitch').addEventListener('click',()=>{
-			if (document.documentElement.getAttribute('data-bs-theme') == 'dark') {
-				document.documentElement.setAttribute('data-bs-theme','light')
-			}
-			else {
-				document.documentElement.setAttribute('data-bs-theme','dark')
-			}
-		})
-	</script>
+<div class="stick bg-primary-subtle rounded m-3 p-3">
+	<div id="banner">
+		<a href="http://archiveteam.org/index.php?title=ArchiveBot" class="underlined-a">ArchiveBot</a>
+		tracking ~<span id="num-crawls" ng-bind="jobs.length"></span> crawls.
+		See also <a href="pipelines" class="underlined-a">pipeline</a> or <a href="logs/recent" class="underlined-a">job</a> reports.
+		<button ng-click="helpVisible = true" class="btn btn-info" ng-hide="helpVisible">Help!</button>
+		<button id="btnThemeSwitch" class="btn btn-secondary" ng-hide="helpVisible">Switch Dark/Light mode</button>
+		<script>
+			document.documentElement.setAttribute('data-bs-theme', (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'))
+			document.getElementById('btnThemeSwitch').addEventListener('click',()=>{
+				if (document.documentElement.getAttribute('data-bs-theme') == 'dark') {
+					document.documentElement.setAttribute('data-bs-theme','light')
+				}
+				else {
+					document.documentElement.setAttribute('data-bs-theme','dark')
+				}
+			})
+		</script>
+	</div>
+
+	<div id="help" ng-show="helpVisible" class="card p-3 rounded">
+		<p>
+			This page shows all of the crawls that <a href="http://archiveteam.org/index.php?title=ArchiveBot">ArchiveBot</a> is currently running.
+		</p>
+		<p>
+			To clear all finished jobs, reload the page.
+		</p>
+		<p>
+			If your adblocker is enabled for this domain, you will see slower performance, and some URLs will not be displayed.
+		</p>
+		<p>
+			To use ArchiveBot, drop by <a href="https://webirc.hackint.org/#irc://irc.hackint.org/archivebot">#archivebot</a> on hackint.  <a href="http://archivebot.readthedocs.org/en/latest/">Issue commands</a> by typing them into the channel.  You will need channel operator (@) or voice (+) status to issue archiving jobs; just ask for help or leave a message with the website you want to archive.
+		</p>
+		<p>
+			These <a href="https://github.com/ArchiveTeam/ArchiveBot/tree/master/db/ignore_patterns">ignore sets</a> are available for crawls.  The <a href="https://github.com/ArchiveTeam/ArchiveBot/blob/master/db/ignore_patterns/global.json">global</a> ignore set automatically applies to all crawls.
+		</p>
+		<p>
+			GitHub: <a href="https://github.com/ArchiveTeam/ArchiveBot">ArchiveBot</a>.
+		</p>
+		<p><button ng-click="helpVisible = false" class="btn btn-primary">OK!</button>
+	</div>
+
+	<div id="message_box" class="alert alert-info">
+		Loading...
+	</div>
+
+	<div>
+		<label for="filterBox">Filter:</label>
+		<input type="search" ng-model="filterQuery" id="filterBox" placeholder="{{ :: showNicks ? 'URL, ident, or nick' : 'URL or ident'}}">
+		<button class="btn btn-secondary" ng-click="applyFilterQuery('')"><span class="bi bi-x" aria-hidden="true"></span> Clear</button>
+	</div>
+
+	<div>
+		<input type="checkbox" ng-model="hideDetails" id="detailsCheckbox">
+		<label for="detailsCheckbox">Hide Details</label>
+		
+		<input type="checkbox" ng-model="paused" id="pauseCheckbox">
+		<label for="pauseCheckbox">Pause</label>
+		
+		<input type="checkbox" ng-model="drawInterval" ng-true-value="250" ng-false-value="1000" id="fastCheckbox">
+		<label for="fastCheckbox">Go fast</label>
+	</div>
 </div>
 
-<div id="help" ng-show="helpVisible" class="card p-3 rounded">
-	<p>
-		This page shows all of the crawls that <a href="http://archiveteam.org/index.php?title=ArchiveBot">ArchiveBot</a> is currently running.
-	</p>
-	<p>
-		To clear all finished jobs, reload the page.
-	</p>
-	<p>
-		If your adblocker is enabled for this domain, you will see slower performance, and some URLs will not be displayed.
-	</p>
-	<p>
-		To use ArchiveBot, drop by <a href="https://webirc.hackint.org/#irc://irc.hackint.org/archivebot">#archivebot</a> on hackint.  <a href="http://archivebot.readthedocs.org/en/latest/">Issue commands</a> by typing them into the channel.  You will need channel operator (@) or voice (+) status to issue archiving jobs; just ask for help or leave a message with the website you want to archive.
-	</p>
-	<p>
-		These <a href="https://github.com/ArchiveTeam/ArchiveBot/tree/master/db/ignore_patterns">ignore sets</a> are available for crawls.  The <a href="https://github.com/ArchiveTeam/ArchiveBot/blob/master/db/ignore_patterns/global.json">global</a> ignore set automatically applies to all crawls.
-	</p>
-	<p>
-		GitHub: <a href="https://github.com/ArchiveTeam/ArchiveBot">ArchiveBot</a>.
-	</p>
-	<p><button ng-click="helpVisible = false" class="btn btn-primary">OK!</button>
-</div>
-
-<div id="message_box" class="alert alert-info">
-	Loading...
-</div>
-
-<div>
-	<label for="filterBox">Filter:</label>
-	<input type="search" ng-model="filterQuery" id="filterBox" placeholder="{{ :: showNicks ? 'URL, ident, or nick' : 'URL or ident'}}">
-	<button class="btn btn-secondary" ng-click="applyFilterQuery('')"><span class="bi bi-x" aria-hidden="true"></span> Clear</button>
-</div>
-
-<div>
-	<input type="checkbox" ng-model="hideDetails" id="detailsCheckbox">
-	<label for="detailsCheckbox">Hide Details</label>
-	
-	<input type="checkbox" ng-model="paused" id="pauseCheckbox">
-	<label for="pauseCheckbox">Pause</label>
-	
-	<input type="checkbox" ng-model="drawInterval" ng-true-value="250" ng-false-value="1000" id="fastCheckbox">
-	<label for="fastCheckbox">Go fast</label>
-</div>
+<hr>
 
 <table id="dashboardTable" class="table table-sm table-striped table-bordered">
 	<tr>
