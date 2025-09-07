@@ -248,6 +248,9 @@ class Dashboard {
 			scope.sortParam = "startedAt";
 			scope.showNicks = showNicks;
 			scope.drawInterval = drawInterval;
+			scope.currentPage = 1;
+			scope.pageSize = 10;
+			scope.totalPages = 1;
 			_gthis.dashboardControllerScopeApply = Reflect.field(scope,"$apply").bind(scope);
 			scope.filterOperator = function(job) {
 				let query = scope.filterQuery;
@@ -267,13 +270,36 @@ class Dashboard {
 			scope.applyFilterQuery = function(query) {
 				scope.filterQuery = query;
 			};
-			scope.$watch("filterQuery",function(newValue,oldValue) {
+			scope.$watchGroup(["filterQuery","jobs.length"],function(newVals,oldVals) {
+				let filterQuery = newVals[0];
 				let maxScrollback = 500;
-				if(newValue == null || newValue.trim() == "") {
+				if(filterQuery == null || filterQuery.trim() == "") {
 					maxScrollback = 50;
 				}
 				_gthis.changeMaxScrollback(maxScrollback);
+				let _this = scope.jobs;
+				let f = scope.filterOperator;
+				let _g = [];
+				let _g1 = 0;
+				while(_g1 < _this.length) {
+					let v = _this[_g1];
+					++_g1;
+					if(f(v)) {
+						_g.push(v);
+					}
+				}
+				scope.totalPages = Math.max(1,Math.ceil(_g.length / scope.pageSize)) | 0;
+				if(oldVals != null && filterQuery != oldVals[0]) {
+					scope.currentPage = 1;
+				} else if(scope.currentPage > scope.totalPages) {
+					scope.currentPage = scope.totalPages;
+				}
 			});
+			scope.setPage = function(page) {
+				if(page >= 1 && page <= scope.totalPages) {
+					scope.currentPage = page;
+				}
+			};
 		}];
 		this.app.controller("DashboardController",controllerArgs);
 	}
@@ -357,7 +383,7 @@ class Dashboard {
 			job = new Job(ident);
 			this.jobMap.h[ident] = job;
 			this.jobs.push(job);
-			console.log("Dashboard.hx:517:","Load job " + ident);
+			console.log("Dashboard.hx:540:","Load job " + ident);
 		} else {
 			job = this.jobMap.h[ident];
 		}

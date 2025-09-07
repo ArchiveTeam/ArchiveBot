@@ -353,6 +353,9 @@ class Dashboard {
                 scope.sortParam = "startedAt";
                 scope.showNicks = showNicks;
                 scope.drawInterval = drawInterval;
+                scope.currentPage = 1;
+                scope.pageSize = 10;
+                scope.totalPages = 1;
                 dashboardControllerScopeApply = Reflect.field(scope, "$apply").bind(scope);
                 scope.filterOperator = function (job:Job) {
                     var query:String = scope.filterQuery;
@@ -369,13 +372,33 @@ class Dashboard {
                 scope.applyFilterQuery = function (query:String) {
                     scope.filterQuery = query;
                 }
-                scope.$watch("filterQuery", function(newValue, oldValue) {
+                scope.$watchGroup(["filterQuery", "jobs.length"], function(newVals:Dynamic, oldVals:Dynamic) {
+                    var filterQuery = newVals[0];
+
+                    // update max scrollback when searching
                     var maxScrollback = 500;
-                    if (newValue == null || newValue.trim() == "") {
+                    if (filterQuery == null || filterQuery.trim() == "") {
                         maxScrollback = 50;
                     }
                     changeMaxScrollback(maxScrollback);
+
+                    // pagination
+                    var filtered = scope.jobs.filter(scope.filterOperator);
+                    var pages:Float = Math.ceil(filtered.length / (scope.pageSize : Float));
+                    scope.totalPages = Std.int(Math.max(1, pages));
+                    if (oldVals != null && filterQuery != oldVals[0]) {
+                        scope.currentPage = 1;
+                    } else {
+                        if (scope.currentPage > scope.totalPages) {
+                            scope.currentPage = scope.totalPages;
+                        }
+                    }
                 });
+                scope.setPage = function (page:Int) {
+                    if (page >= 1 && page <= scope.totalPages) {
+                        scope.currentPage = page;
+                    }
+                };
             }
         ];
 

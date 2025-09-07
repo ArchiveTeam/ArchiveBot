@@ -288,6 +288,24 @@ a.job-log-line-url {
 			<input type="checkbox" ng-model="drawInterval" ng-true-value="250" ng-false-value="1000" id="fastCheckbox">
 			<label for="fastCheckbox">Go fast</label>
 		</div>
+
+		<div>
+			<nav aria-label="Job pagination">
+				<ul class="pagination justify-content-center mt-3">
+					<li class="page-item" ng-class="{disabled: currentPage == 1}">
+					<a class="page-link" href="" ng-click="setPage(currentPage - 1)">Previous</a>
+					</li>
+
+					<li class="page-item disabled">
+					<span class="page-link">Page {{currentPage}} / {{totalPages}}</span>
+					</li>
+
+					<li class="page-item" ng-class="{disabled: currentPage == totalPages}">
+					<a class="page-link" href="" ng-click="setPage(currentPage + 1)">Next</a>
+					</li>
+				</ul>
+			</nav>
+		</div>
 	</div>
 </div>
 
@@ -304,7 +322,7 @@ a.job-log-line-url {
 		<th class="col-2 tablesort" ng-click="sortParam = 'ident'">Ident<span class="bi bi-chevron-down float-end" ng-if="sortParam == 'ident'"></span></th>
 	</tr>
 
-	<tr class="job-summary" ng-repeat-start="job in jobs | filter: filterOperator | orderBy:sortParam:true">
+	<tr class="job-summary" ng-repeat-start="job in jobs | filter: filterOperator | orderBy:sortParam:true | limitTo: pageSize : (currentPage - 1) * pageSize">
 		<td>!{{ :: job.depth == 'shallow' ? 'ao' : 'a' }} <a href="{{ ::job.url }}" ng-bind="::job.url"></a></td>
 		<td ng-bind="job.startedBy" ng-if="::showNicks"></td>
 		<td ng-bind=":: job.startedAt * 1000|date:'MM-dd'"
