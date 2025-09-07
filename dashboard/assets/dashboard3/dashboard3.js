@@ -105,8 +105,8 @@ class Job {
 		logLine.wgetCode = logEvent.wget_code;
 		this.totalResponses = this.r1xx + this.r2xx + this.r3xx + this.r4xx + this.r5xx + this.errorCount;
 		this.queueRemaining = this.itemsQueued - this.itemsDownloaded;
-		if(this.logLines.length >= maxScrollback) {
-			this.logLines.shift();
+		if(this.logLines.length > maxScrollback) {
+			this.logLines = this.logLines.slice(this.logLines.length - maxScrollback);
 		}
 		this.fillDownloadCountBucket();
 		this.responsePerSecond = this.computeSpeed();
@@ -267,8 +267,18 @@ class Dashboard {
 			scope.applyFilterQuery = function(query) {
 				scope.filterQuery = query;
 			};
+			scope.$watch("filterQuery",function(newValue,oldValue) {
+				let maxScrollback = 500;
+				if(newValue == null || newValue.trim() == "") {
+					maxScrollback = 50;
+				}
+				_gthis.changeMaxScrollback(maxScrollback);
+			});
 		}];
 		this.app.controller("DashboardController",controllerArgs);
+	}
+	changeMaxScrollback(maxScrollback) {
+		this.maxScrollback = maxScrollback;
 	}
 	run() {
 		this.loadRecentLogs();
@@ -347,7 +357,7 @@ class Dashboard {
 			job = new Job(ident);
 			this.jobMap.h[ident] = job;
 			this.jobs.push(job);
-			console.log("Dashboard.hx:509:","Load job " + ident);
+			console.log("Dashboard.hx:517:","Load job " + ident);
 		} else {
 			job = this.jobMap.h[ident];
 		}
@@ -401,17 +411,13 @@ class Dashboard {
 	static main() {
 		let args = Dashboard.getQueryArgs();
 		let hostname;
-		let maxScrollback = 20;
 		let showNicks = Object.prototype.hasOwnProperty.call(args.h,"showNicks");
 		if(Object.prototype.hasOwnProperty.call(args.h,"host")) {
 			hostname = args.h["host"];
 		} else {
 			hostname = $global.location.hostname;
 		}
-		if($global.navigator.userAgent.indexOf("Mobi") == -1) {
-			maxScrollback = 500;
-		}
-		new Dashboard(hostname,maxScrollback,showNicks).run();
+		new Dashboard(hostname,50,showNicks).run();
 	}
 }
 Dashboard.__name__ = true;

@@ -175,8 +175,8 @@ class Job {
         totalResponses = r1xx + r2xx + r3xx + r4xx + r5xx + errorCount;
         queueRemaining = itemsQueued - itemsDownloaded;
 
-        if (logLines.length >= maxScrollback) {
-            logLines.shift();
+        if (logLines.length > maxScrollback) {
+            logLines = logLines.slice(logLines.length - maxScrollback);
         }
 
         fillDownloadCountBucket();
@@ -369,6 +369,13 @@ class Dashboard {
                 scope.applyFilterQuery = function (query:String) {
                     scope.filterQuery = query;
                 }
+                scope.$watch("filterQuery", function(newValue, oldValue) {
+                    var maxScrollback = 500;
+                    if (newValue == null || newValue.trim() == "") {
+                        maxScrollback = 50;
+                    }
+                    changeMaxScrollback(maxScrollback);
+                });
             }
         ];
 
@@ -390,20 +397,21 @@ class Dashboard {
         return args;
     }
 
+    public function changeMaxScrollback(maxScrollback:Int) {
+        this.maxScrollback = maxScrollback;
+        return;
+    }
+
     public static function main() {
         var args = getQueryArgs();
         var hostname;
-        var maxScrollback = 20;
+        var maxScrollback = 50;
         var showNicks = args.exists("showNicks");
 
         if (args.exists("host")) {
             hostname = args.get("host");
         } else {
             hostname = Browser.location.hostname;
-        }
-
-        if (Browser.navigator.userAgent.indexOf("Mobi") == -1) {
-            maxScrollback = 500;
         }
 
         var dashboard = new Dashboard(hostname, maxScrollback, showNicks);
