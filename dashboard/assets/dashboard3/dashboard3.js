@@ -4,10 +4,6 @@ class LogLine {
 	constructor() {
 	}
 }
-LogLine.__name__ = true;
-Object.assign(LogLine.prototype, {
-	__class__: LogLine
-});
 class Job {
 	constructor(ident) {
 		this.pendingLogLines = 0;
@@ -19,6 +15,7 @@ class Job {
 		}
 		this.downloadCountBucket = _g;
 		this.logLines = [];
+		this.clusterizeRows = [];
 		this.ident = ident;
 	}
 	fillDownloadCountBucket() {
@@ -113,66 +110,76 @@ class Job {
 		this.logLines.push(logLine);
 		this.pendingLogLines += 1;
 	}
-	drawPendingLogLines() {
+	drawPendingLogLines(maxScrollback) {
 		if(this.pendingLogLines <= 0) {
 			return;
 		}
-		let logElement = window.document.getElementById("job-log-" + this.ident);
-		if(logElement == null) {
+		let scrollEl = window.document.getElementById("job-log-" + this.ident);
+		let contentEl = window.document.getElementById("job-log-content-" + this.ident);
+		if(scrollEl == null || contentEl == null) {
+			if(this.clusterize != null) {
+				this.clusterize.destroy(true);
+				this.clusterize = null;
+			}
 			return;
+		}
+		if(this.clusterize != null) {
+			let stale = this.clusterize.scroll_elem != scrollEl || this.clusterize.content_elem != contentEl;
+			if(stale) {
+				this.clusterize.destroy(true);
+				this.clusterize = null;
+			}
+		}
+		if(this.clusterize == null) {
+			this.clusterizeRows = [];
+			let clusterizeOptions = { rows : [], scrollId : "job-log-" + this.ident, contentId : "job-log-content-" + this.ident};
+			this.clusterize = new Clusterize(clusterizeOptions);
 		}
 		let _g = 0;
 		let _g1 = this.logLines.slice(-this.pendingLogLines);
 		while(_g < _g1.length) {
 			let logLine = _g1[_g];
 			++_g;
-			let logLineDiv = window.document.createElement("div");
-			logLineDiv.className = "job-log-line";
 			let logColor = this.getTextColor(logLine);
-			if(logColor != "") {
-				logLineDiv.classList.add(logColor);
-			}
+			let text = "";
 			if(logLine.responseCode > 0 || logLine.wgetCode != null) {
-				let text;
 				if(logLine.responseCode > 0) {
-					text = "" + logLine.responseCode + " ";
+					text += "" + logLine.responseCode + " ";
 				} else {
-					text = "" + logLine.wgetCode + " ";
+					text += "" + logLine.wgetCode + " ";
 				}
-				logLineDiv.appendChild(window.document.createTextNode(text));
 			}
 			if(logLine.url != null) {
-				let element = window.document.createElement("a");
-				element.href = logLine.url;
-				element.textContent = logLine.url;
-				element.className = "job-log-line-url";
-				logLineDiv.appendChild(element);
+				text += "<a href=\"" + logLine.url + "\" class=\"job-log-line-url\">" + logLine.url + "</a>";
 				if(logLine.pattern != null) {
-					let element = window.document.createElement("span");
-					element.textContent = logLine.pattern;
-					element.className = "text-warning";
-					logLineDiv.appendChild(window.document.createTextNode(" "));
-					logLineDiv.appendChild(element);
+					text += " <span class=\"text-warning\">" + logLine.pattern + "</span>";
 				}
 			} else if(logLine.message != null) {
-				logLineDiv.textContent = logLine.message;
-				logLineDiv.classList.add("job-log-line-message");
+				text += "<span class=\"job-log-line-message\">" + logLine.message + "</span>";
 			}
-			logElement.appendChild(logLineDiv);
-		}
-		let numToTrim = logElement.childElementCount - this.logLines.length;
-		if(numToTrim > 0) {
-			let _g = 0;
-			while(_g < numToTrim) {
-				++_g;
-				let child = logElement.firstChild;
-				if(child != null) {
-					logElement.removeChild(child);
-				}
+			if(logColor != "") {
+				text = "<div class=\"job-log-line " + logColor + "\">" + text + "</div>";
+			} else {
+				text = "<div class=\"job-log-line\">" + text + "</div>";
 			}
+			this.clusterizeRows.push(text);
 		}
-		logElement.setAttribute("data-autoscroll-dirty","true");
+		if(this.clusterizeRows.length > maxScrollback) {
+			this.clusterizeRows = this.clusterizeRows.slice(this.clusterizeRows.length - maxScrollback);
+		}
+		this.clusterize.update(this.clusterizeRows);
 		this.pendingLogLines = 0;
+	}
+	enforceScrollback(maxScrollback) {
+		if(this.logLines.length > maxScrollback) {
+			this.logLines = this.logLines.slice(this.logLines.length - maxScrollback);
+		}
+		if(this.clusterizeRows.length > maxScrollback) {
+			this.clusterizeRows = this.clusterizeRows.slice(this.clusterizeRows.length - maxScrollback);
+			if(this.clusterize != null) {
+				this.clusterize.update(this.clusterizeRows);
+			}
+		}
 	}
 	static parseInt(thing) {
 		if(thing != null) {
@@ -186,10 +193,6 @@ class Job {
 		}
 	}
 }
-Job.__name__ = true;
-Object.assign(Job.prototype, {
-	__class__: Job
-});
 class Dashboard {
 	constructor(hostname,maxScrollback,showNicks,drawInterval) {
 		if(drawInterval == null) {
@@ -249,7 +252,7 @@ class Dashboard {
 			scope.showNicks = showNicks;
 			scope.drawInterval = drawInterval;
 			scope.currentPage = 1;
-			scope.pageSize = 10;
+			scope.pageSize = 20;
 			scope.totalPages = 1;
 			_gthis.dashboardControllerScopeApply = Reflect.field(scope,"$apply").bind(scope);
 			scope.filterOperator = function(job) {
@@ -277,18 +280,21 @@ class Dashboard {
 					maxScrollback = 50;
 				}
 				_gthis.changeMaxScrollback(maxScrollback);
+				let _g = 0;
+				let _g1 = _gthis.jobs;
+				while(_g < _g1.length) _g1[_g++].enforceScrollback(_gthis.maxScrollback);
 				let _this = scope.jobs;
 				let f = scope.filterOperator;
-				let _g = [];
-				let _g1 = 0;
-				while(_g1 < _this.length) {
-					let v = _this[_g1];
-					++_g1;
+				let _g2 = [];
+				let _g3 = 0;
+				while(_g3 < _this.length) {
+					let v = _this[_g3];
+					++_g3;
 					if(f(v)) {
-						_g.push(v);
+						_g2.push(v);
 					}
 				}
-				scope.totalPages = Math.max(1,Math.ceil(_g.length / scope.pageSize)) | 0;
+				scope.totalPages = Math.max(1,Math.ceil(_g2.length / scope.pageSize)) | 0;
 				if(oldVals != null && filterQuery != oldVals[0]) {
 					scope.currentPage = 1;
 				} else if(scope.currentPage > scope.totalPages) {
@@ -383,7 +389,7 @@ class Dashboard {
 			job = new Job(ident);
 			this.jobMap.h[ident] = job;
 			this.jobs.push(job);
-			console.log("Dashboard.hx:540:","Load job " + ident);
+			console.log("Dashboard.hx:565:","Load job " + ident);
 		} else {
 			job = this.jobMap.h[ident];
 		}
@@ -406,22 +412,24 @@ class Dashboard {
 			let job = _g1[_g];
 			++_g;
 			if(!job.logPaused) {
-				job.drawPendingLogLines();
+				job.drawPendingLogLines(this.maxScrollback);
 			}
 		}
 		this.scrollLogsToBottom();
 	}
 	scrollLogsToBottom() {
-		let nodes = window.document.querySelectorAll("[data-autoscroll-dirty].autoscroll");
-		let pending = [];
 		let _g = 0;
-		while(_g < nodes.length) {
-			let element = js_Boot.__cast(nodes[_g++] , HTMLElement);
-			element.removeAttribute("data-autoscroll-dirty");
-			pending.push(element);
+		let _g1 = this.jobs;
+		while(_g < _g1.length) {
+			let job = _g1[_g];
+			++_g;
+			if(!job.logPaused && job.clusterize != null) {
+				let scrollEl = window.document.getElementById("job-log-" + job.ident);
+				if(scrollEl != null) {
+					scrollEl.scrollTop = scrollEl.scrollHeight;
+				}
+			}
 		}
-		let _g1 = 0;
-		while(_g1 < pending.length) pending[_g1++].scrollTop = 99999;
 	}
 	static getQueryArgs() {
 		let query = $global.location.search;
@@ -446,11 +454,6 @@ class Dashboard {
 		new Dashboard(hostname,50,showNicks).run();
 	}
 }
-Dashboard.__name__ = true;
-Object.assign(Dashboard.prototype, {
-	__class__: Dashboard
-});
-Math.__name__ = true;
 class Reflect {
 	static field(o,field) {
 		try {
@@ -460,11 +463,7 @@ class Reflect {
 		}
 	}
 }
-Reflect.__name__ = true;
 class Std {
-	static string(s) {
-		return js_Boot.__string_rec(s,"");
-	}
 	static parseInt(x) {
 		let v = parseInt(x);
 		if(isNaN(v)) {
@@ -473,64 +472,16 @@ class Std {
 		return v;
 	}
 }
-Std.__name__ = true;
 class StringTools {
 	static replace(s,sub,by) {
 		return s.split(sub).join(by);
 	}
 }
-StringTools.__name__ = true;
-class haxe_IMap {
-}
-haxe_IMap.__name__ = true;
-haxe_IMap.__isInterface__ = true;
-class haxe_Exception extends Error {
-	constructor(message,previous,native) {
-		super(message);
-		this.message = message;
-		this.__previousException = previous;
-		this.__nativeException = native != null ? native : this;
-	}
-	get_native() {
-		return this.__nativeException;
-	}
-	static thrown(value) {
-		if(((value) instanceof haxe_Exception)) {
-			return value.get_native();
-		} else if(((value) instanceof Error)) {
-			return value;
-		} else {
-			let e = new haxe_ValueException(value);
-			return e;
-		}
-	}
-}
-haxe_Exception.__name__ = true;
-haxe_Exception.__super__ = Error;
-Object.assign(haxe_Exception.prototype, {
-	__class__: haxe_Exception
-});
-class haxe_ValueException extends haxe_Exception {
-	constructor(value,previous,native) {
-		super(String(value),previous,native);
-		this.value = value;
-	}
-}
-haxe_ValueException.__name__ = true;
-haxe_ValueException.__super__ = haxe_Exception;
-Object.assign(haxe_ValueException.prototype, {
-	__class__: haxe_ValueException
-});
 class haxe_ds_StringMap {
 	constructor() {
 		this.h = Object.create(null);
 	}
 }
-haxe_ds_StringMap.__name__ = true;
-haxe_ds_StringMap.__interfaces__ = [haxe_IMap];
-Object.assign(haxe_ds_StringMap.prototype, {
-	__class__: haxe_ds_StringMap
-});
 class haxe_iterators_ArrayIterator {
 	constructor(array) {
 		this.current = 0;
@@ -543,205 +494,7 @@ class haxe_iterators_ArrayIterator {
 		return this.array[this.current++];
 	}
 }
-haxe_iterators_ArrayIterator.__name__ = true;
-Object.assign(haxe_iterators_ArrayIterator.prototype, {
-	__class__: haxe_iterators_ArrayIterator
-});
-class js_Boot {
-	static getClass(o) {
-		if(o == null) {
-			return null;
-		} else if(((o) instanceof Array)) {
-			return Array;
-		} else {
-			let cl = o.__class__;
-			if(cl != null) {
-				return cl;
-			}
-			let name = js_Boot.__nativeClassName(o);
-			if(name != null) {
-				return js_Boot.__resolveNativeClass(name);
-			}
-			return null;
-		}
-	}
-	static __string_rec(o,s) {
-		if(o == null) {
-			return "null";
-		}
-		if(s.length >= 5) {
-			return "<...>";
-		}
-		let t = typeof(o);
-		if(t == "function" && (o.__name__ || o.__ename__)) {
-			t = "object";
-		}
-		switch(t) {
-		case "function":
-			return "<function>";
-		case "object":
-			if(((o) instanceof Array)) {
-				let str = "[";
-				s += "\t";
-				let _g = 0;
-				let _g1 = o.length;
-				while(_g < _g1) {
-					let i = _g++;
-					str += (i > 0 ? "," : "") + js_Boot.__string_rec(o[i],s);
-				}
-				str += "]";
-				return str;
-			}
-			let tostr;
-			try {
-				tostr = o.toString;
-			} catch( _g ) {
-				return "???";
-			}
-			if(tostr != null && tostr != Object.toString && typeof(tostr) == "function") {
-				let s2 = o.toString();
-				if(s2 != "[object Object]") {
-					return s2;
-				}
-			}
-			let str = "{\n";
-			s += "\t";
-			let hasp = o.hasOwnProperty != null;
-			let k = null;
-			for( k in o ) {
-			if(hasp && !o.hasOwnProperty(k)) {
-				continue;
-			}
-			if(k == "prototype" || k == "__class__" || k == "__super__" || k == "__interfaces__" || k == "__properties__") {
-				continue;
-			}
-			if(str.length != 2) {
-				str += ", \n";
-			}
-			str += s + k + " : " + js_Boot.__string_rec(o[k],s);
-			}
-			s = s.substring(1);
-			str += "\n" + s + "}";
-			return str;
-		case "string":
-			return o;
-		default:
-			return String(o);
-		}
-	}
-	static __interfLoop(cc,cl) {
-		while(true) {
-			if(cc == null) {
-				return false;
-			}
-			if(cc == cl) {
-				return true;
-			}
-			let intf = cc.__interfaces__;
-			if(intf != null && (cc.__super__ == null || cc.__super__.__interfaces__ != intf)) {
-				let _g = 0;
-				let _g1 = intf.length;
-				while(_g < _g1) {
-					let i = intf[_g++];
-					if(i == cl || js_Boot.__interfLoop(i,cl)) {
-						return true;
-					}
-				}
-			}
-			cc = cc.__super__;
-		}
-	}
-	static __instanceof(o,cl) {
-		if(cl == null) {
-			return false;
-		}
-		switch(cl) {
-		case Array:
-			return ((o) instanceof Array);
-		case Bool:
-			return typeof(o) == "boolean";
-		case Dynamic:
-			return o != null;
-		case Float:
-			return typeof(o) == "number";
-		case Int:
-			if(typeof(o) == "number") {
-				return ((o | 0) === o);
-			} else {
-				return false;
-			}
-			break;
-		case String:
-			return typeof(o) == "string";
-		default:
-			if(o != null) {
-				if(typeof(cl) == "function") {
-					if(js_Boot.__downcastCheck(o,cl)) {
-						return true;
-					}
-				} else if(typeof(cl) == "object" && js_Boot.__isNativeObj(cl)) {
-					if(((o) instanceof cl)) {
-						return true;
-					}
-				}
-			} else {
-				return false;
-			}
-			if(cl == Class ? o.__name__ != null : false) {
-				return true;
-			}
-			if(cl == Enum ? o.__ename__ != null : false) {
-				return true;
-			}
-			return false;
-		}
-	}
-	static __downcastCheck(o,cl) {
-		if(!((o) instanceof cl)) {
-			if(cl.__isInterface__) {
-				return js_Boot.__interfLoop(js_Boot.getClass(o),cl);
-			} else {
-				return false;
-			}
-		} else {
-			return true;
-		}
-	}
-	static __cast(o,t) {
-		if(o == null || js_Boot.__instanceof(o,t)) {
-			return o;
-		} else {
-			throw haxe_Exception.thrown("Cannot cast " + Std.string(o) + " to " + Std.string(t));
-		}
-	}
-	static __nativeClassName(o) {
-		let name = js_Boot.__toStr.call(o).slice(8,-1);
-		if(name == "Object" || name == "Function" || name == "Math" || name == "JSON") {
-			return null;
-		}
-		return name;
-	}
-	static __isNativeObj(o) {
-		return js_Boot.__nativeClassName(o) != null;
-	}
-	static __resolveNativeClass(name) {
-		return $global[name];
-	}
-}
-js_Boot.__name__ = true;
 {
-	Object.defineProperty(String.prototype,"__class__",{ value : String, enumerable : false, writable : true});
-	String.__name__ = true;
-	Array.__name__ = true;
-	Date.prototype.__class__ = Date;
-	Date.__name__ = "Date";
-	var Int = { };
-	var Dynamic = { };
-	var Float = Number;
-	var Bool = Boolean;
-	var Class = { };
-	var Enum = { };
 }
-js_Boot.__toStr = ({ }).toString;
 Dashboard.main();
 })(typeof window != "undefined" ? window : typeof global != "undefined" ? global : typeof self != "undefined" ? self : this);
