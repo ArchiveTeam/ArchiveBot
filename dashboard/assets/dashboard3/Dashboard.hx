@@ -3,6 +3,7 @@ using StringTools;
 import Std;
 import haxe.ds.StringMap;
 import js.Browser;
+import js.Syntax.code;
 import js.html.XMLHttpRequest;
 import haxe.Json;
 import Reflect;
@@ -222,7 +223,7 @@ class Job {
                 scrollId: 'job-log-${ident}',
                 contentId: 'job-log-content-${ident}'
             };
-            clusterize = untyped __js__("new Clusterize")(clusterizeOptions);
+            clusterize = code("new Clusterize")(clusterizeOptions);
         }
 
         for (logLine in logLines.slice(-pendingLogLines)) {
@@ -318,7 +319,7 @@ class Job {
 
 
 class Dashboard {
-    var angular = untyped __js__("angular");
+    var angular = code("angular");
     var app:Dynamic;
     var jobs:Array<Job> = [];
     var jobMap:StringMap<Job> = new StringMap<Job>();
@@ -525,16 +526,16 @@ class Dashboard {
             websocket = null;
             showError("Lost connection. Reconnecting...");
 
-            untyped __js__("setTimeout")(function () {
+            code("setTimeout")(function () {
                 openWebSocket();
             }, 60000);
         }
         websocket.onerror = websocket.onclose;
     }
 
-    private function scheduleDraw(delayMS:Int = 1000) {
-        drawTimerHandle = untyped __js__("setTimeout")(function () {
-            var delay:Int = dashboardControllerScope.drawInterval;
+    private function scheduleDraw(delayMS:Float = 1000) {
+        drawTimerHandle = code("setTimeout")(function () {
+            var delay:Float = dashboardControllerScope.drawInterval;
 
             if (!Browser.document.hidden && !dashboardControllerScope.paused) {
                 var beforeDate = Date.now();

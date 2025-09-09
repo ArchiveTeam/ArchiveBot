@@ -389,7 +389,7 @@ class Dashboard {
 			job = new Job(ident);
 			this.jobMap.h[ident] = job;
 			this.jobs.push(job);
-			console.log("Dashboard.hx:565:","Load job " + ident);
+			console.log("Dashboard.hx:566:","Load job " + ident);
 		} else {
 			job = this.jobMap.h[ident];
 		}
