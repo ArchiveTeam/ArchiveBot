@@ -269,7 +269,7 @@ a.job-log-line-url {
 		Loading...
 	</div>
 
-	<div class="settings">
+	<div class="settings mt-2">
 		<div>
 			<label for="filterBox">Filter:</label>
 			<input type="search" ng-model="filterQuery" id="filterBox" placeholder="{{ :: showNicks ? 'URL, ident, or nick' : 'URL or ident'}}">
@@ -289,24 +289,23 @@ a.job-log-line-url {
 			<input type="checkbox" ng-model="drawInterval" ng-true-value="250" ng-false-value="1000" id="fastCheckbox">
 			<label for="fastCheckbox">Go fast</label>
 		</div>
+	</div>
+	<div>
+		<nav aria-label="Job page selector">
+			<ul class="pagination justify-content-center mt-2 mb-0">
+				<li class="page-item" ng-class="{disabled: currentPage == 1}">
+				<a class="page-link" href="" ng-click="setPage(currentPage - 1)">Previous</a>
+				</li>
 
-		<div>
-			<nav aria-label="Job pagination">
-				<ul class="pagination justify-content-center mt-3">
-					<li class="page-item" ng-class="{disabled: currentPage == 1}">
-					<a class="page-link" href="" ng-click="setPage(currentPage - 1)">Previous</a>
-					</li>
+				<li class="page-item disabled">
+				<span class="page-link">Page {{currentPage}} / {{totalPages}}</span>
+				</li>
 
-					<li class="page-item disabled">
-					<span class="page-link">Page {{currentPage}} / {{totalPages}}</span>
-					</li>
-
-					<li class="page-item" ng-class="{disabled: currentPage == totalPages}">
-					<a class="page-link" href="" ng-click="setPage(currentPage + 1)">Next</a>
-					</li>
-				</ul>
-			</nav>
-		</div>
+				<li class="page-item" ng-class="{disabled: currentPage == totalPages}">
+				<a class="page-link" href="" ng-click="setPage(currentPage + 1)">Next</a>
+				</li>
+			</ul>
+		</nav>
 	</div>
 </div>
 
