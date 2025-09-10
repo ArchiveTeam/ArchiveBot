@@ -82,12 +82,20 @@ html, body {
 			return !o || o.trim().length === 0;
 		}
 
+		function getSearchParam() {
+			const params = new URLSearchParams(document.location.search);
+			return params.get("initialFilter");
+		}
+
 		function initTable() {
 			table = $('#pipeline_table').DataTable({
 				"paging" : false,
 				"ajax" : {
 					"url" : "/pipelines",
 					"dataSrc" : "pipelines"
+				},
+				"search": {
+					"search": getSearchParam(),
 				},
 				"rowId" : "id",
 				"columns" : [ {
