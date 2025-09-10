@@ -97,6 +97,7 @@ html, body {
 				"search": {
 					"search": getSearchParam(),
 				},
+				"searchDelay": 500,
 				"rowId" : "id",
 				"columns" : [ {
 					"data" : "id"
@@ -159,6 +160,20 @@ html, body {
 					"data": "status",
 					"defaultContent": "(unknown)"
 				}, ]
+			});
+
+			table.on('search.dt', function () {
+				let timeout = null;
+				clearTimeout(timeout);
+				timeout = setTimeout(() => {
+					clearTimeout(timeout);
+					let url = new URL(document.URL);
+					if (table.search() !== url.searchParams.get('initialFilter')) {
+						url.searchParams.set('initialFilter', table.search());
+						history.pushState(undefined, undefined, url.toString());
+						console.log(url.toString())
+					}
+				}, 500);
 			});
 
 			setTimeout(reloadTable, reloadInterval);
