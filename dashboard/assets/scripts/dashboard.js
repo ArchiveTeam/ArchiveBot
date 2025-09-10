@@ -309,6 +309,7 @@ class JobsRenderer {
 		this.mouseInside = null;
 		this.numCrawls = byId("num-crawls");
 		this._aligned = true;
+		this.pipelines = {};
 	}
 
 	_getNextJobInSorted(ident) {
@@ -323,6 +324,10 @@ class JobsRenderer {
 
 	_createLogSegment() {
 		return h("div");
+	}
+
+	updatePipelines(pipelines) {
+		this.pipelines = pipelines;
 	}
 
 	_createLogContainer(jobData) {
@@ -1093,6 +1098,8 @@ class Dashboard {
 			this.contextMenuRenderer,
 		);
 
+		this.loadPipelines();
+
 		document.onkeypress = (ev) => this.keyPress(ev);
 
 		// Adjust help text based on URL
@@ -1190,6 +1197,31 @@ ${String(kbPerSec).padStart(3, "0")} KB/s`;
 		} else {
 			finishSetup();
 		}
+	}
+
+	loadPipelines() {
+		return new Promise((resolve, reject) => {
+			const xhr = new XMLHttpRequest();
+			xhr.onload = () => {
+				try {
+					let pipelines = {};
+					const json = JSON.parse(xhr.responseText).pipelines;
+					for (const pipeline of json) {
+						pipelines[pipeline.id] = pipeline.nickname;
+					}
+					this.jobsRenderer.updatePipelines(pipelines);
+				} catch (e) {
+					console.log("Failed to load /pipelines data: ", e);
+				}
+				resolve();
+			};
+			xhr.onerror = (ev) => {
+				reject(ev);
+			};
+			xhr.open("GET", `//${this.host}${this.port}/pipelines`);
+			xhr.setRequestHeader("Accept", "application/json");
+			xhr.send("");
+		});
 	}
 
 	loadRecent() {
