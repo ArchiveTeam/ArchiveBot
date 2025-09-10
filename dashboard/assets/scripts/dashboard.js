@@ -5,6 +5,10 @@
 
 "use strict";
 
+String.prototype.removePrefix = function (prefix) {
+    return this.startsWith(prefix) ? this.substr(prefix.length) : this.toString();
+};
+
 function assert(condition, message) {
 	if (!condition) {
 		throw message || "Assertion failed";
@@ -326,8 +330,22 @@ class JobsRenderer {
 		return h("div");
 	}
 
+	pipelineInfo(job) {
+		const pipeline_id = job.pipeline_id;
+		const pipeline_just_id = pipeline_id.removePrefix("pipeline:");
+		const pipeline_nick = this.pipelines[pipeline_id];
+		return [
+			`pipeline ${pipeline_nick ?? "unknown"} ${pipeline_just_id}`,
+			pipeline_nick ?? pipeline_just_id,
+		]
+	}
+
 	updatePipelines(pipelines) {
 		this.pipelines = pipelines;
+		for (const job of this.jobs.sorted) {
+			const pipeline = this.renderInfo[job.ident].statsElements.pipeline;
+			[pipeline.title, pipeline.textContent] = this.pipelineInfo(job);
+		}
 	}
 
 	_createLogContainer(jobData) {
@@ -368,6 +386,9 @@ class JobsRenderer {
 			return s;
 		};
 
+
+		const [pipeline_title, pipeline_text] = this.pipelineInfo(jobData);
+
 		const statsElements = {
 			mb: h("span", { className: `inline-stat ${maybeAligned("job-mb")}` }, "?"),
 			responses: h("span", { className: `inline-stat ${maybeAligned("job-responses")}` }, "?"),
@@ -380,6 +401,12 @@ class JobsRenderer {
 				href: `//${ds.host}${ds.port}/ignores/${ident}?compact=true`,
 				onclick: (ev) => { ev.stopPropagation(); },
 			}, "?" ),
+			pipeline: h("a", {
+				className: `inline-stat ${maybeAligned("job-pipeline")}`,
+				href: `//${ds.host}${ds.port}/pipelines?initialFilter=${jobData.pipeline_id}`,
+				title: pipeline_title,
+				onclick: (ev) => { ev.stopPropagation(); },
+			}, pipeline_text),
 			jobInfo: null /* set later */,
 		};
 
@@ -428,6 +455,8 @@ class JobsRenderer {
 					statsElements.delay,
 					"; ",
 					statsElements.ignores,
+					"; ",
+					statsElements.pipeline,
 				],
 			),
 		]);
@@ -604,6 +633,10 @@ class JobsRenderer {
 				info.statsElements.ignores.classList.remove("job-igoff");
 			}
 		}
+
+		// Update pipeline in case a job is restarted on another pipline
+		const pipeline = info.statsElements.pipeline;
+		[pipeline.title, pipeline.textContent] = this.pipelineInfo(jobData);
 
 		// Update note
 		info.jobNote.textContent = isBlank(jobData.note) ? "" : ` (${jobData.note})`;
