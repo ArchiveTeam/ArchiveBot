@@ -156,7 +156,7 @@
 							{{ job.suppressIgnoreReports ? 'Hiding' : 'Showing' }} ignores.
 						</p>
 
-						<div class="progress job-progress clickable" ng-click="job.showResponseBreakdown = !job.showResponseBreakdown; job.fullview = job.fullview || true">
+						<div class="progress job-progress clickable" ng-click="job.showResponseBreakdown = !job.showResponseBreakdown; job.fullview = job.fullview || job.showResponseBreakdown">
 							<div class="progress-bar"
 								style="width: {{ job.r1xx / (job.totalResponses + job.queueRemaining) * 100 }}%;">
 							</div>
