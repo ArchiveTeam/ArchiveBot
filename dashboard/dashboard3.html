@@ -144,6 +144,10 @@
 			<div class="job-detail-container container-fluid">
 				<div class="row mt-2">
 					<div class="job-detail-datatable col-3" ng-class="{ 'height-limit-small': !job.fullview, 'height-limit-big': job.fullview }">
+						<div class="gy-3 d-flex gap-2">
+							<button class="btn btn-secondary btn-sm" ng-click="applyFilterQuery(job.ident)"><span class="bi bi-funnel-fill" aria-label="Show only this job"></span></button>
+							<button class="job-detail-handle btn btn-success btn-sm flex-grow-1" ng-click="job.fullview = !job.fullview; job.logPaused = job.fullview;" ng-class="{ 'job-detail-handle-active': job.fullview }" aria-label="Toggle detail full view">• • •</button>
+						</div>
 						<p title="Note" ng-bind="job.note"></p>
 						<p title="Speed">
 							<span ng-bind="job.concurrency"></span> with
@@ -238,16 +242,6 @@
 						{{:: job.attachAntiScroll() }}
 					</div>
 				</div>
-
-				<div class="row mb-2">
-					<div class="col-1 gy-3">
-						<button class="btn w-100 btn-secondary btn-sm" ng-click="applyFilterQuery(job.ident)"><span class="bi bi-funnel-fill" aria-label="Show only this job"></span></button>
-					</div>
-					<div class="col-11 gy-3">
-						<button class="job-detail-handle btn btn-success w-100 btn-sm" ng-click="job.fullview = !job.fullview; job.logPaused = job.fullview;" ng-class="{ 'job-detail-handle-active': job.fullview }" aria-label="Toggle detail full view">• • •</button>
-					</div>
-				</div>
-
 			</div>
 		</td>
 	</tr>
