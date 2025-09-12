@@ -1,3 +1,8 @@
+:root {
+  --bs-body-font-size: 0.875rem;
+  --bs-body-line-height: 1.5;
+}
+
 html {
 	/* Always show scrollbar to prevent jumpiness when filtering */
 	overflow-y: scroll;
