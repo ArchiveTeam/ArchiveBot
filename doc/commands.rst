@@ -13,7 +13,7 @@ archive
 ::
 
     > !archive http://artscene.textfiles.com/litpacks/
-    < Archiving http://artscene.textfiles.com/litpacks/.
+    < Queued http://artscene.textfiles.com/litpacks/ as 43z7a11vo6of3a7i173441dtc.
     < Use !status 43z7a11vo6of3a7i173441dtc for updates, !abort
       43z7a11vo6of3a7i173441dtc to abort.
 
@@ -34,7 +34,7 @@ Accepted parameters
     specify sets of URL patterns to ignore::
 
        > !archive http://example.blogspot.com/ncr --ignore-sets=blogs,forums
-       < Archiving http://example.blogspot.com/ncr.
+       < Queued http://example.blogspot.com/ncr as 3pebadizuouwwqln3q9rcb81h.
        < 14 ignore patterns loaded.
        < Use !status 5sid4pgxkiu6zynhbt3q1gi2s for updates, !abort
          5sid4pgxkiu6zynhbt3q1gi2s to abort.
@@ -48,7 +48,7 @@ Accepted parameters
 
         > !archive http://example.blogspot.com/ncr
         >    --no-offsite-links
-        < Archiving http://example.blogspot.com/ncr.
+        < Queued http://example.blogspot.com/ncr as 3pebadizuouwwqln3q9rcb81h.
         < Offsite links will not be grabbed.
         < Use !status 5sid4pgxkiu6zynhbt3q1gi2s for updates, !abort
           5sid4pgxkiu6zynhbt3q1gi2s to abort.
@@ -72,7 +72,7 @@ Accepted parameters
 
         > !archive http://artscene.textfiles.com/litpacks/
             --user-agent-alias=firefox
-        < Archiving http://artscene.textfiles.com/litpacks/.
+        < Queued http://artscene.textfiles.com/litpacks/ as 43z7a11vo6of3a7i173441dtc.
         < Using user-agent Mozilla/5.0 (Windows NT 5.1; rv:31.0)
           Gecko/20100101 Firefox/31.0.
         < Use !status 43z7a11vo6of3a7i173441dtc for updates, !abort
@@ -90,7 +90,7 @@ Accepted parameters
 
         > !archive http://example.blogspot.com/ncr
             --pipeline=superfast
-        < Archiving http://example.blogspot.com/ncr.
+        < Queued http://example.blogspot.com/ncr 3pebadizuouwwqln3q9rcb81h.
         < Job will run on a pipeline whose name contains "superfast".
         < Use !status 5sid4pgxkiu6zynhbt3q1gi2s for updates, !abort
           5sid4pgxkiu6zynhbt3q1gi2s to abort.
@@ -147,8 +147,8 @@ archiveonly
     non-recursive retrieval of the given URL::
 
         > !archiveonly http://store.steampowered.com/livingroom
-        < Archiving http://store.steampowered.com/livingroom without
-          recursion.
+        < Queued http://store.steampowered.com/livingroom as 1q2qydhkeh3gfnrcxuf6py70b
+          for archival without recursion.
         > Use !status 1q2qydhkeh3gfnrcxuf6py70b for updates, !abort
           1q2qydhkeh3gfnrcxuf6py70b to abort.
 
@@ -159,7 +159,8 @@ Accepted parameters
     specify sets of URL patterns to ignore::
 
         > !archiveonly http://example.blogspot.com/ --ignore-sets=blogs,forums
-        < Archiving http://example.blogspot.com/ without recursion.
+        < Queued http://example.blogspot.com/ as 5sid4pgxkiu6zynhbt3q1gi2s 
+          for archival without recursion.
         < 14 ignore patterns loaded.
         < Use !status 5sid4pgxkiu6zynhbt3q1gi2s for updates, !abort
           5sid4pgxkiu6zynhbt3q1gi2s to abort.
@@ -171,8 +172,8 @@ Accepted parameters
 
        > !archiveonly http://artscene.textfiles.com/litpacks/
            --user-agent-alias=firefox
-       < Archiving http://artscene.textfiles.com/litpacks/ without
-         recursion.
+       < Queued http://artscene.textfiles.com/litpacks/ as 43z7a11vo6of3a7i173441dtc
+         for archival without recursion.
        < Using user-agent Mozilla/5.0 (Windows NT 5.1; rv:31.0)
          Gecko/20100101 Firefox/31.0.
        < Use !status 43z7a11vo6of3a7i173441dtc for updates, !abort
@@ -187,7 +188,8 @@ Accepted parameters
 
         > !archiveonly http://example.blogspot.com/
             --pipeline=superfast
-        < Archiving http://example.blogspot.com/.
+        < Queued http://example.blogspot.com/ as 5sid4pgxkiu6zynhbt3q1gi2s
+          for archival without recursion.
         < Job will run on a pipeline whose name contains "superfast".
         < Use !status 5sid4pgxkiu6zynhbt3q1gi2s for updates, !abort
           5sid4pgxkiu6zynhbt3q1gi2s to abort.
@@ -202,8 +204,8 @@ Accepted parameters
     Attempt to download videos using youtube-dl (experimental)::
 
       > !archiveonly https://example.website/fun-video-38214 --youtube-dl
-      < Queued https://example.website/fun-video-38214 for archival without
-        recursion.
+      < Queued https://example.website/fun-video-38214 as dma5g7xcy0r3gbmisqshkpkoe
+        for archival without recursion.
       < Options: youtube-dl: yes
       < Use !status dma5g7xcy0r3gbmisqshkpkoe for updates, !abort
         dma5g7xcy0r3gbmisqshkpkoe to abort.
@@ -251,8 +253,8 @@ archiveonly < FILE
    archive each URL in the text file at URL::
 
         > !archiveonly < https://www.example.com/some-file.txt
-        < Archiving URLs in https://www.example.com/some-file.txt without
-          recursion.
+        < Queued URLs in https://www.example.com/some-file.txt as byu50bzfdbnlyl6mrgn6dd24h
+          for archival without recursion.
         > Use !status byu50bzfdbnlyl6mrgn6dd24h for updates, !abort
           byu50bzfdbnlyl6mrgn6dd24h to abort.
 
