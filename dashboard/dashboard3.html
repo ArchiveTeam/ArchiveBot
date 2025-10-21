@@ -100,7 +100,7 @@
 		<nav aria-label="Job page selector">
 			<ul class="pagination justify-content-center mt-2 mb-0">
 				<li class="page-item" ng-class="{disabled: currentPage == 1}">
-				<a class="page-link" href="" ng-click="setPage(currentPage - 1)">Previous</a>
+				<a class="page-link" href="" ng-click="setPage(currentPage - 1)"><b>&lt;</b></a>
 				</li>
 
 				<li class="page-item disabled">
@@ -108,7 +108,7 @@
 				</li>
 
 				<li class="page-item" ng-class="{disabled: currentPage == totalPages}">
-				<a class="page-link" href="" ng-click="setPage(currentPage + 1)">Next</a>
+				<a class="page-link" href="" ng-click="setPage(currentPage + 1)"><b>&gt;</b></a>
 				</li>
 			</ul>
 		</nav>
