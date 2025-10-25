@@ -34,6 +34,7 @@ class Feed < Webmachine::Resource
   end
 
   def to_json
+    response.headers['Access-Control-Allow-Origin'] = '*'
     prepped_messages.to_json
   end
 
