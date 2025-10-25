@@ -15,6 +15,7 @@ class Pipeline < Webmachine::Resource
   end
 
   def to_json
+    response.headers['Access-Control-Allow-Origin'] = '*'
     { 'pipelines' => PipelineCollection.new(self.class.redis).to_a }.to_json
   end
 
