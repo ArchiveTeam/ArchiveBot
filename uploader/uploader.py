@@ -36,7 +36,8 @@ class Params:
 
         self.url = os.environ.get('RSYNC_URL')
         if self.url != None:
-            if '/localhost' in self.url or '/127.' in self.url:
+            local_urls = ['/localhost','/127.','/[::1]']
+            if any(local_url in self.url for local_url in local_urls):
                 raise RuntimeError('Won\'t let you upload to localhost because I '
                                    'remove files after uploading them, and you '
                                    'might be uploading to the same directory')
