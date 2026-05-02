@@ -3,7 +3,7 @@
 """uploader.py: upload WARC files toward the Internet Archive
 
 rsync mode (RSYNC_URL set): upload everything to an rsync endpoint
-such as fos.
+such as ArchiveTeam targets.
 
 s3 mode (S3_URL set): upload everything directly to the Internet Archive
 
