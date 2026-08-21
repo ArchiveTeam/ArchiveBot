@@ -18,13 +18,11 @@ class Brain
   include AddIgnoreSets
   include PipelineOptions
 
-  attr_reader :couchdb
   attr_reader :redis
   attr_reader :schemes
   attr_reader :url_pattern
 
-  def initialize(schemes, redis, couchdb)
-    @couchdb = couchdb
+  def initialize(schemes, redis)
     @redis = redis
     @schemes = schemes
     @url_pattern ||= %r{(?:#{schemes.join('|')})://.+}

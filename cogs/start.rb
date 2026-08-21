@@ -2,8 +2,6 @@ require 'celluloid'
 require 'trollop'
 require 'uri'
 
-require File.expand_path('../ignore_pattern_updater', __FILE__)
-require File.expand_path('../user_agent_updater', __FILE__)
 require File.expand_path('../../lib/job', __FILE__)
 require File.expand_path('../../lib/redis_subscriber', __FILE__)
 require File.expand_path('../../lib/shared_config', __FILE__)
@@ -35,16 +33,6 @@ db_uri = URI(opts[:db])
 Reaper.supervise_as :reaper, opts[:redis]
 TwitterTweeter.supervise_as :twitter_tweeter, opts[:redis], opts[:twitter_config]
 
-ignore_patterns_path = File.expand_path('../../db/ignore_patterns', __FILE__)
-
-IgnorePatternUpdater.supervise_as :ignore_pattern_updater,
-  ignore_patterns_path, db_uri, opts[:db_credentials]
-
-user_agents_path = File.expand_path('../../db/user_agents', __FILE__)
-
-UserAgentUpdater.supervise_as :user_agent_updater,
-  user_agents_path, db_uri, opts[:db_credentials]
-
 # This should be started after all actors it references have started, which is
 # why it's the last actor to start up.
 if opts[:twitter_config]
@@ -55,8 +43,6 @@ at_exit do
   if opts[:twitter_config]
     Celluloid::Actor[:broadcaster].stop
   end
-  Celluloid::Actor[:ignore_pattern_updater].stop
-  Celluloid::Actor[:user_agent_updater].stop
 end
 
 trap('INT') do
