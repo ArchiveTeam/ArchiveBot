@@ -274,7 +274,23 @@ class Brain
 
     return unless names && !names.empty?
 
-    ignore_pairs = couchdb.resolve_ignore_sets(names)
+    unknown = []
+    ignore_pairs = []
+
+    names.each do |name|
+      file = File.join(File.expand_path('../../db/ignore_patterns', __FILE__), "#{name}.json")
+
+      if File.file?(file)
+        data = JSON.parse(File.read(file))
+
+        data.fetch('patterns', []).map do |pattern|
+          ignore_pairs << [name, pattern]
+        end
+      else
+        unknown << name
+        []
+      end
+    end
 
     resolved = ignore_pairs.map(&:first).uniq
     patterns = ignore_pairs.map(&:last)
@@ -286,8 +302,6 @@ class Brain
     else
       reply m, %Q{Added #{patterns.length} patterns from ignore set #{resolved.first} to job #{job.ident}.}
     end
-
-    unknown = names - resolved
 
     if !unknown.empty?
       reply m, "The following sets are unknown: #{unknown.join(', ')}"
