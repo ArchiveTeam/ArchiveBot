@@ -1,4 +1,5 @@
 require 'addressable/uri'
+require 'json'
 
 require File.expand_path('../../lib/job', __FILE__)
 require File.expand_path('../../lib/pipeline_info', __FILE__)
@@ -125,7 +126,20 @@ class Brain
 
     if h[:user_agent_alias]
       ua_alias = h[:user_agent_alias]
-      user_agent = couchdb.user_agent_for_alias(ua_alias)
+
+      user_agents = {}
+
+      Dir.glob(File.join(File.expand_path('../../db/user_agents', __FILE__), "*.json")).each do |file|
+        data = JSON.parse(File.read(file))
+
+        data["agents"].each do |agent|
+          agent["aliases"].each do |alias_name|
+            user_agents[alias_name] = agent["name"]
+          end
+        end
+      end
+
+      user_agent = user_agents[ua_alias]
 
       if !user_agent
         reply m, %Q{Sorry, I don't know what the user agent "#{ua_alias}" is.}
