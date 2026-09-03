@@ -1,0 +1,24 @@
+{
+    "agents": [
+        {
+            "aliases": [
+                "old-3ds",
+                "old-3ds-US"
+            ],
+            "name": "Mozilla/5.0 (Nintendo 3DS; U; ; en) Version/1.7642.US"
+        },
+        {
+            "aliases": [
+                "old-3ds-EU"
+            ],
+            "name": "Mozilla/5.0 (Nintendo 3DS; U; ; en) Version/1.7642.EU"
+        },
+        {
+            "aliases": [
+                "old-3ds-JPN"
+            ],
+            "name": "Mozilla/5.0 (Nintendo 3DS; U; ; ja) Version/1.7642.JP"
+        }
+    ],
+    "type": "user_agents"
+}
