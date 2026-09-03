@@ -1,7 +1,8 @@
 {
     "name": "notumblrnoteavatars",
     "patterns": [
-        "^https?://\\d+\\.media\\.tumblr\\.com/avatar_.*_(16|64)\\.png$"
+        "^https?://\\d+\\.media\\.tumblr\\.com/avatar_.*_(16|64)\\.(pn[gj]|gif)$",
+        "^https?://\\d+\\.media\\.tumblr\\.com/[0-9a-f]{32}/[0-9a-f]{16}-[0-9a-f]{2}/s(16x16|64x64)u_c1/[0-9a-f]{40}\\.(jpg|pnj|gif)$"
     ],
     "type": "ignore_patterns"
 }
