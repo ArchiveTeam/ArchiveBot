@@ -218,7 +218,8 @@
         "^https?://outlook\\.(office|live)\\.com/owa/?\\?",
         "^https?://twemoji\\.maxcdn\\.com/",
         "^https?://cct\\.google/",
-        "^https?://yandex\\.ru/q/.*(\\.(svg|js|jpg|png)$|/%22data:image/svg)"
+        "^https?://yandex\\.ru/q/.*(\\.(svg|js|jpg|png)$|/%22data:image/svg)",
+        "^https?://nav\\.gov\\.hu/(?!assets/|static/).*\\.js$"
     ],
     "type": "ignore_patterns"
 }
