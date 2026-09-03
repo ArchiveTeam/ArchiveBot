@@ -218,6 +218,10 @@ class Brain
   def whereis(m, job)
     pipeline = PipelineInfo.new(job.redis).from_pipeline_id(job.pipeline_id)
 
+    if job.pending?
+      reply m, %Q{Job #{job.ident} is on a queue.}
+    end
+
     if pipeline.nickname.nil?
       reply m, %Q{Job #{job.ident} is not on a pipeline.}
     else
