@@ -43,6 +43,7 @@
         "/wp-content/cache/wpfc-minified/[^/]+/[^/]+/",
         "/gtm\\.js$",
         "/tel:\\d+$",
+        "%20\\d+w,(%20)*https?:/",
         "^https?://localhost(:\\d+)?/",
         "^https?://(127|10|0)\\.\\d+\\.\\d+\\.\\d+(:\\d+)?/",
         "^https?://169\\.254\\.\\d+\\.\\d+(:\\d+)?/",
