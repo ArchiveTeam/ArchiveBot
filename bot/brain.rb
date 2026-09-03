@@ -44,8 +44,9 @@ class Brain
     if depth == :inf
       return unless authorized?(m)
       # Lock !a < FILE to ops for now: it's a very niche thing.
-      if url_file
-        return unless op?(m)
+      if url_file and not op?(m)
+        reply m, "Sorry, only channel operators may use that command."
+        return
       end
 
       # Allow only ops to add jobs to the queue if there are 5 or more jobs pending
