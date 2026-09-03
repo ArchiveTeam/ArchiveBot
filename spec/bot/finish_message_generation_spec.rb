@@ -21,7 +21,7 @@ describe FinishMessageGeneration do
       it 'returns a message with the URL' do
         vessel.generate_messages(infos).should == {
           '#quux' => [
-            'foobar: Your job for http://www.example.org has finished.'
+            'foobar: Your job for http://www.example.org has finished. csu70nsn5y3k1jop4q6uptgyp'
           ]
         }
       end
@@ -41,7 +41,7 @@ describe FinishMessageGeneration do
       it 'returns a message with the URL' do
         vessel.generate_messages(infos).should == {
           '#quux' => [
-            'foobar: Your job for http://www.example.org was aborted.'
+            'foobar: Your job for http://www.example.org was aborted. csu70nsn5y3k1jop4q6uptgyp'
           ]
         }
       end
@@ -66,10 +66,10 @@ describe FinishMessageGeneration do
       it 'returns two messages with URLs' do
         vessel.generate_messages(infos).should == {
           '#quux' => [
-            'foobar: Your job for http://www.example.org has finished.'
+            'foobar: Your job for http://www.example.org has finished. csu70nsn5y3k1jop4q6uptgyp'
           ],
           '#grault' => [
-            'quxbaz: Your job for http://www.example.net has finished.'
+            'quxbaz: Your job for http://www.example.net has finished. eywnxrf47xues9acq6xmy7xun'
           ]
         }
       end
@@ -93,8 +93,8 @@ describe FinishMessageGeneration do
         messages_by_channel = vessel.generate_messages(infos)
 
         messages_by_channel['#quux'].sort.should == [
-          'foobar: Your job for http://www.example.net has finished.',
-          'foobar: Your job for http://www.example.org has finished.'
+          'foobar: Your job for http://www.example.net has finished. eywnxrf47xues9acq6xmy7xun',
+          'foobar: Your job for http://www.example.org has finished. csu70nsn5y3k1jop4q6uptgyp'
         ]
       end
     end
@@ -127,10 +127,10 @@ describe FinishMessageGeneration do
         messages_by_channel = vessel.generate_messages(infos)
 
         messages_by_channel['#quux'].sort.should == [
-          'foobar: Your job for http://www.example.biz was aborted.',
-          'foobar: Your job for http://www.example.com was aborted.',
-          'foobar: Your job for http://www.example.net has finished.',
-          'foobar: Your job for http://www.example.org has finished.'
+          'foobar: Your job for http://www.example.biz was aborted. 12pjidkef5awcinlco5ol57xv',
+          'foobar: Your job for http://www.example.com was aborted. f4pg9usx4j96ki3zczwlczu51',
+          'foobar: Your job for http://www.example.net has finished. eywnxrf47xues9acq6xmy7xun',
+          'foobar: Your job for http://www.example.org has finished. csu70nsn5y3k1jop4q6uptgyp'
         ]
       end
     end
