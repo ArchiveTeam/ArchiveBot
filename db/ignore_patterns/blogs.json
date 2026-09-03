@@ -34,6 +34,8 @@
         "^https?://[^\\.]+\\.dreamwidth\\.org/.+[\\?&]mode=reply",
         "[?&]SuperSocializerAuth=(LiveJournal|Twitch|Twitter|Xing)(&|$)",
         "^https?://wordpress\\.com/log-in\\?",
+        "^https?://wordpress\\.com/abuse/",
+        "^https?://wordpress\\.com/reader/blogs/\\d+/posts/\\d+$",
         "^https?://[^/]*/\\?blackhole=[^&]+$"
     ],
     "type": "ignore_patterns"
