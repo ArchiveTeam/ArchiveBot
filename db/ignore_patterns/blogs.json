@@ -6,6 +6,7 @@
         "/page/%d/$",
         "\\?showComment(=|%5C)",
         "/quote-comment-\\d+/$",
+        "/xmlrpc\\.php(\\?|$)",
         "/wp-login\\.php\\?",
         "/wp-admin(/|$)",
         "/wp-json/wp/v2/[^/?]+/\\d+/revisions(/\\d+)?$",
