@@ -128,7 +128,7 @@
         "^https?://teams\\.microsoft\\.com/(l/entity/com\\.microsoft\\.teamspace\\.tab\\.url\\.)?share\\?",
         "^https?://viadeo\\.journaldunet\\.com/shareit/share/\\?",
         "^https?://webmail\\.aol\\.com/Mail/ComposeMessage\\.aspx\\?",
-        "^https?://widget\\.renren\\.com/dialog/share\\?",
+        "^https?://widget\\.renren\\.com/dialog/share\\?"
         ],
     "type": "ignore_patterns"
 }
