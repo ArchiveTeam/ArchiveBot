@@ -219,7 +219,8 @@
         "^https?://twemoji\\.maxcdn\\.com/",
         "^https?://cct\\.google/",
         "^https?://yandex\\.ru/q/.*(\\.(svg|js|jpg|png)$|/%22data:image/svg)",
-        "^https?://nav\\.gov\\.hu/(?!assets/|static/).*\\.js$"
+        "^https?://nav\\.gov\\.hu/(?!assets/|static/).*\\.js$",
+        "^https?://((app|msit)\\.powerbi\\.com|app\\.(mil\\.|high\\.)?powerbigov\\.us)/(\\d+(\\.\\d+)*/scripts/[^/]+/[^/]+/|jquery\\.globalize/)"
     ],
     "type": "ignore_patterns"
 }
