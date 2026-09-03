@@ -22,7 +22,6 @@ def make_args(item, default_user_agent, wpull_exe, youtube_dl_exe, finished_warc
         '-o', '%(item_dir)s/wpull.log' % item,
         '--database', '%(item_dir)s/wpull.db' % item,
         '--html-parser', 'libxml2-lxml',
-        '--save-cookies', '%(cookie_jar)s' % item,
         '--no-check-certificate',
         '--no-strong-crypto',
         '--delete-after',
@@ -50,6 +49,11 @@ def make_args(item, default_user_agent, wpull_exe, youtube_dl_exe, finished_warc
         '--max-redirect', '8',
         '--youtube-dl-exe', youtube_dl_exe
     ]
+
+    if item.get('no_cookies'):
+        args.append('--no-cookies')
+    else:
+        add_args(args, ['--save-cookies', '%(cookie_jar)s'], item)
 
     if item['url'].startswith("http://www.reddit.com/") or \
        item['url'].startswith("https://www.reddit.com/"):

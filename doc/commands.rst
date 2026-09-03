@@ -67,6 +67,9 @@ Accepted parameters
 
     Aliases: ``--nooffsitelinks``, ``--no-offsite``, ``--nooffsite``
 
+``--no-cookies``
+    do not use cookies for each request
+
 ``--user-agent-alias ALIAS``
     specify a user-agent to use::
 
