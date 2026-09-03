@@ -1,0 +1,52 @@
+{
+	"agents": [
+    {
+			"aliases": [
+				"googlebot",
+				"google"
+			],
+			"name": "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; Googlebot/2.1; +http://www.google.com/bot.html) Chrome/114.0.5735.90 Safari/537.36"
+		},
+		{
+			"aliases": [
+				"google",
+        "googlebot-smartphone"
+			],
+			"name": "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5735.90 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
+		},
+     {
+			"aliases": [
+				"googlebot-image"
+			],
+			"name": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.75 Safari/537.36 Google Favicon"
+		},
+    {
+			"aliases": [
+				"googlebot-video"
+			],
+			"name": "Googlebot-Video/1.0"
+		},
+    {
+			"aliases": [
+				"googlebot-storebot",
+				"googlebot-store"
+			],
+			"name": "Mozilla/5.0 (X11; Linux x86_64; Storebot-Google/1.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36"
+		},
+    {
+			"aliases": [
+				"googlebot-other",
+				"google-other"
+			],
+			"name": "GoogleOther"
+		},
+    {
+			"aliases": [
+				"googlebot-adsense",
+				"adsense"
+			],
+			"name": "Mediapartners-Google"
+		}
+	],
+	"type": "user_agents"
+}
