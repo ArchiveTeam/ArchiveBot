@@ -11,7 +11,7 @@
 		"^https?://github\\.com/[^/]+/[^/]+/commits/[0-9a-f]{40}([/?]|$)",
 		"^https?://github\\.com/[^/]+/[^/]+/commit/[0-9a-f]{40}\\?diff=",
 		"^https?://github\\.com/[^/]+/[^/]+/issues/\\d+/set_milestone\\?",
-		"^https?://github\\.com/[^/]+/[^/]+/pull/\\d+/review-requests\\?",
+		"^https?://github\\.com/[^/]+/[^/]+/pull/\\d+/review-requests(\\?|$)",
 		"^https?://github\\.com/[^/]+/[^/]+/projects/issues/\\d+$",
 		"^https?://github\\.com/[^/]+/[^/]+/pull/\\d+/(?!commits/).*/",
 		"^https?://github\\.com/[^/]+/[^/]+/(tree|blob|raw)/[0-9a-f]{40}/",
@@ -19,12 +19,20 @@
 		"^https?://github\\.com/[^/]+/[^/]+/runs/\\d+/(header$|toolbar(\\?|$)|step_summary\\?|unseen_check_steps\\?)",
 		"^https?://github\\.com/[^/]+/[^/]+/suites/\\d+/show_partial\\?",
 		"^https?://github\\.com/[^/]+/[^/]+/actions/runs/\\d+/workflow_run$",
-		"^https?://github\\.com/[^/]+/[^/]+/(issues|pull)/[^/]+/hovercard$",
+		"^https?://github\\.com/[^/]+/[^/]+/(issues|pull)/[^/]+/hovercard(\\?|$)",
 		"^https?://github\\.com/[^/]+/[^/]+/packages\\?(.*&)?sort_by=",
 		"^https?://github\\.com/[^/]+/[^/]+/used_by_list$",
 		"^https?://github\\.com/[^/]+/[^/]+/sponsor_button$",
 		"^https?://github\\.com/[^/]+/[^/]+/hovercards/citation/sidebar_partial\\?tree_name=",
-		"^https?://github\\.com/.*/(contributions-spider-graph|drag-drop|jump-to|profile-pins-element|randomColor|sortable-behavior|tweetsodium|user-status-submit)\\.js$"
+		"^https?://github\\.com/[^/]+/[^/]+/discussions(/.*)?\\?(.*&)?discussions_q=[^&]*\\+",
+		"^https?://github\\.com/[^/]+/[^/]+/issue_comments/\\d+(/|$)",
+		"^https?://github\\.com/[^/]+/[^/]+/issues/\\d+/assignees$",
+		"^https?://github\\.com/.*/\\{\\{%20revealButtonHref%20\\}\\}$",
+		"^https?://github\\.com/user_content_edits/show_edit_history_log/",
+		"^https?://github\\.com/[^/]+/[^/]+/(issues|pull(/\\d+/(reviews|review_comment))?)/\\d+/(update/)?edit_form\\?",
+		"^https?://github\\.com/[^/]+/[^/]+/security/overall-count$",
+		"^https?://github\\.com/[^/]+/[^/]+/projects/issues/projects_suggestions\\?",
+		"^https?://github\\.com/(login|u2f/login_fragment)\\?"
 	],
 	"type": "ignore_patterns"
 }
