@@ -1,7 +1,7 @@
 {
     "name": "singletumblr",
     "patterns": [
-        "^https?://(?!({primary_netloc}|(\\d+|v[aefpt])\\.media\\.tumblr\\.com|assets\\.tumblr\\.com|a\\.tumblr\\.com)(:\\d+)?/|www\\.tumblr\\.com/video/)([^/]*\\.)?tumblr\\.com(:\\d+)?/"
+        "^https?://(?!({primary_netloc}|(\\d+|v[aefpt])\\.media\\.tumblr\\.com|assets\\.tumblr\\.com|a\\.tumblr\\.com|static\\.tumblr\\.com)(:\\d+)?/|www\\.tumblr\\.com/video/)([^/]*\\.)?tumblr\\.com(:\\d+)?/"
     ],
     "type": "ignore_patterns"
 }
