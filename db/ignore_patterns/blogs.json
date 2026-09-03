@@ -36,7 +36,11 @@
         "^https?://wordpress\\.com/log-in\\?",
         "^https?://wordpress\\.com/abuse/",
         "^https?://wordpress\\.com/reader/blogs/\\d+/posts/\\d+$",
-        "^https?://[^/]*/\\?blackhole=[^&]+$"
+        "^https?://[^/]*/\\?blackhole=[^&]+$",
+        "[?&]add-to-cart=",
+        "[?&](remove|undo)_item=",
+        "[?&]add_to_wishlist=",
+        "/(current\\.cmp|udata\\.vst|current\\.src|current_add\\.ep)/?$"
     ],
     "type": "ignore_patterns"
 }
