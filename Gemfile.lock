@@ -32,7 +32,8 @@ GIT
 GEM
   remote: https://rubygems.org/
   specs:
-    addressable (2.3.5)
+    addressable (2.8.0)
+      public_suffix (>= 2.0.2, < 5.0)
     as-notifications (1.0.1)
     atomic (1.1.14)
     buftok (0.2.0)
@@ -88,6 +89,7 @@ GEM
     net-http-persistent (2.9)
     nio4r (1.0.1)
     psych (2.0.4)
+    public_suffix (4.0.6)
     rack (1.5.2)
     rack-protection (1.5.2)
       rack
@@ -358,7 +360,7 @@ DEPENDENCIES
   cinch (~> 2.2.0)
   cucumber
   erubis
-  ffi-rzmq (~>2.0)
+  ffi-rzmq (~> 2.0)
   hiredis
   json
   listen (~> 2.0)
