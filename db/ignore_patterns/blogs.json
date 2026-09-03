@@ -10,6 +10,7 @@
         "/wp-login\\.php\\?",
         "/wp-admin(/|$)",
         "/wp-json/wp/v2/[^/?]+/\\d+/revisions(/\\d+)?$",
+        "/wp-json/wp/v2/[^?]+\\.(png|PNG|webp|WEBP|jpe?g|JPE?G|gif|GIF|pdf|PDF)$",
         "^https?://r\\-login\\.wordpress\\.com/remote\\-login\\.php",
         "'\\%20\\+\\%20liker\\.(avatar|profile)_URL\\%20\\+\\%20'",
         "\\%22\\%20\\+\\%20$wrapper\\.data\\(",
