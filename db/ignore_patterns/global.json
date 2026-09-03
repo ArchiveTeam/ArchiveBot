@@ -221,7 +221,8 @@
         "^https?://yandex\\.ru/q/.*(\\.(svg|js|jpg|png)$|/%22data:image/svg)",
         "^https?://nav\\.gov\\.hu/(?!assets/|static/).*\\.js$",
         "^https?://((app|msit)\\.powerbi\\.com|app\\.(mil\\.|high\\.)?powerbigov\\.us)/(\\d+(\\.\\d+)*/scripts/[^/]+/[^/]+/|jquery\\.globalize/)",
-        "^https?://forum\\.videohelp\\.com/min/b=clientscript&f=yui/(?!yuiloader-dom-event/yuiloader-dom-event\\.js,yui/connection/connection-min\\.js,vbulletin-core\\.js,overlib/overlib_mini\\.js,vbulletin_read_marker\\.js$)"
+        "^https?://forum\\.videohelp\\.com/min/b=clientscript&f=yui/(?!yuiloader-dom-event/yuiloader-dom-event\\.js,yui/connection/connection-min\\.js,vbulletin-core\\.js,overlib/overlib_mini\\.js,vbulletin_read_marker\\.js$)",
+        "^https?://[^/?]+\\.facebook\\.com/[^/?]+/videos/([^/?]+/)?\\d+/js/.+\\.(js|com\\.au|com\\.es)$"
     ],
     "type": "ignore_patterns"
 }
