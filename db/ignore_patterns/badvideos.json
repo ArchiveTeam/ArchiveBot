@@ -15,7 +15,8 @@
 		"^https?://(cuts\\.diamond|mlb-cuts-diamond)\\.mlb\\.com/FORGE/.*\\.mp4$",
 		"^https?://video\\.seattle\\.gov/",
 		"^https?://static-clips\\.fox\\.com/",
-		"^https?://vod\\.foxnews\\.com/"
+		"^https?://vod\\.foxnews\\.com/",
+		"^https?://cdn\\.media\\.ccc\\.de/"
 	],
 	"type": "ignore_patterns"
 }
