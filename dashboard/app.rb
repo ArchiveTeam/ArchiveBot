@@ -1,5 +1,6 @@
 require 'json'
 require 'redis'
+require 'hiredis-client'
 require 'trollop'
 require 'uri'
 require 'webmachine'
