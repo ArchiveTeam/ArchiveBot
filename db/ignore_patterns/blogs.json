@@ -8,6 +8,7 @@
         "/quote-comment-\\d+/$",
         "/wp-login\\.php\\?",
         "/wp-admin(/|$)",
+        "/wp-json/wp/v2/[^/?]+/\\d+/revisions(/\\d+)?$",
         "^https?://r\\-login\\.wordpress\\.com/remote\\-login\\.php",
         "'\\%20\\+\\%20liker\\.(avatar|profile)_URL\\%20\\+\\%20'",
         "\\%22\\%20\\+\\%20$wrapper\\.data\\(",
