@@ -40,7 +40,13 @@
         "/\\\\+[\"']",
         "/\\\\/\\\\/",
         "/'\\+[^/]+\\+'",
+        "/(['\"]|%2[27])\\1$",
         "/wp-content/cache/wpfc-minified/[^/]+/[^/]+/",
+        "/gtm\\.js$",
+        "/tel:\\d+$",
+        "%20\\d+w,(%20)*https?:/",
+        "/%3Csvg%20xmlns%3D%2[27]",
+        "/(['\"]|%2[27])data:image/",
         "^https?://localhost(:\\d+)?/",
         "^https?://(127|10|0)\\.\\d+\\.\\d+\\.\\d+(:\\d+)?/",
         "^https?://169\\.254\\.\\d+\\.\\d+(:\\d+)?/",
@@ -57,7 +63,7 @@
         "^https?://www\\.flickr\\.com/change_language\\.gne",
         "^https?://([^/]+\\.)?archive\\.org/",
         "^https?://([^/]+\\.)?archive-it\\.org/",
-        "^https?://archive\\.is/",
+        "^https?://archive\\.(today|fo|is|li|md|ph|vn)/",
         "^https?://www\\.google\\.((com|ad|ae|al|am|as|at|az|ba|be|bf|bg|bi|bj|bs|bt|by|ca|cd|cf|cg|ch|ci|cl|cm|cn|cv|cz|de|dj|dk|dm|dz|ee|es|fi|fm|fr|ga|ge|gg|gl|gm|gp|gr|gy|hn|hr|ht|hu|ie|im|iq|is|it|je|jo|ki|kg|kz|la|li|lk|lt|lu|lv|md|me|mg|mk|ml|mn|ms|mu|mv|mw|ne|nl|no|nr|nu|pl|pn|ps|pt|ro|ru|rw|sc|se|sh|si|sk|sn|so|sm|sr|st|td|tg|tk|tl|tm|tn|to|tt|vg|vu|ws|rs|cat)|(com\\.(af|ag|ai|ar|au|bd|bh|bn|bo|br|bz|co|cu|cy|do|ec|eg|et|fj|gh|gi|gt|hk|jm|kh|kw|lb|ly|mm|mt|mx|my|na|nf|ng|ni|np|om|pa|pe|pg|ph|pk|pr|py|qa|sa|sb|sg|sl|sv|tj|tr|tw|ua|uy|vc|vn))|(co\\.(ao|bw|ck|cr|id|il|in|jp|ke|kr|ls|ma|mz|nz|th|tz|ug|uk|uz|ve|vi|za|zm|zw)))/finance\\?noIL=1&q=[^&]+&ei=",
         "^https?://(upload|thumb)\\.wikimedia\\.org/wikipedia/[^/]+/(thumb|transcoded)/",
         "^https?://s?b\\.scorecardresearch\\.com/",
@@ -123,6 +129,7 @@
         "^https?://air\\.radiorecord\\.ru(:\\d+)?/",
         "^https?://[^/]+\\.rastream\\.com(:\\d+)?/",
         "^https?://audiots\\.scdn\\.arkena\\.com/",
+        "^https?://[^/?]+/mjpg/video\\.mjpg(\\?|$)",
         "^https?://(www|draft)\\.blogger\\.com/(navbar\\.g|post-edit\\.g|delete-comment\\.g|comment-iframe\\.g|share-post\\.g|email-post\\.g|blog-this\\.g|delete-backlink\\.g|rearrange|blog_this\\.pyra)\\?",
         "^https?://[^/]*tumblr\\.com/(impixu\\?|share(/link/?)?\\?|widgets/share/tool|reblog/)",
         "^https?://plus\\.google\\.com/share\\?",
@@ -218,7 +225,11 @@
         "^https?://outlook\\.(office|live)\\.com/owa/?\\?",
         "^https?://twemoji\\.maxcdn\\.com/",
         "^https?://cct\\.google/",
-        "^https?://yandex\\.ru/q/.*(\\.(svg|js|jpg|png)$|/%22data:image/svg)"
+        "^https?://yandex\\.ru/q/.*(\\.(svg|js|jpg|png)$|/%22data:image/svg)",
+        "^https?://nav\\.gov\\.hu/(?!assets/|static/).*\\.js$",
+        "^https?://((app|msit)\\.powerbi\\.com|app\\.(mil\\.|high\\.)?powerbigov\\.us|app\\.fabric\\.microsoft\\.com|app\\.powerbi\\.cn)/(\\d+(\\.\\d+)*/scripts/[^/]+/[^/]+/|jquery\\.globalize/)",
+        "^https?://forum\\.videohelp\\.com/min/b=clientscript&f=yui/(?!yuiloader-dom-event/yuiloader-dom-event\\.js,yui/connection/connection-min\\.js,vbulletin-core\\.js,overlib/overlib_mini\\.js,vbulletin_read_marker\\.js$)",
+        "^https?://[^/?]+\\.facebook\\.com/[^/?]+/videos/([^/?]+/)?\\d+/js/.+\\.(js|com\\.au|com\\.es)$"
     ],
     "type": "ignore_patterns"
 }
