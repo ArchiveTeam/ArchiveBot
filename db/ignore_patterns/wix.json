@@ -1,0 +1,7 @@
+{
+    "name": "wix",
+    "patterns": [
+        "^https?://{primary_netloc}/((.*/)?productPage_USD_productPage_USD|(.*/)?h_\\d+/(.*/)?h_\\d+(/|$)|.*/.*\\.(jpg|jpeg|svg|png|json|txt|xml|text|gif|pdf|mp4|webp)$|.*\\.(css|js|json)$|.*/wix-thunderbolt/)"
+    ],
+    "type": "ignore_patterns"
+}
