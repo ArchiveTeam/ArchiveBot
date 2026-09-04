@@ -3,6 +3,7 @@ using StringTools;
 import Std;
 import haxe.ds.StringMap;
 import js.Browser;
+import js.Syntax.code;
 import js.html.XMLHttpRequest;
 import haxe.Json;
 import Reflect;
@@ -28,6 +29,9 @@ class LogLine {
 }
 
 class Job {
+    public var clusterize:Dynamic;
+    private var clusterizeRows:Array<String> = [];
+
     public var ident : String;
     public var logLines : Array<LogLine> = [];
     public var aborted : Bool;
@@ -90,6 +94,46 @@ class Job {
         return sum / 60.0;
     }
 
+    private function getTextColor(logLine):String {
+        // response codes:
+        // 200 OK
+        if (logLine.responseCode == 200) {
+            return "text-success";
+        }
+        // 100s
+        if (logLine.responseCode >= 100 && logLine.responseCode < 200) {
+            return "text-primary";
+        }
+        // 200s (we already checked 200)
+        if (logLine.responseCode >= 201 && logLine.responseCode < 300) {
+            return "text-success-emphasis";
+        }
+        // 300s
+        if (logLine.responseCode >= 300 && logLine.responseCode < 400) {
+            return "text-info";
+        }
+        // 400s
+        if (logLine.responseCode >= 400 && logLine.responseCode < 500) {
+            return "text-warning";
+        }
+        // 500s
+        if (logLine.responseCode >= 500 && logLine.responseCode < 600) {
+            return "text-danger";
+        }
+
+        // warning levels / misc.
+        if (logLine.isWarning) {
+            return "text-warning";
+        }
+        if (logLine.isError) {
+            return "text-danger";
+        }
+        if (logLine.message != null || logLine.pattern != null) {
+            return "text-muted";
+        }
+        return "";  // fallback, no coloring
+    }
+
     public function consumeLogEvent(logEvent:Dynamic, maxScrollback:Int) {
         var jobData:Dynamic = logEvent.job_data;
 
@@ -135,8 +179,8 @@ class Job {
         totalResponses = r1xx + r2xx + r3xx + r4xx + r5xx + errorCount;
         queueRemaining = itemsQueued - itemsDownloaded;
 
-        if (logLines.length >= maxScrollback) {
-            logLines.shift();
+        if (logLines.length > maxScrollback) {
+            logLines = logLines.slice(logLines.length - maxScrollback);
         }
 
         fillDownloadCountBucket();
@@ -146,76 +190,90 @@ class Job {
         pendingLogLines += 1;
     }
 
-    public function drawPendingLogLines() {
+    public function drawPendingLogLines(maxScrollback:Int) {
         if (pendingLogLines <= 0) {
             return;
         }
 
-        var logElement = Browser.document.getElementById('job-log-${ident}');
+        var scrollEl = Browser.document.getElementById('job-log-${ident}');
+        var contentEl = Browser.document.getElementById('job-log-content-${ident}');
 
-        if (logElement == null) {
+        if (scrollEl == null || contentEl == null) {
+            if (clusterize != null) {
+                untyped clusterize.destroy(true);
+                clusterize = null;
+            }
             return;
         }
 
-        for (logLine in logLines.slice(-pendingLogLines)) {
-            var logLineDiv = Browser.document.createDivElement();
-
-            logLineDiv.className = "job-log-line";
-
-            if (logLine.responseCode == 200) {
-                logLineDiv.classList.add("text-success");
-            } else if (logLine.isWarning) {
-                logLineDiv.classList.add("bg-warning");
-            } else if (logLine.isError) {
-                logLineDiv.classList.add("bg-danger");
-            } else if (logLine.message != null || logLine.pattern != null) {
-                logLineDiv.classList.add("text-muted");
+        if (clusterize != null) {
+            var stale =
+                (untyped clusterize.scroll_elem != scrollEl) ||
+                (untyped clusterize.content_elem != contentEl);
+            if (stale) {
+                untyped clusterize.destroy(true);
+                clusterize = null;
             }
+        }
+
+        if (clusterize == null) {
+            clusterizeRows = [];
+            var clusterizeOptions = {
+                rows: [],
+                scrollId: 'job-log-${ident}',
+                contentId: 'job-log-content-${ident}'
+            };
+            clusterize = code("new Clusterize")(clusterizeOptions);
+        }
+
+        for (logLine in logLines.slice(-pendingLogLines)) {
+            var logColor = getTextColor(logLine);
+            var text = "";
 
             if (logLine.responseCode > 0 || logLine.wgetCode != null) {
-                var text;
                 if (logLine.responseCode > 0) {
-                    text = '${logLine.responseCode} ';
+                    text += '${logLine.responseCode} ';
                 } else {
-                    text = '${logLine.wgetCode} ';
+                    text += '${logLine.wgetCode} ';
                 }
-                logLineDiv.appendChild(Browser.document.createTextNode(text));
             }
-            if (logLine.url != null) {
-                var element = Browser.document.createAnchorElement();
-                element.href = logLine.url;
-                element.textContent = logLine.url;
-                element.className = "job-log-line-url";
-                logLineDiv.appendChild(element);
 
+            if (logLine.url != null) {
+                text += '<a href="' + logLine.url + '" class="job-log-line-url">' + logLine.url + '</a>';
                 if (logLine.pattern != null) {
-                    var element = Browser.document.createSpanElement();
-                    element.textContent = logLine.pattern;
-                    element.className = "text-warning";
-                    logLineDiv.appendChild(Browser.document.createTextNode(" "));
-                    logLineDiv.appendChild(element);
+                    text += ' <span class="text-warning">' + logLine.pattern + '</span>';
                 }
             } else if (logLine.message != null) {
-                logLineDiv.textContent = logLine.message;
-                logLineDiv.classList.add("job-log-line-message");
+                text += '<span class="job-log-line-message">' + logLine.message + '</span>';
             }
 
-            logElement.appendChild(logLineDiv);
-        }
-
-        var numToTrim = logElement.childElementCount - logLines.length;
-
-        if (numToTrim > 0) {
-            for (dummy in 0...numToTrim) {
-                var child = logElement.firstChild;
-                if (child != null) {
-                    logElement.removeChild(child);
-                }
+            if (logColor != "") {
+                text = '<div class="job-log-line ' + logColor + '">' + text + '</div>';
+            } else {
+                text = '<div class="job-log-line">' + text + '</div>';
             }
+
+            clusterizeRows.push(text);
         }
 
-        logElement.setAttribute("data-autoscroll-dirty", "true");
+        if (clusterizeRows.length > maxScrollback) {
+            clusterizeRows = clusterizeRows.slice(clusterizeRows.length - maxScrollback);
+        }
+
+        untyped clusterize.update(clusterizeRows);
         pendingLogLines = 0;
+    }
+
+    public function enforceScrollback(maxScrollback:Int) {
+        if (logLines.length > maxScrollback) {
+            logLines = logLines.slice(logLines.length - maxScrollback);
+        }
+        if (clusterizeRows.length > maxScrollback) {
+            clusterizeRows = clusterizeRows.slice(clusterizeRows.length - maxScrollback);
+            if (clusterize != null) {
+                untyped clusterize.update(clusterizeRows);
+            }
+        }
     }
 
     public function attachAntiScroll() {
@@ -261,7 +319,7 @@ class Job {
 
 
 class Dashboard {
-    var angular = untyped __js__("angular");
+    var angular = code("angular");
     var app:Dynamic;
     var jobs:Array<Job> = [];
     var jobMap:StringMap<Job> = new StringMap<Job>();
@@ -318,6 +376,9 @@ class Dashboard {
                 scope.sortParam = "startedAt";
                 scope.showNicks = showNicks;
                 scope.drawInterval = drawInterval;
+                scope.currentPage = 1;
+                scope.pageSize = 20;
+                scope.totalPages = 1;
                 dashboardControllerScopeApply = Reflect.field(scope, "$apply").bind(scope);
                 scope.filterOperator = function (job:Job) {
                     var query:String = scope.filterQuery;
@@ -334,6 +395,36 @@ class Dashboard {
                 scope.applyFilterQuery = function (query:String) {
                     scope.filterQuery = query;
                 }
+                scope.$watchGroup(["filterQuery", "jobs.length"], function(newVals:Dynamic, oldVals:Dynamic) {
+                    var filterQuery = newVals[0];
+
+                    // update max scrollback when searching
+                    var maxScrollback = 500;
+                    if (filterQuery == null || filterQuery.trim() == "") {
+                        maxScrollback = 50;
+                    }
+                    changeMaxScrollback(maxScrollback);
+                    for (job in jobs) {
+                        job.enforceScrollback(this.maxScrollback);
+                    }
+
+                    // pagination
+                    var filtered = scope.jobs.filter(scope.filterOperator);
+                    var pages:Float = Math.ceil(filtered.length / (scope.pageSize : Float));
+                    scope.totalPages = Std.int(Math.max(1, pages));
+                    if (oldVals != null && filterQuery != oldVals[0]) {
+                        scope.currentPage = 1;
+                    } else {
+                        if (scope.currentPage > scope.totalPages) {
+                            scope.currentPage = scope.totalPages;
+                        }
+                    }
+                });
+                scope.setPage = function (page:Int) {
+                    if (page >= 1 && page <= scope.totalPages) {
+                        scope.currentPage = page;
+                    }
+                };
             }
         ];
 
@@ -355,20 +446,21 @@ class Dashboard {
         return args;
     }
 
+    public function changeMaxScrollback(maxScrollback:Int) {
+        this.maxScrollback = maxScrollback;
+        return;
+    }
+
     public static function main() {
         var args = getQueryArgs();
         var hostname;
-        var maxScrollback = 20;
+        var maxScrollback = 50;
         var showNicks = args.exists("showNicks");
 
         if (args.exists("host")) {
             hostname = args.get("host");
         } else {
             hostname = Browser.location.hostname;
-        }
-
-        if (Browser.navigator.userAgent.indexOf("Mobi") == -1) {
-            maxScrollback = 500;
         }
 
         var dashboard = new Dashboard(hostname, maxScrollback, showNicks);
@@ -434,16 +526,16 @@ class Dashboard {
             websocket = null;
             showError("Lost connection. Reconnecting...");
 
-            untyped __js__("setTimeout")(function () {
+            code("setTimeout")(function () {
                 openWebSocket();
             }, 60000);
         }
         websocket.onerror = websocket.onclose;
     }
 
-    private function scheduleDraw(delayMS:Int = 1000) {
-        drawTimerHandle = untyped __js__("setTimeout")(function () {
-            var delay:Int = dashboardControllerScope.drawInterval;
+    private function scheduleDraw(delayMS:Float = 1000) {
+        drawTimerHandle = code("setTimeout")(function () {
+            var delay:Float = dashboardControllerScope.drawInterval;
 
             if (!Browser.document.hidden && !dashboardControllerScope.paused) {
                 var beforeDate = Date.now();
@@ -495,7 +587,7 @@ class Dashboard {
 
         for (job in jobs) {
             if (!job.logPaused) {
-                job.drawPendingLogLines();
+                job.drawPendingLogLines(maxScrollback);
             }
         }
 
@@ -503,17 +595,13 @@ class Dashboard {
     }
 
     private function scrollLogsToBottom() {
-        var nodes = Browser.document.querySelectorAll("[data-autoscroll-dirty].autoscroll");
-        var pending = new Array<Element>();
-
-        for (node in nodes) {
-            var element:Element = cast(node, Element);
-            element.removeAttribute("data-autoscroll-dirty");
-            pending.push(element);
-        }
-        for (element in pending) {
-            // Try to do layout in a tight loop
-            element.scrollTop = 99999;
+        for (job in jobs) {
+            if (!job.logPaused && job.clusterize != null) {
+                var scrollEl = Browser.document.getElementById('job-log-${job.ident}');
+                if (scrollEl != null) {
+                    scrollEl.scrollTop = scrollEl.scrollHeight;
+                }
+            }
         }
     }
 }
