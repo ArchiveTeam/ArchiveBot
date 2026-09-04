@@ -40,6 +40,11 @@ class Brain
   end
 
   def request_archive(m, target, params, depth=:inf, url_file=false)
+    if !authorized?(m)
+      reply m, "If you are new here, please explain why you would like this to be archived (if it isn't already obvious), and a user with permissions may queue it for you."
+      return
+    end
+
     # Check only !a; allow !ao even without voice or op
     if depth == :inf
       return unless authorized?(m)
