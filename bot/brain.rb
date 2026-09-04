@@ -165,7 +165,7 @@ class Brain
       run_post_registration_hooks(m, job, h)
 
       silence do
-        add_ignore_sets(m, job, ['global'], false)
+        add_ignore_sets(m, job, ['global', 'badvideos'], false)
         toggle_ignores(m, job, false)
       end
 
