@@ -1,0 +1,24 @@
+{
+    "agents": [
+        {
+            "aliases": [
+                "WiiU-US",
+            ],
+            "name": "	Mozilla/5.0 (Nintendo WiiU) AppleWebKit/536.30 (KHTML, like Gecko) NX/3.0.4.2.13 NintendoBrowser/4.3.2.11274.US"
+    }
+    ],
+    {
+            "aliases": [
+                "WiiU-JPN",
+            ],
+            "name": "Mozilla/5.0 (Nintendo WiiU) AppleWebKit/536.30 (KHTML, like Gecko) NX/3.0.4.2.13 NintendoBrowser/4.3.2.11274.JP"
+        },
+     ],
+    {
+            "aliases": [
+                "WiiU-EU",
+            ],
+            "name": "Mozilla/5.0 (Nintendo WiiU) AppleWebKit/536.30 (KHTML, like Gecko) NX/3.0.4.2.13 NintendoBrowser/4.3.2.11274.EU"
+        },
+    "type": "user_agents"
+}
