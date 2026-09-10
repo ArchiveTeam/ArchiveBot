@@ -140,6 +140,7 @@ class GetItemFromQueue(RetryableTask):
                 item['url_file'] = job_data.get('url_file')
                 item['user_agent'] = job_data.get('user_agent')
                 item['no_offsite_links'] = job_data.get('no_offsite_links')
+                item['no_cookies'] = job_data.get('no_cookies')
                 item['youtube_dl'] = job_data.get('youtube_dl')
 
                 item.log_output('Received item %s.' % ident)

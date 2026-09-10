@@ -53,6 +53,10 @@ describe JobOptionsParser do
     expect(parser.parse('--concurrency=4')[:concurrency]).to eq(4)
   end
 
+  it 'recognizes --no-cookies' do
+    expect(parser.parse('--no-cookies')[:no_cookies]).to eq(true)
+  end
+
   describe 'when unknown options are present' do
     it 'raises UnknownOptionError' do
       expect(lambda { parser.parse('--foo=bar') }).to raise_error(JobOptionsParser::UnknownOptionError)

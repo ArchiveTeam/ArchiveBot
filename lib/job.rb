@@ -380,6 +380,10 @@ class Job < Struct.new(:uri, :redis)
     redis.hset(ident, 'no_offsite_links', true)
   end
 
+  def no_cookies!
+    redis.hset(ident, 'no_cookies', true)
+  end
+
   def yahoo
     silently do
       set_delay(0, 0)
