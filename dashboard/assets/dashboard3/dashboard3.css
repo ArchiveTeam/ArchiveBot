@@ -1,0 +1,198 @@
+:root {
+  --bs-body-font-size: 0.875rem;
+  --bs-body-line-height: 1.5;
+}
+
+html {
+	/* Always show scrollbar to prevent jumpiness when filtering */
+	overflow-y: scroll;
+}
+
+html, body {
+	padding-left: 1em;
+	padding-right: 1em;
+}
+
+#banner {
+	font-size: larger;
+}
+
+.banner-controls {
+	position: absolute;
+	right: 0.75rem;
+	top: 1.95rem;
+	transform: translateY(-50%);
+	display: flex;
+	gap: 0.5rem;
+	align-items: center;
+	z-index: 10;
+}
+
+@media (max-width: 576px) {
+	#banner {
+		padding-right: 1rem;
+	}
+
+	.banner-controls {
+		position: static;
+		transform: none;
+		margin-top: 0.5rem;
+		justify-content: flex-end;
+	}
+}
+
+#message_box {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	max-width: 90%;
+	width: min(40rem, 100%);
+	box-sizing: border-box;
+	opacity: 0.95;
+	text-align: center;
+	padding: 0.75rem 1rem;
+	z-index: 9999;
+}
+
+#body-wrapper {
+	margin-top: 1em;
+	margin-bottom: 1em;
+	max-width: 100em;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+#dashboardTable {
+	table-layout: fixed;
+}
+
+.tablesort {
+	cursor: pointer;
+}
+
+.clickable {
+	cursor: pointer;
+}
+
+.numeric {
+	text-align: right;
+}
+
+.height-limit-small {
+	overflow: hidden;
+	max-height: 10em;
+}
+
+.height-limit-big {
+	overflow: auto;
+	max-height: 30em;
+}
+
+.job-summary td {
+	word-wrap: break-word;
+}
+
+.job-ident-clicky {
+	border: none;
+	background: inherit;
+	color: inherit;
+}
+
+.job-log {
+	/* override bootstrap 'well' */
+	margin-bottom: 0px;
+	font-family: "Roboto Mono", monospace;
+	font-optical-sizing: auto;
+	font-weight: 400;
+	font-style: normal;
+}
+
+.job-log .text-warning {
+	font-style: italic;
+}
+
+.job-log .text-danger {
+	font-weight: 700;
+}
+
+.job-log-line {
+	white-space: nowrap;
+}
+
+.job-log-line-message {
+	display: block;
+	white-space: pre;
+}
+
+a.job-log-line-url {
+	color: inherit;
+}
+
+.job-log-paused {
+	overflow: auto;
+}
+
+.job-detail-handle {
+	text-align: center;
+}
+
+.job-detail-handle-active {
+	border-bottom: 0.2em groove mediumaquamarine;
+	border-radius: 0.5em;
+}
+
+.job-progress {
+	height: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.autoscroll-paused {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	opacity: 0.8;
+}
+
+.extra-links {
+    margin-top: 3em;
+}
+
+.pipeline {
+    font-size: smaller;
+}
+
+.stick {
+	position: sticky;
+	top: 1em;
+	z-index: 999;
+}
+
+.settings {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1em;
+	align-items: center;
+}
+
+.settings > div {
+	flex: 0 1 auto;
+	min-width: max-content;
+}
+
+@media (max-width: 576px) {
+	.settings {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.5em;
+	}
+
+	.settings label {
+		white-space: nowrap;
+	}
+
+	#filterBox {
+		max-width: 100%;
+		width: 100%;
+	}
+}
