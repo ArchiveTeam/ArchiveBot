@@ -8,9 +8,17 @@ class CouchdbDocUpdater
   include Celluloid
   include Celluloid::Logger
 
+  def parse_credentials(creds)
+    if creds
+      u, p = creds.split(':', 2)
+
+      { :username => u, :password => p }
+    end
+  end
+
   def initialize(path, uri, credentials)
     @db = Analysand::Database.new(uri)
-    @credentials = credentials
+    @credentials = parse_credentials(credentials)
     @path = path
 
     Dir.foreach(@path) do |filename|

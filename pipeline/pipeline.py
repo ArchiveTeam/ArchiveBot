@@ -1,10 +1,10 @@
 import atexit
 import datetime
-from distutils.version import StrictVersion
-from os import environ as env
 import os
 import subprocess
 import sys
+from distutils.version import StrictVersion
+from os import environ as env
 
 import seesaw
 from seesaw.item import ItemInterpolation, ItemValue
@@ -20,16 +20,17 @@ from seesaw.util import find_executable
 # nice, though.
 sys.path.append(os.getcwd())
 
-from archivebot import control
-from archivebot import shared_config
-from archivebot.seesaw import extensions
-from archivebot.seesaw import monitoring
-from archivebot.seesaw.preflight import check_wpull_args
+from archivebot import control, shared_config
+from archivebot.seesaw import extensions, monitoring
 from archivebot.seesaw.dnspythoncrash import test as dnspython_crash_fixed
+from archivebot.seesaw.preflight import check_wpull_args
+from archivebot.seesaw.tasks import (CheckIP, CheckLocalWebserver,
+                                     CompressLogIfFailed, DownloadUrlFile,
+                                     GetItemFromQueue, MarkItemAsDone,
+                                     MoveFiles, PreparePaths, RelabelIfAborted,
+                                     SetFetchDepth, StartHeartbeat,
+                                     StopHeartbeat, Wpull, WriteInfo)
 from archivebot.seesaw.wpull import WpullArgs
-from archivebot.seesaw.tasks import GetItemFromQueue, StartHeartbeat, \
-    SetFetchDepth, PreparePaths, Wpull, CompressLogIfFailed, WriteInfo, DownloadUrlFile, \
-    RelabelIfAborted, MoveFiles, StopHeartbeat, MarkItemAsDone, CheckIP, CheckLocalWebserver
 
 WPULL_VERSION = ('2.0.3')
 EXPIRE_TIME = 60 * 60 * 48  # 48 hours between archive requests
@@ -136,6 +137,7 @@ wpull_args = WpullArgs(
     warc_max_size=WARC_MAX_SIZE,
     monitor_disk=WPULL_MONITOR_DISK,
     monitor_memory=WPULL_MONITOR_MEMORY,
+    warc_tempdir=TMPDIR if TMPDIR else os.getcwd(),
 )
 
 check_wpull_args(wpull_args)

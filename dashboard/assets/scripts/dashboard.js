@@ -1023,13 +1023,13 @@ class Dashboard {
 		const initialFilter = args.initialFilter ?? "^$";
 		const loadRecent = args.loadRecent ? Boolean(Number(args.loadRecent)) : true;
 		this.debug = args.debug ? Boolean(Number(args.debug)) : false;
-
 		// Append to page title to make it possible to identify the tab in Chrome's task manager
 		if (args.title) {
 			document.title += ` - ${args.title}`;
 		}
 
 		this.host = args.host ? args.host : location.hostname;
+	this.wsHost = args.wsHost ?? this.host + ":4568";
 		this.dumpTraffic = args.dumpMax && Number(args.dumpMax) > 0;
 		if (this.dumpTraffic) {
 			this.dumpMax = Number(args.dumpMax);
@@ -1207,7 +1207,7 @@ ${String(kbPerSec).padStart(3, "0")} KB/s`;
 	connectWebSocket() {
 		const wsproto = window.location.protocol === "https:" ? "wss:" : "ws:";
 
-		this.ws = new WebSocket(`${wsproto}//${this.host}:4568/stream`);
+		this.ws = new WebSocket(`${wsproto}//${this.wsHost}/stream`);
 
 		this.ws.onmessage = (ev) => {
 			this.newItemsReceived += 1;
