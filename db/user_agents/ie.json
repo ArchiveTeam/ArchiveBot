@@ -5,7 +5,7 @@
                 "ie",
                 "ie10"
             ],
-            "name": "Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; WOW64; Trident/6.0)"
+            "name": "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko"
         }
     ],
     "type": "user_agents"
