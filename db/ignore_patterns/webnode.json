@@ -1,0 +1,8 @@
+{
+	"name": "webnode",
+	"patterns": [
+		"^https?://static\\.d\\.webnodev\\.com/files/\\w\\w/\\w{3}/.+\\.png$",
+		"^https?://{primary_netloc}/(.*/)?wnd\\.(pc|es|fe)\\.[^/]+/?$"
+	],
+	"type": "ignore_patterns"
+}
