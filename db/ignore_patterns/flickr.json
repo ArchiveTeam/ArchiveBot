@@ -1,0 +1,10 @@
+{
+    "name": "flickr",
+    "patterns": [
+        "^https?://www\\.flickr\\.com/photos/[^/]+\/.*\\.[jJ][pP][gG]$",
+        "^https?://www\\.flickr\\.com/photos/.*/javascripts/",
+        "^https?://www\\.flickr\\.com/photos/.*/build/hermes",
+        "^https?://www\\.flickr\\.com/c1\\.staticflickr\\.com/"
+    ],
+    "type": "ignore_patterns"
+}
