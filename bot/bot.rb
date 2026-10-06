@@ -7,7 +7,6 @@ require File.expand_path('../brain', __FILE__)
 require File.expand_path('../command_patterns', __FILE__)
 require File.expand_path('../finish_notifier', __FILE__)
 require File.expand_path('../pipeline_notifier', __FILE__)
-require File.expand_path('../../lib/couchdb', __FILE__)
 
 opts = Trollop.options do
   opt :server, 'IRC server, expressed as a URI (irc://SERVER:PORT or ircs://SERVER:PORT for SSL)', :type => String
@@ -17,8 +16,6 @@ opts = Trollop.options do
   opt :schemes, 'Comma-separated list of acceptable URI schemes', :default => 'http,https,ftp'
   opt :redis, 'URL of Redis server', :default => ENV['REDIS_URL'] || 'redis://localhost:6379/0'
   opt :password, 'IRC server password', :default => nil, :type => String
-  opt :db, 'URL of CouchDB database', :default => ENV['COUCHDB_URL'] || 'http://localhost:5984/archivebot'
-  opt :db_credentials, 'Credentials for CouchDB database (USERNAME:PASSWORD)', :type => String, :default => nil
 end
 
 redis = Redis.new(:url => opts[:redis])
@@ -54,8 +51,7 @@ bot = Cinch::Bot.new do
     c.messages_per_second = 1.0
   end
 
-  couchdb = Couchdb.new(URI(opts[:db]), opts[:db_credentials])
-  brain = Brain.new(schemes, redis, couchdb)
+  brain = Brain.new(schemes, redis)
 
   on :message, CommandPatterns::ARCHIVE do |m, target, params|
     brain.request_archive(m, target, params)

@@ -1,4 +1,5 @@
 require 'addressable/uri'
+require 'json'
 
 require File.expand_path('../../lib/job', __FILE__)
 require File.expand_path('../../lib/pipeline_info', __FILE__)
@@ -17,13 +18,11 @@ class Brain
   include AddIgnoreSets
   include PipelineOptions
 
-  attr_reader :couchdb
   attr_reader :redis
   attr_reader :schemes
   attr_reader :url_pattern
 
-  def initialize(schemes, redis, couchdb)
-    @couchdb = couchdb
+  def initialize(schemes, redis)
     @redis = redis
     @schemes = schemes
     @url_pattern ||= %r{(?:#{schemes.join('|')})://.+}
@@ -130,7 +129,20 @@ class Brain
 
     if h[:user_agent_alias]
       ua_alias = h[:user_agent_alias]
-      user_agent = couchdb.user_agent_for_alias(ua_alias)
+
+      user_agents = {}
+
+      Dir.glob(File.join(File.expand_path('../../db/user_agents', __FILE__), "*.json")).each do |file|
+        data = JSON.parse(File.read(file))
+
+        data["agents"].each do |agent|
+          agent["aliases"].each do |alias_name|
+            user_agents[alias_name] = agent["name"]
+          end
+        end
+      end
+
+      user_agent = user_agents[ua_alias]
 
       if !user_agent
         reply m, %Q{Sorry, I don't know what the user agent "#{ua_alias}" is.}
@@ -265,7 +277,23 @@ class Brain
 
     return unless names && !names.empty?
 
-    ignore_pairs = couchdb.resolve_ignore_sets(names)
+    unknown = []
+    ignore_pairs = []
+
+    names.each do |name|
+      file = File.join(File.expand_path('../../db/ignore_patterns', __FILE__), "#{name}.json")
+
+      if File.file?(file)
+        data = JSON.parse(File.read(file))
+
+        data.fetch('patterns', []).map do |pattern|
+          ignore_pairs << [name, pattern]
+        end
+      else
+        unknown << name
+        []
+      end
+    end
 
     resolved = ignore_pairs.map(&:first).uniq
     patterns = ignore_pairs.map(&:last)
@@ -277,8 +305,6 @@ class Brain
     else
       reply m, %Q{Added #{patterns.length} patterns from ignore set #{resolved.first} to job #{job.ident}.}
     end
-
-    unknown = names - resolved
 
     if !unknown.empty?
       reply m, "The following sets are unknown: #{unknown.join(', ')}"
