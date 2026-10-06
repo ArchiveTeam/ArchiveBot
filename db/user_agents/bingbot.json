@@ -1,0 +1,18 @@
+{
+	"agents": [
+		{
+			"aliases": [
+				"bingbot",
+        "bingbot-desktop"
+			],
+			"name": "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/W.X.Y.Z Safari/537.36"
+		},
+    {
+			"aliases": [
+				"bingbot-mobile"
+			],
+			"name": "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/W.X.Y.Z Mobile Safari/537.36 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)"
+		}
+	],
+	"type": "user_agents"
+}
