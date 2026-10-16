@@ -37,6 +37,7 @@
         "^https?://wordpress\\.com/log-in\\?",
         "^https?://wordpress\\.com/abuse/",
         "^https?://wordpress\\.com/reader/blogs/\\d+/posts/\\d+$",
+        "^https?://public-api\\.wordpress\\.com/connect/\\?",
         "^https?://[^/]*/\\?blackhole=[^&]+$",
         "[?&]add-to-cart=",
         "[?&](remove|undo)_item=",
