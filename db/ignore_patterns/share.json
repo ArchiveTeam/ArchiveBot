@@ -54,6 +54,7 @@
         "^https?://(www\\.)?micro\\.blog/share\\?",
         "^https?://(www\\.)?mister-wong\\.com/addurl/\\?",
         "^https?://(www\\.)?mix\\.com/add\\?",
+        "^https?://(www\\.)?mix\\.com/mixit\\?",
         "^https?://(www\\.)?mixx\\.com/submit\\?",
         "^https?://(www\\.)?moemesto\\.ru/post\\.php\\?",
         "^https?://(www\\.)?mstdn\\.social/share\\?",
