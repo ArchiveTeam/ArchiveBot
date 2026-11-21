@@ -328,6 +328,7 @@ class WriteInfo(SimpleTask):
                 'queued_at': item['queued_at'],
                 'started_by': item['started_by'],
                 'started_in': item['started_in'],
+                'ident': item['ident'],
                 'url': item['url'],
                 'url_file': item['url_file']
         }
