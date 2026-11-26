@@ -3,13 +3,7 @@ class Pending < Webmachine::Resource
     attr_accessor :redis
   end
 
-  def content_types_provided
-    [
-      ['text/plain', :to_text]
-    ]
-  end
-
-  def to_text
+  def get_queues
     seen = {}
 
     # Collect queues
@@ -20,10 +14,9 @@ class Pending < Webmachine::Resource
 
     # "pending" sorts before "pending-*" and "pending:*", and "-" sorts before ":", so no special treatment needed to get the desired sorting.
 
-    buffer = []
+    results = {}
     seen.keys.sort_by(&:downcase).each do |queue|
-      b = []
-      b << queue
+      results[queue] = []
 
       idents = self.class.redis.lrange(queue, 0, -1).reverse
 
@@ -32,7 +25,31 @@ class Pending < Webmachine::Resource
       end
 
       idents.zip(urls).each.with_index do |(ident, url), i|
-        b << "  #{i+1}. #{url} (#{ident})"
+        results[queue] << {"url": url, "ident": ident}
+      end
+    end
+
+    return results
+  end
+
+  def content_types_provided
+    [
+      ['application/json', :to_json],
+      ['text/plain', :to_text]
+    ]
+  end
+
+  def to_text
+
+    buffer = []
+    get_queues.each do |queue, jobs|
+      b = []
+      b << queue
+
+      i = 0
+      jobs.each do |job|
+        i += 1
+        b << "  #{i}. #{job[:url]} (#{job[:ident]})"
       end
 
       buffer << b.join("\n")
@@ -40,4 +57,10 @@ class Pending < Webmachine::Resource
 
     buffer.join("\n\n")
   end
+
+  def to_json
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    get_queues.to_json
+  end
+
 end
